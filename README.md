@@ -1,5 +1,5 @@
 
-# cds-file-upload-frontend
+# CDS File Upload Frontend
 
 This is a placeholder README.md for a new repository
 
