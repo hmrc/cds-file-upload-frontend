@@ -20,7 +20,7 @@ import config.AppConfig
 import org.scalatest.{Matchers, WordSpec}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
-import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
+import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Configuration, Environment}
@@ -31,10 +31,10 @@ class HelloWorldControllerSpec extends WordSpec with Matchers with GuiceOneAppPe
   val env = Environment.simple()
   val configuration = Configuration.load(env)
 
-  val messageApi = new DefaultMessagesApi(env, configuration, new DefaultLangs(configuration))
-  val appConfig = new AppConfig(configuration, env)
+  val messageApi = app.injector.instanceOf[MessagesControllerComponents]
+  implicit val appConfig = new AppConfig(configuration, env)
 
-  val controller = new HelloWorld(messageApi, appConfig)
+  val controller = new HelloWorld(messageApi)
 
   "GET /" should {
     "return 200" in {
