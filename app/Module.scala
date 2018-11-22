@@ -15,8 +15,8 @@
  */
 
 import com.google.inject.{AbstractModule, Provides}
-import config.{AppConfig, GoogleAnalytics}
-import javax.inject.{Named, Singleton}
+import config.AppConfig
+import javax.inject.Singleton
 
 class Module extends AbstractModule {
 
