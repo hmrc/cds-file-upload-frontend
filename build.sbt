@@ -13,6 +13,7 @@ lazy val microservice = Project(appName, file("."))
       "uk.gov.hmrc"             %% "govuk-template"           % "5.25.0-play-25",
       "uk.gov.hmrc"             %% "play-ui"                  % "7.25.0-play-25",
       "uk.gov.hmrc"             %% "bootstrap-play-25"        % "3.14.0",
+      "com.github.pureconfig"   %% "pureconfig"               % "0.9.2",
 
       "org.scalatest"           %% "scalatest"                % "3.0.4"                 % "test",
       "org.jsoup"               %  "jsoup"                    % "1.10.2"                % "test",
