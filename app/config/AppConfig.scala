@@ -40,6 +40,12 @@ case class Assets(version: String, url: String) {
 
 case class GoogleAnalytics(token: String, host: String)
 
-case class Microservice(services: Services = Services())
+case class Microservice(services: Services)
 
-case class Services()
+case class Services(customsDeclarations: CustomsDeclarations)
+
+case class CustomsDeclarations(protocol: Option[String], host: String, port: Option[Int], batchUploadUri: String, apiVersion: String) {
+
+  def batchUploadEndpoint: String = s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$batchUploadUri"
+
+}
