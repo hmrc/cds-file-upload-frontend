@@ -16,25 +16,63 @@
 
 package controllers
 
+import java.util.UUID
+
 import config.AppConfig
 import javax.inject.{Inject, Singleton}
-import play.api.data.Form
-import play.api.data.Forms._
+import play.api.Logger
+import play.api.http.{ContentTypes, HeaderNames}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Action
+import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
+
+import scala.collection.mutable
+import scala.concurrent.Future
 
 @Singleton
-class FileUploadController @Inject()(val messagesApi: MessagesApi, implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
+class FileUploadController @Inject()(val messagesApi: MessagesApi, httpClient: HttpClient, implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
+
+  val mongo = mutable.Map[String, BatchFileUploadResponse]()
 	
-	val fileInfoForm = Form(mapping(
-		"mrn" -> text,
-		"count" -> number
-  )(FileInfo.apply)(FileInfo.unapply))
-	
-	val displayFileInfoPage = Action { implicit req =>
-		Ok(views.html.file_info(fileInfoForm))
+	val displayFileInfoForm = Action { implicit req =>
+		Ok(views.html.file_info(Forms.fileInfoForm))
 	}
+
+	val handleFileInfoForm = Action.async { implicit req =>
+    Forms.fileInfoForm.bindFromRequest().fold(
+      errors => Future.successful(BadRequest(views.html.file_info(errors))),
+      success => {
+        val xml = BatchFileUploadRequest(success.mrn, success.count, (1 to success.count).map(i => BatchFileUploadFile(i, "DOCUMENT_TYPE"))).toXml
+        httpClient.POSTString[HttpResponse](appConfig.microservice.services.customsDeclarations.batchUploadEndpoint, xml, Seq(HeaderNames.CONTENT_TYPE -> ContentTypes.XML)).map { response =>
+          // TODO store batch in keystore
+          Logger.info("RESPONSE: " + response.body)
+          val batch = BatchFileUploadResponse(response.body)
+          val batchId = UUID.randomUUID().toString
+          mongo.put(batchId, batch)
+          Redirect(routes.FileUploadController.displayFileUploadForm(batchId, 1))
+        }
+      }
+    )
+  }
+
+  def displayFileUploadForm(batchId: String, batchFileNumber: Int) = Action { implicit req =>
+    mongo.get(batchId).map { batch =>
+      if (batch.files.size < batchFileNumber) NotFound
+      else {
+        val file: BatchFile = batch.files(batchFileNumber - 1)
+        val next = if (batchFileNumber == batch.files.size) routes.FileUploadController.displayConfirmationPage(batchId) else routes.FileUploadController.displayFileUploadForm(batchId, batchFileNumber + 1)
+        Ok(views.html.file_upload(file, next))
+      }
+    }.getOrElse(NotFound)
+  }
+
+  def displayConfirmationPage(batchId: String) = Action { implicit req =>
+    mongo.get(batchId).map { batch =>
+      Ok(views.html.file_receipts(batch))
+    }.getOrElse(NotFound)
+  }
 	
 }
 

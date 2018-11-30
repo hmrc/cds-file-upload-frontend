@@ -4,16 +4,22 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import play.core.PlayVersion.current
 
 val appName = "cds-file-upload-frontend"
+val jacksonVersion = "2.9.7"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
   .settings(
     majorVersion                     := 0,
     libraryDependencies              ++= Seq(
-      "uk.gov.hmrc"             %% "govuk-template"           % "5.25.0-play-25",
-      "uk.gov.hmrc"             %% "play-ui"                  % "7.25.0-play-25",
-      "uk.gov.hmrc"             %% "bootstrap-play-25"        % "3.14.0",
-      "com.github.pureconfig"   %% "pureconfig"               % "0.9.2",
+      "uk.gov.hmrc"                      %% "govuk-template"           % "5.25.0-play-25",
+      "uk.gov.hmrc"                      %% "play-ui"                  % "7.25.0-play-25",
+      "uk.gov.hmrc"                      %% "bootstrap-play-25"        % "3.14.0",
+      "com.github.pureconfig"            %% "pureconfig"               % "0.9.2",
+      "com.fasterxml.jackson.core"       %  "jackson-core"             % jacksonVersion,
+      "com.fasterxml.jackson.core"       %  "jackson-databind"         % jacksonVersion,
+      "com.fasterxml.jackson.core"       %  "jackson-annotations"      % jacksonVersion,
+      "com.fasterxml.jackson.dataformat" %  "jackson-dataformat-xml"   % jacksonVersion,
+      "com.fasterxml.jackson.module"     %% "jackson-module-scala"     % jacksonVersion,
 
       "org.scalatest"           %% "scalatest"                % "3.0.4"                 % "test",
       "org.jsoup"               %  "jsoup"                    % "1.10.2"                % "test",

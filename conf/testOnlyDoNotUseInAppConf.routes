@@ -10,4 +10,8 @@
 # Failing to follow this rule may result in test routes deployed in production.
 
 # Add all the application routes to the prod.routes file
-->         /                          prod.Routes
+
+->          /                                                           prod.Routes
+
+POST        /cds-file-upload-service/test-only/batch-file-upload        controllers.test.CustomsDeclarationsStubController.handleBatchFileUploadRequest
+POST        /cds-file-upload-service/test-only/s3-bucket                controllers.test.CustomsDeclarationsStubController.handleS3FileUploadRequest

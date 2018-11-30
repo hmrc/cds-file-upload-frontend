@@ -15,26 +15,27 @@
  *@
 
 @import config.AppConfig
+@import uk.gov.hmrc.play.views.html.helpers
 
 @(form: Form[FileInfo])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @main_template(title = "File Info Page", bodyClasses = None) {
     <h1>File Info Page</h1>
     <p>Here we ask for the MRN and the number of files to be uploaded.</p>
-    <form method="post" action="#" id="file-info">
+    @helpers.form(routes.FileUploadController.handleFileInfoForm, 'id -> "file-info", 'method -> "post") {
         <fieldset>
             <legend>Tell us about your upload</legend>
             <div>
                 <label for="file-info-mrn">MRN</label>
-                <input type="text" id="file-info-mrn" name="mrn" maxlength="18" required>
+                @helpers.input(form("mrn"), 'type -> "text", 'id -> "file-info-mrn", 'maxlength -> "18", 'required -> "required")
             </div>
             <div>
                 <label for="file-info-count">Number of files to upload</label>
-                <input type="number" min="1" max="10" id="file-info-count" name="count" value="1" required>
+                @helpers.input(form("count"), 'id -> "file-info-count", 'required -> "required")
             </div>
             <div>
                 <input type="submit" value="Start uploading">
             </div>
         </fieldset>
-    </form>
+    }
 }
