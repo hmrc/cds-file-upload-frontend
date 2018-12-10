@@ -41,7 +41,7 @@
 
 @insideHeader = {
     @uiLayouts.header_nav(
-      navTitle = Some("cds-file-upload-frontend"),
+      navTitle = Some(messages("common.service.name")),
       navTitleLink = None,
       showBetaLink = false,
       navLinks = Some(headerNavLinks))
@@ -61,14 +61,16 @@
 @footerTop = {}
 @footerLinks = {}
 
-@serviceInfo = {
-    @uiLayouts.serviceInfo(
-      betaBanner = HtmlFormat.empty,
-      includeGridWrapper = false,
-      serviceInfoContent = Some(serviceInfoContent))
-}
+@serviceInfo = {}
 
 @mainContentHeader = {
+    <div id="global-header-bar"></div>
+    <div class="phase-banner">
+      <p>
+        <strong class="phase-tag">@Messages("common.phase")</strong>
+        <span>@messages("common.feedbackFirst") <a href="#">@messages("common.feedbackSecond")</a> @messages("common.feedbackThird")</span>
+      </p>
+    </div>
     @if(contentHeader.isDefined) {
         @uiLayouts.main_content_header(contentHeader = contentHeader.get)
     }

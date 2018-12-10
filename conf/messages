@@ -1,0 +1,11 @@
+## common
+common.service.name=Upload a customs document
+common.sign-in=Sign in
+common.sign-out=Sign out
+common.phase=Alpha
+common.feedbackFirst=This is a new service - your
+common.feedbackSecond=feedback
+common.feedbackThird=will help us to improve it.
+
+## common buttons with shared labels
+common.button.startNow=Start now
