@@ -1,6 +1,7 @@
 # microservice specific routes
 
 GET         /hello-world                        controllers.HelloWorld.helloWorld
+GET         /start                              controllers.StartController.displayStartPage
 GET         /upload                             controllers.FileUploadController.displayFileInfoForm
 POST        /upload                             controllers.FileUploadController.handleFileInfoForm
 GET         /upload/:batchId/receipts           controllers.FileUploadController.displayConfirmationPage(batchId)
