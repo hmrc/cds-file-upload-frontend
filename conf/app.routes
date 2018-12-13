@@ -4,5 +4,8 @@ GET         /hello-world                        controllers.HelloWorld.helloWorl
 GET         /start                              controllers.StartController.displayStartPage
 GET         /upload                             controllers.FileUploadController.displayFileInfoForm
 POST        /upload                             controllers.FileUploadController.handleFileInfoForm
+GET         /upload/warning                     controllers.FileUploadController.displayFileWarning
+GET         /upload/size                        controllers.FileUploadController.displayFileSizeForm
+POST        /upload/size                        controllers.FileUploadController.handleFileSizeForm
 GET         /upload/:batchId/receipts           controllers.FileUploadController.displayConfirmationPage(batchId)
 GET         /upload/:batchId/:fileNumber        controllers.FileUploadController.displayFileUploadForm(batchId, fileNumber: Int)

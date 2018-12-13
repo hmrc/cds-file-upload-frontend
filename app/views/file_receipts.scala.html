@@ -19,7 +19,7 @@
 @(batch: BatchFileUploadResponse)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @main_template(title = "File Receipts Page", bodyClasses = None) {
-    <h1>File Receipts Page</h1>
+    <h1 class="heading-xlarge">File Receipts Page</h1>
     <p>Here we list the UUIDs of each file in the upload batch.</p>
     <ol>
         @for(file <- batch.files) {

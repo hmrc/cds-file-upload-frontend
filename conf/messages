@@ -9,3 +9,21 @@ common.feedbackThird=will help us to improve it.
 
 ## common buttons with shared labels
 common.button.startNow=Start now
+
+## start page
+startPage.paragraph1=Upload documents to support your import or export declaration.
+startPage.paragraph2=You will need to know how many files you want to upload before you start uploading them. This is not the same as the number of documents.
+startPage.paragraph3=<strong class="bold">Example 1</strong> - if you have photos of 2 pages of an invoice saved as separate jpegs, this is 2 files.
+startPage.paragraph4=<strong class="bold">Example 2</strong> - if you have a bill of lading, an invoice and a licence saved in one word document, this is 1 file.
+startPage.p.youWillNeed=You will need:
+startPage.listItem1=a Government Gateway account
+startPage.listItem2=the movement reference number (MRN) of your declaration
+
+mrnpage.what-is-your-mrn=What is your movement reference number (MRN)?
+howmany.how-many-files=How many files do you need to upload?
+
+fileUploadPage.heading.part1=Upload your
+fileUploadPage.heading.part2=file
+fileUploadPage.heading.first=first
+fileUploadPage.heading.last=last
+fileUploadPage.heading.next=next

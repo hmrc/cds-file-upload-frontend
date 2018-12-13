@@ -15,25 +15,10 @@
  *@
 
 @import config.AppConfig
+@import uk.gov.hmrc.play.views.html.helpers
 
 @()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = "This is the start page", bodyClasses = None) {
-  <div class="form-group">
-  	<h1 class="heading-xlarge">@messages("common.service.name")</h1>
-  
-    <p>@messages("startPage.paragraph1")</p>
-  
-    <p>@messages("startPage.p.youWillNeed")</p>
-    <ul class="list-bullet form-group">
-      <li>@messages("startPage.listItem1")</li>
-      <li>@messages("startPage.listItem2")</li>
-    </ul>
-  
-    <p>@messages("startPage.paragraph2")</p>
-    <p>@Html(messages("startPage.paragraph3"))</p>
-    <p>@Html(messages("startPage.paragraph4"))</p>
-  </div>
-
-  <a class="button button-start" href="#" role="button">@messages("common.button.startNow")</a>
+@main_template(title = "File Size Form", bodyClasses = None) {
+    <h1 class="heading-xlarge">File Size Form</h1>
 }

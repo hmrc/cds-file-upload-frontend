@@ -40,6 +40,10 @@ class FileUploadController @Inject()(val messagesApi: MessagesApi, httpClient: H
 		Ok(views.html.file_info(Forms.fileInfoForm))
 	}
 
+  val displayFileWarning = Action { implicit req =>
+    Ok(views.html.file_warning())
+  }
+
 	val handleFileInfoForm = Action.async { implicit req =>
     Forms.fileInfoForm.bindFromRequest().fold(
       errors => Future.successful(BadRequest(views.html.file_info(errors))),
@@ -56,6 +60,16 @@ class FileUploadController @Inject()(val messagesApi: MessagesApi, httpClient: H
       }
     )
   }
+  
+  // TODO
+  val displayFileSizeForm = Action { implicit req =>
+    Ok(views.html.file_size())
+  }
+  
+  // TODO
+  val handleFileSizeForm = Action { implicit req =>
+    Ok(views.html.file_size())
+  }
 
   def displayFileUploadForm(batchId: String, batchFileNumber: Int) = Action { implicit req =>
     mongo.get(batchId).map { batch =>
@@ -63,7 +77,7 @@ class FileUploadController @Inject()(val messagesApi: MessagesApi, httpClient: H
       else {
         val file: BatchFile = batch.files(batchFileNumber - 1)
         val next = if (batchFileNumber == batch.files.size) routes.FileUploadController.displayConfirmationPage(batchId) else routes.FileUploadController.displayFileUploadForm(batchId, batchFileNumber + 1)
-        Ok(views.html.file_upload(file, next))
+        Ok(views.html.file_upload(file, next, batchFileNumber, batch.files.size))
       }
     }.getOrElse(NotFound)
   }

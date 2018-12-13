@@ -18,30 +18,56 @@
 @import views.html.helper._
 @import views.html.helper.CSRF
 
-@(batchFile: BatchFile, successActionRedirect: Call)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(batchFile: BatchFile, successActionRedirect: Call, currentFileNumber: Int, totalNumberOfFiles: Int)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @main_template(title = "File Upload Page", bodyClasses = None) {
-    <h1>File Upload Page</h1>
-    <p>Here we have a form which submits a single file to S3.</p>
     <form method="post" action="@{batchFile.uploadRequest.href}" id="file-upload" enctype="multipart/form-data">
-        <fieldset>
-            <legend>Gis' yer file</legend>
-            <div>
-                @{
-                    play.filters.csrf.CSRF.getToken(request).map {token => CSRF.formField(request)}
+        <div class="form-group">
+            <label for="file-upload-file">
+                <h1 class="heading-xlarge">
+                    @messages("fileUploadPage.heading.part1")
+                    @{
+                        if (totalNumberOfFiles > 1) {
+                            if (currentFileNumber == 1) {
+                                messages("fileUploadPage.heading.first")
+                            } else if (currentFileNumber == totalNumberOfFiles) {
+                                messages("fileUploadPage.heading.last")
+                            } else {
+                                messages("fileUploadPage.heading.next")
+                            }
+                        }
+                    }
+                    @messages("fileUploadPage.heading.part2")
+                </h1>
+            </label>
+
+
+            <p>The file needs to be:</p>
+            <ul class="list list-bullet form-group">
+              <li>jpeg (image)</li>
+              <li>gif (image)</li>
+              <li>png (image)</li>
+              <li>PDF</li>
+              <li>MS Word document (.doc or .docx)</li>
+              <li>MS Excel spreadsheet (.xls or .xlsx)</li>
+            </ul>
+
+            @{
+                if (currentFileNumber != 1) {
+                    <p>You have upload {currentFileNumber - 1} of {totalNumberOfFiles} files</p>
                 }
-                @for(field <- batchFile.uploadRequest.fields) {
-                    <input type="hidden" name="@field._1" value="@field._2">
-                }
-                <input type="hidden" name="success_action_redirect" value="@successActionRedirect.url">
-            </div>
-            <div>
-                <label for="file-upload-file">Yer file</label>
-                <input type="file" id="file-upload-file" name="file" required>
-            </div>
-            <div>
-                <input type="submit" value="Upload file">
-            </div>
-        </fieldset>
+            }
+
+            @{
+                play.filters.csrf.CSRF.getToken(request).map {token => CSRF.formField(request)}
+            }
+            @for(field <- batchFile.uploadRequest.fields) {
+                <input type="hidden" name="@field._1" value="@field._2">
+            }
+            <input type="hidden" name="success_action_redirect" value="@successActionRedirect.url">
+
+            <input type="file" id="file-upload-file" name="file" required>
+        </div>
+        <input type="submit" value="Upload file" class="button">
     </form>
 }
