@@ -14,21 +14,8 @@
  * limitations under the License.
  */
 
-package controllers
+package views
 
-import config.AppConfig
-import javax.inject.{Inject, Singleton}
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc._
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import base.SpecBase
 
-import scala.concurrent.Future
-
-@Singleton
-class HelloWorld @Inject()(val messagesApi: MessagesApi, implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
-
-  val helloWorld = Action.async { implicit request =>
-    Future.successful(Ok(views.html.hello_world()))
-  }
-
-}
+class ViewBase extends SpecBase

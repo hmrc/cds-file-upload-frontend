@@ -27,3 +27,6 @@ fileUploadPage.heading.part2=file
 fileUploadPage.heading.first=first
 fileUploadPage.heading.last=last
 fileUploadPage.heading.next=next
+
+unauthorised.title = You can’t access this service with this account
+unauthorised.heading = You can’t access this service with this account

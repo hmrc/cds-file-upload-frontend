@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,12 +12,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import config.AppConfig
+package base
 
-@()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+import config.AppConfig
+import org.scalatestplus.play.PlaySpec
+import org.scalatestplus.play.guice._
+import play.api.i18n.{Messages, MessagesApi}
+import play.api.inject.Injector
+import play.api.test.FakeRequest
 
-@main_template(title = "Hello from cds-file-upload-frontend", bodyClasses = None) {
-    <h1>Hello from cds-file-upload-frontend !</h1>
+trait SpecBase extends PlaySpec with GuiceOneAppPerSuite {
+
+  lazy val injector: Injector = app.injector
+
+  implicit lazy val messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
+
+  lazy val appConfig: AppConfig = injector.instanceOf[AppConfig]
+
+  lazy val fakeRequest = FakeRequest("", "")
+
+  lazy val messages: Messages = messagesApi.preferred(fakeRequest)
 }
