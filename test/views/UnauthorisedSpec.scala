@@ -18,7 +18,7 @@ package views
 
 import views.html.unauthorised
 
-class UnauthorisedSpec extends ViewBase {
+class UnauthorisedSpec extends ViewSpecBase {
 
   lazy val view = unauthorised()(fakeRequest, messages, appConfig).toString
 
