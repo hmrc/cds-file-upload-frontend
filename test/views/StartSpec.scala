@@ -16,38 +16,26 @@
 
 package views
 
+import controllers.routes
+import views.behaviours.ViewBehaviours
 import views.html.start
 
-class StartSpec extends ViewSpecBase {
+class StartSpec extends ViewSpecBase with ViewBehaviours {
 
-  lazy val view = start()(fakeRequest, messages, appConfig).toString()
+  val view = () => start()(fakeRequest, messages, appConfig)
 
-  "Start Page" should {
+  val messageKeyPrefix = "startPage"
 
-    "include header" in {
-      view must include(messages("common.service.name"))
-    }
+  "Start Page" must {
+    behave like normalPage(view, messageKeyPrefix)
 
-    "include title" in {
-      view must include(messages("startPage.header"))
-    }
+    "have a start button with correct link" in {
+      val doc = asDocument(view())
+      val expectedLink = routes.MrnEntryController.onPageLoad().url
 
-    "include paragraph with the correct text displayed" in {
-      view must include(messages("startPage.paragraph1"))
-      view must include(messages("startPage.p.youWillNeed"))
-      view must include(messages("startPage.paragraph2"))
-      view must include(messages("startPage.paragraph3"))
-      view must include(messages("startPage.paragraph4"))
-    }
-
-    "include a list with correct items displayed" in {
-      view must include(messages("startPage.listItem1"))
-      view must include(messages("startPage.listItem2"))
-    }
-
-    "include a button with correct text displayed" in {
-      view must include(messages("common.button.startNow"))
+      assertContainsLink(doc, messages("common.button.startNow"), expectedLink)
     }
   }
 
 }
+

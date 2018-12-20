@@ -31,7 +31,7 @@ trait ViewBehaviours extends ViewSpecBase {
           val doc = asDocument(view())
           val nav = doc.getElementById("proposition-menu")
           val span = nav.children.first
-          span.text mustBe messagesApi("site.service_name")
+          span.text mustBe messagesApi("common.service.name")
         }
 
         "display the correct browser title" in {
@@ -47,11 +47,6 @@ trait ViewBehaviours extends ViewSpecBase {
         "display the correct guidance" in {
           val doc = asDocument(view())
           for (key <- expectedGuidanceKeys) assertContainsText(doc, messages(s"$messageKeyPrefix.$key"))
-        }
-
-        "display language toggles" in {
-          val doc = asDocument(view())
-          assertRenderedById(doc, "cymraeg-switch")
         }
       }
     }
