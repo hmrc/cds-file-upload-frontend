@@ -51,5 +51,6 @@ class ControllerSpecBase extends SpecBase with MockitoSugar {
     test
   }
 
-  val escaped: String => String = play.utils.UriEncoding.encodePathSegment(_, "utf-8")
+  val escaped: String => String =
+    play.utils.UriEncoding.encodePathSegment(_, "utf-8")
 }
