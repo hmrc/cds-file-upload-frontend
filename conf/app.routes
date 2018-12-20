@@ -10,3 +10,5 @@ GET         /upload/:batchId/receipts           controllers.FileUploadController
 GET         /upload/:batchId/:fileNumber        controllers.FileUploadController.displayFileUploadForm(batchId, fileNumber: Int)
 
 GET         /unauthorised                       controllers.UnauthorisedController.onPageLoad
+
+GET         /mrn-entry                          controllers.MrnEntryController.onPageLoad
