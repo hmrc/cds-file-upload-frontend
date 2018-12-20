@@ -41,12 +41,12 @@ class StartSpec extends ViewBase {
     }
 
     "include a list with correct items displayed" in {
-     view must include(messages("startPage.listItem1"))
-     view must include(messages("startPage.listItem2"))
+      view must include(messages("startPage.listItem1"))
+      view must include(messages("startPage.listItem2"))
     }
 
     "include a button with correct text displayed" in {
-     view must include(messages("common.button.startNow"))
+      view must include(messages("common.button.startNow"))
     }
   }
 
