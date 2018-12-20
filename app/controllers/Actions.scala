@@ -21,7 +21,7 @@ import domain.auth._
 import play.api.{Configuration, Environment}
 import play.api.mvc._
 import play.api.mvc.Results._
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, NoActiveSession}
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.HeaderCarrier
