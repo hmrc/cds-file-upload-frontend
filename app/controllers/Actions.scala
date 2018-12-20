@@ -43,15 +43,12 @@ class Actions @Inject()(val authAction: AuthAction, val eoriAction: EORIAction) 
 @Singleton
 class AuthAction @Inject()(
   val authConnector: AuthConnector,
-  val configuration: Configuration,
-  val environment: Environment
+  val config: Configuration,
+  val env: Environment
 )(implicit ec: ExecutionContext) extends ActionBuilder[AuthenticatedRequest]
   with ActionRefiner[Request, AuthenticatedRequest]
   with AuthorisedFunctions
   with AuthRedirects {
-
-  override def config: Configuration = configuration
-  override def env: Environment = environment
 
   override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
@@ -83,9 +80,8 @@ class EORIAction extends ActionFilter[AuthenticatedRequest] {
     Future.successful(
       request.user.enrolments
         .getEnrolment(SignedInUser.cdsEnrolmentName)
-        .flatMap(
-          _.getIdentifier(SignedInUser.eoriIdentifierKey).filter(_.value.nonEmpty)
-        )
+        .flatMap(_.getIdentifier(SignedInUser.eoriIdentifierKey))
+        .filter(_.value.nonEmpty)
         .swap(Redirect(routes.UnauthorisedController.onPageLoad)))
 
 }
