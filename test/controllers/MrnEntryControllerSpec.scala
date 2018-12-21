@@ -16,6 +16,42 @@
 
 package controllers
 
-class MrnEntryControllerSpec {
+import config.FakeActions
+import domain.auth.SignedInUser
+import forms.MRNFormProvider
+import generators.SignedInUserGen
+import org.scalatest.prop.PropertyChecks
+import play.api.data.Form
+import play.api.test.Helpers.status
+import views.html.mrn_entry
+import play.api.test.Helpers._
 
+
+
+class MrnEntryControllerSpec extends ControllerSpecBase with PropertyChecks with SignedInUserGen {
+
+  val form = new MRNFormProvider()()
+
+  def controller(signedInUser: SignedInUser) =
+    new MrnEntryController(messagesApi, new FakeActions(signedInUser),new MRNFormProvider, appConfig)
+
+  def viewAsString(form: Form[_] = form) = mrn_entry(form)(fakeRequest, messages, appConfig).toString
+
+  "Mrn Entry Page" must {
+    "load the correct page when user is logged in " in {
+
+      forAll { user: SignedInUser =>
+        withSignedInUser(user) {
+          val result = controller(user).onPageLoad(fakeRequest)
+
+          status(result) mustBe OK
+          contentAsString(result) mustBe viewAsString(form)
+        }
+      }
+    }
+
+    "mrn should be displayed if it exist on the cache" in {
+
+    }
+  }
 }

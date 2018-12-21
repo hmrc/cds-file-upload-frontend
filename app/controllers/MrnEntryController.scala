@@ -18,17 +18,26 @@ package controllers
 
 import com.google.inject.Singleton
 import config.AppConfig
+import forms.MRNFormProvider
 import javax.inject.Inject
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import views.html.mrn_entry
 
 
 @Singleton
-class MrnEntryController @Inject()(val messagesApi: MessagesApi, actions: Actions, implicit val appConfig: AppConfig)
+class MrnEntryController @Inject()(
+                                    val messagesApi: MessagesApi,
+                                    actions: Actions,
+                                    formProvider: MRNFormProvider,
+                                    implicit val appConfig: AppConfig)
   extends FrontendController with I18nSupport {
 
+  val form = formProvider()
+
   def onPageLoad: Action[AnyContent] = (actions.auth andThen actions.requireEori) { implicit req =>
-    Ok("MRN")
+    Ok(mrn_entry(form))
   }
 }

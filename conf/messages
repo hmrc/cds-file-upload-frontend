@@ -7,6 +7,10 @@ common.feedbackFirst=This is a new service - your
 common.feedbackSecond=feedback
 common.feedbackThird=will help us to improve it.
 
+## errors
+error.browser.title.prefix=Error:
+error.summary.title=There is a problem
+
 ## common buttons with shared labels
 common.button.startNow=Start now
 
@@ -22,6 +26,11 @@ startPage.paragraph4.bold= Example 2
 startPage.p.youWillNeed=You will need:
 startPage.listItem1=a Government Gateway account
 startPage.listItem2=the movement reference number (MRN) of your declaration
+
+# MRN Entry Page
+mrnEntryPage.title=What is your movement reference number (MRN)?
+mrnEntryPage.heading=What is your movement reference number (MRN)?
+mrnEntryPage.hint=This is 18 digits long, and is made up of letters and numbers. You were given this when you submitted your declaration.
 
 mrnpage.what-is-your-mrn=What is your movement reference number (MRN)?
 howmany.how-many-files=How many files do you need to upload?
