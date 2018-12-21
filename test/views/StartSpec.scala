@@ -26,8 +26,13 @@ class StartSpec extends ViewSpecBase with ViewBehaviours {
 
   val messageKeyPrefix = "startPage"
 
+  val messageKeys = List("paragraph1", "paragraph2", "p.youWillNeed", "listItem1", "listItem2")
+
   "Start Page" must {
-    behave like normalPage(view, messageKeyPrefix)
+    behave like normalPage(
+      view,
+      messageKeyPrefix,
+      messageKeys: _*)
 
     "have a start button with correct link" in {
       val doc = asDocument(view())
@@ -35,7 +40,19 @@ class StartSpec extends ViewSpecBase with ViewBehaviours {
 
       assertContainsLink(doc, messages("common.button.startNow"), expectedLink)
     }
+
+    "have paragraph3 with bold text" in {
+      val paragraph3 = messages("startPage.paragraph3", messages("startPage.paragraph3.bold"))
+      val doc = asDocument(view())
+
+      assertContainsText(doc, paragraph3)
+    }
+
+    "have paragraph4 with bold text" in {
+      val paragraph4 = messages("startPage.paragraph4", messages("startPage.paragraph4.bold"))
+      val doc = asDocument(view())
+
+      assertContainsText(doc, paragraph4)
+    }
   }
-
 }
-
