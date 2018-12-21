@@ -11,6 +11,7 @@ common.feedbackThird=will help us to improve it.
 common.button.startNow=Start now
 
 ## start page
+startPage.header=Upload a custom document
 startPage.paragraph1=Upload documents to support your import or export declaration.
 startPage.paragraph2=You will need to know how many files you want to upload before you start uploading them. This is not the same as the number of documents.
 startPage.paragraph3=<strong class="bold">Example 1</strong> - if you have photos of 2 pages of an invoice saved as separate jpegs, this is 2 files.
@@ -27,3 +28,6 @@ fileUploadPage.heading.part2=file
 fileUploadPage.heading.first=first
 fileUploadPage.heading.last=last
 fileUploadPage.heading.next=next
+
+unauthorised.title = You can’t access this service with this account
+unauthorised.heading = You can’t access this service with this account

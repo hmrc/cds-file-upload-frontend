@@ -16,17 +16,6 @@
 
 package controllers
 
-import config.AppConfig
-import javax.inject.{Inject, Singleton}
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.Action
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-
-@Singleton
-class StartController @Inject()(val messagesApi: MessagesApi, implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
-
-  val displayStartPage = Action { implicit req =>
-    Ok(views.html.start())
-  }
+class MrnEntryControllerSpec {
 
 }

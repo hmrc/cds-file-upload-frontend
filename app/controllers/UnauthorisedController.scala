@@ -16,17 +16,18 @@
 
 package controllers
 
-import config.AppConfig
 import javax.inject.{Inject, Singleton}
+import config.AppConfig
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.Action
+import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import views.html.unauthorised
 
 @Singleton
-class StartController @Inject()(val messagesApi: MessagesApi, implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
+class UnauthorisedController @Inject()(val messagesApi: MessagesApi, implicit val appConfig: AppConfig)
+  extends FrontendController with I18nSupport {
 
-  val displayStartPage = Action { implicit req =>
-    Ok(views.html.start())
+  def onPageLoad: Action[AnyContent] = Action { implicit req =>
+    Ok(unauthorised())
   }
-
 }

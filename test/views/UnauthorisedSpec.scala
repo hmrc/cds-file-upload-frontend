@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-package controllers
+package views
 
-import config.AppConfig
-import javax.inject.{Inject, Singleton}
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.Action
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import views.html.unauthorised
 
-@Singleton
-class StartController @Inject()(val messagesApi: MessagesApi, implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
+class UnauthorisedSpec extends ViewBase {
 
-  val displayStartPage = Action { implicit req =>
-    Ok(views.html.start())
+  lazy val view = unauthorised()(fakeRequest, messages, appConfig).toString
+
+  "view" should {
+
+    "include header" in {
+      view must include(messages("unauthorised.heading"))
+    }
+
+    "include title" in {
+      view must include(messages("unauthorised.title"))
+    }
   }
-
 }

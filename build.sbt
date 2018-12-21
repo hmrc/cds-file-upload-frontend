@@ -21,12 +21,15 @@ lazy val microservice = Project(appName, file("."))
       "com.fasterxml.jackson.dataformat" %  "jackson-dataformat-xml"   % jacksonVersion,
       "com.fasterxml.jackson.module"     %% "jackson-module-scala"     % jacksonVersion,
 
-      "org.scalatest"           %% "scalatest"                % "3.0.4"                 % "test",
-      "org.jsoup"               %  "jsoup"                    % "1.10.2"                % "test",
-      "com.typesafe.play"       %% "play-test"                % current                 % "test",
-      "org.pegdown"             %  "pegdown"                  % "1.6.0"                 % "test",
-      "uk.gov.hmrc"             %% "service-integration-test" % "0.2.0"                 % "test",
-      "org.scalatestplus.play"  %% "scalatestplus-play"       % "2.0.0"                 % "test"
+      "org.scalatest"              %% "scalatest"                 % "3.0.4"  % "test",
+      "org.jsoup"                  %  "jsoup"                     % "1.10.2" % "test",
+      "com.typesafe.play"          %% "play-test"                 % current  % "test",
+      "org.pegdown"                %  "pegdown"                   % "1.6.0"  % "test",
+      "uk.gov.hmrc"                %% "service-integration-test"  % "0.2.0"  % "test",
+      "org.scalatestplus.play"     %% "scalatestplus-play"        % "2.0.0"  % "test",
+      "org.mockito"                %  "mockito-core"              % "2.13.0" % "test",
+      "org.scalacheck"             %% "scalacheck"                % "1.14.0" % "test"
+
     )
   )
   .settings(publishingSettings: _*)

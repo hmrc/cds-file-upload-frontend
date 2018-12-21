@@ -14,19 +14,8 @@
  * limitations under the License.
  */
 
-package controllers
+package views
 
-import config.AppConfig
-import javax.inject.{Inject, Singleton}
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.Action
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import base.SpecBase
 
-@Singleton
-class StartController @Inject()(val messagesApi: MessagesApi, implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
-
-  val displayStartPage = Action { implicit req =>
-    Ok(views.html.start())
-  }
-
-}
+class ViewBase extends SpecBase
