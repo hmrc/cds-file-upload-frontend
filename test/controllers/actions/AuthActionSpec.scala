@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.actions
 
+import controllers.ControllerSpecBase
+import controllers.actions.AuthAction
 import domain.auth.SignedInUser
 import generators.SignedInUserGen
 import org.scalacheck.{Arbitrary, Gen}
@@ -31,7 +33,7 @@ import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ActionsSpec extends ControllerSpecBase
+class AuthActionSpec extends ControllerSpecBase
   with PropertyChecks
   with MockitoSugar
   with SignedInUserGen {
@@ -40,10 +42,8 @@ class ActionsSpec extends ControllerSpecBase
   lazy val env  = app.injector.instanceOf[Environment]
 
   def authAction = new AuthAction(authConnector, conf, env)
-  def eoriAction = new EORIAction()
 
-  def authController = new AuthActionController(authAction)
-  def eoriController = new EORIActionController(authAction, eoriAction)
+  def authController = new TestController(authAction)
 
   "AuthAction" should {
 
@@ -97,61 +97,16 @@ class ActionsSpec extends ControllerSpecBase
             val response = authController.action(FakeRequest())
 
             status(response) mustBe SEE_OTHER
-            redirectLocation(response) mustBe Some(routes.UnauthorisedController.onPageLoad.url)
+            redirectLocation(response) mustBe Some(controllers.routes.UnauthorisedController.onPageLoad.url)
           }
         }
       }
     }
   }
 
-  "EORIAction" should {
-
-    "return authenticated user" when {
-
-      "user has an eori number" in {
-
-        forAll { (user: SignedInUser, eori: EORIEnrolment) =>
-          val eoriEnrolments = user.enrolments.enrolments.filterNot(_.key == "HMRC-CUS-ORG") + eori.enrolment
-          val userWithEORI = user.copy(enrolments = Enrolments(eoriEnrolments))
-
-          withSignedInUser(userWithEORI) {
-
-            val response = eoriController.action(FakeRequest())
-
-            status(response) mustBe OK
-            contentAsString(response) mustBe userWithEORI.toString
-          }
-        }
-      }
-    }
-
-    "redirect to unauthorised" when {
-
-      "user does not have an eori number" in {
-
-        forAll { user: SignedInUser =>
-          withSignedInUser(user) {
-
-            val response = eoriController.action(FakeRequest())
-
-            status(response) mustBe SEE_OTHER
-            redirectLocation(response) mustBe Some(routes.UnauthorisedController.onPageLoad.url)
-          }
-        }
-      }
-    }
-  }
-
-  class AuthActionController(actions: AuthAction) extends BaseController {
+  class TestController(actions: AuthAction) extends BaseController {
 
     def action: Action[AnyContent] = actions.async { request =>
-      Future.successful(Ok(request.user.toString))
-    }
-  }
-
-  class EORIActionController(auth: AuthAction, eori: EORIAction) extends BaseController {
-
-    def action: Action[AnyContent] = (auth andThen eori).async { request =>
       Future.successful(Ok(request.user.toString))
     }
   }

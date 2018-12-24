@@ -18,6 +18,7 @@ package controllers
 
 import com.google.inject.Singleton
 import config.AppConfig
+import controllers.actions.{AuthAction, EORIAction}
 import forms.MRNFormProvider
 import javax.inject.Inject
 import play.api.data.Form
@@ -30,14 +31,15 @@ import views.html.mrn_entry
 @Singleton
 class MrnEntryController @Inject()(
                                     val messagesApi: MessagesApi,
-                                    actions: Actions,
+                                    authenticate: AuthAction,
+                                    requireEori: EORIAction,
                                     formProvider: MRNFormProvider,
                                     implicit val appConfig: AppConfig)
   extends FrontendController with I18nSupport {
 
   val form = formProvider()
 
-  def onPageLoad: Action[AnyContent] = (actions.auth andThen actions.requireEori) { implicit req =>
+  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori) { implicit req =>
     Ok(mrn_entry(form))
   }
 }

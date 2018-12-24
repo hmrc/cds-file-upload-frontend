@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.FakeActions
+import controllers.actions.{FakeAuthAction, FakeEORIAction}
 import domain.auth.SignedInUser
 import forms.MRNFormProvider
 import generators.SignedInUserGen
@@ -33,7 +33,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase with PropertyChecks with
   val form = new MRNFormProvider()()
 
   def controller(signedInUser: SignedInUser) =
-    new MrnEntryController(messagesApi, new FakeActions(signedInUser),new MRNFormProvider, appConfig)
+    new MrnEntryController(messagesApi, new FakeAuthAction(signedInUser), new FakeEORIAction, new MRNFormProvider, appConfig)
 
   def viewAsString(form: Form[_] = form) = mrn_entry(form)(fakeRequest, messages, appConfig).toString
 

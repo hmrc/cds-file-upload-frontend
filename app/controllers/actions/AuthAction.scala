@@ -14,31 +14,22 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.actions
 
 import com.google.inject.{Inject, Singleton}
-import domain.auth._
+import controllers.routes
+import domain.auth.{AuthenticatedRequest, SignedInUser}
+import play.api.mvc.Results.Redirect
+import play.api.mvc.{ActionBuilder, ActionRefiner, Request, Result}
 import play.api.{Configuration, Environment}
-import play.api.mvc._
-import play.api.mvc.Results._
-import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, NoActiveSession}
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 
 import scala.concurrent.{ExecutionContext, Future}
-
-@Singleton
-class Actions @Inject()(val authAction: AuthAction, val eoriAction: EORIAction) {
-
-  def auth: ActionBuilder[AuthenticatedRequest] with ActionRefiner[Request, AuthenticatedRequest] =
-    authAction
-
-  def requireEori: ActionFilter[AuthenticatedRequest] =
-    eoriAction
-}
 
 @Singleton
 class AuthAction @Inject()(
@@ -55,35 +46,17 @@ class AuthAction @Inject()(
 
     authorised(SignedInUser.authorisationPredicate)
       .retrieve(credentials and name and email and affinityGroup and internalId and allEnrolments) {
+
         case credentials ~ name ~ email ~ affinityGroup ~ Some(identifier) ~ enrolments =>
           val signedInUser = SignedInUser(credentials, name, email, affinityGroup, identifier, enrolments)
           Future.successful(Right(AuthenticatedRequest(request, signedInUser)))
+
         case _ =>
           throw new UnauthorizedException("Unable to retrieve internal Id")
+
       } recover {
         case _: NoActiveSession => Left(toGGLogin(request.uri))
         case _                  => Left(Redirect(routes.UnauthorisedController.onPageLoad))
       }
   }
-}
-
-@Singleton
-class EORIAction extends ActionFilter[AuthenticatedRequest] {
-
-  implicit class OptionOps[A](val optionA: Option[A]) {
-
-    def swap[B](b: B): Option[B] = optionA match {
-      case Some(_) => None
-      case None    => Some(b)
-    }
-  }
-
-  override protected def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] =
-    Future.successful(
-      request.user.enrolments
-        .getEnrolment(SignedInUser.cdsEnrolmentName)
-        .flatMap(_.getIdentifier(SignedInUser.eoriIdentifierKey))
-        .filter(_.value.nonEmpty)
-        .swap(Redirect(routes.UnauthorisedController.onPageLoad)))
-
 }

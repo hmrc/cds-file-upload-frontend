@@ -14,23 +14,33 @@
  * limitations under the License.
  */
 
-package config
+package controllers.actions
 
-import controllers.{Actions, AuthAction, EORIAction}
+import com.google.inject.Singleton
+import controllers.routes
 import domain.auth.{AuthenticatedRequest, SignedInUser}
-import play.api.mvc.{Request, Result}
+import play.api.mvc.Results.Redirect
+import play.api.mvc.{ActionFilter, Result}
 
 import scala.concurrent.Future
 
-class FakeActions(signedInUser: SignedInUser) extends Actions(new FakeAuthAction(signedInUser), new FakeEORIAction)
+@Singleton
+class EORIAction extends ActionFilter[AuthenticatedRequest] {
 
-class FakeAuthAction(result: SignedInUser) extends AuthAction(null, null, null)(null) {
-  override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
-    Future.successful(Right(AuthenticatedRequest(request, result)))
+  implicit class OptionOps[A](val optionA: Option[A]) {
+
+    def swap[B](b: B): Option[B] = optionA match {
+      case Some(_) => None
+      case None    => Some(b)
+    }
   }
-}
 
-class FakeEORIAction extends EORIAction() {
   override protected def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] =
-    Future.successful(None)
+    Future.successful(
+      request.user.enrolments
+        .getEnrolment(SignedInUser.cdsEnrolmentName)
+        .flatMap(_.getIdentifier(SignedInUser.eoriIdentifierKey))
+        .filter(_.value.nonEmpty)
+        .swap(Redirect(routes.UnauthorisedController.onPageLoad)))
+
 }
