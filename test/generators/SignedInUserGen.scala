@@ -16,7 +16,7 @@
 
 package generators
 
-import domain.auth.SignedInUser
+import models.requests.SignedInUser
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Gen.{listOf, option}

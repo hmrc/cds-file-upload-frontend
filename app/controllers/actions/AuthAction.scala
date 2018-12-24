@@ -16,9 +16,9 @@
 
 package controllers.actions
 
-import com.google.inject.{Inject, Singleton}
+import com.google.inject.Inject
 import controllers.routes
-import domain.auth.{AuthenticatedRequest, SignedInUser}
+import models.requests.{AuthenticatedRequest, SignedInUser}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionBuilder, ActionRefiner, Request, Result}
 import play.api.{Configuration, Environment}

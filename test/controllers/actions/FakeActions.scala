@@ -16,7 +16,7 @@
 
 package controllers.actions
 
-import domain.auth.{AuthenticatedRequest, SignedInUser}
+import models.requests.{AuthenticatedRequest, SignedInUser}
 import models.UserAnswers
 import models.requests.OptionalDataRequest
 import play.api.mvc.{Request, Result}

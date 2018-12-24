@@ -16,7 +16,7 @@
 
 package pages
 
-import domain.MRN
+import models.MRN
 
 case object MrnEntryPage extends QuestionPage[MRN] {
 

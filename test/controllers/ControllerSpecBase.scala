@@ -19,7 +19,7 @@ package controllers
 import base.SpecBase
 import connectors.DataCacheConnector
 import controllers.actions.{DataRetrievalAction, FakeDataRetrievalAction}
-import domain.auth.SignedInUser
+import models.requests.SignedInUser
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfterEach

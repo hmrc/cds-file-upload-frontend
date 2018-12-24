@@ -16,7 +16,7 @@
 
 package generators
 
-import domain.MRN
+import models.MRN
 import org.scalacheck.Arbitrary
 import wolfendale.scalacheck.regexp.RegexpGen
 

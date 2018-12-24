@@ -16,8 +16,8 @@
 
 package views
 
-import domain.MRN
 import forms.MRNFormProvider
+import models.MRN
 import org.scalatest.prop.PropertyChecks
 import play.api.data.Form
 import play.twirl.api.{Html, HtmlFormat}

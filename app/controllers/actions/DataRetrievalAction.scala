@@ -19,7 +19,7 @@ package controllers.actions
 import com.google.inject.Inject
 import play.api.mvc.ActionTransformer
 import connectors.DataCacheConnector
-import domain.auth.AuthenticatedRequest
+import models.requests.AuthenticatedRequest
 import models.UserAnswers
 import models.requests.OptionalDataRequest
 import uk.gov.hmrc.play.HeaderCarrierConverter

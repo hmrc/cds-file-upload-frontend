@@ -14,28 +14,35 @@
  * limitations under the License.
  */
 
-package domain
+package models
 
-import play.api.data.validation.ValidationError
-import play.api.libs.json._
+import base.SpecBase
+import org.scalacheck.Gen
+import org.scalatest.prop.PropertyChecks
+import wolfendale.scalacheck.regexp.RegexpGen
 
-sealed abstract case class MRN(value: String)
+class MRNSpec extends SpecBase with PropertyChecks {
 
-object MRN {
+  val validMRNGen: Gen[String] = RegexpGen.from(MRN.validRegex)
 
-  def validRegex: String = "\\d{2}[a-zA-Z]{2}[a-zA-Z0-9]{13}\\d{1}"
+  "MRN.apply" should {
 
-  def apply(value: String): Option[MRN] =
-    if (value.matches(validRegex)) Some(new MRN(value) {})
-    else None
+    "return Some for valid MRN" in {
 
-  implicit val reads: Reads[MRN] =
-    __.read[String].map(MRN(_))
-      .collect(ValidationError("MRN did not pass validation")) {
-        case Some(mrn) => mrn
+      forAll(validMRNGen) { mrn =>
+
+        MRN(mrn).map(_.value) mustBe Some(mrn)
       }
+    }
 
-  implicit val writes: Writes[MRN] = Writes {
-    case MRN(value) => JsString(value)
+    "return None for invalid MRN" in {
+
+      forAll { mrn: String =>
+        whenever(!mrn.matches(MRN.validRegex)) {
+
+          MRN(mrn) mustBe None
+        }
+      }
+    }
   }
 }

@@ -16,7 +16,7 @@
 
 package models.requests
 
-import domain.auth.AuthenticatedRequest
+import models.requests.AuthenticatedRequest
 import play.api.mvc.WrappedRequest
 import models.UserAnswers
 

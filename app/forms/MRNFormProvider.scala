@@ -17,8 +17,8 @@
 package forms
 
 import com.google.inject.Inject
-import domain.MRN
 import forms.mappings.Mappings
+import models.MRN
 import play.api.data.format.Formatter
 import play.api.data.Forms.of
 import play.api.data.{Form, FormError}

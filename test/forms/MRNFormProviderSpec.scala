@@ -17,7 +17,7 @@
 package forms
 
 import base.SpecBase
-import domain.MRN
+import models.MRN
 import org.scalacheck.Gen
 import org.scalatest.prop.PropertyChecks
 import play.api.data.Form

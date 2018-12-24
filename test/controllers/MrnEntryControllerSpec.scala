@@ -17,10 +17,10 @@
 package controllers
 
 import controllers.actions.{DataRetrievalAction, FakeAuthAction, FakeEORIAction}
-import domain.MRN
-import domain.auth.SignedInUser
+import models.requests.SignedInUser
 import forms.MRNFormProvider
 import generators.Generators
+import models.MRN
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mockito.MockitoSugar

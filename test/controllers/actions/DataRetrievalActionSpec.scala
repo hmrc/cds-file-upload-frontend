@@ -18,7 +18,7 @@ package controllers.actions
 
 import base.SpecBase
 import connectors.DataCacheConnector
-import domain.auth.{AuthenticatedRequest, SignedInUser}
+import models.requests.{AuthenticatedRequest, SignedInUser}
 import generators.SignedInUserGen
 import models.requests.OptionalDataRequest
 import org.mockito.Mockito._

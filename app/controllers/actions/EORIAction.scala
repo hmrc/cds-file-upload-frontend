@@ -17,7 +17,7 @@
 package controllers.actions
 
 import controllers.routes
-import domain.auth.{AuthenticatedRequest, SignedInUser}
+import models.requests.{AuthenticatedRequest, SignedInUser}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionFilter, Result}
 

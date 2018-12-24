@@ -17,7 +17,7 @@
 package controllers.actions
 
 import controllers.ControllerSpecBase
-import domain.auth.SignedInUser
+import models.requests.SignedInUser
 import generators.SignedInUserGen
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.PropertyChecks

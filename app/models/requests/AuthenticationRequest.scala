@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package domain.auth
+package models.requests
 
 import play.api.mvc.{Request, WrappedRequest}
 import uk.gov.hmrc.auth.core.authorise.Predicate
