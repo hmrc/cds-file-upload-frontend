@@ -17,7 +17,6 @@
 package controllers.actions
 
 import controllers.ControllerSpecBase
-import controllers.actions.AuthAction
 import domain.auth.SignedInUser
 import generators.SignedInUserGen
 import org.scalacheck.{Arbitrary, Gen}

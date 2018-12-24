@@ -17,10 +17,12 @@
 package controllers
 
 import base.SpecBase
+import connectors.DataCacheConnector
 import controllers.actions.{DataRetrievalAction, FakeDataRetrievalAction}
 import domain.auth.SignedInUser
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{reset, when}
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mockito.MockitoSugar
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
 import uk.gov.hmrc.auth.core.retrieve.Retrievals._
@@ -29,9 +31,10 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
 
-class ControllerSpecBase extends SpecBase with MockitoSugar {
+class ControllerSpecBase extends SpecBase with MockitoSugar with BeforeAndAfterEach {
 
-  val authConnector: AuthConnector = mock[AuthConnector]
+  lazy val authConnector: AuthConnector = mock[AuthConnector]
+  lazy val dataCacheConnector: DataCacheConnector = mock[DataCacheConnector]
 
   def withSignedInUser(user: SignedInUser)(test: => Unit): Unit = {
     when(
@@ -51,6 +54,13 @@ class ControllerSpecBase extends SpecBase with MockitoSugar {
       .thenReturn(Future.failed(authException))
 
     test
+  }
+
+  override def beforeEach = {
+    reset(dataCacheConnector, authConnector)
+
+    when(dataCacheConnector.save(any()))
+      .thenReturn(Future.successful(CacheMap("", Map())))
   }
 
   val escaped: String => String =

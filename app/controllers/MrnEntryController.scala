@@ -18,14 +18,18 @@ package controllers
 
 import com.google.inject.Singleton
 import config.AppConfig
+import connectors.DataCacheConnector
 import controllers.actions.{AuthAction, DataRetrievalAction, EORIAction}
 import forms.MRNFormProvider
 import javax.inject.Inject
+import models.UserAnswers
 import pages.MrnEntryPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.mrn_entry
+
+import scala.concurrent.Future
 
 
 @Singleton
@@ -35,6 +39,7 @@ class MrnEntryController @Inject()(
   requireEori: EORIAction,
   getData: DataRetrievalAction,
   formProvider: MRNFormProvider,
+  dataCacheConnector: DataCacheConnector,
   implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
   val form = formProvider()
@@ -47,8 +52,25 @@ class MrnEntryController @Inject()(
            .map(form.fill))
         .getOrElse(form)
 
-    println(populatedForm.value)
-
     Ok(mrn_entry(populatedForm))
   }
+
+  def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen getData).async {
+    implicit req =>
+
+      val userAnswers = req.userAnswers.getOrElse(UserAnswers(req.request.user.internalId))
+
+      form.bindFromRequest().fold(
+        errorForm =>
+          Future.successful(BadRequest(mrn_entry(errorForm))),
+
+        value => {
+          val cacheMap = userAnswers.set(MrnEntryPage, value).cacheMap
+
+          dataCacheConnector.save(cacheMap).map { _ =>
+            Redirect(routes.UnauthorisedController.onPageLoad())
+          }
+        }
+      )
+    }
 }
