@@ -37,7 +37,11 @@ class MrnEntrySpec extends ViewSpecBase with StringViewBehaviours[MRN] with Prop
 
   "MRN Entry Page" must {
     behave like normalPage(view, messagePrefix)
-    behave like stringPage(createViewUsingForm, "value", messagePrefix)
+    behave like stringPage(
+      createViewUsingForm,
+      "value",
+      messagePrefix,
+      List("mrnEntryPage.hint1", "mrnEntryPage.hint2"))
   }
 }
 

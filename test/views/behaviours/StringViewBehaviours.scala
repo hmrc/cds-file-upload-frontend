@@ -26,7 +26,7 @@ trait StringViewBehaviours[A] extends QuestionViewBehaviours[A] {
   def stringPage(createView: Form[A] => HtmlFormat.Appendable,
                  fieldName: String,
                  messageKeyPrefix: String,
-                 expectedHintKey: Option[String] = None) = {
+                 expectedHintKey: List[String] = List()) = {
 
     s"behave like a page with a string value field of '$fieldName'" when {
       "rendered" must {
