@@ -31,13 +31,11 @@ import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 
 import scala.concurrent.{ExecutionContext, Future}
 
-@Singleton
-class AuthAction @Inject()(
+class AuthActionImpl @Inject()(
   val authConnector: AuthConnector,
   val config: Configuration,
   val env: Environment
-)(implicit ec: ExecutionContext) extends ActionBuilder[AuthenticatedRequest]
-  with ActionRefiner[Request, AuthenticatedRequest]
+)(implicit ec: ExecutionContext) extends AuthAction
   with AuthorisedFunctions
   with AuthRedirects {
 
@@ -60,3 +58,6 @@ class AuthAction @Inject()(
       }
   }
 }
+
+trait AuthAction extends ActionBuilder[AuthenticatedRequest]
+  with ActionRefiner[Request, AuthenticatedRequest]

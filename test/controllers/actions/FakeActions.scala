@@ -24,7 +24,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
 
-class FakeAuthAction(result: SignedInUser) extends AuthAction(null, null, null)(null) {
+class FakeAuthAction(result: SignedInUser) extends AuthAction {
   override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
     Future.successful(Right(AuthenticatedRequest(request, result)))
   }

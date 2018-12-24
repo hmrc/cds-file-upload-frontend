@@ -16,11 +16,12 @@
 
 package controllers
 
-import javax.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 
+@Singleton
 class NumberOfFilesController @Inject() extends FrontendController {
 
   def onPageLoad: Action[AnyContent] = Action {

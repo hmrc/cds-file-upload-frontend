@@ -26,6 +26,7 @@ class Module extends AbstractModule {
 
   override def configure(): Unit = {
     // Bind the actions for DI
+    bind(classOf[AuthAction]).to(classOf[AuthActionImpl]).asEagerSingleton()
     bind(classOf[DataRetrievalAction]).to(classOf[DataRetrievalActionImpl]).asEagerSingleton()
     bind(classOf[DataCacheConnector]).to(classOf[MongoCacheConnector]).asEagerSingleton()
 
