@@ -16,7 +16,6 @@
 
 package controllers.actions
 
-import com.google.inject.Singleton
 import controllers.routes
 import domain.auth.{AuthenticatedRequest, SignedInUser}
 import play.api.mvc.Results.Redirect
@@ -24,8 +23,7 @@ import play.api.mvc.{ActionFilter, Result}
 
 import scala.concurrent.Future
 
-@Singleton
-class EORIAction extends ActionFilter[AuthenticatedRequest] {
+class EORIActionImpl extends EORIAction {
 
   implicit class OptionOps[A](val optionA: Option[A]) {
 
@@ -42,5 +40,6 @@ class EORIAction extends ActionFilter[AuthenticatedRequest] {
         .flatMap(_.getIdentifier(SignedInUser.eoriIdentifierKey))
         .filter(_.value.nonEmpty)
         .swap(Redirect(routes.UnauthorisedController.onPageLoad)))
-
 }
+
+trait EORIAction extends ActionFilter[AuthenticatedRequest]

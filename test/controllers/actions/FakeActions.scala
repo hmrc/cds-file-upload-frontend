@@ -30,7 +30,7 @@ class FakeAuthAction(result: SignedInUser) extends AuthAction {
   }
 }
 
-class FakeEORIAction extends EORIAction() {
+class FakeEORIAction extends EORIAction {
   override protected def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] =
     Future.successful(None)
 }
