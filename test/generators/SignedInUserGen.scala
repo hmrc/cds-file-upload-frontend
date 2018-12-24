@@ -33,7 +33,7 @@ trait SignedInUserGen {
     name          <- nameGen
     email         <- option(arbitrary[String])
     affinityGroup <- option(affinityGroupGen)
-    internalId    <- option(arbitrary[String])
+    internalId    <- arbitrary[String]
     enrolments    <- enrolmentsGen
   } yield SignedInUser(credentials, name, email, affinityGroup, internalId, enrolments)
 

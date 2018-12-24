@@ -38,7 +38,7 @@ class ControllerSpecBase extends SpecBase with MockitoSugar {
           any(),
           eqTo(credentials and name and email and affinityGroup and internalId and allEnrolments))(any(), any())
     ).thenReturn(
-      Future.successful(new ~(new ~(new ~(new ~(new ~(user.credentials, user.name), user.email), user.affinityGroup), user.internalId), user.enrolments))
+      Future.successful(new ~(new ~(new ~(new ~(new ~(user.credentials, user.name), user.email), user.affinityGroup), Some(user.internalId)), user.enrolments))
     )
 
     test

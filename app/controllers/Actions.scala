@@ -24,7 +24,7 @@ import play.api.mvc.Results._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 
@@ -55,9 +55,11 @@ class AuthAction @Inject()(
 
     authorised(SignedInUser.authorisationPredicate)
       .retrieve(credentials and name and email and affinityGroup and internalId and allEnrolments) {
-        case credentials ~ name ~ email ~ affinityGroup ~ internalId ~ enrolments =>
-          val signedInUser = SignedInUser(credentials, name, email, affinityGroup, internalId, enrolments)
+        case credentials ~ name ~ email ~ affinityGroup ~ Some(identifier) ~ enrolments =>
+          val signedInUser = SignedInUser(credentials, name, email, affinityGroup, identifier, enrolments)
           Future.successful(Right(AuthenticatedRequest(request, signedInUser)))
+        case _ =>
+          throw new UnauthorizedException("Unable to retrieve internal Id")
       } recover {
         case _: NoActiveSession => Left(toGGLogin(request.uri))
         case _                  => Left(Redirect(routes.UnauthorisedController.onPageLoad))
