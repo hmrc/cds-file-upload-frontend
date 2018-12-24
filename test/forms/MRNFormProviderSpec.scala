@@ -49,7 +49,7 @@ class MRNFormProviderSpec extends SpecBase with PropertyChecks {
         whenever(!mrn.matches(MRN.validRegex)) {
 
           form.bind(Map("value" -> mrn)).fold(
-            errors => errorMessage(errors) mustBe "error.invalid",
+            errors => errorMessage(errors) mustBe "mrn.invalid",
             _      => fail("Form binding must fail!")
           )
         }

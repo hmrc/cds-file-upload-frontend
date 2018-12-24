@@ -40,10 +40,6 @@ class FileUploadController @Inject()(val messagesApi: MessagesApi, httpClient: H
 		Ok(views.html.file_info(Forms.fileInfoForm))
 	}
 
-  val displayFileWarning = Action { implicit req =>
-    Ok(views.html.file_warning())
-  }
-
 	val handleFileInfoForm = Action.async { implicit req =>
     Forms.fileInfoForm.bindFromRequest().fold(
       errors => Future.successful(BadRequest(views.html.file_info(errors))),

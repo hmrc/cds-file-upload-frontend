@@ -68,7 +68,7 @@ class MrnEntryController @Inject()(
           val cacheMap = userAnswers.set(MrnEntryPage, value).cacheMap
 
           dataCacheConnector.save(cacheMap).map { _ =>
-            Redirect(routes.NumberOfFilesController.onPageLoad())
+            Redirect(routes.FileWarningController.onPageLoad())
           }
         }
       )

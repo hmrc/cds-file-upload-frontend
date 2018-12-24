@@ -27,7 +27,7 @@ class MRNFormProvider @Inject() extends FormErrorHelper with Mappings {
 
   def apply(): Form[MRN] =
     Form(
-      "value" -> of(mrnFormatter("error.invalid"))
+      "value" -> of(mrnFormatter("mrn.invalid"))
     )
 
   def mrnFormatter(errorKey: String): Formatter[MRN] = new Formatter[MRN] {

@@ -22,9 +22,9 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 
 @Singleton
-class NumberOfFilesController @Inject() extends FrontendController {
+class FileWarningController @Inject() extends FrontendController {
 
   def onPageLoad: Action[AnyContent] = Action {
-    Ok("Number of files")
+    Ok("File warning page")
   }
 }

@@ -3,7 +3,6 @@
 GET         /start                              controllers.StartController.displayStartPage
 GET         /upload                             controllers.FileUploadController.displayFileInfoForm
 POST        /upload                             controllers.FileUploadController.handleFileInfoForm
-GET         /upload/warning                     controllers.FileUploadController.displayFileWarning
 GET         /upload/size                        controllers.FileUploadController.displayFileSizeForm
 POST        /upload/size                        controllers.FileUploadController.handleFileSizeForm
 GET         /upload/:batchId/receipts           controllers.FileUploadController.displayConfirmationPage(batchId)
@@ -14,4 +13,4 @@ GET         /unauthorised                       controllers.UnauthorisedControll
 GET         /mrn-entry                          controllers.MrnEntryController.onPageLoad
 POST        /mrn-entry                          controllers.MrnEntryController.onSubmit
 
-GET         /number-of-files                    controllers.NumberOfFilesController.onPageLoad
+GET         /upload/warning                     controllers.FileWarningController.onPageLoad
