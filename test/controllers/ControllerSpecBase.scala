@@ -17,6 +17,7 @@
 package controllers
 
 import base.SpecBase
+import controllers.actions.{DataRetrievalAction, FakeDataRetrievalAction}
 import domain.auth.SignedInUser
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.when
@@ -24,6 +25,7 @@ import org.scalatest.mockito.MockitoSugar
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
 import uk.gov.hmrc.auth.core.retrieve.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
+import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
 
@@ -53,4 +55,8 @@ class ControllerSpecBase extends SpecBase with MockitoSugar {
 
   val escaped: String => String =
     play.utils.UriEncoding.encodePathSegment(_, "utf-8")
+
+  val getEmptyCacheMap: DataRetrievalAction = new FakeDataRetrievalAction(None)
+
+  def getCacheMap(cacheMap: CacheMap): DataRetrievalAction = new FakeDataRetrievalAction(Some(cacheMap))
 }

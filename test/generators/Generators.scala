@@ -20,7 +20,7 @@ import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen._
 import org.scalacheck.{Arbitrary, Gen, Shrink}
 
-trait Generators extends CacheMapGenerator with JsonGenerators {
+trait Generators extends CacheMapGenerator with ModelGenerators with JsonGenerators {
 
   implicit val dontShrink: Shrink[String] = Shrink.shrinkAny
 

@@ -14,28 +14,14 @@
  * limitations under the License.
  */
 
-package domain
+package generators
 
-import play.api.data.validation.ValidationError
-import play.api.libs.json._
+import domain.MRN
+import org.scalacheck.Arbitrary
+import wolfendale.scalacheck.regexp.RegexpGen
 
-sealed abstract case class MRN(value: String)
+trait ModelGenerators extends SignedInUserGen {
 
-object MRN {
-
-  def validRegex: String = "\\d{2}[a-zA-Z]{2}[a-zA-Z0-9]{13}\\d{1}"
-
-  def apply(value: String): Option[MRN] =
-    if (value.matches(validRegex)) Some(new MRN(value) {})
-    else None
-
-  implicit val reads: Reads[MRN] =
-    __.read[String].map(MRN(_))
-      .collect(ValidationError("MRN did not pass validation")) {
-        case Some(mrn) => mrn
-      }
-
-  implicit val writes: Writes[MRN] = Writes {
-    case MRN(value) => JsString(value)
-  }
+  implicit val arbitraryMrn: Arbitrary[MRN] =
+    Arbitrary(RegexpGen.from(MRN.validRegex).map(MRN(_)).suchThat(_.nonEmpty).map(_.get))
 }

@@ -16,24 +16,33 @@
 
 package controllers
 
-import controllers.actions.{FakeAuthAction, FakeEORIAction}
+import controllers.actions.{DataRetrievalAction, FakeAuthAction, FakeEORIAction}
+import domain.MRN
 import domain.auth.SignedInUser
 import forms.MRNFormProvider
-import generators.SignedInUserGen
+import generators.Generators
 import org.scalatest.prop.PropertyChecks
+import pages.MrnEntryPage
 import play.api.data.Form
+import play.api.libs.json.{JsString, JsValue}
 import play.api.test.Helpers.status
 import views.html.mrn_entry
 import play.api.test.Helpers._
+import uk.gov.hmrc.http.cache.client.CacheMap
 
 
-
-class MrnEntryControllerSpec extends ControllerSpecBase with PropertyChecks with SignedInUserGen {
+class MrnEntryControllerSpec extends ControllerSpecBase with PropertyChecks with Generators {
 
   val form = new MRNFormProvider()()
 
-  def controller(signedInUser: SignedInUser) =
-    new MrnEntryController(messagesApi, new FakeAuthAction(signedInUser), new FakeEORIAction, new MRNFormProvider, appConfig)
+  def controller(signedInUser: SignedInUser, dataRetrieval: DataRetrievalAction = getEmptyCacheMap) =
+    new MrnEntryController(
+      messagesApi,
+      new FakeAuthAction(signedInUser),
+      new FakeEORIAction,
+      dataRetrieval,
+      new MRNFormProvider,
+      appConfig)
 
   def viewAsString(form: Form[_] = form) = mrn_entry(form)(fakeRequest, messages, appConfig).toString
 
@@ -41,17 +50,23 @@ class MrnEntryControllerSpec extends ControllerSpecBase with PropertyChecks with
     "load the correct page when user is logged in " in {
 
       forAll { user: SignedInUser =>
-        withSignedInUser(user) {
-          val result = controller(user).onPageLoad(fakeRequest)
 
-          status(result) mustBe OK
-          contentAsString(result) mustBe viewAsString(form)
-        }
+        val result = controller(user).onPageLoad(fakeRequest)
+
+        status(result) mustBe OK
+        contentAsString(result) mustBe viewAsString(form)
       }
     }
 
     "mrn should be displayed if it exist on the cache" in {
 
+      forAll { (user: SignedInUser, mrn: MRN) =>
+
+        val cacheMap: CacheMap = CacheMap("", Map(MrnEntryPage.toString -> JsString(mrn.value)))
+        val result = controller(user, getCacheMap(cacheMap)).onPageLoad(fakeRequest)
+
+        contentAsString(result) mustBe viewAsString(form.fill(mrn))
+      }
     }
   }
 }

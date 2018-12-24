@@ -17,7 +17,10 @@
 package controllers.actions
 
 import domain.auth.{AuthenticatedRequest, SignedInUser}
+import models.UserAnswers
+import models.requests.OptionalDataRequest
 import play.api.mvc.{Request, Result}
+import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
 
@@ -30,4 +33,9 @@ class FakeAuthAction(result: SignedInUser) extends AuthAction(null, null, null)(
 class FakeEORIAction extends EORIAction() {
   override protected def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] =
     Future.successful(None)
+}
+
+class FakeDataRetrievalAction(cacheMap: Option[CacheMap]) extends DataRetrievalAction {
+  override protected def transform[A](request: AuthenticatedRequest[A]): Future[OptionalDataRequest[A]] =
+    Future.successful(OptionalDataRequest(request, cacheMap.map(UserAnswers(_))))
 }

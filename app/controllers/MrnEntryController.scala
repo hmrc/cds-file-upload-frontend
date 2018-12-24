@@ -18,10 +18,10 @@ package controllers
 
 import com.google.inject.Singleton
 import config.AppConfig
-import controllers.actions.{AuthAction, EORIAction}
+import controllers.actions.{AuthAction, DataRetrievalAction, EORIAction}
 import forms.MRNFormProvider
 import javax.inject.Inject
-import play.api.data.Form
+import pages.MrnEntryPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -30,16 +30,25 @@ import views.html.mrn_entry
 
 @Singleton
 class MrnEntryController @Inject()(
-                                    val messagesApi: MessagesApi,
-                                    authenticate: AuthAction,
-                                    requireEori: EORIAction,
-                                    formProvider: MRNFormProvider,
-                                    implicit val appConfig: AppConfig)
-  extends FrontendController with I18nSupport {
+  val messagesApi: MessagesApi,
+  authenticate: AuthAction,
+  requireEori: EORIAction,
+  getData: DataRetrievalAction,
+  formProvider: MRNFormProvider,
+  implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
   val form = formProvider()
 
-  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori) { implicit req =>
-    Ok(mrn_entry(form))
+  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData) { implicit req =>
+    val populatedForm =
+      req.userAnswers
+        .flatMap(
+          _.get(MrnEntryPage)
+           .map(form.fill))
+        .getOrElse(form)
+
+    println(populatedForm.value)
+
+    Ok(mrn_entry(populatedForm))
   }
 }
