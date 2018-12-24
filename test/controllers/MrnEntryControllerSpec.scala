@@ -16,13 +16,11 @@
 
 package controllers
 
-import connectors.DataCacheConnector
 import controllers.actions.{DataRetrievalAction, FakeAuthAction, FakeEORIAction}
 import domain.MRN
 import domain.auth.SignedInUser
 import forms.MRNFormProvider
 import generators.Generators
-import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mockito.MockitoSugar
@@ -87,7 +85,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase
         val result = controller(user).onSubmit(postRequest)
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.UnauthorisedController.onPageLoad().url)
+        redirectLocation(result) mustBe Some(routes.NumberOfFilesController.onPageLoad().url)
       }
     }
 

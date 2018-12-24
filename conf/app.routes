@@ -12,3 +12,6 @@ GET         /upload/:batchId/:fileNumber        controllers.FileUploadController
 GET         /unauthorised                       controllers.UnauthorisedController.onPageLoad
 
 GET         /mrn-entry                          controllers.MrnEntryController.onPageLoad
+POST        /mrn-entry                          controllers.MrnEntryController.onSubmit
+
+GET         /number-of-files                    controllers.NumberOfFilesController.onPageLoad
