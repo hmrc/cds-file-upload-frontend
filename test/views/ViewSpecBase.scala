@@ -89,8 +89,6 @@ trait ViewSpecBase extends SpecBase {
     val label = labels.first
     assert(label.text().contains(expectedText), s"\n\nLabel for $forElement was not $expectedText")
 
-    println(labels)
-
     expectedHintText.foreach(msg =>
       assert(
         label.getElementsByClass("form-hint").first.text.contains(msg),
