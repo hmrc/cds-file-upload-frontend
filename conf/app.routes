@@ -13,4 +13,6 @@ GET         /unauthorised                       controllers.UnauthorisedControll
 GET         /mrn-entry                          controllers.MrnEntryController.onPageLoad
 POST        /mrn-entry                          controllers.MrnEntryController.onSubmit
 
+GET         /how-many-files-upload              controllers.HowManyFilesUploadController.onPageLoad
+
 GET         /upload/warning                     controllers.FileWarningController.onPageLoad

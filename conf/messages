@@ -36,6 +36,18 @@ mrnEntryPage.hint2=You were given this when you submitted your declaration.
 
 mrn.invalid=The MRN you have entered doesn't follow CDS rules, please check your declaration MRN and re-enter
 
+## file warning page
+fileWarning.title=What is your movement reference number (MRN)?
+fileWarning.heading=Count your files
+fileWarning.paragraph1=HMRC need to know how many files you want to upload before you start uploading them.
+fileWarning.paragraph2=This is not the same as the number of documents.
+fileWarning.paragraph3={0} - if you have photos of 2 pages of 1 invoice saved as separate jpegs, this is 2 files.
+fileWarning.paragraph3.bold= Example 1
+fileWarning.paragraph4={0} - if you have a bill of lading, an invoice and a licence saved in 1 word document, this is 1 file.
+fileWarning.paragraph4.bold= Example 2
+fileWarning.panel=You need to enter the correct number of files - you cannot amend your answer so if you get it wrong you will have to start again.
+fileWarning.button=I understand
+
 howmany.how-many-files=How many files do you need to upload?
 
 fileUploadPage.heading.part1=Upload your
