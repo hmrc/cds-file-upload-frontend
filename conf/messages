@@ -34,7 +34,7 @@ mrnEntryPage.heading=What is your movement reference number (MRN)?
 mrnEntryPage.hint1=This is 18 digits long, and is made up of letters and numbers.
 mrnEntryPage.hint2=You were given this when you submitted your declaration.
 
-mrn.invalid=The MRN you have entered doesn't follow CDS rules, please check your declaration MRN and re-enter
+mrn.invalid=The MRN you have entered doesn’t follow CDS rules, please check your declaration MRN and re-enter
 
 howmany.how-many-files=How many files do you need to upload?
 
