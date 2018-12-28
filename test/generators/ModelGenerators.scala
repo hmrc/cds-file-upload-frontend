@@ -16,12 +16,69 @@
 
 package generators
 
-import models.MRN
-import org.scalacheck.Arbitrary
+import models._
+import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck.Arbitrary._
+import org.scalacheck.Gen._
 import wolfendale.scalacheck.regexp.RegexpGen
 
 trait ModelGenerators extends SignedInUserGen {
+  self: Generators =>
 
   implicit val arbitraryMrn: Arbitrary[MRN] =
     Arbitrary(RegexpGen.from(MRN.validRegex).map(MRN(_)).suchThat(_.nonEmpty).map(_.get))
+
+  val fileUploadRequestGen: Gen[FileUploadRequest] =
+    for {
+      decId <- stringsWithMaxLength(22)
+      size  <- intsAboveValue(0)
+      files <- Gen.listOf(arbitrary[FileUploadFile]) suchThat(_.nonEmpty)
+    } yield {
+      FileUploadRequest(decId, size, files).get
+    }
+
+  implicit val arbitraryFileUploadRequest: Arbitrary[FileUploadRequest] =
+    Arbitrary(fileUploadRequestGen)
+
+  val fileUploadFileGen: Gen[FileUploadFile] =
+    for {
+      seqNo   <- intsAboveValue(0)
+      doctype <- arbitrary[String]
+    } yield {
+      FileUploadFile(seqNo, doctype).get
+    }
+
+  implicit val arbitraryFileUploadFile: Arbitrary[FileUploadFile] =
+    Arbitrary(fileUploadFileGen)
+
+  implicit val arbitraryFileUploadResponse: Arbitrary[FileUploadResponse] =
+    Arbitrary {
+      for {
+        files <- Gen.listOf(arbitrary[File]) suchThat(_.nonEmpty)
+      } yield {
+        FileUploadResponse(files)
+      }
+    }
+
+  implicit val arbitraryFile: Arbitrary[File] =
+    Arbitrary {
+      for {
+        ref           <- arbitrary[String].map(_.trim)
+        uploadRequest <- arbitrary[UploadRequest]
+      } yield {
+        File(ref, uploadRequest)
+      }
+    }
+
+  implicit val arbitraryUploadRequest: Arbitrary[UploadRequest] =
+    Arbitrary {
+      val tupleGen = saneString.flatMap(a => arbitrary[String].map(b => (a, b.trim)))
+
+      for {
+        href   <- arbitrary[String].map(_.trim)
+        fields <- Gen.listOf(tupleGen).map(_.toMap) suchThat(_.nonEmpty)
+      } yield {
+        UploadRequest(href, fields)
+      }
+    }
 }
