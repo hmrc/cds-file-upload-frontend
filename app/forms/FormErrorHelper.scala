@@ -14,22 +14,10 @@
  * limitations under the License.
  */
 
-package views
+package forms
 
-import views.html.unauthorised
+import play.api.data.FormError
 
-class UnauthorisedSpec extends ViewSpecBase {
-
-  lazy val view = unauthorised()(fakeRequest, messages, appConfig).toString
-
-  "view" should {
-
-    "include header" in {
-      view must include(messages("unauthorised.heading"))
-    }
-
-    "include title" in {
-      view must include(messages("unauthorised.title"))
-    }
-  }
+trait FormErrorHelper {
+  def produceError(key: String, error: String) = Left(Seq(FormError(key, error)))
 }

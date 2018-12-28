@@ -6,6 +6,8 @@ import play.core.PlayVersion.current
 val appName = "cds-file-upload-frontend"
 val jacksonVersion = "2.9.7"
 
+resolvers += Resolver.bintrayRepo("wolfendale", "maven")
+
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
   .settings(
@@ -20,6 +22,8 @@ lazy val microservice = Project(appName, file("."))
       "com.fasterxml.jackson.core"       %  "jackson-annotations"      % jacksonVersion,
       "com.fasterxml.jackson.dataformat" %  "jackson-dataformat-xml"   % jacksonVersion,
       "com.fasterxml.jackson.module"     %% "jackson-module-scala"     % jacksonVersion,
+      "uk.gov.hmrc"                      %% "play-reactivemongo"       % "6.2.0",
+      "uk.gov.hmrc"                      %% "http-caching-client"      % "7.2.0",
 
       "org.scalatest"              %% "scalatest"                 % "3.0.4"  % "test",
       "org.jsoup"                  %  "jsoup"                     % "1.10.2" % "test",
@@ -28,7 +32,8 @@ lazy val microservice = Project(appName, file("."))
       "uk.gov.hmrc"                %% "service-integration-test"  % "0.2.0"  % "test",
       "org.scalatestplus.play"     %% "scalatestplus-play"        % "2.0.0"  % "test",
       "org.mockito"                %  "mockito-core"              % "2.13.0" % "test",
-      "org.scalacheck"             %% "scalacheck"                % "1.14.0" % "test"
+      "org.scalacheck"             %% "scalacheck"                % "1.14.0" % "test",
+      "wolfendale"                 %% "scalacheck-gen-regexp"     % "0.1.1"  % "test"
 
     )
   )

@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-package views
+package views.helpers
 
-import views.html.unauthorised
+import play.api.data.Form
+import play.api.i18n.Messages
+import play.twirl.api.Html
 
-class UnauthorisedSpec extends ViewSpecBase {
+object Utils {
 
-  lazy val view = unauthorised()(fakeRequest, messages, appConfig).toString
+  def errorPrefix(form: Form[_])(implicit messages: Messages): String = {
+    if (form.hasErrors || form.hasGlobalErrors) messages("error.browser.title.prefix") else ""
+  }
 
-  "view" should {
+  def multiline(values: String*): Html = {
+    Html(values.toList.mkString("<br />"))
+  }
 
-    "include header" in {
-      view must include(messages("unauthorised.heading"))
-    }
-
-    "include title" in {
-      view must include(messages("unauthorised.title"))
-    }
+  def bold(value: String): Html = {
+    Html(s"<strong class='bold'>$value</strong>")
   }
 }

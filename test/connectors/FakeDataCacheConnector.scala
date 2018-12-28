@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-package views
+package connectors
 
-import views.html.unauthorised
+import play.api.libs.json.Format
+import uk.gov.hmrc.http.cache.client.CacheMap
 
-class UnauthorisedSpec extends ViewSpecBase {
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-  lazy val view = unauthorised()(fakeRequest, messages, appConfig).toString
+object FakeDataCacheConnector extends DataCacheConnector {
 
-  "view" should {
+  override def save[A](cacheMap: CacheMap): Future[CacheMap] = Future.successful(cacheMap)
 
-    "include header" in {
-      view must include(messages("unauthorised.heading"))
-    }
+  override def fetch(cacheId: String): Future[Option[CacheMap]] = Future(Some(CacheMap(cacheId, Map())))
 
-    "include title" in {
-      view must include(messages("unauthorised.title"))
-    }
-  }
+  override def getEntry[A](cacheId: String, key: String)(implicit fmt: Format[A]): Future[Option[A]] = ???
 }

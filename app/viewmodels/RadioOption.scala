@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-package views
+package viewmodels
 
-import views.html.unauthorised
+case class RadioOption(id: String, value: String, messageKey: String)
 
-class UnauthorisedSpec extends ViewSpecBase {
-
-  lazy val view = unauthorised()(fakeRequest, messages, appConfig).toString
-
-  "view" should {
-
-    "include header" in {
-      view must include(messages("unauthorised.heading"))
-    }
-
-    "include title" in {
-      view must include(messages("unauthorised.title"))
-    }
-  }
+object RadioOption {
+  def apply(keyPrefix: String, option: String): RadioOption = RadioOption(
+    s"$keyPrefix.$option",
+    option,
+    s"$keyPrefix.$option"
+  )
 }

@@ -14,22 +14,11 @@
  * limitations under the License.
  */
 
-package views
+package pages
 
-import views.html.unauthorised
+import models.MRN
 
-class UnauthorisedSpec extends ViewSpecBase {
+case object MrnEntryPage extends QuestionPage[MRN] {
 
-  lazy val view = unauthorised()(fakeRequest, messages, appConfig).toString
-
-  "view" should {
-
-    "include header" in {
-      view must include(messages("unauthorised.heading"))
-    }
-
-    "include title" in {
-      view must include(messages("unauthorised.title"))
-    }
-  }
+  override val toString: String = "mrnEntryPage"
 }

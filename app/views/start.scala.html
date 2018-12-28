@@ -15,12 +15,14 @@
  *@
 
 @import config.AppConfig
+@import views.helpers.Utils.bold
 
 @()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = messages("startPage.header"), bodyClasses = None) {
+@main_template(title = messages("startPage.title"), bodyClasses = None) {
+
 <div class="form-group">
-    <h1 class="heading-xlarge">@messages("common.service.name")</h1>
+    <h1 class="heading-xlarge">@messages("startPage.heading")</h1>
 
     <p>@messages("startPage.paragraph1")</p>
 
@@ -31,8 +33,8 @@
     </ul>
 
     <p>@messages("startPage.paragraph2")</p>
-    <p>@Html(messages("startPage.paragraph3"))</p>
-    <p>@Html(messages("startPage.paragraph4"))</p>
+    <p>@Html(messages("startPage.paragraph3", bold(messages("startPage.paragraph3.bold"))))</p>
+    <p>@Html(messages("startPage.paragraph4", bold(messages("startPage.paragraph4.bold"))))</p>
 </div>
 
 <a class="button button-start" href="@{routes.MrnEntryController.onPageLoad().url}"

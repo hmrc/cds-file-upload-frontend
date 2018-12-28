@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-package views
+package generators
 
-import views.html.unauthorised
+import models.MRN
+import org.scalacheck.Arbitrary
+import wolfendale.scalacheck.regexp.RegexpGen
 
-class UnauthorisedSpec extends ViewSpecBase {
+trait ModelGenerators extends SignedInUserGen {
 
-  lazy val view = unauthorised()(fakeRequest, messages, appConfig).toString
-
-  "view" should {
-
-    "include header" in {
-      view must include(messages("unauthorised.heading"))
-    }
-
-    "include title" in {
-      view must include(messages("unauthorised.title"))
-    }
-  }
+  implicit val arbitraryMrn: Arbitrary[MRN] =
+    Arbitrary(RegexpGen.from(MRN.validRegex).map(MRN(_)).suchThat(_.nonEmpty).map(_.get))
 }

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package domain.auth
+package models.requests
 
-import play.api.libs.json.Json
 import play.api.mvc.{Request, WrappedRequest}
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.{AffinityGroup, Enrolment, Enrolments}
@@ -27,7 +26,7 @@ case class SignedInUser(
   name: Name,
   email: Option[String],
   affinityGroup: Option[AffinityGroup],
-  internalId: Option[String],
+  internalId: String,
   enrolments: Enrolments)
 
 object SignedInUser {

@@ -17,19 +17,24 @@
 package controllers
 
 import base.SpecBase
-import domain.auth.SignedInUser
+import connectors.DataCacheConnector
+import controllers.actions.{DataRetrievalAction, FakeDataRetrievalAction}
+import models.requests.SignedInUser
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{reset, when}
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mockito.MockitoSugar
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
 import uk.gov.hmrc.auth.core.retrieve.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
+import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
 
-class ControllerSpecBase extends SpecBase with MockitoSugar {
+class ControllerSpecBase extends SpecBase with MockitoSugar with BeforeAndAfterEach {
 
-  val authConnector: AuthConnector = mock[AuthConnector]
+  lazy val authConnector: AuthConnector = mock[AuthConnector]
+  lazy val dataCacheConnector: DataCacheConnector = mock[DataCacheConnector]
 
   def withSignedInUser(user: SignedInUser)(test: => Unit): Unit = {
     when(
@@ -38,7 +43,7 @@ class ControllerSpecBase extends SpecBase with MockitoSugar {
           any(),
           eqTo(credentials and name and email and affinityGroup and internalId and allEnrolments))(any(), any())
     ).thenReturn(
-      Future.successful(new ~(new ~(new ~(new ~(new ~(user.credentials, user.name), user.email), user.affinityGroup), user.internalId), user.enrolments))
+      Future.successful(new ~(new ~(new ~(new ~(new ~(user.credentials, user.name), user.email), user.affinityGroup), Some(user.internalId)), user.enrolments))
     )
 
     test
@@ -51,5 +56,17 @@ class ControllerSpecBase extends SpecBase with MockitoSugar {
     test
   }
 
-  val escaped: String => String = play.utils.UriEncoding.encodePathSegment(_, "utf-8")
+  override def beforeEach = {
+    reset(dataCacheConnector, authConnector)
+
+    when(dataCacheConnector.save(any()))
+      .thenReturn(Future.successful(CacheMap("", Map())))
+  }
+
+  val escaped: String => String =
+    play.utils.UriEncoding.encodePathSegment(_, "utf-8")
+
+  val getEmptyCacheMap: DataRetrievalAction = new FakeDataRetrievalAction(None)
+
+  def getCacheMap(cacheMap: CacheMap): DataRetrievalAction = new FakeDataRetrievalAction(Some(cacheMap))
 }

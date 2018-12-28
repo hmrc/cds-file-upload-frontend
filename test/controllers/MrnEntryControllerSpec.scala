@@ -16,6 +16,106 @@
 
 package controllers
 
-class MrnEntryControllerSpec {
+import controllers.actions.{DataRetrievalAction, FakeAuthAction, FakeEORIAction}
+import models.requests.SignedInUser
+import forms.MRNFormProvider
+import generators.Generators
+import models.MRN
+import org.mockito.Mockito._
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.mockito.MockitoSugar
+import org.scalatest.prop.PropertyChecks
+import pages.MrnEntryPage
+import play.api.data.Form
+import play.api.libs.json.JsString
+import play.api.test.Helpers.status
+import views.html.mrn_entry
+import play.api.test.Helpers._
+import uk.gov.hmrc.http.cache.client.CacheMap
 
+
+class MrnEntryControllerSpec extends ControllerSpecBase
+  with MockitoSugar
+  with PropertyChecks
+  with Generators
+  with BeforeAndAfterEach {
+
+  val form = new MRNFormProvider()()
+
+  def controller(signedInUser: SignedInUser, dataRetrieval: DataRetrievalAction = getEmptyCacheMap) =
+    new MrnEntryController(
+      messagesApi,
+      new FakeAuthAction(signedInUser),
+      new FakeEORIAction,
+      dataRetrieval,
+      new MRNFormProvider,
+      dataCacheConnector,
+      appConfig)
+
+  def viewAsString(form: Form[_] = form) = mrn_entry(form)(fakeRequest, messages, appConfig).toString
+
+  "Mrn Entry Page" must {
+    "load the correct page when user is logged in " in {
+
+      forAll { user: SignedInUser =>
+
+        val result = controller(user).onPageLoad(fakeRequest)
+
+        status(result) mustBe OK
+        contentAsString(result) mustBe viewAsString(form)
+      }
+    }
+
+    "mrn should be displayed if it exist on the cache" in {
+
+      forAll { (user: SignedInUser, mrn: MRN) =>
+
+        val cacheMap: CacheMap = CacheMap("", Map(MrnEntryPage.toString -> JsString(mrn.value)))
+        val result = controller(user, getCacheMap(cacheMap)).onPageLoad(fakeRequest)
+
+        contentAsString(result) mustBe viewAsString(form.fill(mrn))
+      }
+    }
+
+    "return an ok when valid data is submitted" in {
+
+      forAll { (user: SignedInUser, mrn: MRN) =>
+
+        val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn.value)
+        val result = controller(user).onSubmit(postRequest)
+
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result) mustBe Some(routes.FileWarningController.onPageLoad().url)
+      }
+    }
+
+    "return a bad request when invalid data is submitted" in {
+
+      forAll { (user: SignedInUser, mrn: String) =>
+
+        whenever(!mrn.matches(MRN.validRegex)) {
+
+          val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn)
+          val boundForm = form.bind(Map("value" -> mrn))
+
+          val result = controller(user).onSubmit(postRequest)
+
+          status(result) mustBe BAD_REQUEST
+          contentAsString(result) mustBe viewAsString(boundForm)
+        }
+      }
+    }
+
+    "save data in cache when valid" in {
+
+      forAll { (user: SignedInUser, mrn: MRN) =>
+
+        val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn.value)
+        await(controller(user).onSubmit(postRequest))
+
+        val expectedMap = CacheMap(user.internalId, Map(MrnEntryPage.toString -> JsString(mrn.value)))
+        verify(dataCacheConnector, times(1)).save(expectedMap)
+      }
+    }
+  }
 }

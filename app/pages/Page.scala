@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-package views
+package pages
 
-import views.html.unauthorised
+import scala.language.implicitConversions
 
-class UnauthorisedSpec extends ViewSpecBase {
+trait Page
 
-  lazy val view = unauthorised()(fakeRequest, messages, appConfig).toString
+object Page {
 
-  "view" should {
-
-    "include header" in {
-      view must include(messages("unauthorised.heading"))
-    }
-
-    "include title" in {
-      view must include(messages("unauthorised.title"))
-    }
-  }
+  implicit def toString(page: Page): String =
+    page.toString
 }

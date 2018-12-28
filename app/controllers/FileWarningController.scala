@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-package views
+package controllers
 
-import views.html.unauthorised
+import com.google.inject.{Inject, Singleton}
+import play.api.mvc.{Action, AnyContent}
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-class UnauthorisedSpec extends ViewSpecBase {
 
-  lazy val view = unauthorised()(fakeRequest, messages, appConfig).toString
+@Singleton
+class FileWarningController @Inject() extends FrontendController {
 
-  "view" should {
-
-    "include header" in {
-      view must include(messages("unauthorised.heading"))
-    }
-
-    "include title" in {
-      view must include(messages("unauthorised.title"))
-    }
+  def onPageLoad: Action[AnyContent] = Action {
+    Ok("File warning page")
   }
 }

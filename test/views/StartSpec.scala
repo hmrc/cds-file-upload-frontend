@@ -16,38 +16,43 @@
 
 package views
 
+import controllers.routes
+import views.behaviours.ViewBehaviours
 import views.html.start
 
-class StartSpec extends ViewBase {
+class StartSpec extends ViewSpecBase with ViewBehaviours {
 
-  lazy val view = start()(fakeRequest, messages, appConfig).toString()
+  val view = () => start()(fakeRequest, messages, appConfig)
 
-  "Start Page" should {
+  val messageKeyPrefix = "startPage"
 
-    "include header" in {
-      view must include(messages("common.service.name"))
+  val messageKeys = List("paragraph1", "paragraph2", "p.youWillNeed", "listItem1", "listItem2")
+
+  "Start Page" must {
+    behave like normalPage(
+      view,
+      messageKeyPrefix,
+      messageKeys: _*)
+
+    "have a start button with correct link" in {
+      val doc = asDocument(view())
+      val expectedLink = routes.MrnEntryController.onPageLoad().url
+
+      assertContainsLink(doc, messages("common.button.startNow"), expectedLink)
     }
 
-    "include title" in {
-      view must include(messages("startPage.header"))
+    "have paragraph3 with bold text" in {
+      val paragraph3 = messages("startPage.paragraph3", messages("startPage.paragraph3.bold"))
+      val doc = asDocument(view())
+
+      assertContainsText(doc, paragraph3)
     }
 
-    "include paragraph with the correct text displayed" in {
-      view must include(messages("startPage.paragraph1"))
-      view must include(messages("startPage.p.youWillNeed"))
-      view must include(messages("startPage.paragraph2"))
-      view must include(messages("startPage.paragraph3"))
-      view must include(messages("startPage.paragraph4"))
-    }
+    "have paragraph4 with bold text" in {
+      val paragraph4 = messages("startPage.paragraph4", messages("startPage.paragraph4.bold"))
+      val doc = asDocument(view())
 
-    "include a list with correct items displayed" in {
-      view must include(messages("startPage.listItem1"))
-      view must include(messages("startPage.listItem2"))
-    }
-
-    "include a button with correct text displayed" in {
-      view must include(messages("common.button.startNow"))
+      assertContainsText(doc, paragraph4)
     }
   }
-
 }

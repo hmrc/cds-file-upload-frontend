@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package views
+package viewmodels
 
-import views.html.unauthorised
+import base.SpecBase
 
-class UnauthorisedSpec extends ViewSpecBase {
+class RadioOptionSpec extends SpecBase {
 
-  lazy val view = unauthorised()(fakeRequest, messages, appConfig).toString
+  "Radio Option" must {
 
-  "view" should {
+    "build correctly from a key prefix and option" in {
 
-    "include header" in {
-      view must include(messages("unauthorised.heading"))
-    }
+      val radioOption = RadioOption("prefix", "option")
 
-    "include title" in {
-      view must include(messages("unauthorised.title"))
+      radioOption.id mustEqual "prefix.option"
+      radioOption.value mustEqual "option"
+      radioOption.messageKey mustEqual "prefix.option"
     }
   }
 }

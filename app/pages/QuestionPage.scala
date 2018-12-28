@@ -14,22 +14,11 @@
  * limitations under the License.
  */
 
-package views
+package pages
 
-import views.html.unauthorised
+import models.UserAnswers
 
-class UnauthorisedSpec extends ViewSpecBase {
+trait QuestionPage[A] extends Page {
 
-  lazy val view = unauthorised()(fakeRequest, messages, appConfig).toString
-
-  "view" should {
-
-    "include header" in {
-      view must include(messages("unauthorised.heading"))
-    }
-
-    "include title" in {
-      view must include(messages("unauthorised.title"))
-    }
-  }
+  def cleanup(value: Option[A], userAnswers: UserAnswers): UserAnswers = userAnswers
 }

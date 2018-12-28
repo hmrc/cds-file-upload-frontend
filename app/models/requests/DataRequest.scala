@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-package views
+package models.requests
 
-import views.html.unauthorised
+import models.requests.AuthenticatedRequest
+import play.api.mvc.WrappedRequest
+import models.UserAnswers
 
-class UnauthorisedSpec extends ViewSpecBase {
+case class OptionalDataRequest[A] (request: AuthenticatedRequest[A], userAnswers: Option[UserAnswers]) extends WrappedRequest[A](request)
 
-  lazy val view = unauthorised()(fakeRequest, messages, appConfig).toString
-
-  "view" should {
-
-    "include header" in {
-      view must include(messages("unauthorised.heading"))
-    }
-
-    "include title" in {
-      view must include(messages("unauthorised.title"))
-    }
-  }
-}
+case class DataRequest[A] (request: AuthenticatedRequest[A], userAnswers: UserAnswers) extends WrappedRequest[A](request)

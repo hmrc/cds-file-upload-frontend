@@ -16,7 +16,7 @@
 
 package generators
 
-import domain.auth.SignedInUser
+import models.requests.SignedInUser
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Gen.{listOf, option}
@@ -33,7 +33,7 @@ trait SignedInUserGen {
     name          <- nameGen
     email         <- option(arbitrary[String])
     affinityGroup <- option(affinityGroupGen)
-    internalId    <- option(arbitrary[String])
+    internalId    <- arbitrary[String]
     enrolments    <- enrolmentsGen
   } yield SignedInUser(credentials, name, email, affinityGroup, internalId, enrolments)
 

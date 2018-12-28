@@ -14,22 +14,28 @@
  * limitations under the License.
  */
 
-package views
+package models
 
-import views.html.unauthorised
+import play.api.data.validation.ValidationError
+import play.api.libs.json._
 
-class UnauthorisedSpec extends ViewSpecBase {
+sealed abstract case class MRN(value: String)
 
-  lazy val view = unauthorised()(fakeRequest, messages, appConfig).toString
+object MRN {
 
-  "view" should {
+  def validRegex: String = "\\d{2}[a-zA-Z]{2}[a-zA-Z0-9]{14}"
 
-    "include header" in {
-      view must include(messages("unauthorised.heading"))
-    }
+  def apply(value: String): Option[MRN] =
+    if (value.matches(validRegex)) Some(new MRN(value) {})
+    else None
 
-    "include title" in {
-      view must include(messages("unauthorised.title"))
-    }
+  implicit val reads: Reads[MRN] =
+    __.read[String].map(MRN(_))
+      .collect(ValidationError("MRN did not pass validation")) {
+        case Some(mrn) => mrn
+      }
+
+  implicit val writes: Writes[MRN] = Writes {
+    case MRN(value) => JsString(value)
   }
 }

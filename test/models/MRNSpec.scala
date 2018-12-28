@@ -14,22 +14,35 @@
  * limitations under the License.
  */
 
-package views
+package models
 
-import views.html.unauthorised
+import base.SpecBase
+import org.scalacheck.Gen
+import org.scalatest.prop.PropertyChecks
+import wolfendale.scalacheck.regexp.RegexpGen
 
-class UnauthorisedSpec extends ViewSpecBase {
+class MRNSpec extends SpecBase with PropertyChecks {
 
-  lazy val view = unauthorised()(fakeRequest, messages, appConfig).toString
+  val validMRNGen: Gen[String] = RegexpGen.from(MRN.validRegex)
 
-  "view" should {
+  "MRN.apply" should {
 
-    "include header" in {
-      view must include(messages("unauthorised.heading"))
+    "return Some for valid MRN" in {
+
+      forAll(validMRNGen) { mrn =>
+
+        MRN(mrn).map(_.value) mustBe Some(mrn)
+      }
     }
 
-    "include title" in {
-      view must include(messages("unauthorised.title"))
+    "return None for invalid MRN" in {
+
+      forAll { mrn: String =>
+        whenever(!mrn.matches(MRN.validRegex)) {
+
+          MRN(mrn) mustBe None
+        }
+      }
     }
   }
 }
