@@ -19,14 +19,16 @@ package controllers
 import controllers.actions.{DataRetrievalAction, FakeAuthAction, FakeEORIAction}
 import forms.FileUploadCountProvider
 import generators.Generators
+import models.{FileUploadCount, MRN}
 import models.requests.SignedInUser
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.PropertyChecks
+import pages.HowManyFilesUploadPage
 import play.api.data.Form
-import play.api.test.Helpers.{contentAsString, status}
-import play.api.test.Helpers._
-
+import play.api.libs.json.JsNumber
+import play.api.test.Helpers.{contentAsString, status, _}
+import uk.gov.hmrc.http.cache.client.CacheMap
 import views.html.how_many_files_upload
 
 class HowManyFilesUploadControllerSpec extends ControllerSpecBase
@@ -57,6 +59,17 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
 
         status(result) mustBe OK
         contentAsString(result) mustBe viewAsString(form)
+      }
+    }
+
+    "File count should be displayed if it exist on the cache" in {
+
+      forAll { (user: SignedInUser, fileUploadCount: FileUploadCount) =>
+
+        val cacheMap: CacheMap = CacheMap("", Map(HowManyFilesUploadPage.toString -> JsNumber(fileUploadCount.value)))
+        val result = controller(user, getCacheMap(cacheMap)).onPageLoad(fakeRequest)
+
+        contentAsString(result) mustBe viewAsString(form.fill(fileUploadCount))
       }
     }
   }

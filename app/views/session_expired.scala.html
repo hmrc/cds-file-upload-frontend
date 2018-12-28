@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,19 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package generators
+@import config.AppConfig
 
-import models.{FileUploadCount, MRN}
-import org.scalacheck.{Arbitrary, Gen}
-import wolfendale.scalacheck.regexp.RegexpGen
+@()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-trait ModelGenerators extends SignedInUserGen {
+@main_template(
+    title = messages("session_expired.title"),
+    bodyClasses = None) {
 
-  implicit val arbitraryMrn: Arbitrary[MRN] =
-    Arbitrary(RegexpGen.from(MRN.validRegex).map(MRN(_)).suchThat(_.nonEmpty).map(_.get))
+    <h1 class="heading-xlarge">@messages("session_expired.heading")</h1>
 
-  implicit val arbitraryFileCount: Arbitrary[FileUploadCount] =
-    Arbitrary(Gen.chooseNum(1,10).map(FileUploadCount(_).get))
+    <p>@messages("session_expired.guidance")</p>
 }

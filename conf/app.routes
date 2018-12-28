@@ -8,6 +8,8 @@ POST        /upload/size                        controllers.FileUploadController
 GET         /upload/:batchId/receipts           controllers.FileUploadController.displayConfirmationPage(batchId)
 GET         /upload/:batchId/:fileNumber        controllers.FileUploadController.displayFileUploadForm(batchId, fileNumber: Int)
 
+GET         /this-service-has-been-reset        controllers.SessionExpiredController.onPageLoad
+
 GET         /unauthorised                       controllers.UnauthorisedController.onPageLoad
 
 GET         /mrn-entry                          controllers.MrnEntryController.onPageLoad

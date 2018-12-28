@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package generators
+package controllers
 
-import models.{FileUploadCount, MRN}
-import org.scalacheck.{Arbitrary, Gen}
-import wolfendale.scalacheck.regexp.RegexpGen
+import config.AppConfig
+import javax.inject.Inject
+import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.{Action, AnyContent}
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import views.html.session_expired
 
-trait ModelGenerators extends SignedInUserGen {
+class SessionExpiredController @Inject()(
+                                          val messagesApi: MessagesApi,
+                                          implicit val appConfig: AppConfig)
+  extends FrontendController with I18nSupport {
 
-  implicit val arbitraryMrn: Arbitrary[MRN] =
-    Arbitrary(RegexpGen.from(MRN.validRegex).map(MRN(_)).suchThat(_.nonEmpty).map(_.get))
-
-  implicit val arbitraryFileCount: Arbitrary[FileUploadCount] =
-    Arbitrary(Gen.chooseNum(1,10).map(FileUploadCount(_).get))
+  def onPageLoad: Action[AnyContent] = Action { implicit request =>
+    Ok(session_expired())
+  }
 }

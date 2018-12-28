@@ -17,10 +17,10 @@
 package controllers
 
 import controllers.actions.{DataRetrievalAction, FakeAuthAction, FakeEORIAction}
-import models.requests.SignedInUser
 import forms.MRNFormProvider
 import generators.Generators
 import models.MRN
+import models.requests.SignedInUser
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mockito.MockitoSugar
@@ -28,10 +28,9 @@ import org.scalatest.prop.PropertyChecks
 import pages.MrnEntryPage
 import play.api.data.Form
 import play.api.libs.json.JsString
-import play.api.test.Helpers.status
-import views.html.mrn_entry
-import play.api.test.Helpers._
+import play.api.test.Helpers.{status, _}
 import uk.gov.hmrc.http.cache.client.CacheMap
+import views.html.mrn_entry
 
 
 class MrnEntryControllerSpec extends ControllerSpecBase
