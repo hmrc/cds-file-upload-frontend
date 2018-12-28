@@ -14,5 +14,6 @@ GET         /mrn-entry                          controllers.MrnEntryController.o
 POST        /mrn-entry                          controllers.MrnEntryController.onSubmit
 
 GET         /how-many-files-upload              controllers.HowManyFilesUploadController.onPageLoad
+POST        /how-many-files-upload              controllers.HowManyFilesUploadController.onSubmit
 
 GET         /upload/warning                     controllers.FileWarningController.onPageLoad

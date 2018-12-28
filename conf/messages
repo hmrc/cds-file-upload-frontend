@@ -48,7 +48,10 @@ fileWarning.paragraph4.bold= Example 2
 fileWarning.panel=You need to enter the correct number of files - you cannot amend your answer so if you get it wrong you will have to start again.
 fileWarning.button=I understand
 
+## How many files do you need to upload page
 howmany.how-many-files=How many files do you need to upload?
+howManyFilesUpload.title=How many files are you uploading?
+howManyFilesUpload.heading=How many files do you need to upload?
 
 fileUploadPage.heading.part1=Upload your
 fileUploadPage.heading.part2=file
