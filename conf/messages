@@ -53,6 +53,8 @@ howmany.how-many-files=How many files do you need to upload?
 howManyFilesUpload.title=How many files are you uploading?
 howManyFilesUpload.heading=How many files do you need to upload?
 
+howManyFilesUpload.invalid=You have entered an invalid number of files, you can upload 1 or more files up to a maximum number of 10 files. Please re-enter the number of files you wish to upload.
+
 fileUploadPage.heading.part1=Upload your
 fileUploadPage.heading.part2=file
 fileUploadPage.heading.first=first

@@ -45,7 +45,7 @@ class FileUploadCountProviderSpec extends SpecBase with PropertyChecks {
       forAll{count: Int =>
         if(count<1 || count>10){
           form.bind(Map("value" -> count.toString)).fold(
-            errors => errorMessage(errors) mustBe "error.invalid",
+            errors => errorMessage(errors) mustBe "howManyFilesUpload.invalid",
             _      => fail("Form binding must fail!")
           )
         }

@@ -27,7 +27,7 @@ import scala.util.Try
 
 class FileUploadCountProvider @Inject extends FormErrorHelper with Mappings {
 
-  def apply(): Form[FileUploadCount] = Form("value" -> of(fileUploadCountFormatter("error.invalid")))
+  def apply(): Form[FileUploadCount] = Form("value" -> of(fileUploadCountFormatter("howManyFilesUpload.invalid")))
 
   def fileUploadCountFormatter(errorKey: String): Formatter[FileUploadCount] = new Formatter[FileUploadCount] {
 
