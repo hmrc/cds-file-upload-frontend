@@ -16,12 +16,11 @@
 
 package models.requests
 
-import models.requests.AuthenticatedRequest
 import play.api.mvc.WrappedRequest
 import models.UserAnswers
 
-case class OptionalDataRequest[A](request: AuthenticatedRequest[A],
+case class OptionalDataRequest[A](request: EORIRequest[A],
                                   userAnswers: Option[UserAnswers]) extends WrappedRequest[A](request)
 
 
-case class DataRequest[A](request: AuthenticatedRequest[A], userAnswers: UserAnswers) extends WrappedRequest[A](request)
+case class DataRequest[A](request: EORIRequest[A], userAnswers: UserAnswers) extends WrappedRequest[A](request)

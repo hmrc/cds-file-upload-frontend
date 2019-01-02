@@ -34,7 +34,7 @@ class DataRetrievalActionImpl @Inject()(val dataCacheConnector: DataCacheConnect
     val id = request.request.user.internalId
 
     dataCacheConnector.fetch(id).map { data =>
-      OptionalDataRequest(request.request, data.map(UserAnswers(_)))
+      OptionalDataRequest(request, data.map(UserAnswers(_)))
     }
   }
 }

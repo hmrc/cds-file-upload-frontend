@@ -36,5 +36,5 @@ class FakeEORIAction(eori: String) extends EORIAction {
 
 class FakeDataRetrievalAction(cacheMap: Option[CacheMap]) extends DataRetrievalAction {
   override protected def transform[A](request: EORIRequest[A]): Future[OptionalDataRequest[A]] =
-    Future.successful(OptionalDataRequest(request.request, cacheMap.map(UserAnswers(_))))
+    Future.successful(OptionalDataRequest(request, cacheMap.map(UserAnswers(_))))
 }
