@@ -26,7 +26,6 @@ object FileUploadCount {
   val maxNumberOfFiles: Int = 10
 
   def apply(value: Int): Option[FileUploadCount] =
-
     if (value > 0 && value <= maxNumberOfFiles) Some(new FileUploadCount(value) {})
     else None
 

@@ -18,12 +18,12 @@ package config
 
 import pureconfig.{CamelCase, ConfigFieldMapping, KebabCase, ProductHint}
 
-case class AppConfig(appName: String, contactFrontend: ContactFrontend, assets: Assets, googleAnalytics: GoogleAnalytics, microservice: Microservice)
+case class AppConfig(appName: String, developerHubClientId: String, contactFrontend: ContactFrontend, assets: Assets, googleAnalytics: GoogleAnalytics, microservice: Microservice)
 
 object AppConfig {
   implicit val appNameHint: ProductHint[AppConfig] = ProductHint(new ConfigFieldMapping {
     def apply(fieldName: String): String = fieldName match {
-      case "appName" => fieldName
+      case "appName" | "developerHubClientId" => fieldName
       case _ => KebabCase.fromTokens(CamelCase.toTokens(fieldName))
     }
   })
