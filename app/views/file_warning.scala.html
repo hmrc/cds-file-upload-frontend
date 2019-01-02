@@ -16,9 +16,29 @@
 
 @import config.AppConfig
 @import uk.gov.hmrc.play.views.html.helpers
+@import views.helpers.Utils.bold
 
 @()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = "File Warning", bodyClasses = None) {
-    <h1 class="heading-xlarge">File Warning Page</h1>
+@main_template(title = messages("fileWarning.title"), bodyClasses = None) {
+<div class="form-group">
+
+    <h1 class="heading-large">@messages("fileWarning.heading")</h1>
+
+    <p>@messages("fileWarning.paragraph1")</p>
+    <p>@messages("fileWarning.paragraph2")</p>
+
+    <p>@Html(messages("fileWarning.paragraph3", bold(messages("fileWarning.paragraph3.bold"))))</p>
+    <p>@Html(messages("fileWarning.paragraph4", bold(messages("fileWarning.paragraph4.bold"))))</p>
+
+    <div class="panel panel-border-wide">
+        <p>
+            @messages("fileWarning.panel")
+        </p>
+    </div>
+
+    <a class="button" href= "@{routes.HowManyFilesUploadController.onPageLoad().url}"
+            role="button">@messages("fileWarning.button")</a>
+
+</div>
 }
