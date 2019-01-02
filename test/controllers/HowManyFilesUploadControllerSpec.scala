@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions.{DataRetrievalAction, FakeAuthAction, FakeEORIAction}
+import controllers.actions._
 import forms.FileUploadCountProvider
 import generators.Generators
 import models.{FileUploadCount, MRN}
@@ -35,7 +35,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
   with MockitoSugar
   with PropertyChecks
   with Generators
-  with BeforeAndAfterEach{
+  with BeforeAndAfterEach {
 
   val form = new FileUploadCountProvider()()
 
@@ -45,6 +45,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
       new FakeAuthAction(signedInUser),
       new FakeEORIAction(eori),
       dataRetrieval,
+      new DataRequiredActionImpl,
       new FileUploadCountProvider,
       dataCacheConnector,
       appConfig)
@@ -53,16 +54,17 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
 
   "How Many Files Upload Page" must {
     "load correct page when user is logged in " in {
-      forAll { (user: SignedInUser, eori: String) =>
 
-        val result = controller(user, eori).onPageLoad(fakeRequest)
+      forAll { (user: SignedInUser, eori: String, cacheMap: CacheMap) =>
+
+        val result = controller(user, eori, getCacheMap(cacheMap)).onPageLoad(fakeRequest)
 
         status(result) mustBe OK
         contentAsString(result) mustBe viewAsString(form)
       }
     }
 
-    "File count should be displayed if it exist on the cache" in {
+    "file count should be displayed if it exist on the cache" in {
 
       forAll { (user: SignedInUser, eori: String, fileUploadCount: FileUploadCount) =>
 
@@ -70,6 +72,15 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
         val result = controller(user, eori, getCacheMap(cacheMap)).onPageLoad(fakeRequest)
 
         contentAsString(result) mustBe viewAsString(form.fill(fileUploadCount))
+      }
+    }
+
+    "load session expired page when data does not exist" in {
+      forAll { (user: SignedInUser, eori: String) =>
+
+        val result = controller(user, eori).onPageLoad(fakeRequest)
+
+        status(result) mustBe SEE_OTHER
       }
     }
   }

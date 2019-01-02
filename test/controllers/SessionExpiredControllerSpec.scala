@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-package models.requests
+package controllers
 
-import models.requests.AuthenticatedRequest
-import play.api.mvc.WrappedRequest
-import models.UserAnswers
+import play.api.test.Helpers._
+import views.html.session_expired
 
-case class OptionalDataRequest[A](request: AuthenticatedRequest[A],
-                                  userAnswers: Option[UserAnswers]) extends WrappedRequest[A](request)
+class SessionExpiredControllerSpec extends ControllerSpecBase {
 
+  "SessionExpired Controller" must {
+    "return 200 for a GET" in {
+      val result = new SessionExpiredController(messagesApi, appConfig).onPageLoad()(fakeRequest)
+      status(result) mustBe OK
+    }
 
-case class DataRequest[A](request: AuthenticatedRequest[A], userAnswers: UserAnswers) extends WrappedRequest[A](request)
+    "return the correct view for a GET" in {
+      val result = new SessionExpiredController(messagesApi, appConfig).onPageLoad()(fakeRequest)
+      contentAsString(result) mustBe session_expired()(fakeRequest, messages, appConfig).toString
+    }
+  }
+
+}

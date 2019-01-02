@@ -37,7 +37,7 @@ mrnEntryPage.hint2=You were given this when you submitted your declaration.
 mrn.invalid=The MRN you have entered doesn't follow CDS rules, please check your declaration MRN and re-enter
 
 ## file warning page
-fileWarning.title=What is your movement reference number (MRN)?
+fileWarning.title=Count your files
 fileWarning.heading=Count your files
 fileWarning.paragraph1=HMRC need to know how many files you want to upload before you start uploading them.
 fileWarning.paragraph2=This is not the same as the number of documents.
@@ -49,9 +49,12 @@ fileWarning.panel=You need to enter the correct number of files - you cannot ame
 fileWarning.button=I understand
 
 ## How many files do you need to upload page
+
 howmany.how-many-files=How many files do you need to upload?
 howManyFilesUpload.title=How many files are you uploading?
 howManyFilesUpload.heading=How many files do you need to upload?
+
+howManyFilesUpload.invalid=You have entered an invalid number of files, you can upload 1 or more files up to a maximum number of 10 files. Please re-enter the number of files you wish to upload.
 
 fileUploadPage.heading.part1=Upload your
 fileUploadPage.heading.part2=file

@@ -18,10 +18,9 @@ package controllers
 
 import config.AppConfig
 import connectors.DataCacheConnector
-import controllers.actions.{AuthAction, DataRetrievalAction, EORIAction}
+import controllers.actions.{AuthAction, DataRequiredAction, DataRetrievalAction, EORIAction}
 import forms.FileUploadCountProvider
 import javax.inject.{Inject, Singleton}
-import models.UserAnswers
 import pages.HowManyFilesUploadPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
@@ -36,37 +35,34 @@ class HowManyFilesUploadController @Inject()(
                                               authenticate: AuthAction,
                                               requireEori: EORIAction,
                                               getData: DataRetrievalAction,
+                                              requireData: DataRequiredAction,
                                               formProvider: FileUploadCountProvider,
                                               dataCacheConnector: DataCacheConnector,
                                               implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
   val form = formProvider()
 
-  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData) { implicit req =>
+  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireData) { implicit req =>
+
     val populatedForm =
       req.userAnswers
-        .flatMap(
-          _.get(HowManyFilesUploadPage)
-            .map(form.fill))
-        .getOrElse(form)
-
+        .get(HowManyFilesUploadPage)
+        .map(form.fill).getOrElse(form)
     Ok(how_many_files_upload(populatedForm))
   }
 
-  def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen getData).async {
+  def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireData).async {
     implicit req =>
-
-      val userAnswers = req.userAnswers.getOrElse(UserAnswers(req.request.user.internalId))
 
       form.bindFromRequest().fold(
         errorForm =>
           Future.successful(BadRequest(how_many_files_upload(errorForm))),
 
         value => {
-          val cacheMap = userAnswers.set(HowManyFilesUploadPage, value).cacheMap
+          val cacheMap = req.userAnswers.set(HowManyFilesUploadPage, value).cacheMap
 
           dataCacheConnector.save(cacheMap).map { _ =>
-            Redirect(routes.FileWarningController.onPageLoad())
+            Redirect(routes.UploadYourFilesController.onPageLoad())
           }
         }
       )

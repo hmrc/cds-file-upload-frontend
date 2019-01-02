@@ -13,3 +13,7 @@ GET         /how-many-files-upload              controllers.HowManyFilesUploadCo
 POST        /how-many-files-upload              controllers.HowManyFilesUploadController.onSubmit
 
 GET         /upload/warning                     controllers.FileWarningController.onPageLoad
+
+GET         /upload-your-files                  controllers.UploadYourFilesController.onPageLoad
+
+GET         /upload/warning                     controllers.FileWarningController.onPageLoad
