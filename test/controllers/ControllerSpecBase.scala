@@ -16,6 +16,8 @@
 
 package controllers
 
+import java.net.URLEncoder
+
 import base.SpecBase
 import connectors.DataCacheConnector
 import controllers.actions.{DataRetrievalAction, FakeDataRetrievalAction}
@@ -64,7 +66,7 @@ class ControllerSpecBase extends SpecBase with MockitoSugar with BeforeAndAfterE
   }
 
   val escaped: String => String =
-    play.utils.UriEncoding.encodePathSegment(_, "utf-8")
+    URLEncoder.encode(_, "utf-8")
 
   val getEmptyCacheMap: DataRetrievalAction = new FakeDataRetrievalAction(None)
 

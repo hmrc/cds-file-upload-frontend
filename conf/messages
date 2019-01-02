@@ -37,7 +37,7 @@ mrnEntryPage.hint2=You were given this when you submitted your declaration.
 mrn.invalid=The MRN you have entered doesn't follow CDS rules, please check your declaration MRN and re-enter
 
 ## file warning page
-fileWarning.title=What is your movement reference number (MRN)?
+fileWarning.title=Count your files
 fileWarning.heading=Count your files
 fileWarning.paragraph1=HMRC need to know how many files you want to upload before you start uploading them.
 fileWarning.paragraph2=This is not the same as the number of documents.
