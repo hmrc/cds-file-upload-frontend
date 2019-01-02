@@ -17,29 +17,23 @@
 package controllers.actions
 
 import controllers.routes
-import models.requests.{AuthenticatedRequest, SignedInUser}
+import models.requests.{AuthenticatedRequest, EORIRequest, SignedInUser}
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{ActionFilter, Result}
+import play.api.mvc._
 
 import scala.concurrent.Future
 
 class EORIActionImpl extends EORIAction {
 
-  implicit class OptionOps[A](val optionA: Option[A]) {
-
-    def swap[B](b: B): Option[B] = optionA match {
-      case Some(_) => None
-      case None    => Some(b)
-    }
-  }
-
-  override protected def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] =
+  override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, EORIRequest[A]]] = {
     Future.successful(
       request.user.enrolments
         .getEnrolment(SignedInUser.cdsEnrolmentName)
         .flatMap(_.getIdentifier(SignedInUser.eoriIdentifierKey))
         .filter(_.value.nonEmpty)
-        .swap(Redirect(routes.UnauthorisedController.onPageLoad)))
+        .map(i => EORIRequest(request, i.value))
+        .toRight(Redirect(routes.UnauthorisedController.onPageLoad)))
+  }
 }
 
-trait EORIAction extends ActionFilter[AuthenticatedRequest]
+trait EORIAction extends ActionRefiner[AuthenticatedRequest, EORIRequest]

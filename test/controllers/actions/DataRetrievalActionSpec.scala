@@ -18,9 +18,8 @@ package controllers.actions
 
 import base.SpecBase
 import connectors.DataCacheConnector
-import models.requests.{AuthenticatedRequest, SignedInUser}
+import models.requests.{AuthenticatedRequest, EORIRequest, OptionalDataRequest, SignedInUser}
 import generators.SignedInUserGen
-import models.requests.OptionalDataRequest
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
@@ -33,20 +32,21 @@ import scala.concurrent.Future
 class DataRetrievalActionSpec extends SpecBase with MockitoSugar with ScalaFutures with PropertyChecks with SignedInUserGen {
 
   class Harness(dataCacheConnector: DataCacheConnector) extends DataRetrievalActionImpl(dataCacheConnector) {
-    def callTransform[A](request: AuthenticatedRequest[A]): Future[OptionalDataRequest[A]] = transform(request)
+    def callTransform[A](request: EORIRequest[A]): Future[OptionalDataRequest[A]] = transform(request)
   }
 
   "Data Retrieval Action" when {
     "there is no data in the cache" must {
       "set userAnswers to 'None' in the request" in {
 
-        forAll { user: SignedInUser =>
+        forAll { (user: SignedInUser, eori: String) =>
 
           val dataCacheConnector = mock[DataCacheConnector]
           when(dataCacheConnector.fetch(user.internalId)) thenReturn Future(None)
-          val action = new Harness(dataCacheConnector)
+          val action  = new Harness(dataCacheConnector)
+          val request = new EORIRequest(new AuthenticatedRequest(fakeRequest, user), eori)
 
-          val futureResult = action.callTransform(new AuthenticatedRequest(fakeRequest, user))
+          val futureResult = action.callTransform(request)
 
           whenReady(futureResult) { result =>
             result.userAnswers.isEmpty mustBe true
@@ -58,14 +58,15 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar with ScalaFutur
     "there is data in the cache" must {
       "build a userAnswers object and add it to the request" in {
 
-        forAll { user: SignedInUser =>
+        forAll { (user: SignedInUser, eori: String) =>
 
           val id = user.internalId
           val dataCacheConnector = mock[DataCacheConnector]
           when(dataCacheConnector.fetch(id)) thenReturn Future(Some(new CacheMap(id, Map())))
           val action = new Harness(dataCacheConnector)
+          val request = new EORIRequest(new AuthenticatedRequest(fakeRequest, user), eori)
 
-          val futureResult = action.callTransform(new AuthenticatedRequest(fakeRequest, user))
+          val futureResult = action.callTransform(request)
 
           whenReady(futureResult) { result =>
             result.userAnswers.isDefined mustBe true

@@ -40,3 +40,5 @@ object SignedInUser {
 }
 
 case class AuthenticatedRequest[A](request: Request[A], user: SignedInUser) extends WrappedRequest[A](request)
+
+case class EORIRequest[A](request: AuthenticatedRequest[A], eori: String) extends WrappedRequest[A](request)

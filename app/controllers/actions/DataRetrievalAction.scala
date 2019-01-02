@@ -19,9 +19,8 @@ package controllers.actions
 import com.google.inject.Inject
 import play.api.mvc.ActionTransformer
 import connectors.DataCacheConnector
-import models.requests.AuthenticatedRequest
+import models.requests.{EORIRequest, OptionalDataRequest}
 import models.UserAnswers
-import models.requests.OptionalDataRequest
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -29,15 +28,15 @@ import scala.concurrent.Future
 
 class DataRetrievalActionImpl @Inject()(val dataCacheConnector: DataCacheConnector) extends DataRetrievalAction {
 
-  override protected def transform[A](request: AuthenticatedRequest[A]): Future[OptionalDataRequest[A]] = {
+  override protected def transform[A](request: EORIRequest[A]): Future[OptionalDataRequest[A]] = {
     implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    val id = request.user.internalId
+    val id = request.request.user.internalId
 
     dataCacheConnector.fetch(id).map { data =>
-      OptionalDataRequest(request, data.map(UserAnswers(_)))
+      OptionalDataRequest(request.request, data.map(UserAnswers(_)))
     }
   }
 }
 
-trait DataRetrievalAction extends ActionTransformer[AuthenticatedRequest, OptionalDataRequest]
+trait DataRetrievalAction extends ActionTransformer[EORIRequest, OptionalDataRequest]

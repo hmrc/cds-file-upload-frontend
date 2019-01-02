@@ -48,10 +48,9 @@ class CustomsDeclarationsConnectorImpl @Inject()(
     httpClient.POSTString(fileUploadUrl, request.toXml.mkString,  eoriHeader(eori) :: headers).map(r =>
       Try(XML.loadString(r.body)) match {
         case Success(value)     => FileUploadResponse.fromXml(value)
-        case Failure(exception) => {
+        case Failure(exception) =>
           Logger.error(s"Failed to load XML with exception: ${exception.getMessage}")
           throw exception
-        }
       }
     )
   }

@@ -51,6 +51,7 @@ class EORIActionSpec extends ControllerSpecBase
       "user has an eori number" in {
 
         forAll { (user: SignedInUser, eori: EORIEnrolment) =>
+
           val eoriEnrolments = user.enrolments.enrolments.filterNot(_.key == "HMRC-CUS-ORG") + eori.enrolment
           val userWithEORI = user.copy(enrolments = Enrolments(eoriEnrolments))
 
@@ -59,7 +60,7 @@ class EORIActionSpec extends ControllerSpecBase
             val response = eoriController.action(FakeRequest())
 
             status(response) mustBe OK
-            contentAsString(response) mustBe userWithEORI.toString
+            Some(contentAsString(response)) mustBe eori.enrolment.getIdentifier("EORINumber").map(_.value)
           }
         }
       }
@@ -85,7 +86,7 @@ class EORIActionSpec extends ControllerSpecBase
   class TestController(auth: AuthAction, eori: EORIAction) extends BaseController {
 
     def action: Action[AnyContent] = (auth andThen eori).async { request =>
-      Future.successful(Ok(request.user.toString))
+      Future.successful(Ok(request.eori))
     }
   }
 }

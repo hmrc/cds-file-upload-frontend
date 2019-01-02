@@ -39,11 +39,11 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
 
   val form = new FileUploadCountProvider()()
 
-  def controller(signedInUser: SignedInUser, dataRetrieval: DataRetrievalAction = getEmptyCacheMap) =
+  def controller(signedInUser: SignedInUser, eori: String, dataRetrieval: DataRetrievalAction = getEmptyCacheMap) =
     new HowManyFilesUploadController(
       messagesApi,
       new FakeAuthAction(signedInUser),
-      new FakeEORIAction,
+      new FakeEORIAction(eori),
       dataRetrieval,
       new FileUploadCountProvider,
       dataCacheConnector,
@@ -53,9 +53,9 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
 
   "How Many Files Upload Page" must {
     "load correct page when user is logged in " in {
-      forAll { user: SignedInUser =>
+      forAll { (user: SignedInUser, eori: String) =>
 
-        val result = controller(user).onPageLoad(fakeRequest)
+        val result = controller(user, eori).onPageLoad(fakeRequest)
 
         status(result) mustBe OK
         contentAsString(result) mustBe viewAsString(form)
@@ -64,10 +64,10 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
 
     "File count should be displayed if it exist on the cache" in {
 
-      forAll { (user: SignedInUser, fileUploadCount: FileUploadCount) =>
+      forAll { (user: SignedInUser, eori: String, fileUploadCount: FileUploadCount) =>
 
         val cacheMap: CacheMap = CacheMap("", Map(HowManyFilesUploadPage.toString -> JsNumber(fileUploadCount.value)))
-        val result = controller(user, getCacheMap(cacheMap)).onPageLoad(fakeRequest)
+        val result = controller(user, eori, getCacheMap(cacheMap)).onPageLoad(fakeRequest)
 
         contentAsString(result) mustBe viewAsString(form.fill(fileUploadCount))
       }

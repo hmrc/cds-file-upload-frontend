@@ -16,9 +16,8 @@
 
 package controllers.actions
 
-import models.requests.{AuthenticatedRequest, SignedInUser}
+import models.requests.{AuthenticatedRequest, EORIRequest, OptionalDataRequest, SignedInUser}
 import models.UserAnswers
-import models.requests.OptionalDataRequest
 import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.http.cache.client.CacheMap
 
@@ -30,12 +29,12 @@ class FakeAuthAction(result: SignedInUser) extends AuthAction {
   }
 }
 
-class FakeEORIAction extends EORIAction {
-  override protected def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] =
-    Future.successful(None)
+class FakeEORIAction(eori: String) extends EORIAction {
+  override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, EORIRequest[A]]] =
+    Future.successful(Right(new EORIRequest[A](request, eori)))
 }
 
 class FakeDataRetrievalAction(cacheMap: Option[CacheMap]) extends DataRetrievalAction {
-  override protected def transform[A](request: AuthenticatedRequest[A]): Future[OptionalDataRequest[A]] =
-    Future.successful(OptionalDataRequest(request, cacheMap.map(UserAnswers(_))))
+  override protected def transform[A](request: EORIRequest[A]): Future[OptionalDataRequest[A]] =
+    Future.successful(OptionalDataRequest(request.request, cacheMap.map(UserAnswers(_))))
 }

@@ -26,16 +26,16 @@ import play.api.test.Helpers._
 
 class FileWarningControllerSpec extends ControllerSpecBase with MockitoSugar with PropertyChecks with Generators {
 
-  def controller(signedInUser: SignedInUser) =
-    new FileWarningController(messagesApi, new FakeAuthAction(signedInUser), new FakeEORIAction, appConfig)
+  def controller(signedInUser: SignedInUser, eori: String) =
+    new FileWarningController(messagesApi, new FakeAuthAction(signedInUser), new FakeEORIAction(eori), appConfig)
 
   def viewAsString() = file_warning()(fakeRequest, messages, appConfig).toString
 
   "File Warning Page" must {
 
     "load the correct page when user is logged in" in {
-      forAll { user: SignedInUser =>
-        val result = controller(user).onPageLoad(fakeRequest)
+      forAll { (user: SignedInUser, eori: String) =>
+        val result = controller(user, eori).onPageLoad(fakeRequest)
 
         status(result) mustBe OK
         contentAsString(result) mustBe viewAsString()
