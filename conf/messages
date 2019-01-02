@@ -35,7 +35,7 @@ mrnEntryPage.hint1=This is 18 digits long, and is made up of letters and numbers
 mrnEntryPage.hint2=You were given this when you submitted your declaration.
 
 ## file warning page
-fileWarning.title=What is your movement reference number (MRN)?
+fileWarning.title=Count your files
 fileWarning.heading=Count your files
 fileWarning.paragraph1=HMRC need to know how many files you want to upload before you start uploading them.
 fileWarning.paragraph2=This is not the same as the number of documents.
