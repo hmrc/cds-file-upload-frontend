@@ -22,6 +22,7 @@ import org.scalatestplus.play.guice._
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.Injector
 import play.api.test.FakeRequest
+import uk.gov.hmrc.http.HeaderCarrier
 
 trait SpecBase extends PlaySpec with GuiceOneAppPerSuite {
 
@@ -34,4 +35,6 @@ trait SpecBase extends PlaySpec with GuiceOneAppPerSuite {
   lazy val fakeRequest = FakeRequest("", "")
 
   lazy val messages: Messages = messagesApi.preferred(fakeRequest)
+
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 }
