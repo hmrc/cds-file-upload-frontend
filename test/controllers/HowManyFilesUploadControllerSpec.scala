@@ -27,9 +27,9 @@ import org.scalacheck.Arbitrary._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.PropertyChecks
-import pages.HowManyFilesUploadPage
+import pages.{HowManyFilesUploadPage, MrnEntryPage}
 import play.api.data.Form
-import play.api.libs.json.JsNumber
+import play.api.libs.json.{JsNumber, JsString}
 import play.api.test.Helpers.{contentAsString, status, _}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import views.html.how_many_files_upload
@@ -50,6 +50,14 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
   implicit val arbitraryUserInfo: Arbitrary[UserInfo] =
     Arbitrary(zip(userGen, arbitrary[String]))
 
+  implicit val arbitraryMrnCacheMap: Arbitrary[CacheMap] =
+    Arbitrary {
+      zip(arbitraryCacheMap.arbitrary, arbitraryMrn.arbitrary).map {
+        case (cacheMap, mrn) =>
+          cacheMap.copy(data = cacheMap.data + (MrnEntryPage.toString -> JsString(mrn.value)))
+      }
+    }
+
   val form = new FileUploadCountProvider()()
 
   def controller(userInfo: UserInfo, dataRetrieval: DataRetrievalAction = getEmptyCacheMap) =
@@ -58,7 +66,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
       new FakeAuthAction(userInfo._1),
       new FakeEORIAction(userInfo._2),
       dataRetrieval,
-      new DataRequiredActionImpl,
+      new MrnRequiredActionImpl,
       new FileUploadCountProvider,
       dataCacheConnector,
       customsDeclarationsConnector,
@@ -78,12 +86,12 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
       }
     }
 
-    "file count should be displayed if it exist on the cache" in {
+    "display file count if it exist on the cache" in {
 
-      forAll { (userInfo: UserInfo, fileUploadCount: FileUploadCount) =>
+      forAll { (userInfo: UserInfo, cacheMap: CacheMap, fileUploadCount: FileUploadCount) =>
 
-        val cacheMap: CacheMap = CacheMap("", Map(HowManyFilesUploadPage.toString -> JsNumber(fileUploadCount.value)))
-        val result = controller(userInfo, getCacheMap(cacheMap)).onPageLoad(fakeRequest)
+        val updatedCacheMap = cacheMap.copy(data = cacheMap.data + (HowManyFilesUploadPage.toString -> JsNumber(fileUploadCount.value)))
+        val result = controller(userInfo, getCacheMap(updatedCacheMap)).onPageLoad(fakeRequest)
 
         contentAsString(result) mustBe viewAsString(form.fill(fileUploadCount))
       }
@@ -153,8 +161,20 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
         val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> fileUploadCount.value.toString)
         await(controller(userInfo, getCacheMap(cacheMap)).onSubmit(postRequest))
 
-        val expectedMap = cacheMap.copy(data = cacheMap.data + (HowManyFilesUploadPage.toString -> JsNumber(fileUploadCount.value)))
+        val expectedMap =
+          cacheMap.copy(data = cacheMap.data + (HowManyFilesUploadPage.toString -> JsNumber(fileUploadCount.value)))
         verify(dataCacheConnector, times(1)).save(expectedMap)
+      }
+    }
+
+    "make a request to customs declarations" in {
+
+      forAll { (userInfo: UserInfo, cacheMap: CacheMap, fileUploadCount: FileUploadCount) =>
+
+        val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> fileUploadCount.value.toString)
+        await(controller(userInfo, getCacheMap(cacheMap)).onSubmit(postRequest))
+
+
       }
     }
   }

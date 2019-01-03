@@ -17,28 +17,27 @@
 package controllers.actions
 
 import com.google.inject.Inject
-import play.api.mvc.{ActionRefiner, Result}
-import play.api.mvc.Results.Redirect
 import controllers.routes
-import models.UserAnswers
-import models.requests.{DataRequest, OptionalDataRequest}
-import uk.gov.hmrc.http.HeaderCarrier
+import models.requests.{MrnRequest, OptionalDataRequest}
+import pages.MrnEntryPage
+import play.api.mvc.Results.Redirect
+import play.api.mvc.{ActionRefiner, Result}
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
-class DataRequiredActionImpl @Inject() extends DataRequiredAction {
+class MrnRequiredActionImpl @Inject() extends MrnRequiredAction {
 
-  override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, DataRequest[A]]] = {
+  override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, MrnRequest[A]]] = {
     implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    request.userAnswers match {
-      case None => Future.successful(Left(Redirect(routes.SessionExpiredController.onPageLoad())))
-      case Some(data) => Future.successful(Right(DataRequest(request.request, data)))
-    }
+    Future.successful(
+      request.userAnswers
+        .flatMap(data => data.get(MrnEntryPage).map(mrn => (data, mrn)))
+        .map { case (data, mrn) => MrnRequest(request.request, data, mrn) }
+        .toRight(Redirect(routes.SessionExpiredController.onPageLoad())))
   }
 }
 
-trait DataRequiredAction extends ActionRefiner[OptionalDataRequest, DataRequest]
+trait MrnRequiredAction extends ActionRefiner[OptionalDataRequest, MrnRequest]

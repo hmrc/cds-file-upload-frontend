@@ -18,7 +18,7 @@ package controllers
 
 import config.AppConfig
 import connectors.{CustomsDeclarationsConnector, DataCacheConnector}
-import controllers.actions.{AuthAction, DataRequiredAction, DataRetrievalAction, EORIAction}
+import controllers.actions.{AuthAction, MrnRequiredAction, DataRetrievalAction, EORIAction}
 import forms.FileUploadCountProvider
 import javax.inject.{Inject, Singleton}
 import pages.HowManyFilesUploadPage
@@ -35,7 +35,7 @@ class HowManyFilesUploadController @Inject()(
                                               authenticate: AuthAction,
                                               requireEori: EORIAction,
                                               getData: DataRetrievalAction,
-                                              requireData: DataRequiredAction,
+                                              requireMrn: MrnRequiredAction,
                                               formProvider: FileUploadCountProvider,
                                               dataCacheConnector: DataCacheConnector,
                                               customsDeclarationsConnector: CustomsDeclarationsConnector,
@@ -43,18 +43,19 @@ class HowManyFilesUploadController @Inject()(
 
   val form = formProvider()
 
-  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireData) { implicit req =>
+  def onPageLoad: Action[AnyContent] =
+    (authenticate andThen requireEori andThen getData andThen requireMrn) { implicit req =>
 
-    val populatedForm =
-      req.userAnswers
-        .get(HowManyFilesUploadPage)
-        .map(form.fill).getOrElse(form)
+      val populatedForm =
+        req.userAnswers
+          .get(HowManyFilesUploadPage)
+          .map(form.fill).getOrElse(form)
 
-    Ok(how_many_files_upload(populatedForm))
-  }
+      Ok(how_many_files_upload(populatedForm))
+    }
 
-  def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireData).async {
-    implicit req =>
+  def onSubmit: Action[AnyContent] =
+    (authenticate andThen requireEori andThen getData andThen requireMrn).async { implicit req =>
 
       form.bindFromRequest().fold(
         errorForm =>
@@ -68,5 +69,5 @@ class HowManyFilesUploadController @Inject()(
           }
         }
       )
-  }
+    }
 }
