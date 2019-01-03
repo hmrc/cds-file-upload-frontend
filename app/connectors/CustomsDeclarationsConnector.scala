@@ -57,11 +57,10 @@ class CustomsDeclarationsConnectorImpl @Inject()(
 
   private def eoriHeader(eori: String): (String, String) = "X-EORI-Identifier" -> eori
 
-  private val headers: List[(String, String)] = {
+  private lazy val headers: List[(String, String)] =
     List(
       "X-Client-ID" -> clientId,
       HeaderNames.ACCEPT -> s"application/vnd.hmrc.$apiVersion+xml",
       HeaderNames.CONTENT_TYPE -> ContentTypes.XML(Codec.utf_8)
     )
-  }
 }

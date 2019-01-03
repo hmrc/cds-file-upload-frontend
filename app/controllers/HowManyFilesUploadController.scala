@@ -17,13 +17,14 @@
 package controllers
 
 import config.AppConfig
-import connectors.{CustomsDeclarationsConnector, DataCacheConnector}
-import controllers.actions.{AuthAction, MrnRequiredAction, DataRetrievalAction, EORIAction}
+import connectors.DataCacheConnector
+import controllers.actions.{AuthAction, DataRetrievalAction, EORIAction, MrnRequiredAction}
 import forms.FileUploadCountProvider
 import javax.inject.{Inject, Singleton}
 import pages.HowManyFilesUploadPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
+import services.CustomsDeclarationsService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.how_many_files_upload
 
@@ -38,7 +39,7 @@ class HowManyFilesUploadController @Inject()(
                                               requireMrn: MrnRequiredAction,
                                               formProvider: FileUploadCountProvider,
                                               dataCacheConnector: DataCacheConnector,
-                                              customsDeclarationsConnector: CustomsDeclarationsConnector,
+                                              customsDeclarationsService: CustomsDeclarationsService,
                                               implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
   val form = formProvider()
@@ -62,11 +63,19 @@ class HowManyFilesUploadController @Inject()(
           Future.successful(BadRequest(how_many_files_upload(errorForm))),
 
         value => {
-          val answers = req.userAnswers.set(HowManyFilesUploadPage, value)
+          customsDeclarationsService
+            .batchFileUpload(req.request.eori, req.mrn, value)
+            .flatMap { response =>
 
-          dataCacheConnector.save(answers.cacheMap).map { _ =>
-            Redirect(routes.UploadYourFilesController.onPageLoad())
-          }
+              val answers =
+                req.userAnswers
+                  .set(HowManyFilesUploadPage, value)
+                  .set(HowManyFilesUploadPage.Response, response)
+
+              dataCacheConnector.save(answers.cacheMap).map { _ =>
+                Redirect(routes.UploadYourFilesController.onPageLoad())
+              }
+            }
         }
       )
     }

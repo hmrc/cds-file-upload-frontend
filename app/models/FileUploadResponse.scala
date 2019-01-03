@@ -16,11 +16,29 @@
 
 package models
 
+import play.api.libs.json.Json
+
 import scala.xml.Elem
+
+case class UploadRequest(href: String, fields: Map[String, String])
+
+object UploadRequest {
+
+  implicit val format = Json.format[UploadRequest]
+}
+
+case class File(reference: String, uploadRequest: UploadRequest)
+
+object File {
+
+  implicit val format = Json.format[File]
+}
 
 case class FileUploadResponse(files: List[File])
 
 object FileUploadResponse {
+
+  implicit val format = Json.format[FileUploadResponse]
 
   def fromXml(xml: Elem): FileUploadResponse = {
     val files: List[File] = (xml \ "Files" \ "_").theSeq.collect {
@@ -37,7 +55,3 @@ object FileUploadResponse {
     FileUploadResponse(files)
   }
 }
-
-case class File(reference: String, uploadRequest: UploadRequest)
-
-case class UploadRequest(href: String, fields: Map[String, String])

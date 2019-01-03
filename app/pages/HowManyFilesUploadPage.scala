@@ -16,9 +16,14 @@
 
 package pages
 
-import models.FileUploadCount
+import models.{FileUploadCount, FileUploadResponse}
 
 case object HowManyFilesUploadPage extends QuestionPage[FileUploadCount] {
 
   override val toString: String = "howManyFilesUpload"
+
+  case object Response extends QuestionPage[FileUploadResponse] {
+
+    override val toString: String = "fileUploadResponse"
+  }
 }

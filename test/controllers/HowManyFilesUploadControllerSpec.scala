@@ -19,8 +19,10 @@ package controllers
 import controllers.actions._
 import forms.FileUploadCountProvider
 import generators.Generators
-import models.FileUploadCount
+import models.{FileUploadCount, FileUploadResponse, MRN}
 import models.requests.SignedInUser
+import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito._
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Arbitrary._
@@ -29,11 +31,13 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.PropertyChecks
 import pages.{HowManyFilesUploadPage, MrnEntryPage}
 import play.api.data.Form
-import play.api.libs.json.{JsNumber, JsString}
+import play.api.libs.json.{JsNumber, JsString, JsValue}
 import play.api.test.Helpers.{contentAsString, status, _}
+import services.CustomsDeclarationsService
 import uk.gov.hmrc.http.cache.client.CacheMap
 import views.html.how_many_files_upload
 
+import scala.concurrent.Future
 import scala.util.Try
 
 class HowManyFilesUploadControllerSpec extends ControllerSpecBase
@@ -59,6 +63,16 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
     }
 
   val form = new FileUploadCountProvider()()
+  val service = mock[CustomsDeclarationsService]
+
+  override def beforeEach = {
+    super.beforeEach
+
+    reset(service)
+
+    when(service.batchFileUpload(any(), any(), any())(any()))
+      .thenReturn(Future.successful(FileUploadResponse(List())))
+  }
 
   def controller(userInfo: UserInfo, dataRetrieval: DataRetrievalAction = getEmptyCacheMap) =
     new HowManyFilesUploadController(
@@ -69,7 +83,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
       new MrnRequiredActionImpl,
       new FileUploadCountProvider,
       dataCacheConnector,
-      customsDeclarationsConnector,
+      service,
       appConfig)
 
   def viewAsString(form: Form[_] = form) = how_many_files_upload(form)(fakeRequest, messages, appConfig).toString
@@ -161,9 +175,9 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
         val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> fileUploadCount.value.toString)
         await(controller(userInfo, getCacheMap(cacheMap)).onSubmit(postRequest))
 
-        val expectedMap =
-          cacheMap.copy(data = cacheMap.data + (HowManyFilesUploadPage.toString -> JsNumber(fileUploadCount.value)))
-        verify(dataCacheConnector, times(1)).save(expectedMap)
+        val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
+        verify(dataCacheConnector, atLeastOnce).save(captor.capture())
+        captor.getValue.getEntry[FileUploadCount](HowManyFilesUploadPage) mustBe Some(fileUploadCount)
       }
     }
 
@@ -174,7 +188,24 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
         val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> fileUploadCount.value.toString)
         await(controller(userInfo, getCacheMap(cacheMap)).onSubmit(postRequest))
 
+        verify(service, times(1))
+          .batchFileUpload(eqTo(userInfo._2), eqTo(cacheMap.getEntry[MRN](MrnEntryPage).get), eqTo(fileUploadCount))(any())
+      }
+    }
 
+    "save response in cache when valid" in {
+
+      forAll { (userInfo: UserInfo, cacheMap: CacheMap, fileUploadCount: FileUploadCount, response: FileUploadResponse) =>
+
+        when(service.batchFileUpload(any(), any(), any())(any()))
+          .thenReturn(Future.successful(response))
+
+        val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> fileUploadCount.value.toString)
+        await(controller(userInfo, getCacheMap(cacheMap)).onSubmit(postRequest))
+
+        val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
+        verify(dataCacheConnector, atLeastOnce).save(captor.capture())
+        captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response) mustBe Some(response)
       }
     }
   }
