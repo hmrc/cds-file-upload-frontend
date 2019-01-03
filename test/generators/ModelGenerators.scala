@@ -32,11 +32,11 @@ trait ModelGenerators extends SignedInUserGen {
 
   val fileUploadRequestGen: Gen[FileUploadRequest] =
     for {
-      decId <- stringsWithMaxLength(22)
-      size <- intsAboveValue(0)
+      decId <- arbitrary[MRN]
+      size  <- arbitrary[FileUploadCount]
       files <- Gen.listOf(arbitrary[FileUploadFile]) suchThat (_.nonEmpty)
     } yield {
-      FileUploadRequest(decId, size, files).get
+      FileUploadRequest(decId, size, files)
     }
 
   implicit val arbitraryFileUploadRequest: Arbitrary[FileUploadRequest] =

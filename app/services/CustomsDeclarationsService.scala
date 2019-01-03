@@ -36,10 +36,9 @@ class CustomsDeclarationsServiceImpl @Inject()(customsDeclarationsConnector: Cus
 
     val files = for(i <- 1 to fileUploadCount.value) yield FileUploadFile(i, "")
 
-    FileUploadRequest(mrn.value, fileUploadCount.value, files.collect { case Some(v) => v }) match {
-      case Some(request) => customsDeclarationsConnector.requestFileUpload(eori, request)
-      case None          => ???
-    }
+    val request = FileUploadRequest(mrn, fileUploadCount, files.collect { case Some(v) => v })
+
+    customsDeclarationsConnector.requestFileUpload(eori, request)
   }
 
 }

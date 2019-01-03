@@ -18,32 +18,17 @@ package models
 
 import scala.xml.Elem
 
-sealed abstract case class FileUploadRequest(
-  declarationId: String,
-  fileGroupSize: Int,
+final case class FileUploadRequest(
+  declarationId: MRN,
+  fileGroupSize: FileUploadCount,
   files: Seq[FileUploadFile]) {
 
   def toXml: Elem =
     <FileUploadRequest xmlns="hmrc:fileupload">
-      <DeclarationID>{declarationId}</DeclarationID>
-      <FileGroupSize>{fileGroupSize}</FileGroupSize>
+      <DeclarationID>{declarationId.value}</DeclarationID>
+      <FileGroupSize>{fileGroupSize.value}</FileGroupSize>
       <Files>{files.map(_.toXml)}</Files>
     </FileUploadRequest>
-}
-
-object FileUploadRequest {
-
-  def apply(
-    declarationId: String,
-    fileGroupSize: Int,
-    files: Seq[FileUploadFile]): Option[FileUploadRequest] = {
-
-    if (declarationId.length > 0 && declarationId.length < 23 && fileGroupSize > 0 && files.nonEmpty) {
-      Some(new FileUploadRequest(declarationId, fileGroupSize, files) {})
-    } else {
-      None
-    }
-  }
 }
 
 sealed abstract case class FileUploadFile(
