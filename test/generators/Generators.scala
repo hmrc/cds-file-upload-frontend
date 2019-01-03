@@ -24,6 +24,7 @@ trait Generators extends CacheMapGenerator with ModelGenerators with JsonGenerat
 
   implicit val dontShrink: Shrink[String] = Shrink.shrinkAny
 
+
   def genIntersperseString(gen: Gen[String],
                            value: String,
                            frequencyV: Int = 1,

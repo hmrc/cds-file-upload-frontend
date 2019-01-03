@@ -31,7 +31,7 @@ class FakeAuthAction(result: SignedInUser) extends AuthAction {
 
 class FakeEORIAction(eori: String) extends EORIAction {
   override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, EORIRequest[A]]] =
-    Future.successful(Right(new EORIRequest[A](request, eori)))
+    Future.successful(Right(EORIRequest[A](request, eori)))
 }
 
 class FakeDataRetrievalAction(cacheMap: Option[CacheMap]) extends DataRetrievalAction {

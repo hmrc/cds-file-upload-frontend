@@ -19,8 +19,9 @@ package controllers
 import java.net.URLEncoder
 
 import base.SpecBase
-import connectors.DataCacheConnector
+import connectors.{CustomsDeclarationsConnector, DataCacheConnector}
 import controllers.actions.{DataRetrievalAction, FakeDataRetrievalAction}
+import models.FileUploadResponse
 import models.requests.SignedInUser
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, when}
@@ -37,6 +38,7 @@ class ControllerSpecBase extends SpecBase with MockitoSugar with BeforeAndAfterE
 
   lazy val authConnector: AuthConnector = mock[AuthConnector]
   lazy val dataCacheConnector: DataCacheConnector = mock[DataCacheConnector]
+  lazy val customsDeclarationsConnector: CustomsDeclarationsConnector = mock[CustomsDeclarationsConnector]
 
   def withSignedInUser(user: SignedInUser)(test: => Unit): Unit = {
     when(
@@ -59,10 +61,13 @@ class ControllerSpecBase extends SpecBase with MockitoSugar with BeforeAndAfterE
   }
 
   override def beforeEach = {
-    reset(dataCacheConnector, authConnector)
+    reset(dataCacheConnector, authConnector, customsDeclarationsConnector)
 
     when(dataCacheConnector.save(any()))
       .thenReturn(Future.successful(CacheMap("", Map())))
+
+    when(customsDeclarationsConnector.requestFileUpload(any(), any())(any()))
+      .thenReturn(Future.successful(FileUploadResponse(Nil)))
   }
 
   val escaped: String => String =

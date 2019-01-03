@@ -17,7 +17,7 @@
 package controllers
 
 import config.AppConfig
-import connectors.DataCacheConnector
+import connectors.{CustomsDeclarationsConnector, DataCacheConnector}
 import controllers.actions.{AuthAction, DataRequiredAction, DataRetrievalAction, EORIAction}
 import forms.FileUploadCountProvider
 import javax.inject.{Inject, Singleton}
@@ -38,6 +38,7 @@ class HowManyFilesUploadController @Inject()(
                                               requireData: DataRequiredAction,
                                               formProvider: FileUploadCountProvider,
                                               dataCacheConnector: DataCacheConnector,
+                                              customsDeclarationsConnector: CustomsDeclarationsConnector,
                                               implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
   val form = formProvider()
@@ -48,6 +49,7 @@ class HowManyFilesUploadController @Inject()(
       req.userAnswers
         .get(HowManyFilesUploadPage)
         .map(form.fill).getOrElse(form)
+
     Ok(how_many_files_upload(populatedForm))
   }
 
@@ -59,9 +61,9 @@ class HowManyFilesUploadController @Inject()(
           Future.successful(BadRequest(how_many_files_upload(errorForm))),
 
         value => {
-          val cacheMap = req.userAnswers.set(HowManyFilesUploadPage, value).cacheMap
+          val answers = req.userAnswers.set(HowManyFilesUploadPage, value)
 
-          dataCacheConnector.save(cacheMap).map { _ =>
+          dataCacheConnector.save(answers.cacheMap).map { _ =>
             Redirect(routes.UploadYourFilesController.onPageLoad())
           }
         }

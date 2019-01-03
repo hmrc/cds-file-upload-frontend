@@ -19,8 +19,11 @@ package controllers
 import controllers.actions._
 import forms.FileUploadCountProvider
 import generators.Generators
-import models.{FileUploadCount, MRN}
+import models.FileUploadCount
 import models.requests.SignedInUser
+import org.mockito.Mockito._
+import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck.Arbitrary._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.PropertyChecks
@@ -31,23 +34,34 @@ import play.api.test.Helpers.{contentAsString, status, _}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import views.html.how_many_files_upload
 
+import scala.util.Try
+
 class HowManyFilesUploadControllerSpec extends ControllerSpecBase
   with MockitoSugar
   with PropertyChecks
   with Generators
   with BeforeAndAfterEach {
 
+  type UserInfo = (SignedInUser, String)
+
+  def zip[A, B](ga: Gen[A], gb: Gen[B]): Gen[(A, B)] =
+    ga.flatMap(a => gb.map(b => (a, b)))
+
+  implicit val arbitraryUserInfo: Arbitrary[UserInfo] =
+    Arbitrary(zip(userGen, arbitrary[String]))
+
   val form = new FileUploadCountProvider()()
 
-  def controller(signedInUser: SignedInUser, eori: String, dataRetrieval: DataRetrievalAction = getEmptyCacheMap) =
+  def controller(userInfo: UserInfo, dataRetrieval: DataRetrievalAction = getEmptyCacheMap) =
     new HowManyFilesUploadController(
       messagesApi,
-      new FakeAuthAction(signedInUser),
-      new FakeEORIAction(eori),
+      new FakeAuthAction(userInfo._1),
+      new FakeEORIAction(userInfo._2),
       dataRetrieval,
       new DataRequiredActionImpl,
       new FileUploadCountProvider,
       dataCacheConnector,
+      customsDeclarationsConnector,
       appConfig)
 
   def viewAsString(form: Form[_] = form) = how_many_files_upload(form)(fakeRequest, messages, appConfig).toString
@@ -55,9 +69,9 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
   "How Many Files Upload Page" must {
     "load correct page when user is logged in " in {
 
-      forAll { (user: SignedInUser, eori: String, cacheMap: CacheMap) =>
+      forAll { (userInfo: UserInfo, cacheMap: CacheMap) =>
 
-        val result = controller(user, eori, getCacheMap(cacheMap)).onPageLoad(fakeRequest)
+        val result = controller(userInfo, getCacheMap(cacheMap)).onPageLoad(fakeRequest)
 
         status(result) mustBe OK
         contentAsString(result) mustBe viewAsString(form)
@@ -66,21 +80,81 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
 
     "file count should be displayed if it exist on the cache" in {
 
-      forAll { (user: SignedInUser, eori: String, fileUploadCount: FileUploadCount) =>
+      forAll { (userInfo: UserInfo, fileUploadCount: FileUploadCount) =>
 
         val cacheMap: CacheMap = CacheMap("", Map(HowManyFilesUploadPage.toString -> JsNumber(fileUploadCount.value)))
-        val result = controller(user, eori, getCacheMap(cacheMap)).onPageLoad(fakeRequest)
+        val result = controller(userInfo, getCacheMap(cacheMap)).onPageLoad(fakeRequest)
 
         contentAsString(result) mustBe viewAsString(form.fill(fileUploadCount))
       }
     }
 
-    "load session expired page when data does not exist" in {
-      forAll { (user: SignedInUser, eori: String) =>
+    "load session expired page when data does not exist" when {
 
-        val result = controller(user, eori).onPageLoad(fakeRequest)
+      "onPageLoad is called" in {
+
+        forAll { userInfo: UserInfo =>
+
+          val result = controller(userInfo).onPageLoad(fakeRequest)
+
+          status(result) mustBe SEE_OTHER
+        }
+      }
+
+      "onSubmit is called" in {
+
+        forAll { userInfo: UserInfo =>
+
+          val result = controller(userInfo).onSubmit(fakeRequest)
+
+          status(result) mustBe SEE_OTHER
+        }
+      }
+    }
+
+    "return an ok when valid data is submitted" in {
+
+      forAll { (userInfo: UserInfo, cacheMap: CacheMap, fileUploadCount: FileUploadCount) =>
+
+        val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> fileUploadCount.value.toString)
+        val result = controller(userInfo, getCacheMap(cacheMap)).onSubmit(postRequest)
 
         status(result) mustBe SEE_OTHER
+        redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad().url)
+      }
+    }
+
+    "return a bad request when invalid data is submitted" in {
+
+      forAll { (userInfo: UserInfo, cacheMap: CacheMap, fileUploadCount: String) =>
+
+        val fileUploadOpt =
+          Try(fileUploadCount.toInt)
+            .toOption
+            .flatMap(FileUploadCount(_))
+
+        whenever(fileUploadOpt.isEmpty) {
+
+          val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> fileUploadCount)
+          val boundForm = form.bind(Map("value" -> fileUploadCount))
+
+          val result = controller(userInfo, getCacheMap(cacheMap)).onSubmit(postRequest)
+
+          status(result) mustBe BAD_REQUEST
+          contentAsString(result) mustBe viewAsString(boundForm)
+        }
+      }
+    }
+
+    "save data in cache when valid" in {
+
+      forAll { (userInfo: UserInfo, cacheMap: CacheMap, fileUploadCount: FileUploadCount) =>
+
+        val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> fileUploadCount.value.toString)
+        await(controller(userInfo, getCacheMap(cacheMap)).onSubmit(postRequest))
+
+        val expectedMap = cacheMap.copy(data = cacheMap.data + (HowManyFilesUploadPage.toString -> JsNumber(fileUploadCount.value)))
+        verify(dataCacheConnector, times(1)).save(expectedMap)
       }
     }
   }

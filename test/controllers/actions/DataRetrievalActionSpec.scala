@@ -42,9 +42,9 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar with ScalaFutur
         forAll { (user: SignedInUser, eori: String) =>
 
           val dataCacheConnector = mock[DataCacheConnector]
-          when(dataCacheConnector.fetch(user.internalId)) thenReturn Future(None)
+          when(dataCacheConnector.fetch(user.internalId)) thenReturn Future.successful(None)
           val action  = new Harness(dataCacheConnector)
-          val request = new EORIRequest(new AuthenticatedRequest(fakeRequest, user), eori)
+          val request = EORIRequest(AuthenticatedRequest(fakeRequest, user), eori)
 
           val futureResult = action.callTransform(request)
 
@@ -62,9 +62,9 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar with ScalaFutur
 
           val id = user.internalId
           val dataCacheConnector = mock[DataCacheConnector]
-          when(dataCacheConnector.fetch(id)) thenReturn Future(Some(new CacheMap(id, Map())))
+          when(dataCacheConnector.fetch(id)) thenReturn Future.successful(Some(new CacheMap(id, Map())))
           val action = new Harness(dataCacheConnector)
-          val request = new EORIRequest(new AuthenticatedRequest(fakeRequest, user), eori)
+          val request = EORIRequest(AuthenticatedRequest(fakeRequest, user), eori)
 
           val futureResult = action.callTransform(request)
 
