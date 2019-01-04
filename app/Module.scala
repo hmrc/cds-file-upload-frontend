@@ -19,6 +19,7 @@ import config.AppConfig
 import connectors.{CustomsDeclarationsConnector, CustomsDeclarationsConnectorImpl, DataCacheConnector, MongoCacheConnector}
 import controllers.actions._
 import javax.inject.Singleton
+import services.{CustomsDeclarationsService, CustomsDeclarationsServiceImpl}
 
 class Module extends AbstractModule {
 
@@ -32,6 +33,7 @@ class Module extends AbstractModule {
     bind(classOf[MrnRequiredAction]).to(classOf[MrnRequiredActionImpl]).asEagerSingleton()
     bind(classOf[CustomsDeclarationsConnector]).to(classOf[CustomsDeclarationsConnectorImpl]).asEagerSingleton()
     bind(classOf[DataCacheConnector]).to(classOf[MongoCacheConnector]).asEagerSingleton()
+    bind(classOf[CustomsDeclarationsService]).to(classOf[CustomsDeclarationsServiceImpl]).asEagerSingleton()
 
   }
 

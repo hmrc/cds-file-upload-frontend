@@ -32,60 +32,6 @@ class FileUploadRequestSpec extends SpecBase with XmlBehaviours with PropertyChe
     }
   }
 
-  ".apply" should {
-
-    "return Some" when {
-
-      "all arguments are valid" in {
-
-        forAll(fileUploadRequestGen) {
-          case request@FileUploadRequest(decId, fileGroupSize, files) =>
-
-            FileUploadRequest(decId, fileGroupSize, files) mustBe Some(request)
-        }
-      }
-    }
-
-    "return None" when {
-
-      "declaration id is empty" in {
-
-        forAll(fileUploadRequestGen) {
-          case FileUploadRequest(_, fileGroupSize, files) =>
-
-            FileUploadRequest("", fileGroupSize, files) mustBe None
-        }
-      }
-
-      "declaration id is longer than 22 characters" in {
-
-        forAll(stringsLongerThan(22), fileUploadRequestGen) {
-          case (decId, FileUploadRequest(_, fileGroupSize, files)) =>
-
-            FileUploadRequest(decId, fileGroupSize, files) mustBe None
-        }
-      }
-
-      "fileGroupSize is less than 1" in {
-
-        forAll(intsBelowValue(1), fileUploadRequestGen) {
-          case (fileGroupSize, FileUploadRequest(decId, _, files)) =>
-
-            FileUploadRequest(decId, fileGroupSize, files) mustBe None
-        }
-      }
-
-      "files is empty" in {
-
-        forAll(fileUploadRequestGen) {
-          case FileUploadRequest(decId, fileGroupSize, _) =>
-
-            FileUploadRequest(decId, fileGroupSize, Seq()) mustBe None
-        }
-      }
-    }
-  }
-
   "FileUploadFile.apply" should {
 
     "return Some" when {
