@@ -15,5 +15,3 @@ POST        /how-many-files-upload              controllers.HowManyFilesUploadCo
 GET         /upload/warning                     controllers.FileWarningController.onPageLoad
 
 GET         /upload-your-files                  controllers.UploadYourFilesController.onPageLoad
-
-GET         /upload/warning                     controllers.FileWarningController.onPageLoad
