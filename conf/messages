@@ -61,6 +61,14 @@ fileUploadPage.heading.part2=file
 fileUploadPage.heading.first=first
 fileUploadPage.heading.last=last
 fileUploadPage.heading.next=next
+fileUploadPage.p.fileNeedsToBe=The file needs to be:
+fileUploadPage.listItem1=jpeg (image)
+fileUploadPage.listItem2=gif (image)
+fileUploadPage.listItem3=png (image)
+fileUploadPage.listItem4=PDF
+fileUploadPage.listItem5=MS Word document (.doc or .docx)
+fileUploadPage.listItem6=MS Excel spreadsheet (.xls or .xlsx)
+
 
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account

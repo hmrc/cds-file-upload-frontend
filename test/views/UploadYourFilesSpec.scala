@@ -16,6 +16,33 @@
 
 package views
 
-class UploadYourFilesSpec extends ViewSpecBase {
+import models.UploadRequest
+import org.scalatest.prop.PropertyChecks
+import play.twirl.api.Html
+import views.behaviours.ViewBehaviours
+import views.html.{how_many_files_upload, upload_your_files}
+
+class UploadYourFilesSpec extends ViewSpecBase with ViewBehaviours {
+
+  val view: () => Html = () => upload_your_files(
+    new UploadRequest("", Map("" -> "")))(fakeRequest, messages, appConfig)
+
+  val messagePrefix = "fileUploadPage"
+
+  val messageKeys = List(
+                          "p.fileNeedsToBe",
+                          "listItem1",
+                          "listItem2",
+                          "listItem3",
+                          "listItem4",
+                          "listItem5",
+                          "listItem6"
+                        )
+
+  "Upload your files page" must {
+
+    behave like normalPage(view, messagePrefix, messageKeys: _*)
+
+  }
 
 }

@@ -16,21 +16,34 @@
 
 package controllers
 
-import com.google.inject.{Inject, Singleton}
+import com.google.inject.Singleton
 import config.AppConfig
-import controllers.actions.{AuthAction, EORIAction}
+import connectors.DataCacheConnector
+import controllers.actions.{AuthAction, DataRetrievalAction, EORIAction, MrnRequiredAction}
+import javax.inject.Inject
+import models.FileUploadResponse
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import views.html.upload_your_files
+import pages.HowManyFilesUploadPage
+import services.CustomsDeclarationsService
 
 @Singleton
 class UploadYourFilesController @Inject()(
                                            val messagesApi: MessagesApi,
                                            authenticate: AuthAction,
                                            requireEori: EORIAction,
+                                           getData: DataRetrievalAction,
+                                           requireMrn: MrnRequiredAction,
+                                           dataCacheConnector: DataCacheConnector,
+                                           service: CustomsDeclarationsService,
                                            implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = Action {
-    Ok("Upload your first File")
+  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData) { implicit req =>
+    req.userAnswers.flatMap(_.get(HowManyFilesUploadPage.Response)) match {
+      case Some(response) => Ok(upload_your_files(response.files.head.uploadRequest))
+      case None => InternalServerError("")
+    }
   }
 }
