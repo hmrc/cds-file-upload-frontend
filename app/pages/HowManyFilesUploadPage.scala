@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-package connectors
+package pages
 
-import play.api.libs.json.Format
-import uk.gov.hmrc.http.cache.client.CacheMap
+import models.{FileUploadCount, FileUploadResponse}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+case object HowManyFilesUploadPage extends QuestionPage[FileUploadCount] {
 
-object FakeDataCacheConnector extends DataCacheConnector {
+  override val toString: String = "howManyFilesUpload"
 
-  override def save[A](cacheMap: CacheMap): Future[CacheMap] = Future.successful(cacheMap)
+  case object Response extends QuestionPage[FileUploadResponse] {
 
-  override def fetch(cacheId: String): Future[Option[CacheMap]] = Future.successful(Some(CacheMap(cacheId, Map())))
-
-  override def getEntry[A](cacheId: String, key: String)(implicit fmt: Format[A]): Future[Option[A]] = ???
+    override val toString: String = "fileUploadResponse"
+  }
 }

@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package controllers
+package models.requests
 
-import play.api.data.Form
-import play.api.data.Forms._
+import play.api.mvc.WrappedRequest
+import models.{MRN, UserAnswers}
 
-object Forms {
+case class OptionalDataRequest[A](request: EORIRequest[A],
+                                  userAnswers: Option[UserAnswers]) extends WrappedRequest[A](request)
 
-  val fileInfoForm = Form(mapping(
-    "mrn" -> text,
-    "count" -> number
-  )(FileInfo.apply)(FileInfo.unapply))
 
-}
+case class MrnRequest[A](request: EORIRequest[A], userAnswers: UserAnswers, mrn: MRN) extends WrappedRequest[A](request)

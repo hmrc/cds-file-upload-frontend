@@ -1,12 +1,8 @@
 # microservice specific routes
 
 GET         /start                              controllers.StartController.displayStartPage
-GET         /upload                             controllers.FileUploadController.displayFileInfoForm
-POST        /upload                             controllers.FileUploadController.handleFileInfoForm
-GET         /upload/size                        controllers.FileUploadController.displayFileSizeForm
-POST        /upload/size                        controllers.FileUploadController.handleFileSizeForm
-GET         /upload/:batchId/receipts           controllers.FileUploadController.displayConfirmationPage(batchId)
-GET         /upload/:batchId/:fileNumber        controllers.FileUploadController.displayFileUploadForm(batchId, fileNumber: Int)
+
+GET         /this-service-has-been-reset        controllers.SessionExpiredController.onPageLoad
 
 GET         /unauthorised                       controllers.UnauthorisedController.onPageLoad
 
@@ -14,5 +10,8 @@ GET         /mrn-entry                          controllers.MrnEntryController.o
 POST        /mrn-entry                          controllers.MrnEntryController.onSubmit
 
 GET         /how-many-files-upload              controllers.HowManyFilesUploadController.onPageLoad
+POST        /how-many-files-upload              controllers.HowManyFilesUploadController.onSubmit
 
 GET         /upload/warning                     controllers.FileWarningController.onPageLoad
+
+GET         /upload-your-files                  controllers.UploadYourFilesController.onPageLoad

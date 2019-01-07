@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,21 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package connectors
+@import config.AppConfig
 
-import play.api.libs.json.Format
-import uk.gov.hmrc.http.cache.client.CacheMap
+@()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+@main_template(
+    title = messages("session_expired.title"),
+    bodyClasses = None) {
 
-object FakeDataCacheConnector extends DataCacheConnector {
+    <h1 class="heading-xlarge">@messages("session_expired.heading")</h1>
 
-  override def save[A](cacheMap: CacheMap): Future[CacheMap] = Future.successful(cacheMap)
-
-  override def fetch(cacheId: String): Future[Option[CacheMap]] = Future.successful(Some(CacheMap(cacheId, Map())))
-
-  override def getEntry[A](cacheId: String, key: String)(implicit fmt: Format[A]): Future[Option[A]] = ???
+    <p>@messages("session_expired.guidance")</p>
 }

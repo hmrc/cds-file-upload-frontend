@@ -17,10 +17,10 @@
 package controllers
 
 import controllers.actions.{DataRetrievalAction, FakeAuthAction, FakeEORIAction}
-import models.requests.SignedInUser
 import forms.MRNFormProvider
 import generators.Generators
 import models.MRN
+import models.requests.SignedInUser
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mockito.MockitoSugar
@@ -28,10 +28,9 @@ import org.scalatest.prop.PropertyChecks
 import pages.MrnEntryPage
 import play.api.data.Form
 import play.api.libs.json.JsString
-import play.api.test.Helpers.status
-import views.html.mrn_entry
-import play.api.test.Helpers._
+import play.api.test.Helpers.{status, _}
 import uk.gov.hmrc.http.cache.client.CacheMap
+import views.html.mrn_entry
 
 
 class MrnEntryControllerSpec extends ControllerSpecBase
@@ -42,11 +41,11 @@ class MrnEntryControllerSpec extends ControllerSpecBase
 
   val form = new MRNFormProvider()()
 
-  def controller(signedInUser: SignedInUser, dataRetrieval: DataRetrievalAction = getEmptyCacheMap) =
+  def controller(signedInUser: SignedInUser, eori: String, dataRetrieval: DataRetrievalAction = getEmptyCacheMap) =
     new MrnEntryController(
       messagesApi,
       new FakeAuthAction(signedInUser),
-      new FakeEORIAction,
+      new FakeEORIAction(eori),
       dataRetrieval,
       new MRNFormProvider,
       dataCacheConnector,
@@ -57,9 +56,9 @@ class MrnEntryControllerSpec extends ControllerSpecBase
   "Mrn Entry Page" must {
     "load the correct page when user is logged in " in {
 
-      forAll { user: SignedInUser =>
+      forAll { (user: SignedInUser, eori: String) =>
 
-        val result = controller(user).onPageLoad(fakeRequest)
+        val result = controller(user, eori).onPageLoad(fakeRequest)
 
         status(result) mustBe OK
         contentAsString(result) mustBe viewAsString(form)
@@ -68,10 +67,10 @@ class MrnEntryControllerSpec extends ControllerSpecBase
 
     "mrn should be displayed if it exist on the cache" in {
 
-      forAll { (user: SignedInUser, mrn: MRN) =>
+      forAll { (user: SignedInUser, eori: String, mrn: MRN) =>
 
         val cacheMap: CacheMap = CacheMap("", Map(MrnEntryPage.toString -> JsString(mrn.value)))
-        val result = controller(user, getCacheMap(cacheMap)).onPageLoad(fakeRequest)
+        val result = controller(user, eori, getCacheMap(cacheMap)).onPageLoad(fakeRequest)
 
         contentAsString(result) mustBe viewAsString(form.fill(mrn))
       }
@@ -79,10 +78,10 @@ class MrnEntryControllerSpec extends ControllerSpecBase
 
     "return an ok when valid data is submitted" in {
 
-      forAll { (user: SignedInUser, mrn: MRN) =>
+      forAll { (user: SignedInUser, eori: String, mrn: MRN) =>
 
         val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn.value)
-        val result = controller(user).onSubmit(postRequest)
+        val result = controller(user, eori).onSubmit(postRequest)
 
         status(result) mustBe SEE_OTHER
         redirectLocation(result) mustBe Some(routes.FileWarningController.onPageLoad().url)
@@ -91,14 +90,14 @@ class MrnEntryControllerSpec extends ControllerSpecBase
 
     "return a bad request when invalid data is submitted" in {
 
-      forAll { (user: SignedInUser, mrn: String) =>
+      forAll { (user: SignedInUser, eori: String, mrn: String) =>
 
         whenever(!mrn.matches(MRN.validRegex)) {
 
           val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn)
           val boundForm = form.bind(Map("value" -> mrn))
 
-          val result = controller(user).onSubmit(postRequest)
+          val result = controller(user, eori).onSubmit(postRequest)
 
           status(result) mustBe BAD_REQUEST
           contentAsString(result) mustBe viewAsString(boundForm)
@@ -108,10 +107,10 @@ class MrnEntryControllerSpec extends ControllerSpecBase
 
     "save data in cache when valid" in {
 
-      forAll { (user: SignedInUser, mrn: MRN) =>
+      forAll { (user: SignedInUser, eori: String, mrn: MRN) =>
 
         val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn.value)
-        await(controller(user).onSubmit(postRequest))
+        await(controller(user, eori).onSubmit(postRequest))
 
         val expectedMap = CacheMap(user.internalId, Map(MrnEntryPage.toString -> JsString(mrn.value)))
         verify(dataCacheConnector, times(1)).save(expectedMap)

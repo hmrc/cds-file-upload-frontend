@@ -24,6 +24,7 @@ trait Generators extends CacheMapGenerator with ModelGenerators with JsonGenerat
 
   implicit val dontShrink: Shrink[String] = Shrink.shrinkAny
 
+
   def genIntersperseString(gen: Gen[String],
                            value: String,
                            frequencyV: Int = 1,
@@ -56,7 +57,7 @@ trait Generators extends CacheMapGenerator with ModelGenerators with JsonGenerat
     arbitrary[BigInt] suchThat(x => x < Int.MinValue)
 
   def nonNumerics: Gen[String] =
-    alphaStr suchThat(_.size > 0)
+    alphaStr suchThat(_.nonEmpty)
 
   def decimals: Gen[String] =
     arbitrary[BigDecimal]
@@ -65,10 +66,10 @@ trait Generators extends CacheMapGenerator with ModelGenerators with JsonGenerat
       .map(_.formatted("%f"))
 
   def intsBelowValue(value: Int): Gen[Int] =
-    arbitrary[Int] suchThat(_ < value)
+    Gen.choose(Int.MinValue, value - 1)
 
   def intsAboveValue(value: Int): Gen[Int] =
-    arbitrary[Int] suchThat(_ > value)
+    Gen.choose(value + 1, Int.MaxValue)
 
   def intsOutsideRange(min: Int, max: Int): Gen[Int] =
     arbitrary[Int] suchThat(x => x < min || x > max)
@@ -93,6 +94,12 @@ trait Generators extends CacheMapGenerator with ModelGenerators with JsonGenerat
     length    <- Gen.chooseNum(minLength + 1, maxLength)
     chars     <- listOfN(length, arbitrary[Char])
   } yield chars.mkString
+
+  def saneString: Gen[String] =
+    for {
+      length <- choose(1, 100)
+      chars  <- listOfN(length, alphaChar)
+    } yield chars.mkString
 
   def stringsExceptSpecificValues(excluded: Set[String]): Gen[String] =
     nonEmptyString suchThat (!excluded.contains(_))

@@ -34,6 +34,8 @@ mrnEntryPage.heading=What is your movement reference number (MRN)?
 mrnEntryPage.hint1=This is 18 digits long, and is made up of letters and numbers.
 mrnEntryPage.hint2=You were given this when you submitted your declaration.
 
+mrn.invalid=The MRN you have entered doesn't follow CDS rules, please check your declaration MRN and re-enter
+
 ## file warning page
 fileWarning.title=Count your files
 fileWarning.heading=Count your files
@@ -46,9 +48,13 @@ fileWarning.paragraph4.bold= Example 2
 fileWarning.panel=You need to enter the correct number of files - you cannot amend your answer so if you get it wrong you will have to start again.
 fileWarning.button=I understand
 
-mrn.invalid=The MRN you have entered doesn’t follow CDS rules, please check your declaration MRN and re-enter
+## How many files do you need to upload page
 
 howmany.how-many-files=How many files do you need to upload?
+howManyFilesUpload.title=How many files are you uploading?
+howManyFilesUpload.heading=How many files do you need to upload?
+
+howManyFilesUpload.invalid=You have entered an invalid number of files, you can upload 1 or more files up to a maximum number of 10 files. Please re-enter the number of files you wish to upload.
 
 fileUploadPage.heading.part1=Upload your
 fileUploadPage.heading.part2=file

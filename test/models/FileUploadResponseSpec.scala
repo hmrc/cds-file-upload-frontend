@@ -16,26 +16,32 @@
 
 package models
 
-import play.api.data.validation.ValidationError
-import play.api.libs.json._
+import base.SpecBase
+import generators.Generators
+import org.scalatest.prop.PropertyChecks
 
-sealed abstract case class MRN(value: String)
+class FileUploadResponseSpec extends SpecBase with XmlBehaviours with PropertyChecks with Generators {
 
-object MRN {
+  "generators" should {
 
-  def validRegex: String = "\\d{2}[a-zA-Z]{2}[a-zA-Z0-9]{13}\\d{1}"
+    "create valid xml" in {
 
-  def apply(value: String): Option[MRN] =
-    if (value.matches(validRegex)) Some(new MRN(value) {})
-    else None
+      forAll { response: FileUploadResponse =>
 
-  implicit val reads: Reads[MRN] =
-    __.read[String].map(MRN(_))
-      .collect(ValidationError("MRN did not pass validation")) {
-        case Some(mrn) => mrn
+        validateFileUploadResponse(XmlHelper.toXml(response)) mustBe true
       }
+    }
+  }
 
-  implicit val writes: Writes[MRN] = Writes {
-    case MRN(value) => JsString(value)
+  ".fromXml" should {
+
+    "parse all fields" in {
+
+      forAll { response: FileUploadResponse =>
+
+        val xml = XmlHelper.toXml(response)
+        FileUploadResponse.fromXml(xml) mustBe response
+      }
+    }
   }
 }

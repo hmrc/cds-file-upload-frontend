@@ -19,23 +19,23 @@ package models
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 
-sealed abstract case class MRN(value: String)
+sealed abstract case class FileUploadCount(value: Int)
 
-object MRN {
+object FileUploadCount {
 
-  def validRegex: String = "\\d{2}[a-zA-Z]{2}[a-zA-Z0-9]{13}\\d{1}"
+  val maxNumberOfFiles: Int = 10
 
-  def apply(value: String): Option[MRN] =
-    if (value.matches(validRegex)) Some(new MRN(value) {})
+  def apply(value: Int): Option[FileUploadCount] =
+    if (value > 0 && value <= maxNumberOfFiles) Some(new FileUploadCount(value) {})
     else None
 
-  implicit val reads: Reads[MRN] =
-    __.read[String].map(MRN(_))
-      .collect(ValidationError("MRN did not pass validation")) {
-        case Some(mrn) => mrn
+  implicit val reads: Reads[FileUploadCount] =
+    __.read[Int].map(FileUploadCount(_))
+      .collect(ValidationError("FileUploadCount did not pass validation")) {
+        case Some(count) => count
       }
 
-  implicit val writes: Writes[MRN] = Writes {
-    case MRN(value) => JsString(value)
+  implicit val writes: Writes[FileUploadCount] = Writes {
+    case FileUploadCount(value) => JsNumber(value)
   }
 }

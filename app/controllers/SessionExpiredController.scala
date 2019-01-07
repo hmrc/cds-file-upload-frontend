@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-package connectors
+package controllers
 
-import play.api.libs.json.Format
-import uk.gov.hmrc.http.cache.client.CacheMap
+import config.AppConfig
+import javax.inject.Inject
+import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.{Action, AnyContent}
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import views.html.session_expired
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+class SessionExpiredController @Inject()(
+                                          val messagesApi: MessagesApi,
+                                          implicit val appConfig: AppConfig)
+  extends FrontendController with I18nSupport {
 
-object FakeDataCacheConnector extends DataCacheConnector {
-
-  override def save[A](cacheMap: CacheMap): Future[CacheMap] = Future.successful(cacheMap)
-
-  override def fetch(cacheId: String): Future[Option[CacheMap]] = Future.successful(Some(CacheMap(cacheId, Map())))
-
-  override def getEntry[A](cacheId: String, key: String)(implicit fmt: Format[A]): Future[Option[A]] = ???
+  def onPageLoad: Action[AnyContent] = Action { implicit request =>
+    Ok(session_expired())
+  }
 }
