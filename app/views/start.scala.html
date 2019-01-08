@@ -37,6 +37,7 @@
     <p>@Html(messages("startPage.paragraph4", bold(messages("startPage.paragraph4.bold"))))</p>
 </div>
 
-<a class="button button-start" href="@{routes.MrnEntryController.onPageLoad().url}"
-   role="button">@messages("common.button.startNow")</a>
+<a id="submit" class="button button-start" href="@{routes.MrnEntryController.onPageLoad().url}" role="button">
+    @messages("common.button.startNow")
+</a>
 }
