@@ -25,7 +25,7 @@ import views.html.{how_many_files_upload, upload_your_files}
 class UploadYourFilesSpec extends ViewSpecBase with ViewBehaviours {
 
   val view: () => Html = () => upload_your_files(
-    new UploadRequest("", Map("" -> "")))(fakeRequest, messages, appConfig)
+    new UploadRequest("", Map("" -> "")), "")(fakeRequest, messages, appConfig)
 
   val messagePrefix = "fileUploadPage"
 
