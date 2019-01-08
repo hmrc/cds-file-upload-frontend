@@ -69,6 +69,22 @@ fileUploadPage.listItem4=PDF
 fileUploadPage.listItem5=MS Word document (.doc or .docx)
 fileUploadPage.listItem6=MS Excel spreadsheet (.xls or .xlsx)
 
+fileUploadReceiptPage.heading.part1=You have uploaded {0} of files:
+fileUploadReceiptPage.whatHappensNext=What happens next?
+fileUploadReceiptPage.paragraph1=Typical clearance times are 2 hours for air and 3 hours for maritime declarations. During busy periods wait times may be longer.
+fileUploadReceiptPage.paragraph2=For queries about electronic submission of Route 1 and 2 declarations for Heathrow, Gatwick and Stansted airports
+fileUploadReceiptPage.paragraph3=Email {0}.
+fileUploadReceiptPage.paragraph3.email=nchlap@hmrc.gsi.gov.uk
+fileUploadReceiptPage.paragraph4=Include the MRN and date in the subject line of your email.
+fileUploadReceiptPage.paragraph5=For queries about electronic submission of Route 1 and 2 declarations for all other ports and airports
+fileUploadReceiptPage.paragraph6=Email {0}.
+fileUploadReceiptPage.paragraph6.email=nch@hmrc.gsi.gov.uk
+fileUploadReceiptPage.paragraph7=Include the MRN and date in the subject line of your email.
+fileUploadReceiptPage.helpline=Telephone helpline:
+fileUploadReceiptPage.imports=Imports:
+fileUploadReceiptPage.imports.tel=03000 588 454
+fileUploadReceiptPage.exports=Exports:
+fileUploadReceiptPage.exports.tel=03000 588 401
 
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
