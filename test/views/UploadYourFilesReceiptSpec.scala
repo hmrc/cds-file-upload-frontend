@@ -16,6 +16,20 @@
 
 package views
 
-class UploadYourFilesReceiptSpec {
+import play.twirl.api.Html
+import views.behaviours.ViewBehaviours
+import views.html.upload_your_files_receipt
+
+class UploadYourFilesReceiptSpec extends ViewSpecBase with ViewBehaviours {
+  val receiptList = List("receipt1", "receipt2", "receipt3")
+
+  val view: () => Html = () => upload_your_files_receipt(receiptList)(fakeRequest, messages, appConfig)
+
+  val messagePrefix = "fileUploadReceiptPage"
+
+  "File Upload Receipt Page" must {
+    // behave like normalPage(view, messagePrefix)
+  }
+
 
 }

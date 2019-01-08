@@ -69,7 +69,8 @@ fileUploadPage.listItem4=PDF
 fileUploadPage.listItem5=MS Word document (.doc or .docx)
 fileUploadPage.listItem6=MS Excel spreadsheet (.xls or .xlsx)
 
-fileUploadReceiptPage.heading.part1=You have uploaded {0} of files:
+fileUploadReceiptPage.title=Upload your files receipt
+fileUploadReceiptPage.heading=You have uploaded {0} of files:
 fileUploadReceiptPage.whatHappensNext=What happens next?
 fileUploadReceiptPage.paragraph1=Typical clearance times are 2 hours for air and 3 hours for maritime declarations. During busy periods wait times may be longer.
 fileUploadReceiptPage.paragraph2=For queries about electronic submission of Route 1 and 2 declarations for Heathrow, Gatwick and Stansted airports
