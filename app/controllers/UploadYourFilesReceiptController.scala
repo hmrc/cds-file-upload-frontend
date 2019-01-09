@@ -21,9 +21,9 @@ import config.AppConfig
 import controllers.actions._
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Request}
+import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import views.html.upload_your_files
+import views.html.upload_your_files_receipt
 
 @Singleton
 class UploadYourFilesReceiptController @Inject()(
@@ -34,5 +34,8 @@ class UploadYourFilesReceiptController @Inject()(
                                            requireResponse: FileUploadResponseRequiredAction,
                                            implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = ???
+  def onPageLoad: Action[AnyContent] =
+    (authenticate andThen requireEori andThen getData andThen requireResponse) { implicit req =>
+      Ok(upload_your_files_receipt(req.fileUploadResponse.files.map(_.reference).sorted))
+    }
 }
