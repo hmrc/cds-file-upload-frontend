@@ -18,20 +18,15 @@ package controllers
 
 import com.google.inject.Singleton
 import config.AppConfig
-import connectors.DataCacheConnector
 import controllers.actions._
 import javax.inject.Inject
-import models.FileUploadResponse
-import models.requests.FileUploadResponseRequest
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.upload_your_files
-import pages.HowManyFilesUploadPage
-import services.CustomsDeclarationsService
 
 @Singleton
-class UploadYourFilesController @Inject()(
+class UploadYourFilesReceiptController @Inject()(
                                            val messagesApi: MessagesApi,
                                            authenticate: AuthAction,
                                            requireEori: EORIAction,
@@ -39,23 +34,5 @@ class UploadYourFilesController @Inject()(
                                            requireResponse: FileUploadResponseRequiredAction,
                                            implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
-  def onPageLoad(ref: String): Action[AnyContent] =
-    (authenticate andThen requireEori andThen getData andThen requireResponse) { implicit req =>
-
-      val callback = getCallback(ref, req.fileUploadResponse.files.map(_.reference))
-
-      req.fileUploadResponse.files.find(_.reference == ref) match {
-        case Some(file) => Ok(upload_your_files(file.uploadRequest, callback))
-        case None       => Redirect(routes.SessionExpiredController.onPageLoad())
-      }
-  }
-
-  def getCallback(ref: String, refs: List[String])(implicit request: Request[_]): String =
-    refs
-      .sorted
-      .partition(_ <= ref)._2
-      .headOption
-      .map(routes.UploadYourFilesController.onPageLoad(_).absoluteURL())
-      .getOrElse(routes.UploadYourFilesReceiptController.onPageLoad.absoluteURL())
-
+  def onPageLoad: Action[AnyContent] = ???
 }

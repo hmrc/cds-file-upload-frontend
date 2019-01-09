@@ -14,4 +14,6 @@ POST        /how-many-files-upload              controllers.HowManyFilesUploadCo
 
 GET         /upload/warning                     controllers.FileWarningController.onPageLoad
 
-GET         /upload-your-files                  controllers.UploadYourFilesController.onPageLoad
+GET         /upload/receipt                     controllers.UploadYourFilesReceiptController.onPageLoad
+
+GET         /upload/:ref                        controllers.UploadYourFilesController.onPageLoad(ref: String)

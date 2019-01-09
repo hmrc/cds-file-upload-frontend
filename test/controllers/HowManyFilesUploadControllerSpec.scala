@@ -143,7 +143,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
         val result = controller(userInfo, getCacheMap(cacheMap)).onSubmit(postRequest)
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad().url)
+        redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad("abc").url)
       }
     }
 

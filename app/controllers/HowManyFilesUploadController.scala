@@ -73,7 +73,7 @@ class HowManyFilesUploadController @Inject()(
                   .set(HowManyFilesUploadPage.Response, response)
 
               dataCacheConnector.save(answers.cacheMap).map { _ =>
-                Redirect(routes.UploadYourFilesController.onPageLoad())
+                Redirect(routes.UploadYourFilesController.onPageLoad("cba"))
               }
             }
         }

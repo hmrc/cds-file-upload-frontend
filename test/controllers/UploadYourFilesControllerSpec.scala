@@ -51,24 +51,56 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase with PropertyChec
 
   ".onPageLoad" should {
 
-    "load the view" in {
+    "load the view" when {
 
-      forAll(responseGen, arbitrary[CacheMap]) {
-        case ((file, response), cacheMap) =>
+      "request file exists in response" in {
 
-          def nextRef(ref: String, refs: List[String]): String = {
-            refs
-              .sorted
-              .partition(_ == ref)._2
-              .headOption
-              .getOrElse("reciepts")
+        forAll(responseGen, arbitrary[CacheMap]) {
+          case ((file, response), cacheMap) =>
+
+            def nextRef(ref: String, refs: List[String]): String = {
+              val index = refs.sorted.indexOf(ref)
+              refs.sorted.drop(index + 1).headOption.getOrElse("receipts")
+            }
+
+            val callback =
+              routes.UploadYourFilesController.onPageLoad(nextRef(file.reference, response.files.map(_.reference))).absoluteURL()(fakeRequest)
+
+            val updatedCache = cacheMap.copy(data = cacheMap.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))
+            val result = controller(getCacheMap(updatedCache)).onPageLoad(file.reference)(fakeRequest)
+
+            status(result) mustBe OK
+            contentAsString(result) mustBe viewAsString(file.uploadRequest, callback)
+        }
+      }
+    }
+
+    "redirect to session expired page" when {
+
+      "no responses are in the cache" in {
+
+        forAll { ref: String =>
+
+          val result = controller(getEmptyCacheMap).onPageLoad(ref)(fakeRequest)
+
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
+        }
+      }
+
+      "file reference is not in response" in {
+
+        forAll { (ref: String, response: FileUploadResponse, cache: CacheMap) =>
+
+          whenever(!response.files.exists(_.reference == ref)) {
+
+            val updateCache = cache.copy(data = cache.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))
+            val result = controller(getCacheMap(updateCache)).onPageLoad(ref)(fakeRequest)
+
+            status(result) mustBe SEE_OTHER
+            redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
           }
-
-          val updatedCache = cacheMap.copy(data = cacheMap.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))
-          val result = controller(getCacheMap(updatedCache)).onPageLoad(fakeRequest)
-
-          status(result) mustBe OK
-          contentAsString(result) mustBe viewAsString(file.uploadRequest, s"/upload/${nextRef(file.reference, response.files.map(_.reference))}")
+        }
       }
     }
   }
