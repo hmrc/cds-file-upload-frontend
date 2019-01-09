@@ -37,8 +37,6 @@ class UploadYourFilesController @Inject()(
                                            requireEori: EORIAction,
                                            getData: DataRetrievalAction,
                                            requireResponse: FileUploadResponseRequiredAction,
-                                           dataCacheConnector: DataCacheConnector,
-                                           service: CustomsDeclarationsService,
                                            implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData) { implicit req =>

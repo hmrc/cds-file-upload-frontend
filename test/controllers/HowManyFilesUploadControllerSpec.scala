@@ -31,8 +31,8 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.PropertyChecks
 import pages.{HowManyFilesUploadPage, MrnEntryPage}
 import play.api.data.Form
-import play.api.libs.json.{JsNumber, JsString, JsValue}
-import play.api.test.Helpers.{contentAsString, status, _}
+import play.api.libs.json.{JsNumber, JsString}
+import play.api.test.Helpers._
 import services.CustomsDeclarationsService
 import uk.gov.hmrc.http.cache.client.CacheMap
 import views.html.how_many_files_upload
@@ -44,6 +44,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
   with MockitoSugar
   with PropertyChecks
   with Generators
+  with FakeActions
   with BeforeAndAfterEach {
 
   type UserInfo = (SignedInUser, String)

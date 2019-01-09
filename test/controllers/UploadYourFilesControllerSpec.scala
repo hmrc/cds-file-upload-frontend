@@ -16,6 +16,60 @@
 
 package controllers
 
-class UploadYourFilesControllerSpec {
+import controllers.actions.{DataRetrievalAction, FakeActions, FileUploadResponseRequiredActionImpl}
+import generators.Generators
+import models.{File, FileUploadResponse, UploadRequest}
+import org.scalacheck.Arbitrary._
+import org.scalacheck.Gen
+import org.scalatest.prop.PropertyChecks
+import pages.HowManyFilesUploadPage
+import play.api.libs.json.Json
+import play.api.test.Helpers._
+import uk.gov.hmrc.http.cache.client.CacheMap
+import views.html.upload_your_files
 
+import scala.util.Random
+
+class UploadYourFilesControllerSpec extends ControllerSpecBase with PropertyChecks with Generators with FakeActions {
+
+  val responseGen: Gen[(File, FileUploadResponse)] =
+    arbitrary[FileUploadResponse].map { response =>
+      (Random.shuffle(response.files).head, response)
+    }
+
+  def controller(getData: DataRetrievalAction) =
+    new UploadYourFilesController(
+      messagesApi,
+      new FakeAuthAction(),
+      new FakeEORIAction(),
+      getData,
+      new FileUploadResponseRequiredActionImpl(),
+      appConfig)
+
+  def viewAsString(uploadRequest: UploadRequest, callbackUrl: String): String =
+    upload_your_files(uploadRequest, callbackUrl)(fakeRequest, messages, appConfig).toString
+
+  ".onPageLoad" should {
+
+    "load the view" in {
+
+      forAll(responseGen, arbitrary[CacheMap]) {
+        case ((file, response), cacheMap) =>
+
+          def nextRef(ref: String, refs: List[String]): String = {
+            refs
+              .sorted
+              .partition(_ == ref)._2
+              .headOption
+              .getOrElse("reciepts")
+          }
+
+          val updatedCache = cacheMap.copy(data = cacheMap.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))
+          val result = controller(getCacheMap(updatedCache)).onPageLoad(fakeRequest)
+
+          status(result) mustBe OK
+          contentAsString(result) mustBe viewAsString(file.uploadRequest, s"/upload/${nextRef(file.reference, response.files.map(_.reference))}")
+      }
+    }
+  }
 }

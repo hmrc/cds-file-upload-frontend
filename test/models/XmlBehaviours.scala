@@ -57,30 +57,4 @@ trait XmlBehaviours {
     val validator = schema.newValidator()
     validator.validate(new StreamSource(new StringReader(xml.mkString)))
   }
-
-  object XmlHelper {
-
-    def toXml(field: (String, String)): Elem =
-      <a/>.copy(label = field._1, child = Seq(Text(field._2)))
-
-    def toXml(uploadRequest: UploadRequest): Elem =
-      <uploadRequest>
-        <href>{uploadRequest.href}</href>
-        <fields>
-          {uploadRequest.fields.map(toXml)}
-        </fields>
-      </uploadRequest>
-
-    def toXml(file: File): Elem =
-      <File>
-        <reference>{file.reference}</reference>
-        {toXml(file.uploadRequest)}
-      </File>
-
-    def toXml(response: FileUploadResponse): Elem = {
-      <FileUploadResponse xmlns="hmrc:fileupload">
-        <Files>{response.files.map(toXml)}</Files>
-      </FileUploadResponse>
-    }
-  }
 }

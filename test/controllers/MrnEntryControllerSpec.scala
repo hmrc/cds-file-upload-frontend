@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions.{DataRetrievalAction, FakeAuthAction, FakeEORIAction}
+import controllers.actions.{DataRetrievalAction, FakeActions}
 import forms.MRNFormProvider
 import generators.Generators
 import models.MRN
@@ -37,6 +37,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase
   with MockitoSugar
   with PropertyChecks
   with Generators
+  with FakeActions
   with BeforeAndAfterEach {
 
   val form = new MRNFormProvider()()
