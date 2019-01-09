@@ -16,16 +16,19 @@
 
 package views
 
+import controllers.{Position, First, Middle, Last}
 import models.UploadRequest
-import org.scalatest.prop.PropertyChecks
 import play.twirl.api.Html
 import views.behaviours.ViewBehaviours
-import views.html.{how_many_files_upload, upload_your_files}
+import views.html.upload_your_files
 
 class UploadYourFilesSpec extends ViewSpecBase with ViewBehaviours {
 
-  val view: () => Html = () => upload_your_files(
-    new UploadRequest("", Map("" -> "")), "")(fakeRequest, messages, appConfig)
+  def view(pos: Position): Html =
+    upload_your_files(
+      new UploadRequest("", Map("" -> "")), "", pos)(fakeRequest, messages, appConfig)
+
+  val view: () => Html = () => view(First)
 
   val messagePrefix = "fileUploadPage"
 
@@ -41,8 +44,22 @@ class UploadYourFilesSpec extends ViewSpecBase with ViewBehaviours {
 
   "Upload your files page" must {
 
-    behave like normalPage(view, messagePrefix, messageKeys: _*)
+    behave like pageWithoutHeading(view, messagePrefix, messageKeys: _*)
 
+    "show heading for first file" in {
+
+      assertPageTitleEqualsMessage(asDocument(view(First)), s"$messagePrefix.heading.first")
+    }
+
+    "show heading for middle file" in {
+
+      assertPageTitleEqualsMessage(asDocument(view(Middle)), s"$messagePrefix.heading.middle")
+    }
+
+    "show heading for last file" in {
+
+      assertPageTitleEqualsMessage(asDocument(view(Last)), s"$messagePrefix.heading.last")
+    }
   }
 
 }

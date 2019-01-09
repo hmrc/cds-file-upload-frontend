@@ -56,11 +56,10 @@ howManyFilesUpload.heading=How many files do you need to upload?
 
 howManyFilesUpload.invalid=You have entered an invalid number of files, you can upload 1 or more files up to a maximum number of 10 files. Please re-enter the number of files you wish to upload.
 
-fileUploadPage.heading.part1=Upload your
-fileUploadPage.heading.part2=file
-fileUploadPage.heading.first=first
-fileUploadPage.heading.last=last
-fileUploadPage.heading.next=next
+fileUploadPage.title=Upload your files
+fileUploadPage.heading.first=Upload your first file
+fileUploadPage.heading.middle=Upload your next file
+fileUploadPage.heading.last=Upload your last file
 fileUploadPage.p.fileNeedsToBe=The file needs to be:
 fileUploadPage.listItem1=jpeg (image)
 fileUploadPage.listItem2=gif (image)

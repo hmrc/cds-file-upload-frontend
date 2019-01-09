@@ -28,14 +28,15 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
 import views.html.upload_your_files
 
-import scala.util.Random
 
 class UploadYourFilesControllerSpec extends ControllerSpecBase with PropertyChecks with Generators with FakeActions {
 
   val responseGen: Gen[(File, FileUploadResponse)] =
-    arbitrary[FileUploadResponse].map { response =>
-      (Random.shuffle(response.files).head, response)
-    }
+    for {
+      response <- arbitrary[FileUploadResponse]
+      index    <- Gen.choose(0, response.files.length - 1)
+      file      = response.files(index)
+    } yield (file, response)
 
   def controller(getData: DataRetrievalAction) =
     new UploadYourFilesController(
@@ -46,31 +47,42 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase with PropertyChec
       new FileUploadResponseRequiredActionImpl(),
       appConfig)
 
-  def viewAsString(uploadRequest: UploadRequest, callbackUrl: String): String =
-    upload_your_files(uploadRequest, callbackUrl)(fakeRequest, messages, appConfig).toString
+  def viewAsString(uploadRequest: UploadRequest, callbackUrl: String, refPosition: Position): String =
+    upload_your_files(uploadRequest, callbackUrl, refPosition)(fakeRequest, messages, appConfig).toString
 
   ".onPageLoad" should {
 
     "load the view" when {
+
+      def nextRef(ref: String, refs: List[String]): String = {
+        val index = refs.sorted.indexOf(ref)
+        refs.sorted.drop(index + 1).headOption.getOrElse("receipt")
+      }
+
+      def nextPosition(ref: String, refs: List[String]): Position = {
+        refs.indexOf(ref) match {
+          case 0                           => First
+          case x if x == (refs.length - 1) => Last
+          case _                           => Middle
+        }
+      }
 
       "request file exists in response" in {
 
         forAll(responseGen, arbitrary[CacheMap]) {
           case ((file, response), cacheMap) =>
 
-            def nextRef(ref: String, refs: List[String]): String = {
-              val index = refs.sorted.indexOf(ref)
-              refs.sorted.drop(index + 1).headOption.getOrElse("receipt")
-            }
-
             val callback =
               routes.UploadYourFilesController.onPageLoad(nextRef(file.reference, response.files.map(_.reference))).absoluteURL()(fakeRequest)
+
+            val refPosition: Position =
+              nextPosition(file.reference, response.files.map(_.reference))
 
             val updatedCache = cacheMap.copy(data = cacheMap.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))
             val result = controller(getCacheMap(updatedCache)).onPageLoad(file.reference)(fakeRequest)
 
             status(result) mustBe OK
-            contentAsString(result) mustBe viewAsString(file.uploadRequest, callback)
+            contentAsString(result) mustBe viewAsString(file.uploadRequest, callback, refPosition)
         }
       }
     }

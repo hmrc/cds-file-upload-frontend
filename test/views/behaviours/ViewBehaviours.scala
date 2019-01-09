@@ -25,6 +25,23 @@ trait ViewBehaviours extends ViewSpecBase {
                  messageKeyPrefix: String,
                  expectedGuidanceKeys: String*) = {
 
+    "behave like a page with a heading" when {
+      "rendered" must {
+
+        "display the correct page title" in {
+          val doc = asDocument(view())
+          assertPageTitleEqualsMessage(doc, s"$messageKeyPrefix.heading")
+        }
+      }
+    }
+
+    behave like pageWithoutHeading(view, messageKeyPrefix, expectedGuidanceKeys:_*)
+  }
+
+  def pageWithoutHeading(view: () => HtmlFormat.Appendable,
+                         messageKeyPrefix: String,
+                         expectedGuidanceKeys: String*) = {
+
     "behave like a normal page" when {
       "rendered" must {
         "have the correct banner title" in {
@@ -37,11 +54,6 @@ trait ViewBehaviours extends ViewSpecBase {
         "display the correct browser title" in {
           val doc = asDocument(view())
           assertEqualsMessage(doc, "title", s"$messageKeyPrefix.title")
-        }
-
-        "display the correct page title" in {
-          val doc = asDocument(view())
-          assertPageTitleEqualsMessage(doc, s"$messageKeyPrefix.heading")
         }
 
         "display the correct guidance" in {
