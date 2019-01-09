@@ -38,7 +38,7 @@
     </ul>
 
 
-    @hmrcHelpers.form(action = uploadRequest.href, args = ('enctype, "multipart/form-data")) {
+    @hmrcHelpers.form(action = new Call("POST", uploadRequest.href), args = ('enctype, "multipart/form-data")) {
 
     <input type="file" name="file"/>
 

@@ -42,7 +42,7 @@ class UploadYourFilesController @Inject()(
 
   def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData) { implicit req =>
     req.userAnswers.flatMap(_.get(HowManyFilesUploadPage.Response)) match {
-      case Some(response) => Ok(upload_your_files(response.files.head.uploadRequest))
+      case Some(response) => Ok(upload_your_files(response.files.head.uploadRequest, ""))
       case None => InternalServerError("")
     }
   }
