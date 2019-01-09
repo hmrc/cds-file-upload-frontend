@@ -38,7 +38,7 @@ class CustomsDeclarationsStubController @Inject()() extends FrontendController {
 
   // for now, we will just return some random
   def handleBatchFileUploadRequest: Action[NodeSeq] = Action(parse.xml) { implicit req =>
-    val fileGroupSize = (scala.xml.XML.loadString(req.body.mkString) \ "fileGroupSize").text.toInt
+    val fileGroupSize = (scala.xml.XML.loadString(req.body.mkString) \ "FileGroupSize").text.toInt
     val resp = FileUploadResponse((1 to fileGroupSize).map { i =>
       File(reference = UUID.randomUUID().toString, UploadRequest(
         href = "/cds-file-upload-service/test-only/s3-bucket",
