@@ -38,18 +38,17 @@
     </ul>
 
 
-    @hmrcHelpers.form(action = new Call("POST", uploadRequest.href), args = ('enctype, "multipart/form-data")) {
+    @hmrcHelpers.form(action = Call("POST", uploadRequest.href), args = ('enctype, "multipart/form-data")) {
 
-    <input type="file" name="file"/>
+        <input id="upload-file" type="file" name="file"/>
 
-    <input type="hidden" name="success_action_redirect" value="@redirectUrl">
+        <input type="hidden" name="success_action_redirect" value="@redirectUrl">
 
-    @uploadRequest.fields.map { case (key, value) =>
-    <input type="hidden" name="@key" value="@value"/>
-    }
+        @uploadRequest.fields.map { case (key, value) =>
+            <input type="hidden" name="@key" value="@value"/>
+        }
 
-
-    @components.submit_button()
+        @components.submit_button()
     }
 
 </div>

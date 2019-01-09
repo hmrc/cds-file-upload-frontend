@@ -19,9 +19,10 @@ package controllers
 import com.google.inject.Singleton
 import config.AppConfig
 import connectors.DataCacheConnector
-import controllers.actions.{AuthAction, DataRetrievalAction, EORIAction, MrnRequiredAction}
+import controllers.actions._
 import javax.inject.Inject
 import models.FileUploadResponse
+import models.requests.FileUploadResponseRequest
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -35,7 +36,7 @@ class UploadYourFilesController @Inject()(
                                            authenticate: AuthAction,
                                            requireEori: EORIAction,
                                            getData: DataRetrievalAction,
-                                           requireMrn: MrnRequiredAction,
+                                           requireResponse: FileUploadResponseRequiredAction,
                                            dataCacheConnector: DataCacheConnector,
                                            service: CustomsDeclarationsService,
                                            implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
