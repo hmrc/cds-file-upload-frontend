@@ -60,7 +60,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase with PropertyChec
 
             def nextRef(ref: String, refs: List[String]): String = {
               val index = refs.sorted.indexOf(ref)
-              refs.sorted.drop(index + 1).headOption.getOrElse("receipts")
+              refs.sorted.drop(index + 1).headOption.getOrElse("receipt")
             }
 
             val callback =

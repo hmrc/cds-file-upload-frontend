@@ -56,7 +56,8 @@ trait ModelGenerators extends SignedInUserGen {
   implicit val arbitraryFileUploadResponse: Arbitrary[FileUploadResponse] =
     Arbitrary {
       for {
-        files <- Gen.listOf(arbitrary[File]) suchThat (_.nonEmpty)
+        i     <- Gen.choose(1, 10)
+        files <- Gen.listOfN(i, arbitrary[File])
       } yield {
         FileUploadResponse(files)
       }
