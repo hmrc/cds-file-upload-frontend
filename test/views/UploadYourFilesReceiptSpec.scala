@@ -16,20 +16,73 @@
 
 package views
 
+import generators.Generators
+import org.scalacheck.Gen
+import org.scalatest.prop.PropertyChecks
 import play.twirl.api.Html
 import views.behaviours.ViewBehaviours
 import views.html.upload_your_files_receipt
 
-class UploadYourFilesReceiptSpec extends ViewSpecBase with ViewBehaviours {
-  val receiptList = List("receipt1", "receipt2", "receipt3")
+class UploadYourFilesReceiptSpec extends ViewSpecBase with ViewBehaviours with PropertyChecks with Generators {
 
-  val view: () => Html = () => upload_your_files_receipt(receiptList)(fakeRequest, messages, appConfig)
+  def view(receipts: List[String]): Html =
+    upload_your_files_receipt(receipts)(fakeRequest, messages, appConfig)
+
+  val view: () => Html = () => view(Nil)
 
   val messagePrefix = "fileUploadReceiptPage"
 
+  val messageKeys = List(
+    "whatHappensNext",
+    "paragraph1",
+    "paragraph2",
+    "paragraph4",
+    "paragraph5",
+    "paragraph7",
+    "helpline",
+    "imports",
+    "imports.tel",
+    "exports",
+    "exports.tel"
+  )
+
   "File Upload Receipt Page" must {
-    // behave like normalPage(view, messagePrefix)
+    behave like pageWithoutHeading(view, messagePrefix, messageKeys: _*)
+
+    "have heading" in {
+
+      forAll { receipts: List[String] =>
+
+        val doc = asDocument(view(receipts))
+
+        assertPageTitleEqualsMessage(doc, s"$messagePrefix.heading", receipts.length)
+      }
+    }
+
+    "have paragraph 3 with email" in {
+
+      val doc = asDocument(view())
+      val email = messages(s"$messagePrefix.paragraph3.email")
+
+      assertContainsMessage(doc, s"$messagePrefix.paragraph3", email)
+    }
+
+    "have paragraph 6 with email" in {
+
+      val doc = asDocument(view())
+      val email = messages(s"$messagePrefix.paragraph6.email")
+
+      assertContainsMessage(doc, s"$messagePrefix.paragraph6", email)
+    }
+
+    "display all receipts" in {
+
+      forAll(Gen.listOf(saneString)) { receipts: List[String] =>
+
+        val doc = asDocument(view(receipts))
+
+        receipts.foreach(assertContainsText(doc, _))
+      }
+    }
   }
-
-
 }

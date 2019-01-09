@@ -33,4 +33,8 @@ object Utils {
   def bold(value: String): Html = {
     Html(s"<strong class='bold'>$value</strong>")
   }
+
+  def email(address: String): Html = {
+    Html(s"""<a href="email:$address">$address</a>""")
+  }
 }
