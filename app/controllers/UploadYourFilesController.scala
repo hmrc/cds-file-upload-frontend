@@ -40,8 +40,9 @@ class UploadYourFilesController @Inject()(
   def onPageLoad(ref: String): Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireResponse) { implicit req =>
 
-      val callback    = getCallback(ref, req.fileUploadResponse.files.map(_.reference))
-      val refPosition = getPosition(ref, req.fileUploadResponse.files.map(_.reference))
+      val references  = req.fileUploadResponse.files.map(_.reference)
+      val callback    = getCallback(ref, references)
+      val refPosition = getPosition(ref, references)
 
       req.fileUploadResponse.files.find(_.reference == ref) match {
         case Some(file) => Ok(upload_your_files(file.uploadRequest, callback, refPosition))
@@ -63,6 +64,7 @@ class UploadYourFilesController @Inject()(
 }
 
 sealed trait Position
+
 case object First  extends Position
 case object Middle extends Position
 case object Last   extends Position
