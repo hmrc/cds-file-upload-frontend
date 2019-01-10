@@ -27,8 +27,6 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.upload_your_files
-import pages.HowManyFilesUploadPage
-import services.CustomsDeclarationsService
 
 @Singleton
 class UploadYourFilesController @Inject()(
@@ -53,7 +51,6 @@ class UploadYourFilesController @Inject()(
 
   def getCallback(ref: String, refs: List[String])(implicit request: Request[_]): String =
     refs
-      .sorted
       .partition(_ <= ref)._2
       .headOption
       .map(routes.UploadYourFilesController.onPageLoad(_).absoluteURL())

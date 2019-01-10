@@ -67,6 +67,9 @@ fileUploadPage.listItem3=png (image)
 fileUploadPage.listItem4=PDF
 fileUploadPage.listItem5=MS Word document (.doc or .docx)
 fileUploadPage.listItem6=MS Excel spreadsheet (.xls or .xlsx)
+fileUploadPage.validation.required=You must choose a file to upload
+fileUploadPage.validation.accept=The file you have chosen is not a permitted file type
+fileUploadPage.validation.filesize=The file you have chosen is bigger than 10MB and is not permitted
 
 fileUploadReceiptPage.title=Upload your files receipt
 fileUploadReceiptPage.heading=You have uploaded {0} of files:

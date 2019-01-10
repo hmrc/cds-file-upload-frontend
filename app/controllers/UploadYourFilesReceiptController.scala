@@ -36,6 +36,6 @@ class UploadYourFilesReceiptController @Inject()(
 
   def onPageLoad: Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireResponse) { implicit req =>
-      Ok(upload_your_files_receipt(req.fileUploadResponse.files.map(_.reference).sorted))
+      Ok(upload_your_files_receipt(req.fileUploadResponse.files.map(_.reference)))
     }
 }
