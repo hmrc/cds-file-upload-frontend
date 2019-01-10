@@ -16,9 +16,30 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json._
 
 import scala.xml.Elem
+
+sealed trait FileState
+final case object Waiting  extends FileState
+final case object Uploaded extends FileState
+
+object FileState {
+
+  private val waiting  = "Waiting"
+  private val uploaded = "Uploaded"
+
+  implicit val reads = Reads[FileState] {
+    case JsString(`waiting`)  => JsSuccess(Waiting)
+    case JsString(`uploaded`) => JsSuccess(Uploaded)
+    case _                    => JsError("Unable to read FileState")
+  }
+
+  implicit val writes = Writes[FileState] {
+    case Waiting  => JsString(waiting)
+    case Uploaded => JsString(uploaded)
+  }
+}
 
 case class UploadRequest(href: String, fields: Map[String, String])
 
@@ -27,7 +48,7 @@ object UploadRequest {
   implicit val format = Json.format[UploadRequest]
 }
 
-case class File(reference: String, uploadRequest: UploadRequest)
+case class File(reference: String, uploadRequest: UploadRequest, state: FileState = Waiting)
 
 object File {
 
