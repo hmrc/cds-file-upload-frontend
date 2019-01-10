@@ -21,12 +21,15 @@ import config.AppConfig
 import connectors.DataCacheConnector
 import controllers.actions._
 import javax.inject.Inject
-import models.FileUploadResponse
+import models.{FileUploadResponse, Uploaded}
 import models.requests.FileUploadResponseRequest
+import pages.HowManyFilesUploadPage
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Request}
+import play.api.mvc.{Action, AnyContent, Call, Request}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.upload_your_files
+
+import scala.concurrent.Future
 
 @Singleton
 class UploadYourFilesController @Inject()(
@@ -35,13 +38,14 @@ class UploadYourFilesController @Inject()(
                                            requireEori: EORIAction,
                                            getData: DataRetrievalAction,
                                            requireResponse: FileUploadResponseRequiredAction,
+                                           dataCacheConnector: DataCacheConnector,
                                            implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
   def onPageLoad(ref: String): Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireResponse) { implicit req =>
 
       val references  = req.fileUploadResponse.files.map(_.reference)
-      val callback    = getCallback(ref, references)
+      val callback    = routes.UploadYourFilesController.onSuccess(ref).absoluteURL()
       val refPosition = getPosition(ref, references)
 
       req.fileUploadResponse.files.find(_.reference == ref) match {
@@ -50,12 +54,31 @@ class UploadYourFilesController @Inject()(
       }
   }
 
-  def getCallback(ref: String, refs: List[String])(implicit request: Request[_]): String =
+  def onSuccess(ref: String): Action[AnyContent] =
+    (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
+
+      val references  = req.fileUploadResponse.files.map(_.reference)
+
+      req.fileUploadResponse.files.find(_.reference == ref) match {
+        case Some(file) => {
+          val files = file.copy(state = Uploaded) :: req.fileUploadResponse.files.filterNot(_.reference == ref)
+          val answers = req.userAnswers.set(HowManyFilesUploadPage.Response, FileUploadResponse(files))
+
+          dataCacheConnector.save(answers.cacheMap).map { _ =>
+            Redirect(nextPage(ref, references))
+          }
+        }
+
+        case None => Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
+      }
+    }
+
+  def nextPage(ref: String, refs: List[String])(implicit request: Request[_]): Call =
     refs
       .partition(_ <= ref)._2
       .headOption
-      .map(routes.UploadYourFilesController.onPageLoad(_).absoluteURL())
-      .getOrElse(routes.UploadYourFilesReceiptController.onPageLoad().absoluteURL())
+      .map(routes.UploadYourFilesController.onPageLoad(_))
+      .getOrElse(routes.UploadYourFilesReceiptController.onPageLoad())
 
   def getPosition(ref: String, refs: List[String]): Position =
     if (refs.headOption.contains(ref)) First

@@ -18,4 +18,5 @@ GET         /upload/warning                     controllers.FileWarningControlle
 
 GET         /upload/receipt                     controllers.UploadYourFilesReceiptController.onPageLoad
 
+GET         /upload/success/:ref                controllers.UploadYourFilesController.onSuccess(ref: String)
 GET         /upload/:ref                        controllers.UploadYourFilesController.onPageLoad(ref: String)

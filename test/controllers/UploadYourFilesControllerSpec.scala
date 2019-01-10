@@ -18,9 +18,13 @@ package controllers
 
 import controllers.actions.{DataRetrievalAction, FakeActions, FileUploadResponseRequiredActionImpl}
 import generators.Generators
-import models.{File, FileUploadResponse, UploadRequest}
+import models._
+import org.mockito.ArgumentCaptor
+import org.mockito.Mockito._
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.PropertyChecks
 import pages.HowManyFilesUploadPage
 import play.api.libs.json.Json
@@ -29,7 +33,12 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import views.html.upload_your_files
 
 
-class UploadYourFilesControllerSpec extends ControllerSpecBase with PropertyChecks with Generators with FakeActions {
+class UploadYourFilesControllerSpec extends ControllerSpecBase
+  with ScalaFutures
+  with MockitoSugar
+  with PropertyChecks
+  with Generators
+  with FakeActions {
 
   val responseGen: Gen[(File, FileUploadResponse)] =
     for {
@@ -45,10 +54,14 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase with PropertyChec
       new FakeEORIAction(),
       getData,
       new FileUploadResponseRequiredActionImpl(),
+      dataCacheConnector,
       appConfig)
 
   def viewAsString(uploadRequest: UploadRequest, callbackUrl: String, refPosition: Position): String =
     upload_your_files(uploadRequest, callbackUrl, refPosition)(fakeRequest, messages, appConfig).toString
+
+  private def combine(response: FileUploadResponse, cache: CacheMap): CacheMap =
+    cache.copy(data = cache.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))
 
   ".onPageLoad" should {
 
@@ -73,12 +86,12 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase with PropertyChec
           case ((file, response), cacheMap) =>
 
             val callback =
-              routes.UploadYourFilesController.onPageLoad(nextRef(file.reference, response.files.map(_.reference))).absoluteURL()(fakeRequest)
+              routes.UploadYourFilesController.onSuccess(file.reference).absoluteURL()(fakeRequest)
 
             val refPosition: Position =
               nextPosition(file.reference, response.files.map(_.reference))
 
-            val updatedCache = cacheMap.copy(data = cacheMap.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))
+            val updatedCache = combine(response, cacheMap)
             val result = controller(getCacheMap(updatedCache)).onPageLoad(file.reference)(fakeRequest)
 
             status(result) mustBe OK
@@ -106,8 +119,81 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase with PropertyChec
 
           whenever(!response.files.exists(_.reference == ref)) {
 
-            val updateCache = cache.copy(data = cache.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))
-            val result = controller(getCacheMap(updateCache)).onPageLoad(ref)(fakeRequest)
+            val updatedCache = combine(response, cache)
+            val result = controller(getCacheMap(updatedCache)).onPageLoad(ref)(fakeRequest)
+
+            status(result) mustBe SEE_OTHER
+            redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
+          }
+        }
+      }
+    }
+  }
+
+  ".onSuccess" should {
+
+    def nextRef(ref: String, refs: List[String]): String = {
+      val index = refs.sorted.indexOf(ref)
+      refs.sorted.drop(index + 1).headOption.getOrElse("receipt")
+    }
+
+    "update file status to Uploaded" in {
+
+      forAll(responseGen, arbitrary[CacheMap]) {
+        case ((file, response), cache: CacheMap) =>
+
+          val updatedCache = combine(response, cache)
+          val result = controller(getCacheMap(updatedCache)).onSuccess(file.reference)(fakeRequest)
+
+          whenReady(result) { _ =>
+            val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
+            verify(dataCacheConnector, atLeastOnce).save(captor.capture())
+
+            val updateResponse = captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response)
+
+            updateResponse must not be Some(response)
+            updateResponse
+              .flatMap(_.files.find(_.reference == file.reference))
+              .map(_.state) mustBe Some(Uploaded)
+          }
+      }
+    }
+
+    "redirect user to the next upload page" in {
+
+      forAll(responseGen, arbitrary[CacheMap]) {
+        case ((file, response), cache: CacheMap) =>
+
+          val updatedCache = combine(response, cache)
+          val result = controller(getCacheMap(updatedCache)).onSuccess(file.reference)(fakeRequest)
+          val next = nextRef(file.reference, response.files.map(_.reference))
+
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad(next).url)
+      }
+    }
+
+    "redirect to session expired page" when {
+
+      "no responses are in the cache" in {
+
+        forAll { ref: String =>
+
+          val result = controller(getEmptyCacheMap).onSuccess(ref)(fakeRequest)
+
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
+        }
+      }
+
+      "file reference is not in response" in {
+
+        forAll { (ref: String, response: FileUploadResponse, cache: CacheMap) =>
+
+          whenever(!response.files.exists(_.reference == ref)) {
+
+            val updatedCache = combine(response, cache)
+            val result = controller(getCacheMap(updatedCache)).onSuccess(ref)(fakeRequest)
 
             status(result) mustBe SEE_OTHER
             redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
