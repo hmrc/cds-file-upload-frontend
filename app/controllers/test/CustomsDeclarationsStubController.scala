@@ -18,8 +18,8 @@ package controllers.test
 
 import java.util.UUID
 
-import controllers.{BatchFile, BatchFileUploadRequest, BatchFileUploadResponse, UploadRequest}
 import javax.inject.{Inject, Singleton}
+import models.{File, FileUploadResponse, UploadRequest}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.http.ContentTypes
@@ -27,7 +27,7 @@ import play.api.libs.Files
 import play.api.mvc.{Action, MultipartFormData}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.xml.NodeSeq
+import scala.xml._
 
 @Singleton
 class CustomsDeclarationsStubController @Inject()() extends FrontendController {
@@ -38,9 +38,9 @@ class CustomsDeclarationsStubController @Inject()() extends FrontendController {
 
   // for now, we will just return some random
   def handleBatchFileUploadRequest: Action[NodeSeq] = Action(parse.xml) { implicit req =>
-    val bfur = BatchFileUploadRequest.fromXml(req.body.mkString)
-    val resp = BatchFileUploadResponse((1 to bfur.fileGroupSize).map { i =>
-      BatchFile(reference = UUID.randomUUID().toString, UploadRequest(
+    val fileGroupSize = (scala.xml.XML.loadString(req.body.mkString) \ "FileGroupSize").text.toInt
+    val resp = FileUploadResponse((1 to fileGroupSize).map { i =>
+      File(reference = UUID.randomUUID().toString, UploadRequest(
         href = "/cds-file-upload-service/test-only/s3-bucket",
         fields = Map(
           "X-Amz-Algorithm" -> "AWS4-HMAC-SHA256",
@@ -53,7 +53,7 @@ class CustomsDeclarationsStubController @Inject()() extends FrontendController {
         )
       ))
     }.toList)
-    Ok(resp.toXml).as(ContentTypes.XML)
+    Ok(XmlHelper.toXml(resp)).as(ContentTypes.XML)
   }
 
   def handleS3FileUploadRequest: Action[MultipartFormData[Files.TemporaryFile]] = Action(parse.multipartFormData) { implicit req =>
@@ -62,7 +62,32 @@ class CustomsDeclarationsStubController @Inject()() extends FrontendController {
       success => Redirect(success.success_action_redirect)
     )
   }
-
 }
 
 case class S3Form(success_action_redirect: String)
+
+object XmlHelper {
+
+  def toXml(field: (String, String)): Elem =
+      <a/>.copy(label = field._1, child = Seq(Text(field._2)))
+
+  def toXml(uploadRequest: UploadRequest): Elem =
+    <uploadRequest>
+      <href>{uploadRequest.href}</href>
+      <fields>
+        {uploadRequest.fields.map(toXml)}
+      </fields>
+    </uploadRequest>
+
+  def toXml(file: File): Elem =
+    <File>
+      <reference>{file.reference}</reference>
+      {toXml(file.uploadRequest)}
+    </File>
+
+  def toXml(response: FileUploadResponse): Elem = {
+    <FileUploadResponse xmlns="hmrc:fileupload">
+      <Files>{response.files.map(toXml)}</Files>
+    </FileUploadResponse>
+  }
+}

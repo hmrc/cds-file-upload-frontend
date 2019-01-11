@@ -28,8 +28,8 @@ trait ViewSpecBase extends SpecBase {
 
   def asDocument(html: Html): Document = Jsoup.parse(html.toString())
 
-  def assertEqualsMessage(doc: Document, cssSelector: String, expectedMessageKey: String) =
-    assertEqualsValue(doc, cssSelector, messages(expectedMessageKey))
+  def assertEqualsMessage(doc: Document, cssSelector: String, expectedMessageKey: String, args: Any*) =
+    assertEqualsValue(doc, cssSelector, messages(expectedMessageKey, args))
 
   def assertEqualsValue(doc : Document, cssSelector: String, expectedValue: String) = {
     val elements = doc.select(cssSelector)
@@ -55,7 +55,8 @@ trait ViewSpecBase extends SpecBase {
     headers.first.text.replaceAll("\u00a0", " ") mustBe messages(expectedMessageKey, args:_*).replaceAll("&nbsp;", " ")
   }
 
-  def assertContainsText(doc:Document, text: String) = assert(doc.text().contains(text), "\n\ntext " + text + " was not rendered on the page.\n")
+  def assertContainsText(doc:Document, text: String) =
+    assert(doc.text().contains(Html(text).body), "\n\ntext " + text + " was not rendered on the page.\n")
 
   def assertContainsLink(doc:Document, text: String, href: String) = {
     val anchors = doc.getElementsByTag("a").asScala
@@ -64,7 +65,11 @@ trait ViewSpecBase extends SpecBase {
   }
 
   def assertContainsMessages(doc: Document, expectedMessageKeys: String*) = {
-    for (key <- expectedMessageKeys) assertContainsText(doc, messages(key))
+    for (key <- expectedMessageKeys) assertContainsMessage(doc, key)
+  }
+
+  def assertContainsMessage(doc: Document, messageKey: String, args: Any*) = {
+    assertContainsText(doc, messages(messageKey, args: _*))
   }
 
   def assertRenderedById(doc: Document, id: String) = {

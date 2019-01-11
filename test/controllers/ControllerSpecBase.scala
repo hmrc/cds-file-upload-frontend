@@ -20,7 +20,7 @@ import java.net.URLEncoder
 
 import base.SpecBase
 import connectors.DataCacheConnector
-import controllers.actions.{DataRetrievalAction, FakeDataRetrievalAction}
+import controllers.actions.{DataRetrievalAction, FakeActions}
 import models.requests.SignedInUser
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, when}
@@ -33,7 +33,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
 
-class ControllerSpecBase extends SpecBase with MockitoSugar with BeforeAndAfterEach {
+class ControllerSpecBase extends SpecBase with MockitoSugar with FakeActions with BeforeAndAfterEach {
 
   lazy val authConnector: AuthConnector = mock[AuthConnector]
   lazy val dataCacheConnector: DataCacheConnector = mock[DataCacheConnector]

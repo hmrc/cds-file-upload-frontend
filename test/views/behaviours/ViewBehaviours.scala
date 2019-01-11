@@ -25,6 +25,33 @@ trait ViewBehaviours extends ViewSpecBase {
                  messageKeyPrefix: String,
                  expectedGuidanceKeys: String*) = {
 
+    "behave like a page with a heading" when {
+      "rendered" must {
+
+        "display the correct page title" in {
+          val doc = asDocument(view())
+          assertPageTitleEqualsMessage(doc, s"$messageKeyPrefix.heading")
+        }
+      }
+    }
+
+    "behave like a page with a title" when {
+      "rendered" must {
+
+        "display the correct browser title" in {
+          val doc = asDocument(view())
+          assertEqualsMessage(doc, "title", s"$messageKeyPrefix.title")
+        }
+      }
+    }
+
+    behave like pageWithoutHeading(view, messageKeyPrefix, expectedGuidanceKeys:_*)
+  }
+
+  def pageWithoutHeading(view: () => HtmlFormat.Appendable,
+                         messageKeyPrefix: String,
+                         expectedGuidanceKeys: String*) = {
+
     "behave like a normal page" when {
       "rendered" must {
         "have the correct banner title" in {
@@ -32,16 +59,6 @@ trait ViewBehaviours extends ViewSpecBase {
           val nav = doc.getElementById("proposition-menu")
           val span = nav.children.first
           span.text mustBe messagesApi("common.service.name")
-        }
-
-        "display the correct browser title" in {
-          val doc = asDocument(view())
-          assertEqualsMessage(doc, "title", s"$messageKeyPrefix.title")
-        }
-
-        "display the correct page title" in {
-          val doc = asDocument(view())
-          assertPageTitleEqualsMessage(doc, s"$messageKeyPrefix.heading")
         }
 
         "display the correct guidance" in {

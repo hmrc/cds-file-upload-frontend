@@ -17,6 +17,7 @@
 package models
 
 import base.SpecBase
+import controllers.test.XmlHelper
 import generators.Generators
 import org.scalatest.prop.PropertyChecks
 

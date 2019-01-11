@@ -56,11 +56,36 @@ howManyFilesUpload.heading=How many files do you need to upload?
 
 howManyFilesUpload.invalid=You have entered an invalid number of files, you can upload 1 or more files up to a maximum number of 10 files. Please re-enter the number of files you wish to upload.
 
-fileUploadPage.heading.part1=Upload your
-fileUploadPage.heading.part2=file
-fileUploadPage.heading.first=first
-fileUploadPage.heading.last=last
-fileUploadPage.heading.next=next
+fileUploadPage.title.first=Upload your first file
+fileUploadPage.title.middle=Upload your next file
+fileUploadPage.title.last=Upload your last file
+fileUploadPage.heading.first=Upload your first file
+fileUploadPage.heading.middle=Upload your next file
+fileUploadPage.heading.last=Upload your last file
+fileUploadPage.p.fileNeedsToBe=The file needs to be:
+fileUploadPage.listItem1=jpeg (image)
+fileUploadPage.listItem2=gif (image)
+fileUploadPage.listItem3=png (image)
+fileUploadPage.listItem4=PDF
+fileUploadPage.listItem5=MS Word document (.doc or .docx)
+fileUploadPage.listItem6=MS Excel spreadsheet (.xls or .xlsx)
+fileUploadPage.filesUploaded=You have uploaded {0} of {1} files
+fileUploadPage.validation.required=You must choose a file to upload
+fileUploadPage.validation.accept=The file you have chosen is not a permitted file type
+fileUploadPage.validation.filesize=The file you have chosen is bigger than 10MB and is not permitted
+
+fileUploadReceiptPage.title=Upload your files receipt
+fileUploadReceiptPage.heading=You have uploaded {0} files:
+fileUploadReceiptPage.whatHappensNext=What happens next?
+fileUploadReceiptPage.fileName=File name
+fileUploadReceiptPage.receipt=Receipt
+fileUploadReceiptPage.paragraph1=As long as you have provided the documents that HMRC need to clear your goods, they should be cleared within 3 hours.
+fileUploadReceiptPage.paragraph2=You will be notified through your software when the goods have been cleared.
+fileUploadReceiptPage.helpline=If you have any problems call the helpline.
+fileUploadReceiptPage.imports=Imports helpline:
+fileUploadReceiptPage.imports.tel=03000 588 454
+fileUploadReceiptPage.exports=Exports helpline:
+fileUploadReceiptPage.exports.tel=03000 588 401
 
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account

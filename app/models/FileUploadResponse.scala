@@ -55,9 +55,12 @@ object File {
   implicit val format = Json.format[File]
 }
 
-case class FileUploadResponse(files: List[File])
+sealed abstract case class FileUploadResponse(files: List[File])
 
 object FileUploadResponse {
+
+  def apply(files: List[File]): FileUploadResponse =
+    new FileUploadResponse(files.sortBy(_.reference)) {}
 
   implicit val format = Json.format[FileUploadResponse]
 

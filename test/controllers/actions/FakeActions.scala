@@ -16,25 +16,31 @@
 
 package controllers.actions
 
+import generators.Generators
 import models.requests.{AuthenticatedRequest, EORIRequest, OptionalDataRequest, SignedInUser}
 import models.UserAnswers
 import play.api.mvc.{Request, Result}
+import org.scalacheck.Arbitrary._
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
 
-class FakeAuthAction(result: SignedInUser) extends AuthAction {
-  override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
-    Future.successful(Right(AuthenticatedRequest(request, result)))
+trait FakeActions extends Generators {
+
+  class FakeAuthAction(result: SignedInUser = arbitrary[SignedInUser].sample.get) extends AuthAction {
+    override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
+      Future.successful(Right(AuthenticatedRequest(request, result)))
+    }
   }
-}
 
-class FakeEORIAction(eori: String) extends EORIAction {
-  override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, EORIRequest[A]]] =
-    Future.successful(Right(EORIRequest[A](request, eori)))
-}
+  class FakeEORIAction(eori: String = arbitrary[String].sample.get) extends EORIAction {
+    override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, EORIRequest[A]]] =
+      Future.successful(Right(EORIRequest[A](request, eori)))
+  }
 
-class FakeDataRetrievalAction(cacheMap: Option[CacheMap]) extends DataRetrievalAction {
-  override protected def transform[A](request: EORIRequest[A]): Future[OptionalDataRequest[A]] =
-    Future.successful(OptionalDataRequest(request, cacheMap.map(UserAnswers(_))))
+  class FakeDataRetrievalAction(cacheMap: Option[CacheMap]) extends DataRetrievalAction {
+    override protected def transform[A](request: EORIRequest[A]): Future[OptionalDataRequest[A]] =
+      Future.successful(OptionalDataRequest(request, cacheMap.map(UserAnswers(_))))
+  }
+
 }

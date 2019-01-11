@@ -18,7 +18,14 @@ package config
 
 import pureconfig.{CamelCase, ConfigFieldMapping, KebabCase, ProductHint}
 
-case class AppConfig(appName: String, developerHubClientId: String, contactFrontend: ContactFrontend, assets: Assets, googleAnalytics: GoogleAnalytics, microservice: Microservice)
+case class AppConfig(
+  appName: String,
+  developerHubClientId: String,
+  contactFrontend: ContactFrontend,
+  assets: Assets,
+  googleAnalytics: GoogleAnalytics,
+  microservice: Microservice,
+  fileFormats: FileFormats)
 
 object AppConfig {
   implicit val appNameHint: ProductHint[AppConfig] = ProductHint(new ConfigFieldMapping {
@@ -49,3 +56,5 @@ case class CustomsDeclarations(protocol: Option[String], host: String, port: Opt
   def batchUploadEndpoint: String = s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$batchUploadUri"
 
 }
+
+case class FileFormats(maxFileSize: Int, approvedFileExt: String)

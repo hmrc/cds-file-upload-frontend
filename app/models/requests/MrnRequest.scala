@@ -17,10 +17,12 @@
 package models.requests
 
 import play.api.mvc.WrappedRequest
-import models.{MRN, UserAnswers}
+import models.{FileUploadResponse, MRN, UserAnswers}
 
 case class OptionalDataRequest[A](request: EORIRequest[A],
                                   userAnswers: Option[UserAnswers]) extends WrappedRequest[A](request)
 
 
 case class MrnRequest[A](request: EORIRequest[A], userAnswers: UserAnswers, mrn: MRN) extends WrappedRequest[A](request)
+
+case class FileUploadResponseRequest[A](request: EORIRequest[A], userAnswers: UserAnswers, fileUploadResponse: FileUploadResponse) extends WrappedRequest[A](request)

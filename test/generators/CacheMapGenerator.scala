@@ -31,7 +31,11 @@ trait CacheMapGenerator {
     } yield (key, value)
 
   private val entriesGen: Gen[Map[String, JsValue]] =
-    Gen.listOf(entryGen).map(_.toMap)
+    for {
+      i    <- Gen.choose(0, 10)
+      list <- Gen.listOfN(i, entryGen)
+    } yield list.toMap
+
 
   implicit lazy val arbitraryCacheMap: Arbitrary[CacheMap] =
     Arbitrary {
