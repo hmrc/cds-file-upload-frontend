@@ -162,12 +162,13 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
     "update file status to Uploaded" in {
 
       forAll(responseGen, arbitrary[CacheMap]) {
-        case ((file, response), cache: CacheMap) =>
+        case ((file, response), cache) =>
 
           val updatedCache = combine(response, cache)
           val result = controller(getCacheMap(updatedCache)).onSuccess(file.reference)(fakeRequest)
 
           whenReady(result) { _ =>
+
             val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
             verify(dataCacheConnector, atLeastOnce).save(captor.capture())
 
