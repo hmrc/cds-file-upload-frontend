@@ -40,8 +40,7 @@ class UploadYourFilesSpec extends ViewSpecBase with ViewBehaviours with Property
                           "listItem2",
                           "listItem3",
                           "listItem4",
-                          "listItem5",
-                          "listItem6"
+                          "listItem5"
                         )
 
   "Upload your files page" must {
