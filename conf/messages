@@ -74,8 +74,10 @@ fileUploadPage.validation.accept=The file you have chosen is not a permitted fil
 fileUploadPage.validation.filesize=The file you have chosen is bigger than 10MB and is not permitted
 
 fileUploadReceiptPage.title=Upload your files receipt
-fileUploadReceiptPage.heading=You have uploaded {0} of files:
+fileUploadReceiptPage.heading=You have uploaded {0} files:
 fileUploadReceiptPage.whatHappensNext=What happens next?
+fileUploadReceiptPage.fileName=File name
+fileUploadReceiptPage.receipt=Receipt
 fileUploadReceiptPage.paragraph1=Typical clearance times are 2 hours for air and 3 hours for maritime declarations. During busy periods wait times may be longer.
 fileUploadReceiptPage.paragraph2=For queries about electronic submission of Route 1 and 2 declarations for Heathrow, Gatwick and Stansted airports
 fileUploadReceiptPage.paragraph3=Email {0}.
