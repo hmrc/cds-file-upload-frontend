@@ -49,8 +49,8 @@
 
     @{
       Some(refPosition).collect {
-        case Middle(index, total) => messages("fileUploadPage.filesUploaded", index, total)
-        case Last(total)          => messages("fileUploadPage.filesUploaded", total, total)
+        case Middle(index, total) => messages("fileUploadPage.filesUploaded", index - 1, total)
+        case Last(total)          => messages("fileUploadPage.filesUploaded", total - 1, total)
       }.map(paragraph)
     }
 

@@ -109,7 +109,7 @@ class UploadYourFilesSpec extends ViewSpecBase with ViewBehaviours with Property
         forAll { (index: Int, total: Int) =>
 
           val doc = asDocument(view(Middle(index, total)))
-          assertContainsMessage(doc, s"$messagePrefix.filesUploaded", index, total)
+          assertContainsMessage(doc, s"$messagePrefix.filesUploaded", index - 1, total)
         }
       }
 
@@ -118,7 +118,7 @@ class UploadYourFilesSpec extends ViewSpecBase with ViewBehaviours with Property
         forAll { total: Int =>
 
           val doc = asDocument(view(Last(total)))
-          assertContainsMessage(doc, s"$messagePrefix.filesUploaded", total, total)
+          assertContainsMessage(doc, s"$messagePrefix.filesUploaded", total - 1, total)
         }
       }
     }
