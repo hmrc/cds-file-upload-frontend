@@ -63,20 +63,20 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
   private def combine(response: FileUploadResponse, cache: CacheMap): CacheMap =
     cache.copy(data = cache.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))
 
+  private def nextRef(ref: String, refs: List[String]): String = {
+    val index = refs.sorted.indexOf(ref)
+    refs.sorted.drop(index + 1).headOption.getOrElse("receipt")
+  }
+
   ".onPageLoad" should {
 
     "load the view" when {
 
-      def nextRef(ref: String, refs: List[String]): String = {
-        val index = refs.sorted.indexOf(ref)
-        refs.sorted.drop(index + 1).headOption.getOrElse("receipt")
-      }
-
       def nextPosition(ref: String, refs: List[String]): Position = {
         refs.indexOf(ref) match {
-          case 0                           => First
-          case x if x == (refs.length - 1) => Last
-          case _                           => Middle
+          case 0                           => First(refs.size)
+          case x if x == (refs.length - 1) => Last(refs.size)
+          case x                           => Middle(x + 1, refs.size)
         }
       }
 
@@ -96,6 +96,33 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
 
             status(result) mustBe OK
             contentAsString(result) mustBe viewAsString(file.uploadRequest, callback, refPosition)
+        }
+      }
+    }
+
+    "redirect to the next page" when {
+
+      "file has already been uploaded" in {
+
+        val fileUploadedGen = responseGen.map {
+          case (file, response) =>
+            val uploadedFile = file.copy(state = Uploaded)
+            val updatedFiles = uploadedFile :: response.files.filterNot(_ == file)
+
+            (uploadedFile, FileUploadResponse(updatedFiles))
+        }
+
+        forAll(fileUploadedGen, arbitrary[CacheMap]) {
+          case ((file, response), cache) =>
+
+            val reference    = nextRef(file.reference, response.files.map(_.reference))
+            val nextPage     = routes.UploadYourFilesController.onPageLoad(reference)
+            val updatedCache = combine(response, cache)
+
+            val result = controller(getCacheMap(updatedCache)).onPageLoad(file.reference)(fakeRequest)
+
+            status(result) mustBe SEE_OTHER
+            redirectLocation(result) mustBe Some(nextPage.url)
         }
       }
     }
@@ -131,11 +158,6 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
   }
 
   ".onSuccess" should {
-
-    def nextRef(ref: String, refs: List[String]): String = {
-      val index = refs.sorted.indexOf(ref)
-      refs.sorted.drop(index + 1).headOption.getOrElse("receipt")
-    }
 
     "update file status to Uploaded" in {
 

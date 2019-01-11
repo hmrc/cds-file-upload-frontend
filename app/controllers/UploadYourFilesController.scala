@@ -21,8 +21,7 @@ import config.AppConfig
 import connectors.DataCacheConnector
 import controllers.actions._
 import javax.inject.Inject
-import models.{FileUploadResponse, Uploaded}
-import models.requests.FileUploadResponseRequest
+import models.{File, FileUploadResponse, Uploaded, Waiting}
 import pages.HowManyFilesUploadPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Call, Request}
@@ -49,45 +48,49 @@ class UploadYourFilesController @Inject()(
       val refPosition = getPosition(ref, references)
 
       req.fileUploadResponse.files.find(_.reference == ref) match {
-        case Some(file) => Ok(upload_your_files(file.uploadRequest, callback, refPosition))
-        case None       => Redirect(routes.SessionExpiredController.onPageLoad())
+        case Some(file) =>
+          file.state match {
+            case Waiting => Ok(upload_your_files(file.uploadRequest, callback, refPosition))
+            case _       => Redirect(nextPage(file.reference, req.fileUploadResponse.files))
+          }
+
+        case None => Redirect(routes.SessionExpiredController.onPageLoad())
       }
   }
 
   def onSuccess(ref: String): Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
 
-      val references  = req.fileUploadResponse.files.map(_.reference)
+      val files  = req.fileUploadResponse.files
 
-      req.fileUploadResponse.files.find(_.reference == ref) match {
-        case Some(file) => {
-          val files = file.copy(state = Uploaded) :: req.fileUploadResponse.files.filterNot(_.reference == ref)
-          val answers = req.userAnswers.set(HowManyFilesUploadPage.Response, FileUploadResponse(files))
+      files.find(_.reference == ref) match {
+        case Some(file) =>
+          val updatedFiles = file.copy(state = Uploaded) :: files.filterNot(_.reference == ref)
+          val answers = req.userAnswers.set(HowManyFilesUploadPage.Response, FileUploadResponse(updatedFiles))
 
           dataCacheConnector.save(answers.cacheMap).map { _ =>
-            Redirect(nextPage(ref, references))
+            Redirect(nextPage(ref, files))
           }
-        }
 
         case None => Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
       }
     }
 
-  def nextPage(ref: String, refs: List[String])(implicit request: Request[_]): Call =
+  def nextPage(ref: String, refs: List[File])(implicit request: Request[_]): Call =
     refs
-      .partition(_ <= ref)._2
-      .headOption
-      .map(routes.UploadYourFilesController.onPageLoad(_))
+      .partition(_.reference <= ref)._2
+      .find(_.state == Waiting)
+      .map(file => routes.UploadYourFilesController.onPageLoad(file.reference))
       .getOrElse(routes.UploadYourFilesReceiptController.onPageLoad())
 
   def getPosition(ref: String, refs: List[String]): Position =
-    if (refs.headOption.contains(ref)) First
-    else if (refs.lastOption.contains(ref)) Last
-    else Middle
+    if (refs.headOption.contains(ref)) First(refs.size)
+    else if (refs.lastOption.contains(ref)) Last(refs.size)
+    else Middle(refs.indexOf(ref) + 1, refs.size)
 }
 
 sealed trait Position
 
-case object First  extends Position
-case object Middle extends Position
-case object Last   extends Position
+case class First(total: Int)              extends Position
+case class Middle(index: Int, total: Int) extends Position
+case class Last(total: Int)               extends Position

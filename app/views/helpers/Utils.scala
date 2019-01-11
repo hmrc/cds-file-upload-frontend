@@ -37,4 +37,8 @@ object Utils {
   def email(address: String): Html = {
     Html(s"""<a href="email:$address">$address</a>""")
   }
+
+  def paragraph(content: String): Html = {
+    Html(s"<p>$content</p>")
+  }
 }

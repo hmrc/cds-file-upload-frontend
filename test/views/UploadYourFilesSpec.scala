@@ -16,19 +16,21 @@
 
 package views
 
-import controllers.{Position, First, Middle, Last}
+import controllers.{First, Last, Middle, Position}
+import generators.Generators
 import models.UploadRequest
+import org.scalatest.prop.PropertyChecks
 import play.twirl.api.Html
 import views.behaviours.ViewBehaviours
 import views.html.upload_your_files
 
-class UploadYourFilesSpec extends ViewSpecBase with ViewBehaviours {
+class UploadYourFilesSpec extends ViewSpecBase with ViewBehaviours with PropertyChecks with Generators {
 
   def view(pos: Position): Html =
     upload_your_files(
       new UploadRequest("", Map("" -> "")), "", pos)(fakeRequest, messages, appConfig)
 
-  val view: () => Html = () => view(First)
+  val view: () => Html = () => view(First(3))
 
   val messagePrefix = "fileUploadPage"
 
@@ -46,19 +48,79 @@ class UploadYourFilesSpec extends ViewSpecBase with ViewBehaviours {
 
     behave like pageWithoutHeading(view, messagePrefix, messageKeys: _*)
 
-    "show heading for first file" in {
+    "show title" when {
 
-      assertPageTitleEqualsMessage(asDocument(view(First)), s"$messagePrefix.heading.first")
+      "first file upload is shown" in {
+
+        forAll { total: Int =>
+
+          assertEqualsMessage(asDocument(view(First(total))), "title", s"$messagePrefix.title.first")
+        }
+      }
+
+      "a middle file upload is shown" in {
+
+        forAll { (index: Int, total: Int) =>
+
+          assertEqualsMessage(asDocument(view(Middle(index, total))), "title", s"$messagePrefix.title.middle")
+        }
+      }
+
+      "the last file upload is shown" in {
+
+        forAll { total: Int =>
+
+          assertEqualsMessage(asDocument(view(Last(total))), "title", s"$messagePrefix.title.last")
+        }
+      }
     }
 
-    "show heading for middle file" in {
+    "show heading" when {
 
-      assertPageTitleEqualsMessage(asDocument(view(Middle)), s"$messagePrefix.heading.middle")
+      "first file upload is shown" in {
+
+        forAll { total: Int =>
+
+          assertPageTitleEqualsMessage(asDocument(view(First(total))), s"$messagePrefix.heading.first")
+        }
+      }
+
+      "a middle file upload is shown" in {
+
+        forAll { (index: Int, total: Int) =>
+
+          assertPageTitleEqualsMessage(asDocument(view(Middle(index, total))), s"$messagePrefix.heading.middle")
+        }
+      }
+
+      "the last file upload is shown" in {
+
+        forAll { total: Int =>
+
+          assertPageTitleEqualsMessage(asDocument(view(Last(total))), s"$messagePrefix.heading.last")
+        }
+      }
     }
 
-    "show heading for last file" in {
+    "show file upload counter" when {
 
-      assertPageTitleEqualsMessage(asDocument(view(Last)), s"$messagePrefix.heading.last")
+      "a file middle is requested" in {
+
+        forAll { (index: Int, total: Int) =>
+
+          val doc = asDocument(view(Middle(index, total)))
+          assertContainsMessage(doc, s"$messagePrefix.filesUploaded", index, total)
+        }
+      }
+
+      "the last file is requested" in {
+
+        forAll { total: Int =>
+
+          val doc = asDocument(view(Last(total)))
+          assertContainsMessage(doc, s"$messagePrefix.filesUploaded", total, total)
+        }
+      }
     }
   }
 

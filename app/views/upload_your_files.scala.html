@@ -22,16 +22,18 @@
 
 @(uploadRequest: UploadRequest, callbackUrl: String, refPosition: Position)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = messages("fileUploadPage.title"), bodyClasses = None) {
+@positionModifier = @{refPosition match {
+    case First(_)     => "first"
+    case Middle(_, _) => "middle"
+    case Last(_)      => "last"
+}}
+
+@main_template(title = messages(s"fileUploadPage.title.$positionModifier"), bodyClasses = None) {
 
 <div class="form-group">
 
     <h1 class="heading-large">
-        @{refPosition match {
-            case First  => messages("fileUploadPage.heading.first")
-            case Middle => messages("fileUploadPage.heading.middle")
-            case Last   => messages("fileUploadPage.heading.last")
-        }}
+        @messages(s"fileUploadPage.heading.$positionModifier")
     </h1>
 
     <p>@messages("fileUploadPage.p.fileNeedsToBe")</p>
@@ -45,6 +47,12 @@
         <li>@messages("fileUploadPage.listItem6")</li>
     </ul>
 
+    @{
+      Some(refPosition).collect {
+        case Middle(index, total) => messages("fileUploadPage.filesUploaded", index, total)
+        case Last(total)          => messages("fileUploadPage.filesUploaded", total, total)
+      }.map(paragraph)
+    }
 
     @hmrcHelpers.form(Call("POST", uploadRequest.href), ('enctype, "multipart/form-data"), ('class, "js-form")) {
 

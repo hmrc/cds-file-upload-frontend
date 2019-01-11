@@ -56,7 +56,9 @@ howManyFilesUpload.heading=How many files do you need to upload?
 
 howManyFilesUpload.invalid=You have entered an invalid number of files, you can upload 1 or more files up to a maximum number of 10 files. Please re-enter the number of files you wish to upload.
 
-fileUploadPage.title=Upload your files
+fileUploadPage.title.first=Upload your first file
+fileUploadPage.title.middle=Upload your next file
+fileUploadPage.title.last=Upload your last file
 fileUploadPage.heading.first=Upload your first file
 fileUploadPage.heading.middle=Upload your next file
 fileUploadPage.heading.last=Upload your last file
@@ -67,6 +69,7 @@ fileUploadPage.listItem3=png (image)
 fileUploadPage.listItem4=PDF
 fileUploadPage.listItem5=MS Word document (.doc or .docx)
 fileUploadPage.listItem6=MS Excel spreadsheet (.xls or .xlsx)
+fileUploadPage.filesUploaded=You have uploaded {0} of {1} files
 fileUploadPage.validation.required=You must choose a file to upload
 fileUploadPage.validation.accept=The file you have chosen is not a permitted file type
 fileUploadPage.validation.filesize=The file you have chosen is bigger than 10MB and is not permitted

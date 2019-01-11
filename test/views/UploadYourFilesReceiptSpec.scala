@@ -49,6 +49,16 @@ class UploadYourFilesReceiptSpec extends ViewSpecBase with ViewBehaviours with P
   "File Upload Receipt Page" must {
     behave like pageWithoutHeading(view, messagePrefix, messageKeys: _*)
 
+    "have title" in {
+
+      forAll { receipts: List[String] =>
+
+        val doc = asDocument(view(receipts))
+
+        assertEqualsMessage(doc, "title", s"$messagePrefix.title")
+      }
+    }
+
     "have heading" in {
 
       forAll { receipts: List[String] =>
