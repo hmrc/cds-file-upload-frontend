@@ -50,7 +50,7 @@
       Some(refPosition).collect {
         case Middle(index, total) => messages("fileUploadPage.filesUploaded", index - 1, total)
         case Last(total)          => messages("fileUploadPage.filesUploaded", total - 1, total)
-      }.map(paragraph)
+      }.map(x => paragraph(bold(x)))
     }
 
     @hmrcHelpers.form(Call("POST", uploadRequest.href), ('enctype, "multipart/form-data"), ('class, "js-form")) {
