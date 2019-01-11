@@ -36,9 +36,6 @@ class UploadYourFilesReceiptSpec extends ViewSpecBase with ViewBehaviours with P
     "whatHappensNext",
     "paragraph1",
     "paragraph2",
-    "paragraph4",
-    "paragraph5",
-    "paragraph7",
     "helpline",
     "imports",
     "imports.tel",
@@ -67,22 +64,6 @@ class UploadYourFilesReceiptSpec extends ViewSpecBase with ViewBehaviours with P
 
         assertPageTitleEqualsMessage(doc, s"$messagePrefix.heading", receipts.length)
       }
-    }
-
-    "have paragraph 3 with email" in {
-
-      val doc = asDocument(view())
-      val email = messages(s"$messagePrefix.paragraph3.email")
-
-      assertContainsMessage(doc, s"$messagePrefix.paragraph3", email)
-    }
-
-    "have paragraph 6 with email" in {
-
-      val doc = asDocument(view())
-      val email = messages(s"$messagePrefix.paragraph6.email")
-
-      assertContainsMessage(doc, s"$messagePrefix.paragraph6", email)
     }
 
     "display all receipts" in {
