@@ -19,16 +19,17 @@ package generators
 import models.{FileUploadCount, MRN, _}
 import org.scalacheck.Arbitrary._
 import org.scalacheck.{Arbitrary, Gen}
+import org.scalatest.OptionValues
 import wolfendale.scalacheck.regexp.RegexpGen
 
-trait ModelGenerators extends SignedInUserGen {
+trait ModelGenerators extends SignedInUserGen with OptionValues {
   self: Generators =>
 
   implicit val arbitraryMrn: Arbitrary[MRN] =
-    Arbitrary(RegexpGen.from(MRN.validRegex).map(MRN(_)).suchThat(_.nonEmpty).map(_.get))
+    Arbitrary(RegexpGen.from(MRN.validRegex).map(MRN(_)).suchThat(_.nonEmpty).map(_.value))
 
   implicit val arbitraryFileCount: Arbitrary[FileUploadCount] =
-    Arbitrary(Gen.chooseNum(1, 10).map(FileUploadCount(_).get))
+    Arbitrary(Gen.chooseNum(1, 10).map(FileUploadCount(_).value))
 
   val fileUploadRequestGen: Gen[FileUploadRequest] =
     for {
@@ -44,10 +45,10 @@ trait ModelGenerators extends SignedInUserGen {
 
   val fileUploadFileGen: Gen[FileUploadFile] =
     for {
-      seqNo <- intsAboveValue(0)
+      seqNo   <- intsAboveValue(0)
       doctype <- arbitrary[String]
     } yield {
-      FileUploadFile(seqNo, doctype).get
+      FileUploadFile(seqNo, doctype).value
     }
 
   implicit val arbitraryFileUploadFile: Arbitrary[FileUploadFile] =
@@ -66,7 +67,7 @@ trait ModelGenerators extends SignedInUserGen {
   implicit val arbitraryFile: Arbitrary[File] =
     Arbitrary {
       for {
-        ref <- arbitrary[String].map(_.trim)
+        ref           <- saneString
         uploadRequest <- arbitrary[UploadRequest]
       } yield {
         File(ref, uploadRequest)
@@ -78,8 +79,9 @@ trait ModelGenerators extends SignedInUserGen {
       val tupleGen = saneString.flatMap(a => arbitrary[String].map(b => (a, b.trim)))
 
       for {
-        href <- arbitrary[String].map(_.trim)
-        fields <- Gen.listOf(tupleGen).map(_.toMap) suchThat (_.nonEmpty)
+        href   <- arbitrary[String].map(_.trim)
+        i      <- Gen.choose(1, 10)
+        fields <- Gen.listOfN(i, tupleGen).map(_.toMap)
       } yield {
         UploadRequest(href, fields)
       }
