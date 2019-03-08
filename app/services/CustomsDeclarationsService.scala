@@ -40,5 +40,4 @@ class CustomsDeclarationsServiceImpl @Inject()(customsDeclarationsConnector: Cus
 
     customsDeclarationsConnector.requestFileUpload(eori, request)
   }
-
 }
