@@ -47,7 +47,9 @@ lazy val microservice = Project(appName, file("."))
     // concatenate js
     Concat.groups := Seq(
       "javascripts/cdsfileuploadfrontend-app.js" ->
-        group(Seq("javascripts/cdsfileuploadfrontend.js"))
+        group(Seq("javascripts/cdsfileuploadfrontend.js")),
+      "javascripts/analytics.min.js" ->
+        group(Seq("javascripts/analytics.js"))
     ),
     // prevent removal of unused code which generates warning errors due to use of third-party libs
     uglifyCompressOptions := Seq("unused=false", "dead_code=false"),
