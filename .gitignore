@@ -1,6 +1,7 @@
 .*
 
 !.gitignore
+!.pa11yci
 
 .cache
 /.classpath
@@ -33,3 +34,5 @@ test-result
 tmp
 .idea_modules
 bin
+package-lock.json
+node_modules/
