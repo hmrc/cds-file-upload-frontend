@@ -1,0 +1,11 @@
+{
+  "name": "customs-declare-imports-frontend",
+  "description": "Pa11y CI accessibility test",
+  "scripts": {
+    "test": "mkdir -p target/test-reports/html-report/a11y/screenshots && pa11y-ci"
+  },
+  "dependencies": {
+    "pa11y-ci": "2.1.1",
+    "puppeteer": "1.6.2"
+  }
+}
