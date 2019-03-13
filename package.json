@@ -1,6 +1,6 @@
 {
   "name": "cds-file-upload-frontend",
-  "description": "Pa11y Cl accessibility test",
+  "description": "Pa11y CI accessibility test",
   "scripts": {
     "test": "mkdir -p target/test-reports/html-report/a11y/screenshots && pa11y-ci"
   },
