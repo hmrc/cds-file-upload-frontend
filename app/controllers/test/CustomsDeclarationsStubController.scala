@@ -19,6 +19,7 @@ package controllers.test
 import java.util.UUID
 
 import javax.inject.{Inject, Singleton}
+import models.Field._
 import models.{File, FileUploadResponse, UploadRequest}
 import play.api.data.Form
 import play.api.data.Forms._
@@ -43,13 +44,12 @@ class CustomsDeclarationsStubController @Inject()() extends FrontendController {
       File(reference = UUID.randomUUID().toString, UploadRequest(
         href = "/cds-file-upload-service/test-only/s3-bucket",
         fields = Map(
-          "X-Amz-Algorithm" -> "AWS4-HMAC-SHA256",
-          "X-Amz-Expiration" -> "2018-02-09T12:35:45.297Z",
-          "X-Amz-Signature" -> "xxxx",
-          "key" -> "xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-          "acl" -> "private",
-          "X-Amz-Credential" -> "ASIAxxxxxxxxx/20180202/eu-west-2/s3/aws4_request",
-          "policy" -> "xxxxxxxx=="
+          Algorithm.toString   -> "AWS4-HMAC-SHA256",
+          Signature.toString   -> "xxxx",
+          Key.toString         -> "xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+          ACL.toString         -> "private",
+          Credentials.toString -> "ASIAxxxxxxxxx/20180202/eu-west-2/s3/aws4_request",
+          Policy.toString      -> "xxxxxxxx=="
         )
       ))
     }.toList)
@@ -72,16 +72,16 @@ object XmlHelper {
       <a/>.copy(label = field._1, child = Seq(Text(field._2)))
 
   def toXml(uploadRequest: UploadRequest): Elem =
-    <uploadRequest>
-      <href>{uploadRequest.href}</href>
-      <fields>
+    <UploadRequest>
+      <Href>{uploadRequest.href}</Href>
+      <Fields>
         {uploadRequest.fields.map(toXml)}
-      </fields>
-    </uploadRequest>
+      </Fields>
+    </UploadRequest>
 
   def toXml(file: File): Elem =
     <File>
-      <reference>{file.reference}</reference>
+      <Reference>{file.reference}</Reference>
       {toXml(file.uploadRequest)}
     </File>
 

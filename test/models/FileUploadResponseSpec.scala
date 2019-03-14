@@ -23,17 +23,6 @@ import org.scalatest.prop.PropertyChecks
 
 class FileUploadResponseSpec extends SpecBase with XmlBehaviours with PropertyChecks with Generators {
 
-  "generators" should {
-
-    "create valid xml" in {
-
-      forAll { response: FileUploadResponse =>
-
-        validateFileUploadResponse(XmlHelper.toXml(response)) mustBe true
-      }
-    }
-  }
-
   ".fromXml" should {
 
     "parse all fields" in {
