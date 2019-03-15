@@ -66,6 +66,14 @@ trait Constraints {
         Invalid(errorKey, maximum)
     }
 
+  protected def maxLengthInt (maximum: Int, errorKey: String): Constraint[BigDecimal] =
+    Constraint {
+      case str if str <= maximum =>
+        Valid
+      case _ =>
+        Invalid(errorKey, maximum)
+    }
+
   protected def length(length: Int, errorKey: String): Constraint[String] =
     Constraint {
       case str if str.length == length => Valid

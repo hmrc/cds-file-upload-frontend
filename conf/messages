@@ -36,6 +36,12 @@ mrnEntryPage.hint2=You were given this when you submitted your declaration.
 
 mrn.invalid=The MRN you have entered doesn't follow CDS rules, please check your declaration MRN and re-enter
 
+## Contact details page
+contactDetails.name.invalid=Name must be less than or equal to 35 characters
+contactDetails.companyName.invalid=Company name must be less than or equal to 35 characters
+contactDetails.phoneNumber.invalid=Phone number must be less than or equal to 35 characters
+contactDetails.email.invalid=Email must be less than or equal to 35 characters
+
 ## file warning page
 fileWarning.title=Count your files
 fileWarning.heading=Count your files
