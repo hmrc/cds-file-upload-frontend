@@ -16,7 +16,7 @@
 
 package repositories
 
-import com.google.inject.Inject
+import com.google.inject.{ImplementedBy, Inject}
 import config.{AppConfig, Crypto}
 import models.FileUploadResponse
 import models.requests.EORI
@@ -30,6 +30,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@ImplementedBy(classOf[MongoFileUploadResponseRepository])
 trait FileUploadResponseRepository extends Repository {
 
   def put(eori: EORI, data: List[FileUploadResponse]): Future[Unit]

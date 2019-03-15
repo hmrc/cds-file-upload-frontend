@@ -37,7 +37,7 @@ class FileUploadResponseRepositorySpec extends WordSpec with MustMatchers
             _      <- started(fileUploadResponseRepo)
             result <- fileUploadResponseRepo.getAll(EORI("123"))
           } yield {
-            result mustBe None
+            result mustBe List.empty
           }
           test.futureValue
         }
