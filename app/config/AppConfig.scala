@@ -18,6 +18,8 @@ package config
 
 import pureconfig.{CamelCase, ConfigFieldMapping, KebabCase, ProductHint}
 
+import scala.concurrent.duration.Duration
+
 case class AppConfig(
   appName: String,
   developerHubClientId: String,
@@ -25,7 +27,8 @@ case class AppConfig(
   assets: Assets,
   googleAnalytics: GoogleAnalytics,
   microservice: Microservice,
-  fileFormats: FileFormats)
+  fileFormats: FileFormats,
+  mongodb: Mongo)
 
 object AppConfig {
   implicit val appNameHint: ProductHint[AppConfig] = ProductHint(new ConfigFieldMapping {
@@ -58,3 +61,5 @@ case class CustomsDeclarations(protocol: Option[String], host: String, port: Opt
 }
 
 case class FileFormats(maxFileSize: Int, approvedFileExt: String)
+
+case class Mongo(uri: String, encryptionEnabled: Boolean, shortTtl: Duration)
