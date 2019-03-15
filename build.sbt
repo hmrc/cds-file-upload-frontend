@@ -6,7 +6,7 @@ import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
 val appName = "cds-file-upload-frontend"
 val jacksonVersion = "2.9.7"
-
+val test = "it,test"
 resolvers += Resolver.bintrayRepo("wolfendale", "maven")
 
 lazy val microservice = Project(appName, file("."))
@@ -23,20 +23,24 @@ lazy val microservice = Project(appName, file("."))
       "com.fasterxml.jackson.core"       %  "jackson-annotations"      % jacksonVersion,
       "com.fasterxml.jackson.dataformat" %  "jackson-dataformat-xml"   % jacksonVersion,
       "com.fasterxml.jackson.module"     %% "jackson-module-scala"     % jacksonVersion,
-      "uk.gov.hmrc"                      %% "play-reactivemongo"       % "6.4.0",
       "uk.gov.hmrc"                      %% "http-caching-client"      % "8.1.0",
       "uk.gov.hmrc"                      %% "play-whitelist-filter"    % "2.0.0",
+      "org.reactivemongo"                %% "play2-reactivemongo"      % "0.16.3-play25",
+      "uk.gov.hmrc"                      %% "crypto"                   % "5.3.0",
 
-      "org.scalatest"              %% "scalatest"                 % "3.0.4"  % "test",
-      "org.jsoup"                  %  "jsoup"                     % "1.10.2" % "test",
-      "com.typesafe.play"          %% "play-test"                 % current  % "test",
-      "org.pegdown"                %  "pegdown"                   % "1.6.0"  % "test",
-      "uk.gov.hmrc"                %% "service-integration-test"  % "0.2.0"  % "test",
-      "org.scalatestplus.play"     %% "scalatestplus-play"        % "2.0.0"  % "test",
-      "org.mockito"                %  "mockito-core"              % "2.13.0" % "test",
-      "org.scalacheck"             %% "scalacheck"                % "1.14.0" % "test",
-      "wolfendale"                 %% "scalacheck-gen-regexp"     % "0.1.1"  % "test"
+      "org.scalatest"              %% "scalatest"                 % "3.0.4"  % test,
+      "org.jsoup"                  %  "jsoup"                     % "1.10.2" % test,
+      "com.typesafe.play"          %% "play-test"                 % current  % test,
+      "org.pegdown"                %  "pegdown"                   % "1.6.0"  % test,
+      "uk.gov.hmrc"                %% "service-integration-test"  % "0.2.0"  % test,
+      "org.scalatestplus.play"     %% "scalatestplus-play"        % "2.0.0"  % test,
+      "org.mockito"                %  "mockito-core"              % "2.13.0" % test,
+      "org.scalacheck"             %% "scalacheck"                % "1.14.0" % test,
+      "wolfendale"                 %% "scalacheck-gen-regexp"     % "0.1.1"  % test
+    ),
 
+    dependencyOverrides ++= Set(
+      "org.reactivemongo" %% "reactivemongo" % "0.16.3"
     )
   )
   .settings(publishingSettings: _*)
