@@ -67,15 +67,38 @@ object FileUploadResponse {
   def fromXml(xml: Elem): FileUploadResponse = {
     val files: List[File] = (xml \ "Files" \ "_").theSeq.collect {
       case file =>
-        val reference = (file \ "reference").text.trim
-        val href = (file \ "uploadRequest" \ "href").text.trim
-        val fields: Map[String, String] = (file \ "uploadRequest" \ "fields" \ "_").theSeq.collect {
-          case field =>
-            field.label -> field.text.trim
-        }.toMap
+        val reference = (file \ "Reference").text.trim
+        val href = (file \ "UploadRequest" \ "Href").text.trim
+        val fields: Map[String, String] =
+          (file \ "UploadRequest" \ "Fields" \ "_")
+            .theSeq
+            .map(field => Field.values.find(_.toString == field.label).map(_.toString -> field.text.trim))
+            .collect { case Some(field) => field }.toMap
+
         File(reference, UploadRequest(href, fields))
     }.toList
 
     FileUploadResponse(files)
   }
+}
+
+abstract class Field(value: String) {
+  override def toString: String = value
+}
+
+object Field {
+
+  final case object ContentType extends Field("Content-Type")
+  final case object ACL         extends Field("acl")
+  final case object Key         extends Field("key")
+  final case object Policy      extends Field("policy")
+  final case object Algorithm   extends Field("x-amz-algorithm")
+  final case object Credentials extends Field("x-amz-credential")
+  final case object Date        extends Field("x-amz-date")
+  final case object Callback    extends Field("x-amz-meta-callback-url")
+  final case object Signature   extends Field("x-amz-signature")
+
+  val values: Set[Field] = Set(
+    ContentType, ACL, Key, Policy, Algorithm, Credentials, Date, Signature, Callback
+  )
 }

@@ -74,9 +74,14 @@ trait ModelGenerators extends SignedInUserGen with OptionValues {
       }
     }
 
+  implicit val arbitraryField: Arbitrary[Field] =
+    Arbitrary {
+      Gen.oneOf(Field.values.toList)
+    }
+
   implicit val arbitraryUploadRequest: Arbitrary[UploadRequest] =
     Arbitrary {
-      val tupleGen = saneString.flatMap(a => arbitrary[String].map(b => (a, b.trim)))
+      val tupleGen = arbitrary[Field].flatMap(a => arbitrary[String].map(b => (a.toString, b.trim)))
 
       for {
         href   <- arbitrary[String].map(_.trim)
