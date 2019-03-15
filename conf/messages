@@ -16,6 +16,7 @@ error.summary.title=There is a problem
 common.button.startNow=Start now
 
 ## start page
+
 startPage.title=Upload a customs document
 startPage.heading=Upload a customs document
 startPage.paragraph1=Upload documents to support your import or export declaration.
@@ -29,20 +30,28 @@ startPage.listItem1=a Government Gateway account
 startPage.listItem2=the movement reference number (MRN) of your declaration
 
 # MRN Entry Page
+
 mrnEntryPage.title=What is your movement reference number (MRN)?
 mrnEntryPage.heading=What is your movement reference number (MRN)?
 mrnEntryPage.hint1=This is 18 digits long, and is made up of letters and numbers.
 mrnEntryPage.hint2=You were given this when you submitted your declaration.
-
 mrn.invalid=The MRN you have entered doesn't follow CDS rules, please check your declaration MRN and re-enter
 
 ## Contact details page
+
+contactDetails.title=Your contact details
+contactDetails.heading=Your contact details
+contactDetails.name=Name
+contactDetails.companyName=Company name
+contactDetails.phoneNumber=Phone number
+contactDetails.email=Email address
 contactDetails.name.invalid=Name must be less than or equal to 35 characters
 contactDetails.companyName.invalid=Company name must be less than or equal to 35 characters
 contactDetails.phoneNumber.invalid=Phone number must be less than or equal to 35 characters
 contactDetails.email.invalid=Email must be less than or equal to 35 characters
 
 ## file warning page
+
 fileWarning.title=Count your files
 fileWarning.heading=Count your files
 fileWarning.paragraph1=HMRC need to know how many files you want to upload before you start uploading them.
