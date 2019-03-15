@@ -62,4 +62,4 @@ case class CustomsDeclarations(protocol: Option[String], host: String, port: Opt
 
 case class FileFormats(maxFileSize: Int, approvedFileExt: String)
 
-case class Mongo(uri: String, encryptionEnabled: Boolean, shortTtl: Duration)
+case class Mongo(uri: String, encryptionEnabled: Boolean, shortTtl: Duration, longTtl: Duration)

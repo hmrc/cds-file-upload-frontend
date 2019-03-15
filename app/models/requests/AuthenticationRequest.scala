@@ -45,3 +45,5 @@ case class EORIRequest[A](request: AuthenticatedRequest[A], eori: String) extend
 
   val user = request.user
 }
+
+case class EORI(value: String)
