@@ -16,9 +16,11 @@
 
 package views
 
+import com.fasterxml.jackson.databind.util.ViewMatcher
 import forms.mappings.ContactDetailsMapping._
 import generators.Generators
 import models.ContactDetails
+import org.scalatest.MustMatchers._
 import org.scalatest.prop.PropertyChecks
 import play.api.data.Form
 import play.twirl.api.Html
@@ -26,13 +28,16 @@ import views.behaviours.StringViewBehaviours
 import views.html.components.input_text
 import views.html.contact_details
 
-class ContactDetailsSpec extends ViewSpecBase with StringViewBehaviours[ContactDetails] with PropertyChecks with Generators{
+class ContactDetailsSpec extends ViewSpecBase
+  with StringViewBehaviours[ContactDetails]
+  with PropertyChecks
+  with Generators {
 
   val form: Form[ContactDetails] = Form(contactDetailsMapping)
 
   val simpleView: () => Html = () => contact_details(form)(fakeRequest, messages, appConfig)
 
-  def view(form: Form[_] = form): Html = contact_details(form)(fakeRequest, messages, appConfig)
+  def view(form: Form[_] = form): String = contact_details(form)(fakeRequest, messages, appConfig).toString()
 
   val messagePrefix = "contactDetails"
 
@@ -47,9 +52,42 @@ class ContactDetailsSpec extends ViewSpecBase with StringViewBehaviours[ContactD
       forAll { contactDetails: ContactDetails =>
 
         val popForm = form.fillAndValidate(contactDetails)
-        //val input = input_text(popForm("name"), getMessage("name"))
+        val input = input_text(popForm("name"), getMessage("name")).toString()
 
-       // view(popForm) must contain(input)
+        view(popForm) must include(input)
+      }
+    }
+
+    "display company name input" in {
+
+      forAll { contactDetails: ContactDetails =>
+
+        val popForm = form.fillAndValidate(contactDetails)
+        val input = input_text(popForm("companyName"), getMessage("companyName")).toString()
+
+        view(popForm) must include(input)
+      }
+    }
+
+    "display phone number input" in {
+
+      forAll { contactDetails: ContactDetails =>
+
+        val popForm = form.fillAndValidate(contactDetails)
+        val input = input_text(popForm("phoneNumber"), getMessage("phoneNumber")).toString()
+
+        view(popForm) must include(input)
+      }
+    }
+
+    "display email input" in {
+
+      forAll { contactDetails: ContactDetails =>
+        
+        val popForm = form.fillAndValidate(contactDetails)
+        val input = input_text(popForm("email"), getMessage("email")).toString()
+
+        view(popForm) must include(input)
       }
     }
   }

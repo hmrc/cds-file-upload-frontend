@@ -34,7 +34,7 @@ trait SpecBase extends PlaySpec with GuiceOneAppPerSuite {
 
   lazy val fakeRequest = FakeRequest("", "")
 
-  lazy val messages: Messages = messagesApi.preferred(fakeRequest)
+  implicit lazy val messages: Messages = messagesApi.preferred(fakeRequest)
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 }
