@@ -17,13 +17,13 @@
 package forms.mappings
 
 import base.SpecBase
-import generators.Generators
-import org.scalatest.prop.PropertyChecks
-import org.scalatest.{MustMatchers, WordSpec}
-import play.api.data.Form
 import forms.mappings.ContactDetailsMapping._
+import generators.Generators
 import models.ContactDetails
 import org.scalacheck.Arbitrary._
+import org.scalatest.MustMatchers
+import org.scalatest.prop.PropertyChecks
+import play.api.data.Form
 
 class ContactDetailsMappingSpec extends SpecBase
   with MustMatchers
