@@ -20,6 +20,8 @@ import play.api.data.validation.{Constraint, Invalid, Valid}
 
 trait Constraints {
 
+  val isInt: String => Boolean = _.matches("^[0-9-]*$")
+
   protected def firstError[A](constraints: Constraint[A]*): Constraint[A] =
     Constraint { input =>
       constraints
