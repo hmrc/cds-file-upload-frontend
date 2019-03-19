@@ -8,6 +8,9 @@ GET         /this-service-has-been-reset        controllers.SessionExpiredContro
 
 GET         /unauthorised                       controllers.UnauthorisedController.onPageLoad
 
+GET         /contact-details                    controllers.ContactDetailsController.onPageLoad
+POST        /contact-details                    controllers.ContactDetailsController.onSubmit
+
 GET         /mrn-entry                          controllers.MrnEntryController.onPageLoad
 POST        /mrn-entry                          controllers.MrnEntryController.onSubmit
 

@@ -16,11 +16,15 @@
 
 package models
 
+import play.api.libs.json.Json
+
 case class ContactDetails(name: String,
                           companyName: String,
                           phoneNumber: String,
                           email: String) {}
 
 object ContactDetails {
+
+  implicit val format = Json.format[ContactDetails]
 
 }

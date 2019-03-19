@@ -83,7 +83,7 @@ class ContactDetailsSpec extends ViewSpecBase
     "display email input" in {
 
       forAll { contactDetails: ContactDetails =>
-        
+
         val popForm = form.fillAndValidate(contactDetails)
         val input = input_text(popForm("email"), getMessage("email")).toString()
 

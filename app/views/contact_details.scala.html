@@ -27,12 +27,15 @@
 
         @components.error_summary(form.errors)
 
+        @hmrcHelpers.form(action = routes.ContactDetailsController.onSubmit()) {
+
             @components.input_text(form("name"), messages("contactDetails.name"))
             @components.input_text(form("companyName"), messages("contactDetails.companyName"))
             @components.input_text(form("phoneNumber"), messages("contactDetails.phoneNumber"))
             @components.input_text(form("email"), messages("contactDetails.email"))
 
             @components.submit_button()
+        }
 
     </div>
 }

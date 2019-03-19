@@ -37,4 +37,22 @@ trait SpecBase extends PlaySpec with GuiceOneAppPerSuite {
   implicit lazy val messages: Messages = messagesApi.preferred(fakeRequest)
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
+
+  // toJson strips out Some and None and replaces them with string values
+  def asFormParams(cc: Product): List[(String, String)] =
+    cc.getClass.getDeclaredFields.toList
+      .map { f =>
+        f.setAccessible(true)
+        (f.getName, f.get(cc))
+      }
+      .flatMap {
+        case (n, l: List[_]) if l.headOption.exists(_.isInstanceOf[Product]) =>
+          l.zipWithIndex.flatMap {
+            case (x, i) => asFormParams(x.asInstanceOf[Product]).map { case (k, v) => (s"$n[$i].$k", v) }
+          }
+        case (n, Some(p: Product)) => asFormParams(p).map { case (k, v) => (s"$n.$k", v) }
+        case (n, Some(a))          => List((n, a.toString))
+        case (n, None)             => List((n, ""))
+        case (n, a)                => List((n, a.toString))
+      }
 }

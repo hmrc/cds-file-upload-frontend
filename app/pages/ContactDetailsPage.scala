@@ -16,6 +16,10 @@
 
 package pages
 
-case object ContactDetails {
+import models.ContactDetails
+
+case object ContactDetailsPage extends QuestionPage[ContactDetails] {
+
+  override val toString: String = "contactDetailsPage"
 
 }
