@@ -74,7 +74,8 @@ class HowManyFilesUploadController @Inject()(
 
               dataCacheConnector.save(answers.cacheMap).map { _ =>
 
-                response.files.map(_.reference).headOption match {
+                val x = response.files.map(x => x.reference)
+                  x.headOption match {
                   case Some(nextRef) => Redirect(routes.UploadYourFilesController.onPageLoad(nextRef))
                   case None          => Redirect(routes.SessionExpiredController.onPageLoad())
                 }

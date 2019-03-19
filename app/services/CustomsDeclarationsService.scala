@@ -35,8 +35,9 @@ class CustomsDeclarationsServiceImpl @Inject()(customsDeclarationsConnector: Cus
                               (implicit hc: HeaderCarrier): Future[FileUploadResponse] = {
 
     val files = for(i <- 1 to fileUploadCount.value) yield FileUploadFile(i, "")
+    val fileSeq = files.collect { case Some(v) => v }
 
-    val request = FileUploadRequest(mrn, fileUploadCount, files.collect { case Some(v) => v })
+    val request = FileUploadRequest(mrn, fileUploadCount, fileSeq)
 
     customsDeclarationsConnector.requestFileUpload(eori, request)
   }
