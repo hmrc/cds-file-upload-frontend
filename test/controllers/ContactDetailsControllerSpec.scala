@@ -78,7 +78,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase
       }
     }
 
-    "return an ok when valid data is submitted" in {
+    "return an see other when valid data is submitted" in {
 
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
 
