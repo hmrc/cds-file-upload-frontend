@@ -67,7 +67,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase
       }
     }
 
-    "contact details should be displayed if it exist on the cache" in {
+    "contact details should be displayed if they exist in the cache" in {
 
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
 
