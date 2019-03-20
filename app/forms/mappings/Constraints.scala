@@ -22,6 +22,9 @@ trait Constraints {
 
   val isInt: String => Boolean = _.matches("^[0-9-]*$")
 
+  val isValidEmail:String => Boolean = _.matches("""^[a-zA-Z0-9\.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$""")
+  val isvalidPhoneNumber: String => Boolean = _.matches("""^[\d\s\+()\-/]+$""")
+
   protected def firstError[A](constraints: Constraint[A]*): Constraint[A] =
     Constraint { input =>
       constraints
@@ -63,14 +66,6 @@ trait Constraints {
   protected def maxLength(maximum: Int, errorKey: String): Constraint[String] =
     Constraint {
       case str if str.length <= maximum =>
-        Valid
-      case _ =>
-        Invalid(errorKey, maximum)
-    }
-
-  protected def maxLengthInt (maximum: Int, errorKey: String): Constraint[BigDecimal] =
-    Constraint {
-      case str if str <= maximum =>
         Valid
       case _ =>
         Invalid(errorKey, maximum)

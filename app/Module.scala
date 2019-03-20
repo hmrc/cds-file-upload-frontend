@@ -20,6 +20,9 @@ import connectors.{CustomsDeclarationsConnector, CustomsDeclarationsConnectorImp
 import controllers.actions._
 import javax.inject.Singleton
 import services.{CustomsDeclarationsService, CustomsDeclarationsServiceImpl}
+import play.api.i18n.{Lang, Messages}
+import play.api.i18n.Messages.Implicits._
+import play.api.Play.current
 
 class Module extends AbstractModule {
 

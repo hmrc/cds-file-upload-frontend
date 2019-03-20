@@ -48,7 +48,9 @@ contactDetails.email=Email address
 contactDetails.name.invalid=Name must be less than or equal to 35 characters
 contactDetails.companyName.invalid=Company name must be less than or equal to 35 characters
 contactDetails.phoneNumber.invalid=Phone number must be less than or equal to 35 characters
+contactDetails.phoneNumber.invalidPattern=Phone number is invalid
 contactDetails.email.invalid=Email must be less than or equal to 35 characters
+contactDetails.email.invalidPattern=Email is invalid
 
 ## file warning page
 

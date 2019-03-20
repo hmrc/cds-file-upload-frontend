@@ -82,11 +82,13 @@ class ContactDetailsControllerSpec extends ControllerSpecBase
 
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
 
-        val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
-        val result = controller(user, eori).onSubmit(postRequest)
+        whenever(contactDetails.email.matches(emailRegex)) {
+          val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
+          val result = controller(user, eori).onSubmit(postRequest)
 
-        status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.MrnEntryController.onPageLoad().url)
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(routes.MrnEntryController.onPageLoad().url)
+        }
       }
     }
 
@@ -111,11 +113,13 @@ class ContactDetailsControllerSpec extends ControllerSpecBase
 
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
 
-        val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
-        await(controller(user, eori).onSubmit(postRequest))
+        whenever(contactDetails.email.matches(emailRegex)) {
+          val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
+          await(controller(user, eori).onSubmit(postRequest))
 
-        val expectedMap = CacheMap(user.internalId, Map(ContactDetailsPage.toString -> Json.toJson(contactDetails)))
-        verify(dataCacheConnector, times(1)).save(expectedMap)
+          val expectedMap = CacheMap(user.internalId, Map(ContactDetailsPage.toString -> Json.toJson(contactDetails)))
+          verify(dataCacheConnector, times(1)).save(expectedMap)
+        }
       }
     }
   }

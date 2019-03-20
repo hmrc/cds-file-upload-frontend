@@ -16,26 +16,19 @@
 
 package forms.mappings
 
-import com.google.inject.Inject
 import forms.FormErrorHelper
 import models.ContactDetails
-import play.api.data.Forms.of
-import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
 import play.api.data.Forms._
-import play.api.data.Mapping
-
-import scala.util.Try
-import scala.util.control.Exception.allCatch
 
 object ContactDetailsMapping extends FormErrorHelper with Mappings {
 
   val contactDetailsMapping = mapping(
-    "name" -> text().verifying(maxLength(35, "Name must be less than or equal to 35 characters")),
-    "companyName" -> text().verifying(maxLength(35, "Company name must be less than or equal to 35 characters")),
-    "phoneNumber" -> text().verifying(maxLength(35, "Phone number must be less than or equal to 35 characters"))
-      .verifying("phone number must be digits",isInt),
-    "email" -> text().verifying(maxLength(35, "Email must be less than or equal to 35 characters"))
+    "name" -> text().verifying(maxLength(35, "contactDetails.name.invalid")),
+    "companyName" -> text().verifying(maxLength(35, "contactDetails.companyName.invalid")),
+    "phoneNumber" -> text().verifying(maxLength(15, "contactDetails.phoneNumber.invalid"))
+      .verifying("contactDetails.phoneNumber.invalidPattern", isvalidPhoneNumber),
+    "email" -> text().verifying(maxLength(50, "contactDetails.email.invalid"))
+      .verifying("contactDetails.email.invalidPattern", isValidEmail)
   )(ContactDetails.apply)(ContactDetails.unapply)
 
 }
