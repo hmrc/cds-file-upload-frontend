@@ -17,8 +17,8 @@
 package controllers.actions
 
 import generators.Generators
-import models.requests.{AuthenticatedRequest, EORIRequest, OptionalDataRequest, SignedInUser}
-import models.UserAnswers
+import models.requests._
+import models.{ContactDetails, UserAnswers}
 import play.api.mvc.{Request, Result}
 import org.scalacheck.Arbitrary._
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -41,6 +41,11 @@ trait FakeActions extends Generators {
   class FakeDataRetrievalAction(cacheMap: Option[CacheMap]) extends DataRetrievalAction {
     override protected def transform[A](request: EORIRequest[A]): Future[OptionalDataRequest[A]] =
       Future.successful(OptionalDataRequest(request, cacheMap.map(UserAnswers(_))))
+  }
+
+  class FakeContactDetailsRequiredAction(cacheMap: CacheMap, contactDetails: ContactDetails) extends ContactDetailsRequiredAction {
+    override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] =
+      Future.successful(Right(ContactDetailsRequest(request.request, UserAnswers(cacheMap), contactDetails)))
   }
 
 }

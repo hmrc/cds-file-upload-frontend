@@ -16,14 +16,19 @@
 
 package generators
 
+import models.ContactDetails
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen._
 import org.scalacheck.{Arbitrary, Gen, Shrink}
+import wolfendale.scalacheck.regexp.RegexpGen
 
 trait Generators extends CacheMapGenerator with ModelGenerators with JsonGenerators {
 
   implicit val dontShrink: Shrink[String] = Shrink.shrinkAny
 
+  val emailRegex = """^[a-zA-Z0-9\.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-.]+$"""
+
+  val phoneRegex = """^[\d\s\+()\-/]+$"""
 
   def genIntersperseString(gen: Gen[String],
                            value: String,
@@ -104,6 +109,12 @@ trait Generators extends CacheMapGenerator with ModelGenerators with JsonGenerat
   def stringsExceptSpecificValues(excluded: Set[String]): Gen[String] =
     nonEmptyString suchThat (!excluded.contains(_))
 
+  def minStringLength(length: Int): Gen[String] =
+    for {
+      i <- choose(length, length + 500)
+      n <- listOfN(i, arbitrary[Char])
+    } yield n.mkString
+
   def oneOf[T](xs: Seq[Gen[T]]): Gen[T] =
     if (xs.isEmpty) {
       throw new IllegalArgumentException("oneOf called on empty collection")
@@ -111,4 +122,17 @@ trait Generators extends CacheMapGenerator with ModelGenerators with JsonGenerat
       val vector = xs.toVector
       choose(0, vector.size - 1).flatMap(vector(_))
     }
+
+  val validEmailGen: Gen[String] = RegexpGen.from(emailRegex)
+
+  val validPhoneNumberGen: Gen[String] = RegexpGen.from(phoneRegex)
+
+  implicit val arbitraryContactDetails: Arbitrary[ContactDetails] = Arbitrary {
+    for {
+      name        <- nonEmptyString.map(_.take(35))
+      companyName <- nonEmptyString.map(_.take(35))
+      phoneNumber <- validPhoneNumberGen.map(_.take(15))
+      email       <- validEmailGen.map(_.take(50))
+    } yield ContactDetails(name, companyName, phoneNumber, email)
+  }
 }
