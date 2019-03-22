@@ -19,15 +19,22 @@ package models
 import base.SpecBase
 import controllers.test.XmlHelper
 import generators.Generators
+import org.scalacheck.Arbitrary.arbitrary
+import org.scalacheck.Gen
+import org.scalacheck.Gen._
 import org.scalatest.prop.PropertyChecks
 
 class FileUploadResponseSpec extends SpecBase with XmlBehaviours with PropertyChecks with Generators {
+
+  val fileGen: Gen[File] = arbitrary[File].flatMap(file => arbitrary[Waiting].map(waiting => file.copy(state = waiting)))
+  val responseGen: Gen[FileUploadResponse] =
+    listOfN(10, fileGen).map(files => FileUploadResponse(files))
 
   ".fromXml" should {
 
     "parse all fields" in {
 
-      forAll { response: FileUploadResponse =>
+      forAll(responseGen) { response =>
 
         val xml = XmlHelper.toXml(response)
         FileUploadResponse.fromXml(xml) mustBe response

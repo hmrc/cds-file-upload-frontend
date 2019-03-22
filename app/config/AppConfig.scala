@@ -16,6 +16,7 @@
 
 package config
 
+import models.EORI
 import pureconfig.{CamelCase, ConfigFieldMapping, KebabCase, ProductHint}
 
 import scala.concurrent.duration.Duration
@@ -52,12 +53,20 @@ case class GoogleAnalytics(token: String, host: String)
 
 case class Microservice(services: Services)
 
-case class Services(customsDeclarations: CustomsDeclarations)
+case class Services(customsDeclarations: CustomsDeclarations, cdsFileUpload: CDSFileUpload)
 
 case class CustomsDeclarations(protocol: Option[String], host: String, port: Option[Int], batchUploadUri: String, apiVersion: String) {
 
   def batchUploadEndpoint: String = s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$batchUploadUri"
 
+}
+
+case class CDSFileUpload(protocol: Option[String], host: String, port: Option[Int]) {
+
+  val uri: String = s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}"
+
+  def saveBatch(eori: EORI): String = s"$uri/cds-file-upload/batch/${eori.value}"
+  def getBatches(eori: EORI): String = s"$uri/cds-file-upload/batch/${eori.value}"
 }
 
 case class FileFormats(maxFileSize: Int, approvedFileExt: String)

@@ -44,10 +44,11 @@ class MrnEntryController @Inject()(
 
   val form = formProvider()
 
-  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireContactDetails) { implicit req =>
-    val populatedForm = req.userAnswers.get(MrnEntryPage).map(form.fill).getOrElse(form)
+  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireContactDetails) {
+    implicit req =>
+      val populatedForm = req.userAnswers.get(MrnEntryPage).map(form.fill).getOrElse(form)
 
-    Ok(mrn_entry(populatedForm))
+      Ok(mrn_entry(populatedForm))
   }
 
   def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireContactDetails).async {

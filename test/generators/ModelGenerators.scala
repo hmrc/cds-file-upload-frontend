@@ -18,6 +18,7 @@ package generators
 
 import models.{FileUploadCount, MRN, _}
 import org.scalacheck.Arbitrary._
+import org.scalacheck.Gen._
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.OptionValues
 import wolfendale.scalacheck.regexp.RegexpGen
@@ -64,13 +65,21 @@ trait ModelGenerators extends SignedInUserGen with OptionValues {
       }
     }
 
+  implicit val arbitraryWaiting: Arbitrary[Waiting] =
+    Arbitrary(arbitrary[UploadRequest].map(Waiting(_)))
+
+  implicit val arbitraryFileState: Arbitrary[FileState] =
+    Arbitrary {
+      oneOf(List(arbitrary[Waiting], const(Uploaded), const(Successful), const(Failed), const(VirusDetected), const(UnacceptableMimeType)))
+    }
+
   implicit val arbitraryFile: Arbitrary[File] =
     Arbitrary {
       for {
-        ref           <- saneString
-        uploadRequest <- arbitrary[UploadRequest]
+        ref       <- saneString
+        fileState <- arbitrary[FileState]
       } yield {
-        File(ref, uploadRequest)
+        File(ref, fileState)
       }
     }
 
