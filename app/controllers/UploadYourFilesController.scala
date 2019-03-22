@@ -50,8 +50,8 @@ class UploadYourFilesController @Inject()(
       req.fileUploadResponse.files.find(_.reference == ref) match {
         case Some(file) =>
           file.state match {
-            case Waiting => Ok(upload_your_files(file.uploadRequest, callback, refPosition))
-            case _       => Redirect(nextPage(file.reference, req.fileUploadResponse.files))
+            case Waiting(request) => Ok(upload_your_files(request, callback, refPosition))
+            case _                => Redirect(nextPage(file.reference, req.fileUploadResponse.files))
           }
 
         case None => Redirect(routes.SessionExpiredController.onPageLoad())
@@ -79,7 +79,7 @@ class UploadYourFilesController @Inject()(
   def nextPage(ref: String, refs: List[File])(implicit request: Request[_]): Call =
     refs
       .partition(_.reference <= ref)._2
-      .find(_.state == Waiting)
+      .collectFirst { case file@File(_, Waiting(_)) => file }
       .map(file => routes.UploadYourFilesController.onPageLoad(file.reference))
       .getOrElse(routes.UploadYourFilesReceiptController.onPageLoad())
 

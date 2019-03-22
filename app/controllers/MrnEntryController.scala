@@ -18,11 +18,11 @@ package controllers
 
 import com.google.inject.Singleton
 import config.AppConfig
-import connectors.DataCacheConnector
+import connectors.{BackendConnector, DataCacheConnector}
 import controllers.actions.{AuthAction, DataRetrievalAction, EORIAction}
 import forms.MRNFormProvider
 import javax.inject.Inject
-import models.UserAnswers
+import models.{BatchFileUpload, EORI, MRN, UserAnswers}
 import pages.MrnEntryPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
@@ -40,11 +40,14 @@ class MrnEntryController @Inject()(
   getData: DataRetrievalAction,
   formProvider: MRNFormProvider,
   dataCacheConnector: DataCacheConnector,
-  implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
+  implicit val appConfig: AppConfig,
+  backend: BackendConnector) extends FrontendController with I18nSupport {
 
   val form = formProvider()
 
   def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData) { implicit req =>
+    backend.save(EORI("123"), BatchFileUpload(MRN("12GB12345678901234").get, List()))
+Thread.sleep(1000)
     val populatedForm =
       req.userAnswers
         .flatMap(

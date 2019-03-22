@@ -35,10 +35,8 @@ class Module extends AbstractModule {
     bind(classOf[CustomsDeclarationsConnector]).to(classOf[CustomsDeclarationsConnectorImpl]).asEagerSingleton()
     bind(classOf[DataCacheConnector]).to(classOf[MongoCacheConnector]).asEagerSingleton()
     bind(classOf[CustomsDeclarationsService]).to(classOf[CustomsDeclarationsServiceImpl]).asEagerSingleton()
-
   }
 
   @Provides @Singleton
   def appConfig: AppConfig = cfg
-
 }
