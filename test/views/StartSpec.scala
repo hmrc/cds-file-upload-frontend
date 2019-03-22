@@ -36,7 +36,7 @@ class StartSpec extends ViewSpecBase with ViewBehaviours {
 
     "have a start button with correct link" in {
       val doc = asDocument(view())
-      val expectedLink = routes.MrnEntryController.onPageLoad().url
+      val expectedLink = routes.ContactDetailsController.onPageLoad().url
 
       assertContainsLink(doc, messages("common.button.startNow"), expectedLink)
     }
