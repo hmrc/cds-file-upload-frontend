@@ -16,8 +16,7 @@
 
 package models
 
-import play.api.libs.json.Json
-import play.json.extra.Variants
+import play.api.libs.json.{Format, JsError, JsObject, JsResult, JsString, JsSuccess, JsValue, Json}
 
 sealed trait FileState
 final case class Waiting(uploadRequest: UploadRequest) extends FileState
@@ -34,5 +33,35 @@ object Waiting {
 
 object FileState {
 
-  implicit val format = Variants.format[FileState]
+  private val waiting  = "waiting"
+  private val uploaded = "uploaded"
+  private val success  = "success"
+  private val failed   = "failed"
+  private val virus    = "virus"
+  private val mimeType = "mimeType`"
+
+  implicit val format = new Format[FileState] {
+    override def writes(o: FileState): JsValue = o match {
+      case Waiting(request)     => Json.obj(waiting -> Json.toJson(request))
+      case Uploaded             => JsString(uploaded)
+      case Successful           => JsString(success)
+      case Failed               => JsString(failed)
+      case VirusDetected        => JsString(virus)
+      case UnacceptableMimeType => JsString(mimeType)
+    }
+
+    override def reads(json: JsValue): JsResult[FileState] = json match {
+      case JsString(`uploaded`) => JsSuccess(Uploaded)
+      case JsString(`success`)  => JsSuccess(Successful)
+      case JsString(`failed`)   => JsSuccess(Failed)
+      case JsString(`virus`)    => JsSuccess(VirusDetected)
+      case JsString(`mimeType`) => JsSuccess(UnacceptableMimeType)
+      case JsObject(map)        =>
+        map.get(waiting) match {
+          case Some(request)    => Json.fromJson[UploadRequest](request).map(Waiting(_))
+          case None             => JsError("Unable to parse FileState")
+        }
+      case _                    => JsError("Unable to parse FileState")
+    }
+  }
 }
