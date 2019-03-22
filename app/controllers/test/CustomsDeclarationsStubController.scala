@@ -85,7 +85,7 @@ object XmlHelper {
         case Waiting(request) => toXml(request)
         case _ => NodeSeq.Empty
       }}
-      </File>
+    </File>
 
   def toXml(response: FileUploadResponse): Elem = {
     <FileUploadResponse xmlns="hmrc:fileupload">
