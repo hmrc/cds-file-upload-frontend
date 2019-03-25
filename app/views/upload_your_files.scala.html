@@ -56,6 +56,12 @@
 
     @hmrcHelpers.form(Call("POST", uploadRequest.href), ('enctype, "multipart/form-data"), ('class, "js-form")) {
 
+        <input type="hidden" name="success_action_redirect" value="@callbackUrl">
+
+        @uploadRequest.fields.map { case (key, value) =>
+            <input type="hidden" name="@key" value="@value"/>
+        }
+
         <div class="form-field-group">
             @errorInline(
                 errorKey = "upload-file",
@@ -64,22 +70,16 @@
             )
 
             <input
-                id="upload-file"
-                type="file"
-                name="file"
-                required
-                filesize="@appConfig.fileFormats.maxFileSize"
-                accept="@appConfig.fileFormats.approvedFileExt"
-                data-msg-required="@messages("fileUploadPage.validation.required")"
-                data-msg-accept="@messages("fileUploadPage.validation.accept")"
-                data-msg-filesize="@messages("fileUploadPage.validation.filesize")" />
+            id="upload-file"
+            type="file"
+            name="file"
+            required
+            filesize="@appConfig.fileFormats.maxFileSize"
+            accept="@appConfig.fileFormats.approvedFileExt"
+            data-msg-required="@messages("fileUploadPage.validation.required")"
+            data-msg-accept="@messages("fileUploadPage.validation.accept")"
+            data-msg-filesize="@messages("fileUploadPage.validation.filesize")" />
         </div>
-
-        <input type="hidden" name="success_action_redirect" value="@callbackUrl">
-
-        @uploadRequest.fields.map { case (key, value) =>
-            <input type="hidden" name="@key" value="@value"/>
-        }
 
         @components.submit_button()
     }

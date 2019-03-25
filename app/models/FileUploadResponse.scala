@@ -52,8 +52,8 @@ object FileUploadResponse {
         val fields: Map[String, String] =
           (file \ "UploadRequest" \ "Fields" \ "_")
             .theSeq
-            .map(field => Field.values.find(_.toString == field.label).map(_.toString -> field.text.trim))
-            .collect { case Some(field) => field }.toMap
+            .map(field => field.label -> field.text.trim)
+            .toMap
 
         File(reference, Waiting(UploadRequest(href, fields)))
     }.toList
