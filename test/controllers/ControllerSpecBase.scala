@@ -20,7 +20,8 @@ import java.net.URLEncoder
 
 import base.SpecBase
 import connectors.DataCacheConnector
-import controllers.actions.{DataRetrievalAction, FakeActions}
+import controllers.actions.{ContactDetailsRequiredAction, DataRetrievalAction, FakeActions}
+import models.ContactDetails
 import models.requests.SignedInUser
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, when}
@@ -69,6 +70,9 @@ class ControllerSpecBase extends SpecBase with MockitoSugar with FakeActions wit
     URLEncoder.encode(_, "utf-8")
 
   val getEmptyCacheMap: DataRetrievalAction = new FakeDataRetrievalAction(None)
+
+  def getContactDetails(cacheMap: CacheMap, contactDetails: ContactDetails): ContactDetailsRequiredAction =
+    new FakeContactDetailsRequiredAction(cacheMap, contactDetails)
 
   def getCacheMap(cacheMap: CacheMap): DataRetrievalAction = new FakeDataRetrievalAction(Some(cacheMap))
 }

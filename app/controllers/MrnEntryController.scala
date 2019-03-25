@@ -19,10 +19,9 @@ package controllers
 import com.google.inject.Singleton
 import config.AppConfig
 import connectors.DataCacheConnector
-import controllers.actions.{AuthAction, DataRetrievalAction, EORIAction}
+import controllers.actions.{AuthAction, ContactDetailsRequiredAction, DataRetrievalAction, EORIAction}
 import forms.MRNFormProvider
 import javax.inject.Inject
-import models.UserAnswers
 import pages.MrnEntryPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
@@ -37,6 +36,7 @@ class MrnEntryController @Inject()(
   val messagesApi: MessagesApi,
   authenticate: AuthAction,
   requireEori: EORIAction,
+  requireContactDetails: ContactDetailsRequiredAction,
   getData: DataRetrievalAction,
   formProvider: MRNFormProvider,
   dataCacheConnector: DataCacheConnector,
@@ -44,28 +44,22 @@ class MrnEntryController @Inject()(
 
   val form = formProvider()
 
-  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData) { implicit req =>
-    val populatedForm =
-      req.userAnswers
-        .flatMap(
-          _.get(MrnEntryPage)
-           .map(form.fill))
-        .getOrElse(form)
+  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireContactDetails) {
+    implicit req =>
+      val populatedForm = req.userAnswers.get(MrnEntryPage).map(form.fill).getOrElse(form)
 
-    Ok(mrn_entry(populatedForm))
+      Ok(mrn_entry(populatedForm))
   }
 
-  def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen getData).async {
+  def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireContactDetails).async {
     implicit req =>
-
-      val userAnswers = req.userAnswers.getOrElse(UserAnswers(req.request.user.internalId))
 
       form.bindFromRequest().fold(
         errorForm =>
           Future.successful(BadRequest(mrn_entry(errorForm))),
 
         value => {
-          val cacheMap = userAnswers.set(MrnEntryPage, value).cacheMap
+          val cacheMap = req.userAnswers.set(MrnEntryPage, value).cacheMap
 
           dataCacheConnector.save(cacheMap).map { _ =>
             Redirect(routes.FileWarningController.onPageLoad())
