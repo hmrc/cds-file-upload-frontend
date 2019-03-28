@@ -19,14 +19,14 @@ common.button.startNow=Start now
 
 startPage.title=Upload a customs document
 startPage.heading=Upload a customs document
-startPage.paragraph1=Upload documents to support your import or export declaration.
-startPage.paragraph2=You will need to know how many files you want to upload before you start uploading them. This is not the same as the number of documents.
-startPage.paragraph3= {0} - if you have photos of 2 pages of an invoice saved as separate jpegs, this is 2 files.
+startPage.paragraph2=You should only use this service when HMRC requests that you submit supporting Customs Documents.  You will need to know how many files you want to upload before you start uploading them. This is not the same as the number of documents.  You can submit a maximum of 10 documents, with a total file size of 10 Megabytes (MB).
+startPage.paragraph3= {0} - if you have two photos of an invoice saved as separate jpegs, this is two files.
 startPage.paragraph3.bold= Example 1
-startPage.paragraph4= {0} - if you have a bill of lading, an invoice and a licence saved in one word document, this is 1 file.
+startPage.paragraph4= {0} - if you have a bill of lading, an invoice, and a licence saved in a single Word document, this is one file.
 startPage.paragraph4.bold= Example 2
 startPage.p.youWillNeed=You will need:
 startPage.listItem1=a Government Gateway account
+startPage.listItem2=a Customs Declaration Service (CDS) enrolment
 startPage.listItem2=the movement reference number (MRN) of your declaration
 
 # MRN Entry Page
@@ -51,6 +51,7 @@ contactDetails.phoneNumber.invalid=Phone number must be less than or equal to 35
 contactDetails.phoneNumber.invalidPattern=Phone number is invalid
 contactDetails.email.invalid=Email must be less than or equal to 35 characters
 contactDetails.email.invalidPattern=Email is invalid
+contactDetails.paragraph1=Please provide these details so we can contact you if there are any issues with the documents you submit.
 
 ## file warning page
 
@@ -58,10 +59,6 @@ fileWarning.title=Count your files
 fileWarning.heading=Count your files
 fileWarning.paragraph1=HMRC need to know how many files you want to upload before you start uploading them.
 fileWarning.paragraph2=This is not the same as the number of documents.
-fileWarning.paragraph3={0} - if you have photos of 2 pages of 1 invoice saved as separate jpegs, this is 2 files.
-fileWarning.paragraph3.bold= Example 1
-fileWarning.paragraph4={0} - if you have a bill of lading, an invoice and a licence saved in 1 word document, this is 1 file.
-fileWarning.paragraph4.bold= Example 2
 fileWarning.panel=You need to enter the correct number of files - you cannot amend your answer so if you get it wrong you will have to start again.
 fileWarning.button=I understand
 
@@ -90,15 +87,18 @@ fileUploadPage.filesUploaded=You have uploaded {0} of {1} files
 fileUploadPage.validation.required=You must choose a file to upload
 fileUploadPage.validation.accept=The file you have chosen is not a permitted file type
 fileUploadPage.validation.filesize=The file you have chosen is bigger than 10MB and is not permitted
+fileUploadPage.paragraph1=Please ensure that you select the correct documents as requested by HMRC.
 
 fileUploadReceiptPage.title=Upload your files receipt
 fileUploadReceiptPage.heading=You have uploaded {0} files:
+fileUploadReceiptPage.paragraphIntro=Please ensure you take a copy or print your receipt numbers listed above.
 fileUploadReceiptPage.whatHappensNext=What happens next?
 fileUploadReceiptPage.fileName=File name
 fileUploadReceiptPage.receipt=Receipt
-fileUploadReceiptPage.paragraph1=As long as you have provided the documents that HMRC need to clear your goods, they should be cleared within 3 hours.
-fileUploadReceiptPage.paragraph2=You will be notified through your software when the goods have been cleared.
-fileUploadReceiptPage.helpline=If you have any problems call the helpline.
+fileUploadReceiptPage.paragraph1=As long as you have provided the documents that HMRC need to clear your goods, they should be cleared within the following times;
+fileUploadReceiptPage.paragraph2=Air freight/RoRo (Roll-on/roll-off ships are vessels that carry wheeled cargo, for example lorries) - within two hours of receipt.
+fileUploadReceiptPage.paragraph3=Maritime freight - within three hours of receipt between 0800 hrs and 1500 hrs.  Declarations received after 1500 will be cleared by 0800 the following day.
+fileUploadReceiptPage.helpline=If clearance has not been granted within these times you can call the relevant helpline listed below;
 fileUploadReceiptPage.imports=Imports helpline:
 fileUploadReceiptPage.imports.tel=03000 588 454
 fileUploadReceiptPage.exports=Exports helpline:
