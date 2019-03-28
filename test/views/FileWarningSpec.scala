@@ -33,14 +33,14 @@ class FileWarningSpec extends ViewSpecBase with ViewBehaviours {
     behave like normalPage(view, messageKeyPrefix, messageKeys: _*)
 
     "have paragraph3 with bold text" in {
-      val paragraph3 = messages("fileWarning.paragraph3", messages("fileWarning.paragraph3.bold"))
+      val paragraph3 = messages("startPage.paragraph3", messages("startPage.paragraph3.bold"))
       val doc = asDocument(view())
 
       assertContainsText(doc, paragraph3)
     }
 
     "have paragraph4 with bold text" in {
-      val paragraph4 = messages("fileWarning.paragraph4", messages("fileWarning.paragraph4.bold"))
+      val paragraph4 = messages("startPage.paragraph4", messages("startPage.paragraph4.bold"))
       val doc = asDocument(view())
 
       assertContainsText(doc, paragraph4)
