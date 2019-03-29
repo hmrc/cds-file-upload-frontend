@@ -19,11 +19,16 @@ import config.AppConfig
 import connectors.{CustomsDeclarationsConnector, CustomsDeclarationsConnectorImpl, DataCacheConnector, MongoCacheConnector}
 import controllers.actions._
 import javax.inject.Singleton
+import play.filters.csrf.CSRFConfig
 import services.{CustomsDeclarationsService, CustomsDeclarationsServiceImpl}
 
 class Module extends AbstractModule {
 
   val cfg = pureconfig.loadConfigOrThrow[AppConfig]
+
+  val csrfConfig = CSRFConfig(
+    shouldProtect = !_.uri.matches("*test-only*")
+  )
 
   override def configure(): Unit = {
     // Bind the actions for DI
@@ -35,7 +40,7 @@ class Module extends AbstractModule {
     bind(classOf[CustomsDeclarationsConnector]).to(classOf[CustomsDeclarationsConnectorImpl]).asEagerSingleton()
     bind(classOf[DataCacheConnector]).to(classOf[MongoCacheConnector]).asEagerSingleton()
     bind(classOf[CustomsDeclarationsService]).to(classOf[CustomsDeclarationsServiceImpl]).asEagerSingleton()
-
+    bind(classOf[CSRFConfig]).toInstance(csrfConfig)
   }
 
   @Provides @Singleton
