@@ -16,13 +16,18 @@
 
 package models.requests
 
+import models.{ContactDetails, FileUploadResponse, MRN, UserAnswers}
 import play.api.mvc.WrappedRequest
-import models.{FileUploadResponse, MRN, UserAnswers}
 
 case class OptionalDataRequest[A](request: EORIRequest[A],
                                   userAnswers: Option[UserAnswers]) extends WrappedRequest[A](request)
 
 
-case class MrnRequest[A](request: EORIRequest[A], userAnswers: UserAnswers, mrn: MRN) extends WrappedRequest[A](request)
+case class MrnRequest[A](request: ContactDetailsRequest[A], userAnswers: UserAnswers, mrn: MRN) extends WrappedRequest[A](request) {
+  def eori: String = request.request.eori
+}
 
 case class FileUploadResponseRequest[A](request: EORIRequest[A], userAnswers: UserAnswers, fileUploadResponse: FileUploadResponse) extends WrappedRequest[A](request)
+
+case class ContactDetailsRequest[A](request: EORIRequest[A], userAnswers: UserAnswers, contactDetails: ContactDetails) extends WrappedRequest[A](request)
+

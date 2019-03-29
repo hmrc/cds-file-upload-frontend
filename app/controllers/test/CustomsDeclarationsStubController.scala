@@ -20,7 +20,7 @@ import java.util.UUID
 
 import javax.inject.{Inject, Singleton}
 import models.Field._
-import models.{File, FileUploadResponse, UploadRequest}
+import models.{File, FileUploadResponse, UploadRequest, Waiting}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.http.ContentTypes
@@ -41,8 +41,8 @@ class CustomsDeclarationsStubController @Inject()() extends FrontendController {
   def handleBatchFileUploadRequest: Action[NodeSeq] = Action(parse.xml) { implicit req =>
     val fileGroupSize = (scala.xml.XML.loadString(req.body.mkString) \ "FileGroupSize").text.toInt
     val resp = FileUploadResponse((1 to fileGroupSize).map { i =>
-      File(reference = UUID.randomUUID().toString, UploadRequest(
-        href = "/cds-file-upload-service/test-only/s3-bucket",
+      File(reference = UUID.randomUUID().toString, Waiting(UploadRequest(
+        href = routes.CustomsDeclarationsStubController.handleS3FileUploadRequest().absoluteURL(),
         fields = Map(
           Algorithm.toString   -> "AWS4-HMAC-SHA256",
           Signature.toString   -> "xxxx",
@@ -51,12 +51,17 @@ class CustomsDeclarationsStubController @Inject()() extends FrontendController {
           Credentials.toString -> "ASIAxxxxxxxxx/20180202/eu-west-2/s3/aws4_request",
           Policy.toString      -> "xxxxxxxx=="
         )
-      ))
+      )))
     }.toList)
     Ok(XmlHelper.toXml(resp)).as(ContentTypes.XML)
   }
 
-  def handleS3FileUploadRequest: Action[MultipartFormData[Files.TemporaryFile]] = Action(parse.multipartFormData) { implicit req =>
+  def handleS3FileUploadRequest = Action { implicit req =>
+
+    println("-" * 100)
+    println(req.body)
+    println("-" * 100)
+
     s3Form.bindFromRequest().fold(
       errors => NoContent,
       success => Redirect(success.success_action_redirect)
@@ -81,8 +86,10 @@ object XmlHelper {
 
   def toXml(file: File): Elem =
     <File>
-      <Reference>{file.reference}</Reference>
-      {toXml(file.uploadRequest)}
+      <Reference>{file.reference}</Reference>{file.state match {
+        case Waiting(request) => toXml(request)
+        case _ => NodeSeq.Empty
+      }}
     </File>
 
   def toXml(response: FileUploadResponse): Elem = {
@@ -90,4 +97,5 @@ object XmlHelper {
       <Files>{response.files.map(toXml)}</Files>
     </FileUploadResponse>
   }
+
 }

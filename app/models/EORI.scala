@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-package services
+package models
 
-import models.FileUploadResponse
-import uk.gov.hmrc.http.HeaderCarrier
-
-import scala.concurrent.Future
-
-trait S3Service {
-
-  def s3FileUpload(fileUploadResponse: FileUploadResponse)(implicit hc: HeaderCarrier): Future[FileUploadResponse]
-
-}
+case class EORI(value: String) extends AnyVal

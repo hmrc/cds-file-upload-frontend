@@ -16,12 +16,13 @@
 
 package controllers
 
-import controllers.actions.{DataRetrievalAction, FakeActions}
+import controllers.actions.{ContactDetailsRequiredAction, FakeActions}
 import forms.MRNFormProvider
 import generators.Generators
-import models.MRN
 import models.requests.SignedInUser
+import models.{ContactDetails, MRN}
 import org.mockito.Mockito._
+import org.scalacheck.Arbitrary._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.PropertyChecks
@@ -42,12 +43,23 @@ class MrnEntryControllerSpec extends ControllerSpecBase
 
   val form = new MRNFormProvider()()
 
-  def controller(signedInUser: SignedInUser, eori: String, dataRetrieval: DataRetrievalAction = getEmptyCacheMap) =
+  val contactDetailsRequiredGen =
+    for {
+      cache <- arbitrary[CacheMap]
+      contactDetails <- arbitrary[ContactDetails]
+    } yield {
+      getContactDetails(cache, contactDetails)
+    }
+
+  def controller(signedInUser: SignedInUser,
+                 eori: String,
+                 requireContactDetails: ContactDetailsRequiredAction) =
     new MrnEntryController(
       messagesApi,
       new FakeAuthAction(signedInUser),
       new FakeEORIAction(eori),
-      dataRetrieval,
+      requireContactDetails,
+      getEmptyCacheMap,
       new MRNFormProvider,
       dataCacheConnector,
       appConfig)
@@ -57,9 +69,9 @@ class MrnEntryControllerSpec extends ControllerSpecBase
   "Mrn Entry Page" must {
     "load the correct page when user is logged in " in {
 
-      forAll { (user: SignedInUser, eori: String) =>
+      forAll(arbitrary[SignedInUser], arbitrary[String], contactDetailsRequiredGen) { (user, eori, fakeContactDetails) =>
 
-        val result = controller(user, eori).onPageLoad(fakeRequest)
+        val result = controller(user, eori, fakeContactDetails).onPageLoad(fakeRequest)
 
         status(result) mustBe OK
         contentAsString(result) mustBe viewAsString(form)
@@ -68,53 +80,64 @@ class MrnEntryControllerSpec extends ControllerSpecBase
 
     "mrn should be displayed if it exist on the cache" in {
 
-      forAll { (user: SignedInUser, eori: String, mrn: MRN) =>
+      forAll(arbitrary[SignedInUser], arbitrary[String], arbitrary[MRN]) {
+        (user, eori, mrn) =>
 
-        val cacheMap: CacheMap = CacheMap("", Map(MrnEntryPage.toString -> JsString(mrn.value)))
-        val result = controller(user, eori, getCacheMap(cacheMap)).onPageLoad(fakeRequest)
+          val fakeContactDetails = new FakeContactDetailsRequiredAction(
+            CacheMap("", Map(MrnEntryPage.toString -> JsString(mrn.value))),
+            ContactDetails("", "", "", "")
+          )
+          val result = controller(user, eori, fakeContactDetails).onPageLoad(fakeRequest)
 
-        contentAsString(result) mustBe viewAsString(form.fill(mrn))
+          contentAsString(result) mustBe viewAsString(form.fill(mrn))
       }
     }
 
     "return an ok when valid data is submitted" in {
 
-      forAll { (user: SignedInUser, eori: String, mrn: MRN) =>
+      forAll(arbitrary[SignedInUser], arbitrary[String], arbitrary[MRN], contactDetailsRequiredGen) {
+        (user, eori, mrn, fakeContactDetails) =>
 
-        val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn.value)
-        val result = controller(user, eori).onSubmit(postRequest)
+          val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn.value)
+          val result = controller(user, eori, fakeContactDetails).onSubmit(postRequest)
 
-        status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.FileWarningController.onPageLoad().url)
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(routes.FileWarningController.onPageLoad().url)
       }
     }
 
     "return a bad request when invalid data is submitted" in {
 
-      forAll { (user: SignedInUser, eori: String, mrn: String) =>
+      forAll(arbitrary[SignedInUser], arbitrary[String], arbitrary[String], contactDetailsRequiredGen) {
+        (user, eori, mrn, fakeContactDetails) =>
 
-        whenever(!mrn.matches(MRN.validRegex)) {
+          whenever(!mrn.matches(MRN.validRegex)) {
 
-          val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn)
-          val boundForm = form.bind(Map("value" -> mrn))
+            val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn)
+            val boundForm = form.bind(Map("value" -> mrn))
 
-          val result = controller(user, eori).onSubmit(postRequest)
+            val result = controller(user, eori, fakeContactDetails).onSubmit(postRequest)
 
-          status(result) mustBe BAD_REQUEST
-          contentAsString(result) mustBe viewAsString(boundForm)
-        }
+            status(result) mustBe BAD_REQUEST
+            contentAsString(result) mustBe viewAsString(boundForm)
+          }
       }
     }
 
     "save data in cache when valid" in {
 
-      forAll { (user: SignedInUser, eori: String, mrn: MRN) =>
+      forAll(arbitrary[SignedInUser], arbitrary[String], arbitrary[MRN]) {
+        (user, eori, mrn) =>
 
-        val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn.value)
-        await(controller(user, eori).onSubmit(postRequest))
+          val expectedMap = CacheMap(user.internalId, Map(MrnEntryPage.toString -> JsString(mrn.value)))
+          val fakeContactDetails = new FakeContactDetailsRequiredAction(
+            expectedMap,
+            ContactDetails("", "", "", "")
+          )
+          val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn.value)
+          await(controller(user, eori, fakeContactDetails).onSubmit(postRequest))
 
-        val expectedMap = CacheMap(user.internalId, Map(MrnEntryPage.toString -> JsString(mrn.value)))
-        verify(dataCacheConnector, times(1)).save(expectedMap)
+          verify(dataCacheConnector, times(1)).save(expectedMap)
       }
     }
   }

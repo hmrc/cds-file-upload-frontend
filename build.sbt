@@ -23,6 +23,7 @@ lazy val microservice = Project(appName, file("."))
       "com.fasterxml.jackson.core"       %  "jackson-annotations"      % jacksonVersion,
       "com.fasterxml.jackson.dataformat" %  "jackson-dataformat-xml"   % jacksonVersion,
       "com.fasterxml.jackson.module"     %% "jackson-module-scala"     % jacksonVersion,
+      "io.megl"                          %% "play-json-extra"          % "2.4.3",
       "uk.gov.hmrc"                      %% "http-caching-client"      % "8.1.0",
       "uk.gov.hmrc"                      %% "play-whitelist-filter"    % "2.0.0",
       "org.reactivemongo"                %% "play2-reactivemongo"      % "0.16.3-play25",

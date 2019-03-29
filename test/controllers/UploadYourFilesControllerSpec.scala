@@ -47,6 +47,17 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
       file      = response.files(index)
     } yield (file, response)
 
+  val waitingGen: Gen[(File, UploadRequest, FileUploadResponse)] =
+    responseGen.flatMap {
+      case (file, response) =>
+        arbitrary[Waiting].map { waiting =>
+          val uploadedFile = file.copy(state = waiting)
+          val updatedFiles = uploadedFile :: response.files.filterNot(_ == file)
+
+          (uploadedFile, waiting.uploadRequest, FileUploadResponse(updatedFiles))
+        }
+    }
+
   def controller(getData: DataRetrievalAction) =
     new UploadYourFilesController(
       messagesApi,
@@ -82,8 +93,8 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
 
       "request file exists in response" in {
 
-        forAll(responseGen, arbitrary[CacheMap]) {
-          case ((file, response), cacheMap) =>
+        forAll(waitingGen, arbitrary[CacheMap]) {
+          case ((file, request, response), cacheMap) =>
 
             val callback =
               routes.UploadYourFilesController.onSuccess(file.reference).absoluteURL()(fakeRequest)
@@ -95,7 +106,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
             val result = controller(getCacheMap(updatedCache)).onPageLoad(file.reference)(fakeRequest)
 
             status(result) mustBe OK
-            contentAsString(result) mustBe viewAsString(file.uploadRequest, callback, refPosition)
+            contentAsString(result) mustBe viewAsString(request, callback, refPosition)
         }
       }
     }
@@ -105,11 +116,10 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
       "file has already been uploaded" in {
 
         val fileUploadedGen = responseGen.map {
-          case (file, response) =>
+          case (file, _) =>
             val uploadedFile = file.copy(state = Uploaded)
-            val updatedFiles = uploadedFile :: response.files.filterNot(_ == file)
 
-            (uploadedFile, FileUploadResponse(updatedFiles))
+            (uploadedFile, FileUploadResponse(List(uploadedFile)))
         }
 
         forAll(fileUploadedGen, arbitrary[CacheMap]) {
@@ -161,8 +171,8 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
 
     "update file status to Uploaded" in {
 
-      forAll(responseGen, arbitrary[CacheMap]) {
-        case ((file, response), cache) =>
+      forAll(waitingGen, arbitrary[CacheMap]) {
+        case ((file, _, response), cache) =>
 
           val updatedCache = combine(response, cache)
           val result = controller(getCacheMap(updatedCache)).onSuccess(file.reference)(fakeRequest)
@@ -184,12 +194,12 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
 
     "redirect user to the next upload page" in {
 
-      forAll(responseGen, arbitrary[CacheMap]) {
-        case ((file, response), cache: CacheMap) =>
+      forAll(waitingGen, arbitrary[CacheMap]) {
+        case ((file, _, response), cache: CacheMap) =>
 
           val updatedCache = combine(response, cache)
           val result = controller(getCacheMap(updatedCache)).onSuccess(file.reference)(fakeRequest)
-          val next = nextRef(file.reference, response.files.map(_.reference))
+          val next = nextRef(file.reference, response.files.collect { case file@File(_, Waiting(_)) => file.reference })
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad(next).url)

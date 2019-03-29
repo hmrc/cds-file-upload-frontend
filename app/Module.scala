@@ -21,6 +21,9 @@ import controllers.actions._
 import javax.inject.Singleton
 import play.filters.csrf.CSRFConfig
 import services.{CustomsDeclarationsService, CustomsDeclarationsServiceImpl}
+import play.api.i18n.{Lang, Messages}
+import play.api.i18n.Messages.Implicits._
+import play.api.Play.current
 
 class Module extends AbstractModule {
 
@@ -34,6 +37,7 @@ class Module extends AbstractModule {
     // Bind the actions for DI
     bind(classOf[AuthAction]).to(classOf[AuthActionImpl]).asEagerSingleton()
     bind(classOf[EORIAction]).to(classOf[EORIActionImpl]).asEagerSingleton()
+    bind(classOf[ContactDetailsRequiredAction]).to(classOf[ContactDetailsRequiredActionImpl]).asEagerSingleton()
     bind(classOf[DataRetrievalAction]).to(classOf[DataRetrievalActionImpl]).asEagerSingleton()
     bind(classOf[MrnRequiredAction]).to(classOf[MrnRequiredActionImpl]).asEagerSingleton()
     bind(classOf[FileUploadResponseRequiredAction]).to(classOf[FileUploadResponseRequiredActionImpl]).asEagerSingleton()
@@ -45,5 +49,4 @@ class Module extends AbstractModule {
 
   @Provides @Singleton
   def appConfig: AppConfig = cfg
-
 }

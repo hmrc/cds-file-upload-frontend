@@ -14,4 +14,6 @@
 ->          /                                                           prod.Routes
 
 POST        /cds-file-upload-service/test-only/batch-file-upload        controllers.test.CustomsDeclarationsStubController.handleBatchFileUploadRequest
+
++nocsrf
 POST        /cds-file-upload-service/test-only/s3-bucket                controllers.test.CustomsDeclarationsStubController.handleS3FileUploadRequest
