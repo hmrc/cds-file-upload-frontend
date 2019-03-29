@@ -43,7 +43,7 @@ trait FakeActions extends Generators {
       Future.successful(OptionalDataRequest(request, cacheMap.map(UserAnswers(_))))
   }
 
-  class FakeContactDetailsRequiredAction(cacheMap: CacheMap, contactDetails: ContactDetails) extends ContactDetailsRequiredAction {
+  class FakeContactDetailsRequiredAction(val cacheMap: CacheMap, val contactDetails: ContactDetails) extends ContactDetailsRequiredAction {
     override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] =
       Future.successful(Right(ContactDetailsRequest(request.request, UserAnswers(cacheMap), contactDetails)))
   }

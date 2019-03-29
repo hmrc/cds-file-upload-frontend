@@ -21,7 +21,14 @@ import play.api.libs.json.Json
 case class ContactDetails(name: String,
                           companyName: String,
                           phoneNumber: String,
-                          email: String) {}
+                          email: String) {
+
+  override def toString: String =
+    s"""Name: $name
+       |Company name: $companyName
+       |Phone number: $phoneNumber
+       |Email: $email""".stripMargin
+}
 
 object ContactDetails {
 

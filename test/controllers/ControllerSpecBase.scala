@@ -19,7 +19,7 @@ package controllers
 import java.net.URLEncoder
 
 import base.SpecBase
-import connectors.DataCacheConnector
+import connectors.{DataCacheConnector, S3Connector}
 import controllers.actions.{ContactDetailsRequiredAction, DataRetrievalAction, FakeActions}
 import models.ContactDetails
 import models.requests.SignedInUser
@@ -38,6 +38,7 @@ class ControllerSpecBase extends SpecBase with MockitoSugar with FakeActions wit
 
   lazy val authConnector: AuthConnector = mock[AuthConnector]
   lazy val dataCacheConnector: DataCacheConnector = mock[DataCacheConnector]
+  lazy val s3Connector: S3Connector = mock[S3Connector]
 
   def withSignedInUser(user: SignedInUser)(test: => Unit): Unit = {
     when(

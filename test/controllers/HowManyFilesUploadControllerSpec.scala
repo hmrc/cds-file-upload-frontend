@@ -16,11 +16,12 @@
 
 package controllers
 
+import connectors.S3Connector
 import controllers.actions._
 import forms.FileUploadCountProvider
 import generators.Generators
-import models.{FileUploadCount, FileUploadResponse, MRN}
-import models.requests.SignedInUser
+import models.{ContactDetails, FileUploadCount, FileUploadResponse, MRN}
+import models.requests.{ContactDetailsRequest, SignedInUser}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito._
@@ -33,6 +34,7 @@ import pages.{HowManyFilesUploadPage, MrnEntryPage}
 import play.api.data.Form
 import play.api.libs.json.{JsNumber, JsString}
 import play.api.test.Helpers._
+import repositories.CacheMapRepository
 import services.CustomsDeclarationsService
 import uk.gov.hmrc.http.cache.client.CacheMap
 import views.html.how_many_files_upload
@@ -62,9 +64,22 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
           cacheMap.copy(data = cacheMap.data + (MrnEntryPage.toString -> JsString(mrn.value)))
       }
     }
+  implicit val arbitraryContactDetailsActions: Arbitrary[ContactDetailsRequiredAction] =
+    Arbitrary(arbitrary[FakeContactDetailsRequiredAction].map(_.asInstanceOf[ContactDetailsRequiredAction]))
+
+  implicit val arbitraryFakeContactDetailsActions: Arbitrary[FakeContactDetailsRequiredAction] =
+    Arbitrary {
+      for {
+        details <- arbitrary[ContactDetails]
+        cache <- arbitrary[CacheMap]
+      } yield {
+        new FakeContactDetailsRequiredAction(cache, details)
+      }
+    }
 
   val form = new FileUploadCountProvider()()
   val service = mock[CustomsDeclarationsService]
+  val awsConnector = mock[S3Connector]
 
   override def beforeEach = {
     super.beforeEach
@@ -75,15 +90,17 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
       .thenReturn(Future.successful(FileUploadResponse(List())))
   }
 
-  def controller(dataRetrieval: DataRetrievalAction = getEmptyCacheMap) =
+  def controller(contactDetailsRequiredAction: ContactDetailsRequiredAction) =
     new HowManyFilesUploadController(
       messagesApi,
       new FakeAuthAction(),
       new FakeEORIAction(),
-      dataRetrieval,
+      getEmptyCacheMap,
       new MrnRequiredActionImpl,
+      contactDetailsRequiredAction,
       new FileUploadCountProvider,
       dataCacheConnector,
+      awsConnector,
       service,
       appConfig)
 
@@ -92,9 +109,9 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
   "How Many Files Upload Page" must {
     "load correct page when user is logged in " in {
 
-      forAll { cacheMap: CacheMap =>
+      forAll { action: ContactDetailsRequiredAction =>
 
-        val result = controller(getCacheMap(cacheMap)).onPageLoad(fakeRequest)
+        val result = controller(action).onPageLoad(fakeRequest)
 
         status(result) mustBe OK
         contentAsString(result) mustBe viewAsString(form)
@@ -103,10 +120,12 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
 
     "display file count if it exist on the cache" in {
 
-      forAll { (cacheMap: CacheMap, fileUploadCount: FileUploadCount) =>
+      forAll { (action: FakeContactDetailsRequiredAction, fileUploadCount: FileUploadCount) =>
 
-        val updatedCacheMap = cacheMap.copy(data = cacheMap.data + (HowManyFilesUploadPage.toString -> JsNumber(fileUploadCount.value)))
-        val result = controller(getCacheMap(updatedCacheMap)).onPageLoad(fakeRequest)
+        val updatedCacheMap =
+          action.cacheMap.copy(data = action.cacheMap.data + (HowManyFilesUploadPage.toString -> JsNumber(fileUploadCount.value)))
+        val updatedAction = new FakeContactDetailsRequiredAction(updatedCacheMap, action.contactDetails)
+        val result = controller(updatedAction).onPageLoad(fakeRequest)
 
         contentAsString(result) mustBe viewAsString(form.fill(fileUploadCount))
       }
@@ -116,28 +135,37 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
 
       "onPageLoad is called" in {
 
-        val result = controller(getEmptyCacheMap).onPageLoad(fakeRequest)
+        forAll { contactDetails: ContactDetails =>
 
-        status(result) mustBe SEE_OTHER
+          val action = new FakeContactDetailsRequiredAction(CacheMap("", Map()), contactDetails)
+          val result = controller(action).onPageLoad(fakeRequest)
+
+          status(result) mustBe SEE_OTHER
+        }
       }
 
       "onSubmit is called" in {
 
-        val result = controller(getEmptyCacheMap).onSubmit(fakeRequest)
+        forAll { contactDetails: ContactDetails =>
 
-        status(result) mustBe SEE_OTHER
+          val action = new FakeContactDetailsRequiredAction(CacheMap("", Map()), contactDetails)
+          val result = controller(action).onSubmit(fakeRequest)
+
+          status(result) mustBe SEE_OTHER
+        }
       }
     }
 
     "return an ok when valid data is submitted" in {
 
-      forAll { (cacheMap: CacheMap, fileUploadCount: FileUploadCount, response: FileUploadResponse) =>
+      forAll { (action: ContactDetailsRequiredAction, fileUploadCount: FileUploadCount, response: FileUploadResponse) =>
 
         when(service.batchFileUpload(any(), any(), any())(any()))
           .thenReturn(Future.successful(response))
 
         val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> fileUploadCount.value.toString)
-        val result = controller(getCacheMap(cacheMap)).onSubmit(postRequest)
+
+        val result = controller(action).onSubmit(postRequest)
         val nextRef = response.files.map(_.reference).min
 
         status(result) mustBe SEE_OTHER
@@ -147,7 +175,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
 
     "return a bad request when invalid data is submitted" in {
 
-      forAll { (cacheMap: CacheMap, fileUploadCount: String) =>
+      forAll { (action: ContactDetailsRequiredAction, fileUploadCount: String) =>
 
         val fileUploadOpt =
           Try(fileUploadCount.toInt)
@@ -159,7 +187,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
           val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> fileUploadCount)
           val boundForm = form.bind(Map("value" -> fileUploadCount))
 
-          val result = controller(getCacheMap(cacheMap)).onSubmit(postRequest)
+          val result = controller(action).onSubmit(postRequest)
 
           status(result) mustBe BAD_REQUEST
           contentAsString(result) mustBe viewAsString(boundForm)
@@ -169,10 +197,10 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
 
     "save data in cache when valid" in {
 
-      forAll { (cacheMap: CacheMap, fileUploadCount: FileUploadCount) =>
+      forAll { (action: ContactDetailsRequiredAction, fileUploadCount: FileUploadCount) =>
 
         val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> fileUploadCount.value.toString)
-        await(controller(getCacheMap(cacheMap)).onSubmit(postRequest))
+        await(controller(action).onSubmit(postRequest))
 
         val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
         verify(dataCacheConnector, atLeastOnce).save(captor.capture())
@@ -182,25 +210,25 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
 
     "make a request to customs declarations" in {
 
-      forAll { (cacheMap: CacheMap, fileUploadCount: FileUploadCount) =>
+      forAll { (action: FakeContactDetailsRequiredAction, fileUploadCount: FileUploadCount) =>
 
         val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> fileUploadCount.value.toString)
-        await(controller(getCacheMap(cacheMap)).onSubmit(postRequest))
+        await(controller(action).onSubmit(postRequest))
 
         verify(service, times(1))
-          .batchFileUpload(any(), eqTo(cacheMap.getEntry[MRN](MrnEntryPage).get), eqTo(fileUploadCount))(any())
+          .batchFileUpload(any(), eqTo(action.cacheMap.getEntry[MRN](MrnEntryPage).get), eqTo(fileUploadCount))(any())
       }
     }
 
     "save response in cache when valid" in {
 
-      forAll { (cacheMap: CacheMap, fileUploadCount: FileUploadCount, response: FileUploadResponse) =>
+      forAll { (action: ContactDetailsRequiredAction, fileUploadCount: FileUploadCount, response: FileUploadResponse) =>
 
         when(service.batchFileUpload(any(), any(), any())(any()))
           .thenReturn(Future.successful(response))
 
         val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> fileUploadCount.value.toString)
-        await(controller(getCacheMap(cacheMap)).onSubmit(postRequest))
+        await(controller(action).onSubmit(postRequest))
 
         val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
         verify(dataCacheConnector, atLeastOnce).save(captor.capture())

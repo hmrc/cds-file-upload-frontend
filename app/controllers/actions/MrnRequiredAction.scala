@@ -18,7 +18,7 @@ package controllers.actions
 
 import com.google.inject.Inject
 import controllers.routes
-import models.requests.{MrnRequest, OptionalDataRequest}
+import models.requests.{ContactDetailsRequest, MrnRequest, OptionalDataRequest}
 import pages.MrnEntryPage
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, Result}
@@ -29,15 +29,21 @@ import scala.concurrent.Future
 
 class MrnRequiredActionImpl @Inject() extends MrnRequiredAction {
 
-  override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, MrnRequest[A]]] = {
+  override protected def refine[A](request: ContactDetailsRequest[A]): Future[Either[Result, MrnRequest[A]]] = {
     implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
     Future.successful(
-      request.userAnswers
-        .flatMap(data => data.get(MrnEntryPage).map(mrn => (data, mrn)))
-        .map { case (data, mrn) => MrnRequest(request.request, data, mrn) }
-        .toRight(Redirect(routes.SessionExpiredController.onPageLoad())))
+      request.userAnswers.get(MrnEntryPage).map(mrn => (request.userAnswers, mrn))
+        .map { case (request.userAnswers, mrn) => MrnRequest(request, request.userAnswers, mrn) }
+        .toRight(Redirect(routes.SessionExpiredController.onPageLoad()))
+    )
+
+    /*    Future.successful(
+          request.userAnswers
+            .flatMap(data => data.get(MrnEntryPage).map(mrn => (data, mrn)))
+            .map { case (data, mrn) => MrnRequest(request.request, data, mrn) }
+            .toRight(Redirect(routes.SessionExpiredController.onPageLoad())))*/
   }
 }
 
-trait MrnRequiredAction extends ActionRefiner[OptionalDataRequest, MrnRequest]
+trait MrnRequiredAction extends ActionRefiner[ContactDetailsRequest, MrnRequest]
