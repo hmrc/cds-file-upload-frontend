@@ -29,7 +29,8 @@ import services.CustomsDeclarationsService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.{how_many_files_upload, upload_your_files}
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
 
 @Singleton
 class HowManyFilesUploadController @Inject()(
@@ -71,16 +72,17 @@ class HowManyFilesUploadController @Inject()(
             .batchFileUpload(req.eori, req.mrn, value)
             .flatMap { response =>
 
-              response.files.headOption match {
-                case Some(file) =>
-                  file.state match {
-                    case Waiting(uploadRequest) => {
-                      s3.uploadContactDetailsToS3(req.request.contactDetails, uploadRequest)
-                    }
-                    case _ => Redirect(routes.SessionExpiredController.onPageLoad())
-                  }
-                case None => Redirect(routes.SessionExpiredController.onPageLoad())
-              }
+              response
+                .files
+                .headOption
+                .map(_.state)
+                .collect { case Waiting(request) => request }
+                .fold(
+                  Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
+                ) { request =>
+                  Await.ready(s3.uploadContactDetailsToS3(req.request.contactDetails, request).map(_ => Ok("")), 5 seconds)
+                }
+
 
               val answers =
                 req.userAnswers

@@ -19,35 +19,37 @@ package connectors
 import java.io.{File, PrintWriter}
 import java.util.UUID
 
+import akka.stream.scaladsl.{FileIO, Source}
 import com.google.inject.Singleton
 
 import scala.collection.JavaConverters._
 import javax.inject.Inject
 import models.{ContactDetails, UploadRequest}
-import org.asynchttpclient.AsyncHttpClient
-import org.asynchttpclient.request.body.multipart.{FilePart, Part, StringPart}
 import play.api.libs.ws._
+import play.api.mvc.MultipartFormData.{DataPart, FilePart, Part}
+
+import scala.concurrent.Future
 
 @Singleton
 class S3Connector @Inject()(ws: WSClient) {
 
-  val asyncHttpClient: AsyncHttpClient = ws.underlying
+  def createFileName: String = s"contact_details_${UUID.randomUUID().toString()}.txt"
 
-  def myBuilder(contactDetails: ContactDetails, uploadRequest: UploadRequest): List[Part] = {
-    val r = uploadRequest.fields.toList.map(field => new StringPart(field._1, field._2, "UTF-8"))
-    new FilePart("file", toFile(contactDetails.toString(), s"contact_details_${UUID.randomUUID().toString()}")) :: r
+  def myBuilder(contactDetails: ContactDetails, uploadRequest: UploadRequest) = {
+    val fileName = createFileName
+    val r = uploadRequest.fields.toList.map(field => new DataPart(field._1, field._2))
+    new FilePart("file", fileName, Some("text/plain"), FileIO.fromPath(toFile(contactDetails.toString(), fileName).toPath)) :: r
   }
 
   def uploadContactDetailsToS3(contactDetails: ContactDetails, uploadRequest: UploadRequest) = {
-    val postBuilder = asyncHttpClient.preparePost(uploadRequest.href)
-    val x = myBuilder(contactDetails, uploadRequest).asJava
-    val response = asyncHttpClient.executeRequest(postBuilder.setBodyParts(x).build())
+    myBuilder(contactDetails, uploadRequest).foreach(println)
+    val response = ws.url(uploadRequest.href).post(Source(myBuilder(contactDetails, uploadRequest)))
     response
   }
 
   def toFile(contents: String, fileName: String): File = {
 
-    val uploadFile = File.createTempFile(fileName, ".txt")
+    val uploadFile = File.createTempFile(fileName, "")
 
     uploadFile.deleteOnExit() // Don't do this, need to delete after file has been used
     new PrintWriter(uploadFile) {

@@ -42,7 +42,7 @@ class CustomsDeclarationsStubController @Inject()() extends FrontendController {
     val fileGroupSize = (scala.xml.XML.loadString(req.body.mkString) \ "FileGroupSize").text.toInt
     val resp = FileUploadResponse((1 to fileGroupSize).map { i =>
       File(reference = UUID.randomUUID().toString, Waiting(UploadRequest(
-        href = "/cds-file-upload-service/test-only/s3-bucket",
+        href = routes.CustomsDeclarationsStubController.handleS3FileUploadRequest().absoluteURL(),
         fields = Map(
           Algorithm.toString   -> "AWS4-HMAC-SHA256",
           Signature.toString   -> "xxxx",
@@ -56,7 +56,12 @@ class CustomsDeclarationsStubController @Inject()() extends FrontendController {
     Ok(XmlHelper.toXml(resp)).as(ContentTypes.XML)
   }
 
-  def handleS3FileUploadRequest: Action[MultipartFormData[Files.TemporaryFile]] = Action(parse.multipartFormData) { implicit req =>
+  def handleS3FileUploadRequest = Action { implicit req =>
+
+    println("-" * 100)
+    println(req.body)
+    println("-" * 100)
+
     s3Form.bindFromRequest().fold(
       errors => NoContent,
       success => Redirect(success.success_action_redirect)
