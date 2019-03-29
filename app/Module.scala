@@ -44,7 +44,6 @@ class Module extends AbstractModule {
     bind(classOf[CustomsDeclarationsConnector]).to(classOf[CustomsDeclarationsConnectorImpl]).asEagerSingleton()
     bind(classOf[DataCacheConnector]).to(classOf[MongoCacheConnector]).asEagerSingleton()
     bind(classOf[CustomsDeclarationsService]).to(classOf[CustomsDeclarationsServiceImpl]).asEagerSingleton()
-    bind(classOf[CSRFConfig]).toInstance(csrfConfig)
   }
 
   @Provides @Singleton

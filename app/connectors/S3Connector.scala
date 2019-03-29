@@ -42,7 +42,7 @@ class S3Connector @Inject()(ws: WSClient) {
   }
 
   def uploadContactDetailsToS3(contactDetails: ContactDetails, uploadRequest: UploadRequest) = {
-    myBuilder(contactDetails, uploadRequest).foreach(println)
+
     val response = ws.url(uploadRequest.href).post(Source(myBuilder(contactDetails, uploadRequest)))
     response
   }

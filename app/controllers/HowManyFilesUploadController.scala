@@ -80,23 +80,24 @@ class HowManyFilesUploadController @Inject()(
                 .fold(
                   Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
                 ) { request =>
-                  Await.ready(s3.uploadContactDetailsToS3(req.request.contactDetails, request).map(_ => Ok("")), 5 seconds)
+                  s3.uploadContactDetailsToS3(req.request.contactDetails, request).flatMap { _ =>
+
+                    val answers =
+                      req.userAnswers
+                        .set(HowManyFilesUploadPage, value)
+                        .set(HowManyFilesUploadPage.Response, response)
+
+                    dataCacheConnector.save(answers.cacheMap).map { _ =>
+
+                      val x = response.files.map(x => x.reference)
+                      x.headOption match {
+                        case Some(nextRef) => Redirect(routes.UploadYourFilesController.onPageLoad(nextRef))
+                        case None => Redirect(routes.SessionExpiredController.onPageLoad())
+                      }
+                    }
+                  }
                 }
 
-
-              val answers =
-                req.userAnswers
-                  .set(HowManyFilesUploadPage, value)
-                  .set(HowManyFilesUploadPage.Response, response)
-
-              dataCacheConnector.save(answers.cacheMap).map { _ =>
-
-                val x = response.files.map(x => x.reference)
-                x.headOption match {
-                  case Some(nextRef) => Redirect(routes.UploadYourFilesController.onPageLoad(nextRef))
-                  case None => Redirect(routes.SessionExpiredController.onPageLoad())
-                }
-              }
             }
         }
       )
