@@ -14,7 +14,7 @@
         </encoder>
     </appender>
 
-    <logger name="reactivemongo.io.netty" level="OFF"/>
+    <logger name="reactivemongo.io.netty.buffer.PoolThreadCache" level="OFF"/>
 
     <root level="OFF">
         <appender-ref ref="FILE"/>

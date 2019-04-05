@@ -62,12 +62,9 @@ class BackendConnectorSpec extends WordSpec with MustMatchers
           _      <- connector.save(eori, virus)(hc)
           _      <- connector.save(eori, mimeType)(hc)
           result <- connector.fetch(eori)(hc)
-        } yield {
+        } yield result
 
-          result mustBe List(waiting, uploaded, success, failed, virus, mimeType)
-        }
-
-        test.futureValue
+        test.futureValue mustBe List(waiting, uploaded, success, failed, virus, mimeType)
       }
     }
   }
