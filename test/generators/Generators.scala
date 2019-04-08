@@ -28,8 +28,6 @@ trait Generators extends CacheMapGenerator with ModelGenerators with JsonGenerat
 
   val emailRegex = """^[a-zA-Z0-9\.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-.]+$"""
 
-  val phoneRegex = """^[\d\s\+()\-/]+$"""
-
   def genIntersperseString(gen: Gen[String],
                            value: String,
                            frequencyV: Int = 1,
@@ -123,15 +121,15 @@ trait Generators extends CacheMapGenerator with ModelGenerators with JsonGenerat
       choose(0, vector.size - 1).flatMap(vector(_))
     }
 
-  val validEmailGen: Gen[String] = RegexpGen.from(emailRegex)
+  val validEmailGen: Gen[String] = RegexpGen.from("[a-zA-Z0-9\\.!#$%&'*+/=?^_`{|}~-]{1,25}@[a-zA-Z0-9-.]{1,25}")
 
-  val validPhoneNumberGen: Gen[String] = RegexpGen.from(phoneRegex)
+  val validPhoneNumberGen: Gen[String] = RegexpGen.from("[\\d\\s\\+()\\-/]{1,15}")
 
   implicit val arbitraryContactDetails: Arbitrary[ContactDetails] = Arbitrary {
     for {
       name        <- nonEmptyString.map(_.take(35))
       companyName <- nonEmptyString.map(_.take(35))
-      phoneNumber <- validPhoneNumberGen.map(_.take(15))
+      phoneNumber <- validPhoneNumberGen
       email       <- validEmailGen.map(_.take(50))
     } yield ContactDetails(name, companyName, phoneNumber, email)
   }

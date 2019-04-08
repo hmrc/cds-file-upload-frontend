@@ -26,7 +26,7 @@ class StartSpec extends ViewSpecBase with ViewBehaviours {
 
   val messageKeyPrefix = "startPage"
 
-  val messageKeys = List("paragraph1", "paragraph2", "p.youWillNeed", "listItem1", "listItem2")
+  val messageKeys = List("paragraph2", "p.youWillNeed", "listItem1", "listItem2", "listItem3")
 
   "Start Page" must {
     behave like normalPage(

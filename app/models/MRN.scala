@@ -23,7 +23,7 @@ sealed abstract case class MRN(value: String)
 
 object MRN {
 
-  def validRegex: String = "\\d{2}[a-zA-Z]{2}[a-zA-Z0-9]{13}\\d{1}"
+  def validRegex: String = "\\d{2}[a-zA-Z]{2}[a-zA-Z0-9]{14}"
 
   def apply(value: String): Option[MRN] =
     if (value.matches(validRegex)) Some(new MRN(value) {})
