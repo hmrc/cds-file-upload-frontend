@@ -31,6 +31,7 @@ lazy val microservice = (project in file("."))
   )
 
 val jacksonVersion = "2.9.7"
+val httpComponentsVersion = "4.5.8"
 
 val compileDependencies = Seq(
   "uk.gov.hmrc" %% "govuk-template" % "5.25.0-play-25",
@@ -42,6 +43,8 @@ val compileDependencies = Seq(
   "com.fasterxml.jackson.core" % "jackson-annotations" % jacksonVersion,
   "com.fasterxml.jackson.dataformat" % "jackson-dataformat-xml" % jacksonVersion,
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
+  "org.apache.httpcomponents"        %  "httpclient"               % httpComponentsVersion,
+  "org.apache.httpcomponents"        %  "httpmime"                 % httpComponentsVersion,
   "io.megl" %% "play-json-extra" % "2.4.3",
   "uk.gov.hmrc" %% "http-caching-client" % "8.1.0",
   "uk.gov.hmrc" %% "play-whitelist-filter" % "2.0.0",
@@ -59,7 +62,8 @@ val testDependencies = Seq(
   "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" % "test",
   "org.mockito" % "mockito-core" % "2.13.0" % "test",
   "org.scalacheck" %% "scalacheck" % "1.14.0" % "test",
-  "wolfendale" %% "scalacheck-gen-regexp" % "0.1.1" % "test"
+  "wolfendale" %% "scalacheck-gen-regexp" % "0.1.1" % "test",
+  "com.github.tomakehurst" %  "wiremock" % "2.22.0" % "test"
 )
 
 libraryDependencies ++= compileDependencies ++ testDependencies
