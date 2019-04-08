@@ -16,7 +16,6 @@
 
 package connectors
 
-import config.AppConfig
 import javax.inject.{Inject, Singleton}
 import models.UploadRequest
 import org.apache.http.HttpResponse
@@ -26,10 +25,7 @@ import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.{FileBody, StringBody}
 import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.util.EntityUtils
-import play.api.Logger
 import play.api.libs.Files.TemporaryFile
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.Future.{failed, successful}
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,8 +34,7 @@ import scala.util.Try
 @Singleton
 class UpscanS3Connector @Inject()()(implicit executionContext: ExecutionContext) {
 
-  def upload(template: UploadRequest, file: TemporaryFile)
-            (implicit headerCarrier: HeaderCarrier): Future[Unit] = {
+  def upload(template: UploadRequest, file: TemporaryFile): Future[Unit] = {
     val builder: MultipartEntityBuilder = MultipartEntityBuilder.create
 
     template.fields.foreach(entry => builder.addPart(entry._1, new StringBody(entry._2, ContentType.TEXT_PLAIN)))

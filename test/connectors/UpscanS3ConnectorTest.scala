@@ -23,15 +23,12 @@ import models.UploadRequest
 import org.scalatest.{MustMatchers, WordSpec}
 import play.api.http.Status
 import play.api.libs.Files.TemporaryFile
-import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{Await, Future}
 
 class UpscanS3ConnectorTest extends WordSpec with WiremockTestServer with MustMatchers {
-
-  protected implicit val hc: HeaderCarrier = HeaderCarrier()
 
   private val connector = new UpscanS3Connector()
 

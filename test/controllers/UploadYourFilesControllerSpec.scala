@@ -36,7 +36,6 @@ import play.api.libs.json.Json
 import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc.{MaxSizeExceeded, MultipartFormData}
 import play.api.test.Helpers._
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import views.html.upload_your_files
 
@@ -196,7 +195,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
         forAll(fileUploadedGen, arbitrary[CacheMap]) {
           case ((file, response), cache) =>
             reset(upscanConnector)
-            given(upscanConnector.upload(any[UploadRequest], any[TemporaryFile])(any[HeaderCarrier])) willReturn Future.successful((): Unit)
+            given(upscanConnector.upload(any[UploadRequest], any[TemporaryFile])) willReturn Future.successful((): Unit)
 
             val nextPage     = routes.UploadYourFilesController.onSuccess(file.reference)
             val updatedCache = combine(response, cache)
@@ -210,7 +209,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
             status(result) mustBe SEE_OTHER
             redirectLocation(result) mustBe Some(nextPage.url)
 
-            verify(upscanConnector).upload(refEq(upscanRequest), any[TemporaryFile])(any[HeaderCarrier])
+            verify(upscanConnector).upload(refEq(upscanRequest), any[TemporaryFile])
         }
       }
     }
