@@ -63,7 +63,7 @@ val testDependencies = Seq(
   "org.mockito" % "mockito-core" % "2.13.0" % "test",
   "org.scalacheck" %% "scalacheck" % "1.14.0" % "test",
   "wolfendale" %% "scalacheck-gen-regexp" % "0.1.1" % "test",
-  "com.github.tomakehurst"     %  "wiremock"                  % "2.22.0" % test
+  "com.github.tomakehurst" %  "wiremock" % "2.22.0" % "test"
 )
 
 libraryDependencies ++= compileDependencies ++ testDependencies
