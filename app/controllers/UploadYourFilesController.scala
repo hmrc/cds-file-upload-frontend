@@ -16,18 +16,21 @@
 
 package controllers
 
+import akka.stream.Materializer
 import com.google.inject.Singleton
 import config.AppConfig
-import connectors.DataCacheConnector
+import connectors.{DataCacheConnector, UpscanS3Connector}
 import controllers.actions._
 import javax.inject.Inject
 import models.{File, FileUploadResponse, Uploaded, Waiting}
 import pages.HowManyFilesUploadPage
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Call, Request}
+import play.api.libs.Files.TemporaryFile
+import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.upload_your_files
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
@@ -38,25 +41,52 @@ class UploadYourFilesController @Inject()(
                                            getData: DataRetrievalAction,
                                            requireResponse: FileUploadResponseRequiredAction,
                                            dataCacheConnector: DataCacheConnector,
-                                           implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
+                                           upscanS3Connector: UpscanS3Connector,
+                                           implicit val appConfig: AppConfig,
+                                           implicit val mat: Materializer) extends FrontendController with I18nSupport {
 
   def onPageLoad(ref: String): Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireResponse) { implicit req =>
 
       val references  = req.fileUploadResponse.files.map(_.reference)
-      val callback    = routes.UploadYourFilesController.onSuccess(ref).absoluteURL()
       val refPosition = getPosition(ref, references)
 
       req.fileUploadResponse.files.find(_.reference == ref) match {
         case Some(file) =>
           file.state match {
-            case Waiting(request) => Ok(upload_your_files(request, callback, refPosition))
+            case Waiting(request) => Ok(upload_your_files(ref, refPosition))
             case _                => Redirect(nextPage(file.reference, req.fileUploadResponse.files))
           }
 
         case None => Redirect(routes.SessionExpiredController.onPageLoad())
       }
   }
+
+  def onSubmit(ref: String): Action[Either[MaxSizeExceeded, MultipartFormData[TemporaryFile]]] =
+    (authenticate andThen requireEori andThen getData andThen requireResponse)
+      .async(parse.maxLength(appConfig.fileFormats.maxFileSize, parse.multipartFormData)) { implicit req =>
+
+        req.fileUploadResponse.files.find(_.reference == ref) match {
+          case Some(file) =>
+            file.state match {
+              case Waiting(request) =>
+                req.body match {
+                  case Right(form) if form.file("file").exists(_.filename.nonEmpty) =>
+                    upscanS3Connector
+                      .upload(request, form.file("file").get.ref)
+                      .map(_ => Redirect(routes.UploadYourFilesController.onSuccess(ref)))
+
+                  case Right(_) | Left(MaxSizeExceeded(_)) =>
+                    Future.successful(Redirect(routes.UploadYourFilesController.onPageLoad(ref)))
+                }
+
+              case _ =>
+                Future.successful(Redirect(nextPage(file.reference, req.fileUploadResponse.files)))
+            }
+
+          case None => Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
+        }
+      }
 
   def onSuccess(ref: String): Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
