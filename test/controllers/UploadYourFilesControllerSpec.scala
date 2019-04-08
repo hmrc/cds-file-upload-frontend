@@ -16,10 +16,14 @@
 
 package controllers
 
+import akka.stream.Materializer
+import connectors.UpscanS3Connector
 import controllers.actions.{DataRetrievalAction, FakeActions, FileUploadResponseRequiredActionImpl}
 import generators.Generators
 import models._
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers._
+import org.mockito.BDDMockito._
 import org.mockito.Mockito._
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen
@@ -27,10 +31,16 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.PropertyChecks
 import pages.HowManyFilesUploadPage
+import play.api.libs.Files.TemporaryFile
 import play.api.libs.json.Json
+import play.api.mvc.MultipartFormData.FilePart
+import play.api.mvc.{MaxSizeExceeded, MultipartFormData}
 import play.api.test.Helpers._
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import views.html.upload_your_files
+
+import scala.concurrent.Future
 
 
 class UploadYourFilesControllerSpec extends ControllerSpecBase
@@ -39,6 +49,9 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
   with PropertyChecks
   with Generators
   with FakeActions {
+
+  val materializer: Materializer = mock[Materializer]
+  val upscanConnector: UpscanS3Connector = mock[UpscanS3Connector]
 
   val responseGen: Gen[(File, FileUploadResponse)] =
     for {
@@ -66,10 +79,12 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
       getData,
       new FileUploadResponseRequiredActionImpl(),
       dataCacheConnector,
-      appConfig)
+      upscanConnector,
+      appConfig,
+      materializer)
 
-  def viewAsString(uploadRequest: UploadRequest, callbackUrl: String, refPosition: Position): String =
-    upload_your_files(uploadRequest, callbackUrl, refPosition)(fakeRequest, messages, appConfig).toString
+  def viewAsString(uploadRequest: UploadRequest, reference: String, callbackUrl: String, refPosition: Position): String =
+    upload_your_files(uploadRequest, reference, callbackUrl, refPosition)(fakeRequest, messages, appConfig).toString
 
   private def combine(response: FileUploadResponse, cache: CacheMap): CacheMap =
     cache.copy(data = cache.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))
@@ -106,7 +121,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
             val result = controller(getCacheMap(updatedCache)).onPageLoad(file.reference)(fakeRequest)
 
             status(result) mustBe OK
-            contentAsString(result) mustBe viewAsString(request, callback, refPosition)
+            contentAsString(result) mustBe viewAsString(request, file.reference, callback, refPosition)
         }
       }
     }
@@ -158,6 +173,146 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
 
             val updatedCache = combine(response, cache)
             val result = controller(getCacheMap(updatedCache)).onPageLoad(ref)(fakeRequest)
+
+            status(result) mustBe SEE_OTHER
+            redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
+          }
+        }
+      }
+    }
+  }
+
+  ".onSubmit" should {
+
+    "upload to upscan & redirect to next page" when {
+
+      val upscanRequest = UploadRequest("href", Map())
+      val fileUploadedGen = responseGen.map {
+        case (file, _) =>
+          val uploadedFile = file.copy(state = Waiting(upscanRequest))
+
+          (uploadedFile, FileUploadResponse(List(uploadedFile)))
+      }
+
+      "file is valid" in {
+
+        forAll(fileUploadedGen, arbitrary[CacheMap]) {
+          case ((file, response), cache) =>
+            reset(upscanConnector)
+            given(upscanConnector.upload(any[UploadRequest], any[TemporaryFile])(any[HeaderCarrier])) willReturn Future.successful((): Unit)
+
+            val nextPage     = routes.UploadYourFilesController.onSuccess(file.reference)
+            val updatedCache = combine(response, cache)
+
+
+            val filePart = FilePart[TemporaryFile](key = "file", "file.txt", contentType = None, ref = TemporaryFile("file.txt"))
+            val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
+
+            val result = controller(getCacheMap(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Right(form)))
+
+            status(result) mustBe SEE_OTHER
+            redirectLocation(result) mustBe Some(nextPage.url)
+
+            verify(upscanConnector).upload(refEq(upscanRequest), any[TemporaryFile])(any[HeaderCarrier])
+        }
+      }
+    }
+
+    "redirect to the previous page" when {
+      val upscanRequest = UploadRequest("href", Map())
+      val fileUploadedGen = responseGen.map {
+        case (file, _) =>
+          val uploadedFile = file.copy(state = Waiting(upscanRequest))
+
+          (uploadedFile, FileUploadResponse(List(uploadedFile)))
+      }
+
+      "file is Missing" in {
+        forAll(fileUploadedGen, arbitrary[CacheMap]) {
+          case ((file, response), cache) =>
+            val updatedCache = combine(response, cache)
+
+            val filePart = FilePart[TemporaryFile](key = "file", "", contentType = None, ref = TemporaryFile())
+            val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
+
+            val result = controller(getCacheMap(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Right(form)))
+
+            status(result) mustBe SEE_OTHER
+            redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad(file.reference).url)
+        }
+      }
+
+      "file is too large" in {
+
+        forAll(fileUploadedGen, arbitrary[CacheMap]) {
+          case ((file, response), cache) =>
+            val updatedCache = combine(response, cache)
+
+            val result = controller(getCacheMap(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Left(MaxSizeExceeded(0))))
+
+            status(result) mustBe SEE_OTHER
+            redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad(file.reference).url)
+        }
+      }
+    }
+
+
+    "redirect to the next page" when {
+
+      "file has already been uploaded" in {
+
+        val fileUploadedGen = responseGen.map {
+          case (file, _) =>
+            val uploadedFile = file.copy(state = Uploaded)
+
+            (uploadedFile, FileUploadResponse(List(uploadedFile)))
+        }
+
+        forAll(fileUploadedGen, arbitrary[CacheMap]) {
+          case ((file, response), cache) =>
+
+            val reference    = nextRef(file.reference, response.files.map(_.reference))
+            val nextPage     = routes.UploadYourFilesController.onSubmit(reference)
+            val updatedCache = combine(response, cache)
+
+            val filePart = FilePart[TemporaryFile](key = "file", "file.txt", contentType = None, ref = TemporaryFile("file.txt"))
+            val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
+
+            val result = controller(getCacheMap(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Right(form)))
+
+            status(result) mustBe SEE_OTHER
+            redirectLocation(result) mustBe Some(nextPage.url)
+        }
+      }
+    }
+
+    "redirect to session expired page" when {
+
+      "no responses are in the cache" in {
+
+        forAll { ref: String =>
+
+          val filePart = FilePart[TemporaryFile](key = "file", "file.txt", contentType = None, ref = TemporaryFile("file.txt"))
+          val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
+
+          val result = controller(getEmptyCacheMap).onSubmit(ref)(fakeRequest.withBody(Right(form)))
+
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
+        }
+      }
+
+      "file reference is not in response" in {
+
+        forAll { (ref: String, response: FileUploadResponse, cache: CacheMap) =>
+
+          whenever(!response.files.exists(_.reference == ref)) {
+
+            val filePart = FilePart[TemporaryFile](key = "file", "file.txt", contentType = None, ref = TemporaryFile("file.txt"))
+            val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
+
+            val updatedCache = combine(response, cache)
+            val result = controller(getCacheMap(updatedCache)).onSubmit(ref)(fakeRequest.withBody(Right(form)))
 
             status(result) mustBe SEE_OTHER
             redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)

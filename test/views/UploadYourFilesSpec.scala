@@ -28,7 +28,7 @@ class UploadYourFilesSpec extends ViewSpecBase with ViewBehaviours with Property
 
   def view(pos: Position): Html =
     upload_your_files(
-      new UploadRequest("", Map("" -> "")), "", pos)(fakeRequest, messages, appConfig)
+      new UploadRequest("", Map("" -> "")), "",  "", pos)(fakeRequest, messages, appConfig)
 
   val view: () => Html = () => view(First(3))
 

@@ -6,6 +6,7 @@ import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
 val appName = "cds-file-upload-frontend"
 val jacksonVersion = "2.9.7"
+val httpComponentsVersion = "4.5.8"
 val test = "it,test"
 resolvers += Resolver.bintrayRepo("wolfendale", "maven")
 
@@ -28,6 +29,8 @@ lazy val microservice = Project(appName, file("."))
       "uk.gov.hmrc"                      %% "play-whitelist-filter"    % "2.0.0",
       "org.reactivemongo"                %% "play2-reactivemongo"      % "0.16.3-play25",
       "uk.gov.hmrc"                      %% "crypto"                   % "5.3.0",
+      "org.apache.httpcomponents"        %  "httpclient"               % httpComponentsVersion,
+      "org.apache.httpcomponents"        %  "httpmime"                 % httpComponentsVersion,
 
       "org.scalatest"              %% "scalatest"                 % "3.0.4"  % test,
       "org.jsoup"                  %  "jsoup"                     % "1.10.2" % test,
@@ -37,7 +40,8 @@ lazy val microservice = Project(appName, file("."))
       "org.scalatestplus.play"     %% "scalatestplus-play"        % "2.0.0"  % test,
       "org.mockito"                %  "mockito-core"              % "2.13.0" % test,
       "org.scalacheck"             %% "scalacheck"                % "1.14.0" % test,
-      "wolfendale"                 %% "scalacheck-gen-regexp"     % "0.1.1"  % test
+      "wolfendale"                 %% "scalacheck-gen-regexp"     % "0.1.1"  % test,
+      "com.github.tomakehurst"     %  "wiremock"                  % "2.22.0" % test
     ),
 
     dependencyOverrides ++= Set(
