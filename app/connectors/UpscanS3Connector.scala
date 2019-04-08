@@ -27,12 +27,12 @@ import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.util.EntityUtils
 import play.api.libs.Files.TemporaryFile
 
+import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
-import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 @Singleton
-class UpscanS3Connector @Inject()()(implicit executionContext: ExecutionContext) {
+class UpscanS3Connector @Inject()() {
 
   def upload(template: UploadRequest, file: TemporaryFile): Future[Unit] = {
     val builder: MultipartEntityBuilder = MultipartEntityBuilder.create

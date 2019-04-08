@@ -24,7 +24,6 @@ import org.scalatest.{MustMatchers, WordSpec}
 import play.api.http.Status
 import play.api.libs.Files.TemporaryFile
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{Await, Future}
 
