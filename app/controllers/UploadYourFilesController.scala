@@ -29,8 +29,8 @@ import play.api.libs.Files.TemporaryFile
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.upload_your_files
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
@@ -49,13 +49,12 @@ class UploadYourFilesController @Inject()(
     (authenticate andThen requireEori andThen getData andThen requireResponse) { implicit req =>
 
       val references  = req.fileUploadResponse.files.map(_.reference)
-      val callback    = routes.UploadYourFilesController.onSuccess(ref).absoluteURL()
       val refPosition = getPosition(ref, references)
 
       req.fileUploadResponse.files.find(_.reference == ref) match {
         case Some(file) =>
           file.state match {
-            case Waiting(request) => Ok(upload_your_files(request, ref, callback, refPosition))
+            case Waiting(request) => Ok(upload_your_files(ref, refPosition))
             case _                => Redirect(nextPage(file.reference, req.fileUploadResponse.files))
           }
 

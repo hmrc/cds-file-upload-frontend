@@ -18,7 +18,6 @@ package views
 
 import controllers.{First, Last, Middle, Position}
 import generators.Generators
-import models.UploadRequest
 import org.scalatest.prop.PropertyChecks
 import play.twirl.api.Html
 import views.behaviours.ViewBehaviours
@@ -27,8 +26,7 @@ import views.html.upload_your_files
 class UploadYourFilesSpec extends ViewSpecBase with ViewBehaviours with PropertyChecks with Generators {
 
   def view(pos: Position): Html =
-    upload_your_files(
-      new UploadRequest("", Map("" -> "")), "",  "", pos)(fakeRequest, messages, appConfig)
+    upload_your_files("", pos)(fakeRequest, messages, appConfig)
 
   val view: () => Html = () => view(First(3))
 

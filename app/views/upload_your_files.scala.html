@@ -15,12 +15,11 @@
  *@
 
 @import config.AppConfig
+@import uk.gov.hmrc.play.views.html.helpers._
 @import uk.gov.hmrc.play.views.html.{helpers => hmrcHelpers}
 @import views.helpers.Utils._
-@import models._
-@import uk.gov.hmrc.play.views.html.helpers._
 
-@(uploadRequest: UploadRequest, ref: String, callbackUrl: String, refPosition: Position)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(ref: String, refPosition: Position)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @positionModifier = @{refPosition match {
     case First(_)     => "first"

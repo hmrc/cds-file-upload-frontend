@@ -83,8 +83,8 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
       appConfig,
       materializer)
 
-  def viewAsString(uploadRequest: UploadRequest, reference: String, callbackUrl: String, refPosition: Position): String =
-    upload_your_files(uploadRequest, reference, callbackUrl, refPosition)(fakeRequest, messages, appConfig).toString
+  def viewAsString(reference: String, refPosition: Position): String =
+    upload_your_files(reference, refPosition)(fakeRequest, messages, appConfig).toString
 
   private def combine(response: FileUploadResponse, cache: CacheMap): CacheMap =
     cache.copy(data = cache.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))
@@ -109,10 +109,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
       "request file exists in response" in {
 
         forAll(waitingGen, arbitrary[CacheMap]) {
-          case ((file, request, response), cacheMap) =>
-
-            val callback =
-              routes.UploadYourFilesController.onSuccess(file.reference).absoluteURL()(fakeRequest)
+          case ((file, _, response), cacheMap) =>
 
             val refPosition: Position =
               nextPosition(file.reference, response.files.map(_.reference))
@@ -121,7 +118,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
             val result = controller(getCacheMap(updatedCache)).onPageLoad(file.reference)(fakeRequest)
 
             status(result) mustBe OK
-            contentAsString(result) mustBe viewAsString(request, file.reference, callback, refPosition)
+            contentAsString(result) mustBe viewAsString(file.reference, refPosition)
         }
       }
     }
