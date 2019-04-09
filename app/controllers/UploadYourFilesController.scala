@@ -54,8 +54,8 @@ class UploadYourFilesController @Inject()(
       req.fileUploadResponse.files.find(_.reference == ref) match {
         case Some(file) =>
           file.state match {
-            case Waiting(request) => Ok(upload_your_files(ref, refPosition))
-            case _                => Redirect(nextPage(file.reference, req.fileUploadResponse.files))
+            case Waiting(_) => Ok(upload_your_files(ref, refPosition))
+            case _ => Redirect(nextPage(file.reference, req.fileUploadResponse.files))
           }
 
         case None => Redirect(routes.SessionExpiredController.onPageLoad())
