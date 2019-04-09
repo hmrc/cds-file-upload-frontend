@@ -21,8 +21,6 @@ import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import models.Field._
 import models.{File, FileUploadResponse, UploadRequest, Waiting}
-import play.api.data.Form
-import play.api.data.Forms._
 import play.api.http.ContentTypes
 import play.api.libs.Files
 import play.api.mvc.{Action, MultipartFormData}
@@ -33,16 +31,12 @@ import scala.xml._
 @Singleton
 class CustomsDeclarationsStubController @Inject()() extends FrontendController {
 
-  val s3Form = Form(mapping(
-    "success_action_redirect" -> text
-  )(S3Form.apply)(S3Form.unapply))
-
   // for now, we will just return some random
   def handleBatchFileUploadRequest: Action[NodeSeq] = Action(parse.xml) { implicit req =>
     val fileGroupSize = (scala.xml.XML.loadString(req.body.mkString) \ "FileGroupSize").text.toInt
     val resp = FileUploadResponse((1 to fileGroupSize).map { i =>
       File(reference = UUID.randomUUID().toString, Waiting(UploadRequest(
-        href = routes.CustomsDeclarationsStubController.handleS3FileUploadRequest().absoluteURL(),
+        href = "http://localhost:6793/cds-file-upload-service/test-only/s3-bucket",
         fields = Map(
           Algorithm.toString   -> "AWS4-HMAC-SHA256",
           Signature.toString   -> "xxxx",
@@ -56,20 +50,8 @@ class CustomsDeclarationsStubController @Inject()() extends FrontendController {
     Ok(XmlHelper.toXml(resp)).as(ContentTypes.XML)
   }
 
-  def handleS3FileUploadRequest = Action { implicit req =>
-
-    println("-" * 100)
-    println(req.body)
-    println("-" * 100)
-
-    s3Form.bindFromRequest().fold(
-      errors => NoContent,
-      success => Redirect(success.success_action_redirect)
-    )
-  }
+  def handleS3FileUploadRequest: Action[MultipartFormData[Files.TemporaryFile]] = Action(parse.multipartFormData) { implicit req => NoContent }
 }
-
-case class S3Form(success_action_redirect: String)
 
 object XmlHelper {
 

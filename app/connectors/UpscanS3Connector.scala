@@ -16,7 +16,7 @@
 
 package connectors
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Singleton
 import models.UploadRequest
 import org.apache.http.HttpResponse
 import org.apache.http.client.methods.HttpPost
@@ -32,7 +32,7 @@ import scala.concurrent.Future.{failed, successful}
 import scala.util.Try
 
 @Singleton
-class UpscanS3Connector @Inject()() {
+class UpscanS3Connector() {
 
   def upload(template: UploadRequest, file: TemporaryFile): Future[Unit] = {
     val builder: MultipartEntityBuilder = MultipartEntityBuilder.create
