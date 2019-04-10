@@ -19,7 +19,7 @@ package connectors
 import com.google.inject._
 import config.AppConfig
 import models.{BatchFileUpload, EORI}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -30,11 +30,11 @@ class BackendConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient)
 
   private val fileUpload = appConfig.microservice.services.cdsFileUpload
 
-  def save(eori: EORI, data: BatchFileUpload)(implicit hc: HeaderCarrier): Future[Unit] = {
-    httpClient.POST(fileUpload.saveBatch(eori), data).map(_ => ())
+  def save(eori: EORI, data: BatchFileUpload)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+    httpClient.doPost(fileUpload.saveBatch(eori), data,  Seq("Content-Type" -> "application/json"))
   }
 
-  def fetch(eori: EORI)(implicit hc: HeaderCarrier): Future[List[BatchFileUpload]] = {
-    httpClient.GET(fileUpload.getBatches(eori)).map(_.json.asOpt[List[BatchFileUpload]].getOrElse(Nil))
+  def fetch(eori: EORI)(implicit hc: HeaderCarrier): Future[Option[List[BatchFileUpload]]] = {
+    httpClient.GET[Option[List[BatchFileUpload]]](fileUpload.getBatches(eori))
   }
 }
