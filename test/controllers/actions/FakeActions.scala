@@ -27,9 +27,9 @@ import scala.concurrent.Future
 
 trait FakeActions extends Generators {
 
-  class FakeAuthAction(result: SignedInUser = arbitrary[SignedInUser].sample.get) extends AuthAction {
+  class FakeAuthAction(user: SignedInUser = arbitrary[SignedInUser].sample.get) extends AuthAction {
     override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
-      Future.successful(Right(AuthenticatedRequest(request, result)))
+      Future.successful(Right(AuthenticatedRequest(request, user)))
     }
   }
 

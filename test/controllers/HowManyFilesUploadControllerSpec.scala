@@ -19,8 +19,8 @@ package controllers
 import controllers.actions._
 import forms.FileUploadCountProvider
 import generators.Generators
-import models.requests.SignedInUser
 import models._
+import models.requests.SignedInUser
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito._
@@ -75,8 +75,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       }
     }
 
-  private val Some(contactDetailsRequiredAction) = arbitraryContactDetailsActions.arbitrary.sample
-  private val Some(fakeContactDetailsRequiredAction) = arbitraryFakeContactDetailsActions.arbitrary.sample
+  private val fakeContactDetailsRequiredAction = arbitraryFakeContactDetailsActions.arbitrary.sample.get
 
   val form = new FileUploadCountProvider()()
 
@@ -153,7 +152,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
 
     "return a bad request when empty data is submitted" in {
       val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "")
-      val result = controller(contactDetailsRequiredAction).onSubmit(postRequest)
+      val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
       status(result) mustBe BAD_REQUEST
     }
 
@@ -168,7 +167,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       when(mockDataCacheConnector.save(any())).thenReturn(Future.successful(CacheMap("", Map.empty)))
       val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "3")
 
-      val result = controller(contactDetailsRequiredAction).onSubmit(postRequest)
+      val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
 
       status(result) mustBe SEE_OTHER
       val nextRef = response.files.map(_.reference).min
