@@ -25,7 +25,7 @@ import views.behaviours.StringViewBehaviours
 import views.html.mrn_entry
 
 
-class MrnEntrySpec extends ViewSpecBase with StringViewBehaviours[MRN] with PropertyChecks {
+class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with PropertyChecks {
 
   val form = new MRNFormProvider()()
 

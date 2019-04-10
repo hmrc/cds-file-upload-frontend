@@ -21,16 +21,15 @@ import connectors.{DataCacheConnector, S3Connector}
 import controllers.actions._
 import forms.FileUploadCountProvider
 import javax.inject.{Inject, Singleton}
-import models.{File, FileUploadCount, Waiting}
-import pages.{ContactDetailsPage, HowManyFilesUploadPage}
+import models.Waiting
+import pages.HowManyFilesUploadPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import services.CustomsDeclarationsService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import views.html.{how_many_files_upload, upload_your_files}
+import views.html._
 
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration._
+import scala.concurrent.Future
 
 @Singleton
 class HowManyFilesUploadController @Inject()(
@@ -67,7 +66,6 @@ class HowManyFilesUploadController @Inject()(
           Future.successful(BadRequest(how_many_files_upload(errorForm))),
 
         value => {
-
           customsDeclarationsService
             .batchFileUpload(req.eori, req.mrn, value)
             .flatMap { response =>
@@ -77,10 +75,13 @@ class HowManyFilesUploadController @Inject()(
                 .headOption
                 .map(_.state)
                 .collect { case Waiting(request) => request }
-                .fold(
+                .fold {
                   Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
-                ) { request =>
-                  s3.uploadContactDetailsToS3(req.request.contactDetails, request).flatMap { _ =>
+                } { request =>
+                  s3.uploadContactDetailsToS3(
+                    req.request.contactDetails,
+                    request).
+                    flatMap { _ =>
 
                     val answers =
                       req.userAnswers
@@ -92,7 +93,8 @@ class HowManyFilesUploadController @Inject()(
                       val x = response.files.map(x => x.reference)
                       x.headOption match {
                         case Some(nextRef) => Redirect(routes.UploadYourFilesController.onPageLoad(nextRef))
-                        case None => Redirect(routes.SessionExpiredController.onPageLoad())
+                        case None =>
+                          Redirect(routes.SessionExpiredController.onPageLoad())
                       }
                     }
                   }

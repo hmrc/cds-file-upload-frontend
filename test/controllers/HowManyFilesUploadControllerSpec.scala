@@ -16,33 +16,30 @@
 
 package controllers
 
-import connectors.S3Connector
 import controllers.actions._
 import forms.FileUploadCountProvider
 import generators.Generators
-import models.{ContactDetails, FileUploadCount, FileUploadResponse, MRN}
-import models.requests.{ContactDetailsRequest, SignedInUser}
+import models.requests.SignedInUser
+import models._
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito._
-import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Arbitrary._
+import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.PropertyChecks
 import pages.{HowManyFilesUploadPage, MrnEntryPage}
-import play.api.data.Form
 import play.api.libs.json.{JsNumber, JsString}
+import play.api.libs.ws.WSResponse
 import play.api.test.Helpers._
-import repositories.CacheMapRepository
 import services.CustomsDeclarationsService
 import uk.gov.hmrc.http.cache.client.CacheMap
-import views.html.how_many_files_upload
+import views.DomAssertions
 
 import scala.concurrent.Future
-import scala.util.Try
 
-class HowManyFilesUploadControllerSpec extends ControllerSpecBase
+class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssertions
   with MockitoSugar
   with PropertyChecks
   with Generators
@@ -64,6 +61,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
           cacheMap.copy(data = cacheMap.data + (MrnEntryPage.toString -> JsString(mrn.value)))
       }
     }
+
   implicit val arbitraryContactDetailsActions: Arbitrary[ContactDetailsRequiredAction] =
     Arbitrary(arbitrary[FakeContactDetailsRequiredAction].map(_.asInstanceOf[ContactDetailsRequiredAction]))
 
@@ -77,17 +75,18 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
       }
     }
 
+  private val Some(contactDetailsRequiredAction) = arbitraryContactDetailsActions.arbitrary.sample
+  private val Some(fakeContactDetailsRequiredAction) = arbitraryFakeContactDetailsActions.arbitrary.sample
+
   val form = new FileUploadCountProvider()()
-  val service = mock[CustomsDeclarationsService]
-  val awsConnector = mock[S3Connector]
 
-  override def beforeEach = {
+  private val mockCustomsDeclarationsService = mock[CustomsDeclarationsService]
+  private val mockWSResponse = mock[WSResponse]
+
+  override def beforeEach: Unit = {
     super.beforeEach
-
-    reset(service)
-
-    when(service.batchFileUpload(any(), any(), any())(any()))
-      .thenReturn(Future.successful(FileUploadResponse(List())))
+    reset(mockCustomsDeclarationsService, mockWSResponse)
+    when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(FileUploadResponse(List())))
   }
 
   def controller(contactDetailsRequiredAction: ContactDetailsRequiredAction) =
@@ -99,14 +98,13 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
       new MrnRequiredActionImpl,
       contactDetailsRequiredAction,
       new FileUploadCountProvider,
-      dataCacheConnector,
-      awsConnector,
-      service,
+      mockDataCacheConnector,
+      mockS3Connector,
+      mockCustomsDeclarationsService,
       appConfig)
 
-  def viewAsString(form: Form[_] = form) = how_many_files_upload(form)(fakeRequest, messages, appConfig).toString
-
   "How Many Files Upload Page" must {
+
     "load correct page when user is logged in " in {
 
       forAll { action: ContactDetailsRequiredAction =>
@@ -114,126 +112,80 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase
         val result = controller(action).onPageLoad(fakeRequest)
 
         status(result) mustBe OK
-        contentAsString(result) mustBe viewAsString(form)
+        val doc = asDocument(contentAsString(result))
+        doc.title mustEqual "How many files are you uploading?"
       }
     }
 
-    "display file count if it exist on the cache" in {
+    "display file count if it exist in the cache" in {
+      val updatedCacheMap = fakeContactDetailsRequiredAction.cacheMap.copy(data = fakeContactDetailsRequiredAction.cacheMap.data + (HowManyFilesUploadPage.toString -> JsNumber(7)))
+      val updatedAction = new FakeContactDetailsRequiredAction(updatedCacheMap, fakeContactDetailsRequiredAction.contactDetails)
 
-      forAll { (action: FakeContactDetailsRequiredAction, fileUploadCount: FileUploadCount) =>
+      val result = controller(updatedAction).onPageLoad(fakeRequest)
 
-        val updatedCacheMap =
-          action.cacheMap.copy(data = action.cacheMap.data + (HowManyFilesUploadPage.toString -> JsNumber(fileUploadCount.value)))
-        val updatedAction = new FakeContactDetailsRequiredAction(updatedCacheMap, action.contactDetails)
-        val result = controller(updatedAction).onPageLoad(fakeRequest)
-
-        contentAsString(result) mustBe viewAsString(form.fill(fileUploadCount))
-      }
+      val doc = asDocument(contentAsString(result))
+      doc.select("#value").`val` mustEqual "7"
     }
 
-    "load session expired page when data does not exist" when {
+    "load session expired page when data does not exist for onPageLoad" in {
 
-      "onPageLoad is called" in {
+      forAll { contactDetails: ContactDetails =>
 
-        forAll { contactDetails: ContactDetails =>
-
-          val action = new FakeContactDetailsRequiredAction(CacheMap("", Map()), contactDetails)
-          val result = controller(action).onPageLoad(fakeRequest)
-
-          status(result) mustBe SEE_OTHER
-        }
-      }
-
-      "onSubmit is called" in {
-
-        forAll { contactDetails: ContactDetails =>
-
-          val action = new FakeContactDetailsRequiredAction(CacheMap("", Map()), contactDetails)
-          val result = controller(action).onSubmit(fakeRequest)
-
-          status(result) mustBe SEE_OTHER
-        }
-      }
-    }
-
-    "return an ok when valid data is submitted" in {
-
-      forAll { (action: ContactDetailsRequiredAction, fileUploadCount: FileUploadCount, response: FileUploadResponse) =>
-
-        when(service.batchFileUpload(any(), any(), any())(any()))
-          .thenReturn(Future.successful(response))
-
-        val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> fileUploadCount.value.toString)
-
-        val result = controller(action).onSubmit(postRequest)
-        val nextRef = response.files.map(_.reference).min
+        val action = new FakeContactDetailsRequiredAction(CacheMap("", Map()), contactDetails)
+        val result = controller(action).onPageLoad(fakeRequest)
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad(nextRef).url)
+        redirectLocation(result) mustBe Some("/cds-file-upload-service/this-service-has-been-reset")
       }
     }
 
-    "return a bad request when invalid data is submitted" in {
+    "load session expired page when data does not exist for onSubmit" in {
 
-      forAll { (action: ContactDetailsRequiredAction, fileUploadCount: String) =>
+      forAll { contactDetails: ContactDetails =>
 
-        val fileUploadOpt =
-          Try(fileUploadCount.toInt)
-            .toOption
-            .flatMap(FileUploadCount(_))
+        val action = new FakeContactDetailsRequiredAction(CacheMap("", Map()), contactDetails)
+        val result = controller(action).onSubmit(fakeRequest)
 
-        whenever(fileUploadOpt.isEmpty) {
-
-          val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> fileUploadCount)
-          val boundForm = form.bind(Map("value" -> fileUploadCount))
-
-          val result = controller(action).onSubmit(postRequest)
-
-          status(result) mustBe BAD_REQUEST
-          contentAsString(result) mustBe viewAsString(boundForm)
-        }
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result) mustBe Some("/cds-file-upload-service/this-service-has-been-reset")
       }
     }
 
-    "save data in cache when valid" in {
+    "return a bad request when empty data is submitted" in {
+      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "")
+      val result = controller(contactDetailsRequiredAction).onSubmit(postRequest)
+      status(result) mustBe BAD_REQUEST
+    }
 
-      forAll { (action: ContactDetailsRequiredAction, fileUploadCount: FileUploadCount) =>
+    "return an ok and save to the data cache when valid data is submitted" in {
+      val response = FileUploadResponse(List(
+        File("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> "")))),
+        File("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> "")))),
+        File("someFileRef3", Waiting(UploadRequest("http://s3bucket/myfile3", Map("" -> ""))))
+      ))
+      when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(response))
+      when(mockS3Connector.uploadContactDetailsToS3(any(), any())).thenReturn(Future.successful(mockWSResponse))
+      when(mockDataCacheConnector.save(any())).thenReturn(Future.successful(CacheMap("", Map.empty)))
+      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "3")
 
-        val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> fileUploadCount.value.toString)
-        await(controller(action).onSubmit(postRequest))
+      val result = controller(contactDetailsRequiredAction).onSubmit(postRequest)
 
-        val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
-        verify(dataCacheConnector, atLeastOnce).save(captor.capture())
-        captor.getValue.getEntry[FileUploadCount](HowManyFilesUploadPage) mustBe Some(fileUploadCount)
-      }
+      status(result) mustBe SEE_OTHER
+      val nextRef = response.files.map(_.reference).min
+      redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad(nextRef).url)
+      val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
+      verify(mockDataCacheConnector).save(captor.capture())
+      val Some(fileUploadCount) = FileUploadCount(3)
+      captor.getValue.getEntry[FileUploadCount](HowManyFilesUploadPage) mustBe Some(fileUploadCount)
+      captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response) mustBe Some(response)
     }
 
     "make a request to customs declarations" in {
+      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2")
+      await(controller(fakeContactDetailsRequiredAction).onSubmit(postRequest))
 
-      forAll { (action: FakeContactDetailsRequiredAction, fileUploadCount: FileUploadCount) =>
-
-        val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> fileUploadCount.value.toString)
-        await(controller(action).onSubmit(postRequest))
-
-        verify(service, times(1))
-          .batchFileUpload(any(), eqTo(action.cacheMap.getEntry[MRN](MrnEntryPage).get), eqTo(fileUploadCount))(any())
-      }
-    }
-
-    "save response in cache when valid" in {
-
-      forAll { (action: ContactDetailsRequiredAction, fileUploadCount: FileUploadCount, response: FileUploadResponse) =>
-
-        when(service.batchFileUpload(any(), any(), any())(any()))
-          .thenReturn(Future.successful(response))
-
-        val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> fileUploadCount.value.toString)
-        await(controller(action).onSubmit(postRequest))
-
-        val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
-        verify(dataCacheConnector, atLeastOnce).save(captor.capture())
-        captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response) mustBe Some(response)
-      }
+      val Some(fileUploadCount) = FileUploadCount(2)
+      verify(mockCustomsDeclarationsService).batchFileUpload(any(), eqTo(fakeContactDetailsRequiredAction.cacheMap.getEntry[MRN](MrnEntryPage).get), eqTo(fileUploadCount))(any())
     }
   }
 }

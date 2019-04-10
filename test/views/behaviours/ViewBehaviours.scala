@@ -17,9 +17,9 @@
 package views.behaviours
 
 import play.twirl.api.HtmlFormat
-import views.ViewSpecBase
+import views.DomAssertions
 
-trait ViewBehaviours extends ViewSpecBase {
+trait ViewBehaviours extends DomAssertions {
 
   def normalPage(view: () => HtmlFormat.Appendable,
                  messageKeyPrefix: String,
@@ -30,7 +30,7 @@ trait ViewBehaviours extends ViewSpecBase {
 
         "display the correct page title" in {
           val doc = asDocument(view())
-          assertPageTitleEqualsMessage(doc, s"$messageKeyPrefix.heading")
+          assertH1EqualsMessage(doc, s"$messageKeyPrefix.heading")
         }
       }
     }

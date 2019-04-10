@@ -40,7 +40,7 @@ class AuthActionSpec extends ControllerSpecBase
   lazy val conf = app.injector.instanceOf[Configuration]
   lazy val env  = app.injector.instanceOf[Environment]
 
-  def authAction = new AuthActionImpl(authConnector, conf, env)
+  def authAction = new AuthActionImpl(mockAuthConnector, conf, env)
 
   def authController = new TestController(authAction)
 

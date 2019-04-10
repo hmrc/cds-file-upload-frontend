@@ -39,7 +39,7 @@ class EORIActionSpec extends ControllerSpecBase
   lazy val conf = app.injector.instanceOf[Configuration]
   lazy val env  = app.injector.instanceOf[Environment]
 
-  def authAction = new AuthActionImpl(authConnector, conf, env)
+  def authAction = new AuthActionImpl(mockAuthConnector, conf, env)
   def eoriAction = new EORIActionImpl()
 
   def eoriController = new TestController(authAction, eoriAction)

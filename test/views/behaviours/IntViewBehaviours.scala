@@ -64,7 +64,7 @@ trait IntViewBehaviours[A] extends QuestionViewBehaviours[A] {
 
         "show an error prefix in the browser title" in {
           val doc = asDocument(createView(form.withError(error)))
-          assertEqualsValue(doc, "title", s"""${messages("error.browser.title.prefix")} ${messages(s"$messageKeyPrefix.title")}""")
+          assertPageTitleEquals(doc, s"""${messages("error.browser.title.prefix")} ${messages(s"$messageKeyPrefix.title")}""")
         }
       }
     }

@@ -23,7 +23,7 @@ import play.twirl.api.Html
 import views.behaviours.ViewBehaviours
 import views.html.upload_your_files
 
-class UploadYourFilesSpec extends ViewSpecBase with ViewBehaviours with PropertyChecks with Generators {
+class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with PropertyChecks with Generators {
 
   def view(pos: Position): Html =
     upload_your_files("", pos)(fakeRequest, messages, appConfig)
@@ -79,7 +79,7 @@ class UploadYourFilesSpec extends ViewSpecBase with ViewBehaviours with Property
 
         forAll { total: Int =>
 
-          assertPageTitleEqualsMessage(asDocument(view(First(total))), s"$messagePrefix.heading.first")
+          assertH1EqualsMessage(asDocument(view(First(total))), s"$messagePrefix.heading.first")
         }
       }
 
@@ -87,7 +87,7 @@ class UploadYourFilesSpec extends ViewSpecBase with ViewBehaviours with Property
 
         forAll { (index: Int, total: Int) =>
 
-          assertPageTitleEqualsMessage(asDocument(view(Middle(index, total))), s"$messagePrefix.heading.middle")
+          assertH1EqualsMessage(asDocument(view(Middle(index, total))), s"$messagePrefix.heading.middle")
         }
       }
 
@@ -95,7 +95,7 @@ class UploadYourFilesSpec extends ViewSpecBase with ViewBehaviours with Property
 
         forAll { total: Int =>
 
-          assertPageTitleEqualsMessage(asDocument(view(Last(total))), s"$messagePrefix.heading.last")
+          assertH1EqualsMessage(asDocument(view(Last(total))), s"$messagePrefix.heading.last")
         }
       }
     }

@@ -41,7 +41,7 @@ class S3Connector @Inject()(ws: WSClient) {
     new FilePart("file", fileName, Some("text/plain"), FileIO.fromPath(toFile(contactDetails.toString(), fileName).toPath)) :: r
   }
 
-  def uploadContactDetailsToS3(contactDetails: ContactDetails, uploadRequest: UploadRequest) = {
+  def uploadContactDetailsToS3(contactDetails: ContactDetails, uploadRequest: UploadRequest): Future[WSResponse] = {
 
     val response = ws.url(uploadRequest.href).post(Source(myBuilder(contactDetails, uploadRequest)))
     response

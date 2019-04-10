@@ -61,7 +61,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase
       requireContactDetails,
       getEmptyCacheMap,
       new MRNFormProvider,
-      dataCacheConnector,
+      mockDataCacheConnector,
       appConfig)
 
   def viewAsString(form: Form[_] = form) = mrn_entry(form)(fakeRequest, messages, appConfig).toString
@@ -137,7 +137,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase
           val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn.value)
           await(controller(user, eori, fakeContactDetails).onSubmit(postRequest))
 
-          verify(dataCacheConnector, times(1)).save(expectedMap)
+          verify(mockDataCacheConnector, times(1)).save(expectedMap)
       }
     }
   }

@@ -20,7 +20,7 @@ import controllers.routes
 import views.behaviours.ViewBehaviours
 import views.html.start
 
-class StartSpec extends ViewSpecBase with ViewBehaviours {
+class StartSpec extends DomAssertions with ViewBehaviours {
 
   val view = () => start()(fakeRequest, messages, appConfig)
 

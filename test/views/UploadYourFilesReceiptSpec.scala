@@ -23,7 +23,7 @@ import play.twirl.api.Html
 import views.behaviours.ViewBehaviours
 import views.html.upload_your_files_receipt
 
-class UploadYourFilesReceiptSpec extends ViewSpecBase with ViewBehaviours with PropertyChecks with Generators {
+class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with PropertyChecks with Generators {
 
   def view(receipts: List[String]): Html =
     upload_your_files_receipt(receipts)(fakeRequest, messages, appConfig)
@@ -62,7 +62,7 @@ class UploadYourFilesReceiptSpec extends ViewSpecBase with ViewBehaviours with P
 
         val doc = asDocument(view(receipts))
 
-        assertPageTitleEqualsMessage(doc, s"$messagePrefix.heading", receipts.length)
+        assertH1EqualsMessage(doc, s"$messagePrefix.heading", receipts.length)
       }
     }
 

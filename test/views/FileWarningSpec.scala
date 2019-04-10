@@ -21,7 +21,7 @@ import play.twirl.api.Html
 import views.behaviours.ViewBehaviours
 import views.html.file_warning
 
-class FileWarningSpec extends ViewSpecBase with ViewBehaviours {
+class FileWarningSpec extends DomAssertions with ViewBehaviours {
 
   val view: () => Html = () => file_warning()(fakeRequest, messages, appConfig)
 

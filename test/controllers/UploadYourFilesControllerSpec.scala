@@ -77,7 +77,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
       new FakeEORIAction(),
       getData,
       new FileUploadResponseRequiredActionImpl(),
-      dataCacheConnector,
+      mockDataCacheConnector,
       upscanConnector,
       appConfig,
       materializer)
@@ -331,7 +331,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
           whenReady(result) { _ =>
 
             val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
-            verify(dataCacheConnector, atLeastOnce).save(captor.capture())
+            verify(mockDataCacheConnector, atLeastOnce).save(captor.capture())
 
             val updateResponse = captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response)
 

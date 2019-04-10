@@ -36,13 +36,13 @@ import scala.concurrent.Future
 
 class ControllerSpecBase extends SpecBase with MockitoSugar with FakeActions with BeforeAndAfterEach {
 
-  lazy val authConnector: AuthConnector = mock[AuthConnector]
-  lazy val dataCacheConnector: DataCacheConnector = mock[DataCacheConnector]
-  lazy val s3Connector: S3Connector = mock[S3Connector]
+  lazy val mockAuthConnector: AuthConnector = mock[AuthConnector]
+  lazy val mockDataCacheConnector: DataCacheConnector = mock[DataCacheConnector]
+  lazy val mockS3Connector: S3Connector = mock[S3Connector]
 
   def withSignedInUser(user: SignedInUser)(test: => Unit): Unit = {
     when(
-      authConnector
+      mockAuthConnector
         .authorise(
           any(),
           eqTo(credentials and name and email and affinityGroup and internalId and allEnrolments))(any(), any())
@@ -54,17 +54,16 @@ class ControllerSpecBase extends SpecBase with MockitoSugar with FakeActions wit
   }
 
   def withAuthError(authException: AuthorisationException)(test: => Unit): Unit = {
-    when(authConnector.authorise(any(), any())(any(), any()))
+    when(mockAuthConnector.authorise(any(), any())(any(), any()))
       .thenReturn(Future.failed(authException))
 
     test
   }
 
   override def beforeEach = {
-    reset(dataCacheConnector, authConnector)
+    reset(mockDataCacheConnector, mockAuthConnector, mockS3Connector)
 
-    when(dataCacheConnector.save(any()))
-      .thenReturn(Future.successful(CacheMap("", Map())))
+    when(mockDataCacheConnector.save(any())).thenReturn(Future.successful(CacheMap("", Map())))
   }
 
   val escaped: String => String =

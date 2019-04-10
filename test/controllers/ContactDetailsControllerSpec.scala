@@ -50,7 +50,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase
       new FakeAuthAction(signedInUser),
       new FakeEORIAction(eori),
       dataRetrieval,
-      dataCacheConnector,
+      mockDataCacheConnector,
       appConfig
     )
 
@@ -118,7 +118,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase
           await(controller(user, eori).onSubmit(postRequest))
 
           val expectedMap = CacheMap(user.internalId, Map(ContactDetailsPage.toString -> Json.toJson(contactDetails)))
-          verify(dataCacheConnector, times(1)).save(expectedMap)
+          verify(mockDataCacheConnector, times(1)).save(expectedMap)
         }
       }
     }

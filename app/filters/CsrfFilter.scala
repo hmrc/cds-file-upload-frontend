@@ -30,12 +30,6 @@ class CsrfFilter @Inject()(implicit val mat: Materializer) extends Filter {
       if (rh.uri.matches(".*test-only.*")) rh.headers.add("csrf" -> "bypass")
       else rh.headers
 
-
-    println("-" *100)
-    println(rh.uri)
-    println(headers.get("csrf"))
-    println("-" *100)
-
     f(rh.copy(headers = headers))
   }
 }

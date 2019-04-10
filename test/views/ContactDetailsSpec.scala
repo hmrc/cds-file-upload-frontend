@@ -28,7 +28,7 @@ import views.behaviours.StringViewBehaviours
 import views.html.components.input_text
 import views.html.contact_details
 
-class ContactDetailsSpec extends ViewSpecBase
+class ContactDetailsSpec extends DomAssertions
   with StringViewBehaviours[ContactDetails]
   with PropertyChecks
   with Generators {

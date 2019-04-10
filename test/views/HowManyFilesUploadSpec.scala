@@ -24,7 +24,7 @@ import play.twirl.api.{Html, HtmlFormat}
 import views.behaviours.{IntViewBehaviours, StringViewBehaviours}
 import views.html.how_many_files_upload
 
-class HowManyFilesUploadSpec extends ViewSpecBase with IntViewBehaviours[FileUploadCount] with PropertyChecks {
+class HowManyFilesUploadSpec extends DomAssertions with IntViewBehaviours[FileUploadCount] with PropertyChecks {
 
   val form = new FileUploadCountProvider()()
 

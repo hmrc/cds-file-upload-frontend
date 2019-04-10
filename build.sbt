@@ -9,6 +9,7 @@ majorVersion := 0
 PlayKeys.devSettings := Seq("play.server.http.port" -> "6793")
 
 resolvers += Resolver.bintrayRepo("wolfendale", "maven")
+
 lazy val microservice = (project in file("."))
   .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
   .settings(publishingSettings: _*)
@@ -54,16 +55,15 @@ val compileDependencies = Seq(
 
 
 val testDependencies = Seq(
-  "org.scalatest" %% "scalatest" % "3.0.4" % "test",
-  "org.jsoup" % "jsoup" % "1.10.2" % "test",
+  "org.scalatest" %% "scalatest" % "3.0.5" % "test",
+  "org.jsoup" % "jsoup" % "1.11.3" % "test",
   "com.typesafe.play" %% "play-test" % current % "test",
   "org.pegdown" % "pegdown" % "1.6.0" % "test",
-  "uk.gov.hmrc" %% "service-integration-test" % "0.2.0" % "test",
-  "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" % "test",
-  "org.mockito" % "mockito-core" % "2.13.0" % "test",
+  "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1" % "test",
+  "org.mockito" % "mockito-core" % "2.23.0" % "test",
   "org.scalacheck" %% "scalacheck" % "1.14.0" % "test",
   "wolfendale" %% "scalacheck-gen-regexp" % "0.1.1" % "test",
-  "com.github.tomakehurst" %  "wiremock" % "2.22.0" % "test"
+  "com.github.tomakehurst" % "wiremock-standalone" % "2.19.0" % "test"
 )
 
 libraryDependencies ++= compileDependencies ++ testDependencies

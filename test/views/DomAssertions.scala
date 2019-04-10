@@ -23,42 +23,47 @@ import play.twirl.api.Html
 
 import scala.collection.JavaConverters._
 
+trait DomAssertions extends SpecBase {
 
-trait ViewSpecBase extends SpecBase {
+  def asDocument(string: String) = Jsoup.parse(string)
 
-  def asDocument(html: Html): Document = Jsoup.parse(html.toString())
+  def asDocument(html: Html): Document = asDocument(html.toString())
 
   def assertEqualsMessage(doc: Document, cssSelector: String, expectedMessageKey: String, args: Any*) =
     assertEqualsValue(doc, cssSelector, messages(expectedMessageKey, args))
 
-  def assertEqualsValue(doc : Document, cssSelector: String, expectedValue: String) = {
+  def assertEqualsValue(doc: Document, cssSelector: String, expectedValue: String) = {
     val elements = doc.select(cssSelector)
 
-    if(elements.isEmpty) throw new IllegalArgumentException(s"CSS Selector $cssSelector wasn't rendered.")
+    if (elements.isEmpty) throw new IllegalArgumentException(s"CSS Selector $cssSelector wasn't rendered.")
 
     //<p> HTML elements are rendered out with a carriage return on some pages, so discount for comparison
     assert(elements.first().html().replace("\n", "") == expectedValue)
   }
 
-  def assertContainsValue(doc : Document, cssSelector: String, expectedValue: String) = {
+  def assertContainsValue(doc: Document, cssSelector: String, expectedValue: String) = {
     val elements = doc.select(cssSelector)
 
-    if(elements.isEmpty) throw new IllegalArgumentException(s"CSS Selector $cssSelector wasn't rendered.")
+    if (elements.isEmpty) throw new IllegalArgumentException(s"CSS Selector $cssSelector wasn't rendered.")
 
     //<p> HTML elements are rendered out with a carriage return on some pages, so discount for comparison
     assert(elements.first().html().replace("\n", "").contains(expectedValue))
   }
 
-  def assertPageTitleEqualsMessage(doc: Document, expectedMessageKey: String, args: Any*) = {
-    val headers = doc.getElementsByTag("h1")
-    headers.size mustBe 1
-    headers.first.text.replaceAll("\u00a0", " ") mustBe messages(expectedMessageKey, args:_*).replaceAll("&nbsp;", " ")
+  def assertPageTitleEquals(doc: Document, expectedMessage: String) = {
+    doc.title mustBe expectedMessage
   }
 
-  def assertContainsText(doc:Document, text: String) =
+  def assertH1EqualsMessage(doc: Document, expectedMessageKey: String, args: Any*) = {
+    val headers = doc.getElementsByTag("h1")
+    headers.size mustBe 1
+    headers.first.text.replaceAll("\u00a0", " ") mustBe messages(expectedMessageKey, args: _*).replaceAll("&nbsp;", " ")
+  }
+
+  def assertContainsText(doc: Document, text: String) =
     assert(doc.text().contains(Html(text).body), "\n\ntext " + text + " was not rendered on the page.\n")
 
-  def assertContainsLink(doc:Document, text: String, href: String) = {
+  def assertContainsLink(doc: Document, text: String, href: String) = {
     val anchors = doc.getElementsByTag("a").asScala
     val exists = anchors.exists(a => a.text() == text && a.attr("href") == href)
     assert(exists, s"\n\nanchor with text $text and href $href was not rendered on the page.\n")
