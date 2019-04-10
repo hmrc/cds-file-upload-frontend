@@ -22,30 +22,21 @@ import models.{FileUploadRequest, FileUploadResponse}
 import play.api.Logger
 import play.api.http.{ContentTypes, HeaderNames}
 import play.api.mvc.Codec
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 import scala.xml.XML
 
-trait CustomsDeclarationsConnector {
-
-  def requestFileUpload(eori: String, request: FileUploadRequest)(implicit hc: HeaderCarrier): Future[FileUploadResponse]
-
-}
-
-class CustomsDeclarationsConnectorImpl @Inject()(
-                                                  config: AppConfig,
-                                                  httpClient: HttpClient)
-                                                (implicit ec: ExecutionContext) extends CustomsDeclarationsConnector {
+class CustomsDeclarationsConnector @Inject()(config: AppConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) {
 
   private val fileUploadUrl = config.microservice.services.customsDeclarations.batchUploadEndpoint
   private val apiVersion    = config.microservice.services.customsDeclarations.apiVersion
   private val clientId      = config.developerHubClientId
 
-  override def requestFileUpload(eori: String, request: FileUploadRequest)(implicit hc: HeaderCarrier): Future[FileUploadResponse] = {
-    httpClient.POSTString(fileUploadUrl, request.toXml.mkString,  eoriHeader(eori) :: headers).map(r =>
+  def requestFileUpload(eori: String, request: FileUploadRequest)(implicit hc: HeaderCarrier): Future[FileUploadResponse] = {
+    httpClient.POSTString[HttpResponse](fileUploadUrl, request.toXml.mkString,  eoriHeader(eori) :: headers).map(r =>
       Try(XML.loadString(r.body)) match {
         case Success(value)     => FileUploadResponse.fromXml(value)
         case Failure(exception) =>

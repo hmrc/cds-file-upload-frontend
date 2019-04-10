@@ -16,14 +16,11 @@
 
 import com.google.inject.{AbstractModule, Provides}
 import config.AppConfig
-import connectors.{CustomsDeclarationsConnector, CustomsDeclarationsConnectorImpl, DataCacheConnector, MongoCacheConnector}
+import connectors.{DataCacheConnector, MongoCacheConnector}
 import controllers.actions._
 import javax.inject.Singleton
 import play.filters.csrf.CSRFConfig
 import services.{CustomsDeclarationsService, CustomsDeclarationsServiceImpl}
-import play.api.i18n.{Lang, Messages}
-import play.api.i18n.Messages.Implicits._
-import play.api.Play.current
 
 class Module extends AbstractModule {
 
@@ -41,7 +38,6 @@ class Module extends AbstractModule {
     bind(classOf[DataRetrievalAction]).to(classOf[DataRetrievalActionImpl]).asEagerSingleton()
     bind(classOf[MrnRequiredAction]).to(classOf[MrnRequiredActionImpl]).asEagerSingleton()
     bind(classOf[FileUploadResponseRequiredAction]).to(classOf[FileUploadResponseRequiredActionImpl]).asEagerSingleton()
-    bind(classOf[CustomsDeclarationsConnector]).to(classOf[CustomsDeclarationsConnectorImpl]).asEagerSingleton()
     bind(classOf[DataCacheConnector]).to(classOf[MongoCacheConnector]).asEagerSingleton()
     bind(classOf[CustomsDeclarationsService]).to(classOf[CustomsDeclarationsServiceImpl]).asEagerSingleton()
   }
