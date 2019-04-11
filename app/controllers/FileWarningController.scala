@@ -26,8 +26,7 @@ import views.html.file_warning
 
 
 @Singleton
-class FileWarningController @Inject()(
-                                       val messagesApi: MessagesApi,
+class FileWarningController @Inject()(val messagesApi: MessagesApi,
                                        authenticate: AuthAction,
                                        requireEori: EORIRequiredActionImpl,
                                        implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {

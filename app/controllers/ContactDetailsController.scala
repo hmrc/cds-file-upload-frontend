@@ -33,8 +33,7 @@ import views.html.contact_details
 import scala.concurrent.Future
 
 @Singleton
-class ContactDetailsController @Inject()(
-                                          val messagesApi: MessagesApi,
+class ContactDetailsController @Inject()(val messagesApi: MessagesApi,
                                           authenticate: AuthAction,
                                           requireEori: EORIRequiredActionImpl,
                                           getData: DataRetrievalAction,

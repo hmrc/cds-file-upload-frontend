@@ -34,8 +34,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class UploadYourFilesController @Inject()(
-                                           val messagesApi: MessagesApi,
+class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
                                            authenticate: AuthAction,
                                            requireEori: EORIRequiredActionImpl,
                                            getData: DataRetrievalAction,
@@ -106,14 +105,14 @@ class UploadYourFilesController @Inject()(
       }
     }
 
-  def nextPage(ref: String, refs: List[File])(implicit request: Request[_]): Call =
+  private def nextPage(ref: String, refs: List[File])(implicit request: Request[_]): Call =
     refs
       .partition(_.reference <= ref)._2
       .collectFirst { case file@File(_, Waiting(_)) => file }
       .map(file => routes.UploadYourFilesController.onPageLoad(file.reference))
       .getOrElse(routes.UploadYourFilesReceiptController.onPageLoad())
 
-  def getPosition(ref: String, refs: List[String]): Position =
+  private def getPosition(ref: String, refs: List[String]): Position =
     if (refs.headOption.contains(ref)) First(refs.size)
     else if (refs.lastOption.contains(ref)) Last(refs.size)
     else Middle(refs.indexOf(ref) + 1, refs.size)

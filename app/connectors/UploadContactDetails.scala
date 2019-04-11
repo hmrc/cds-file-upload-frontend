@@ -32,10 +32,9 @@ class UploadContactDetails @Inject()(upscanConnector: UpscanS3Connector) {
   def apply(contactDetails: ContactDetails, uploadRequest: UploadRequest): Future[Unit] = upscanConnector.upload(uploadRequest, toFile(contactDetails))
 
   def toFile(contactDetails: ContactDetails): TemporaryFile = {
-    val fileName = s"contact_details_${UUID.randomUUID().toString()}.txt"
+    val fileName = s"contact_details_${UUID.randomUUID().toString}.txt"
     val uploadFile = File.createTempFile(fileName, "")
 
-    uploadFile.deleteOnExit() // Don't do this, need to delete after file has been used
     new PrintWriter(uploadFile) {
       try {
         write(contactDetails.toString())

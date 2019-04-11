@@ -23,7 +23,7 @@ import play.api.data.format.Formatter
 import play.api.data.Forms.of
 import play.api.data.{Form, FormError}
 
-class MRNFormProvider @Inject() extends FormErrorHelper with Mappings {
+class MRNFormProvider @Inject() extends Mappings {
 
   def apply(): Form[MRN] =
     Form(

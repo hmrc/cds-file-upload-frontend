@@ -25,7 +25,7 @@ import play.api.data.{Form, FormError}
 
 import scala.util.Try
 
-class FileUploadCountProvider @Inject extends FormErrorHelper with Mappings {
+class FileUploadCountProvider @Inject extends Mappings {
 
   def apply(): Form[FileUploadCount] = Form("value" -> of(fileUploadCountFormatter("howManyFilesUpload.invalid")))
 

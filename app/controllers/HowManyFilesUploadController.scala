@@ -32,8 +32,7 @@ import views.html._
 import scala.concurrent.Future
 
 @Singleton
-class HowManyFilesUploadController @Inject()(
-                                              val messagesApi: MessagesApi,
+class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
                                               authenticate: AuthAction,
                                               requireEori: EORIRequiredActionImpl,
                                               getData: DataRetrievalAction,

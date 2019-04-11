@@ -32,8 +32,7 @@ import scala.concurrent.Future
 
 
 @Singleton
-class MrnEntryController @Inject()(
-                                    val messagesApi: MessagesApi,
+class MrnEntryController @Inject()(val messagesApi: MessagesApi,
                                     authenticate: AuthAction,
                                     requireEori: EORIRequiredActionImpl,
                                     requireContactDetails: ContactDetailsRequiredAction,

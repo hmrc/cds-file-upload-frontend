@@ -16,19 +16,17 @@
 
 package forms.mappings
 
-import forms.FormErrorHelper
 import models.ContactDetails
 import play.api.data.Forms._
 
-object ContactDetailsMapping extends FormErrorHelper with Mappings {
+object ContactDetailsMapping extends Mappings {
 
   val contactDetailsMapping = mapping(
     "name" -> text().verifying(maxLength(35, "contactDetails.name.invalid")),
     "companyName" -> text().verifying(maxLength(35, "contactDetails.companyName.invalid")),
     "phoneNumber" -> text().verifying(maxLength(15, "contactDetails.phoneNumber.invalid"))
-      .verifying("contactDetails.phoneNumber.invalidPattern", isvalidPhoneNumber),
+      .verifying("contactDetails.phoneNumber.invalidPattern", isValidPhoneNumber),
     "email" -> text().verifying(maxLength(50, "contactDetails.email.invalid"))
       .verifying("contactDetails.email.invalidPattern", isValidEmail)
   )(ContactDetails.apply)(ContactDetails.unapply)
-
 }

@@ -47,9 +47,9 @@ contactDetails.phoneNumber=Phone number
 contactDetails.email=Email address
 contactDetails.name.invalid=Name must be less than or equal to 35 characters
 contactDetails.companyName.invalid=Company name must be less than or equal to 35 characters
-contactDetails.phoneNumber.invalid=Phone number must be less than or equal to 35 characters
+contactDetails.phoneNumber.invalid=Phone number must be less than or equal to 15 characters
 contactDetails.phoneNumber.invalidPattern=Phone number is invalid
-contactDetails.email.invalid=Email must be less than or equal to 35 characters
+contactDetails.email.invalid=Email must be less than or equal to 50 characters
 contactDetails.email.invalidPattern=Email is invalid
 contactDetails.paragraph1=Provide these details so we can contact you if there are any issues with the documents you submit.
 
