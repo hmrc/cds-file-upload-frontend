@@ -19,7 +19,7 @@ package controllers
 import java.net.URLEncoder
 
 import base.SpecBase
-import connectors.{DataCacheConnector, S3Connector}
+import connectors.{DataCacheConnector, UploadContactDetails}
 import controllers.actions.{ContactDetailsRequiredAction, DataRetrievalAction, FakeActions}
 import models.ContactDetails
 import models.requests.SignedInUser
@@ -38,7 +38,7 @@ class ControllerSpecBase extends SpecBase with MockitoSugar with FakeActions wit
 
   lazy val mockAuthConnector: AuthConnector = mock[AuthConnector]
   lazy val mockDataCacheConnector: DataCacheConnector = mock[DataCacheConnector]
-  lazy val mockS3Connector: S3Connector = mock[S3Connector]
+  lazy val mockUploadContactDetails: UploadContactDetails = mock[UploadContactDetails]
 
   def withSignedInUser(user: SignedInUser)(test: => Unit): Unit = {
     when(
@@ -61,7 +61,7 @@ class ControllerSpecBase extends SpecBase with MockitoSugar with FakeActions wit
   }
 
   override def beforeEach = {
-    reset(mockDataCacheConnector, mockAuthConnector, mockS3Connector)
+    reset(mockDataCacheConnector, mockAuthConnector, mockUploadContactDetails)
 
     when(mockDataCacheConnector.save(any())).thenReturn(Future.successful(CacheMap("", Map())))
   }

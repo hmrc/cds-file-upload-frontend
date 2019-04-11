@@ -98,7 +98,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       contactDetailsRequiredAction,
       new FileUploadCountProvider,
       mockDataCacheConnector,
-      mockS3Connector,
+      mockUploadContactDetails,
       mockCustomsDeclarationsService,
       appConfig)
 
@@ -163,7 +163,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
         File("someFileRef3", Waiting(UploadRequest("http://s3bucket/myfile3", Map("" -> ""))))
       ))
       when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(response))
-      when(mockS3Connector.uploadContactDetailsToS3(any(), any())).thenReturn(Future.successful(mockWSResponse))
+      when(mockUploadContactDetails.apply(any(), any())).thenReturn(Future.successful())
       when(mockDataCacheConnector.save(any())).thenReturn(Future.successful(CacheMap("", Map.empty)))
       val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "3")
 

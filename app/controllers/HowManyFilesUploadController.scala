@@ -17,7 +17,7 @@
 package controllers
 
 import config.AppConfig
-import connectors.{DataCacheConnector, S3Connector}
+import connectors.{DataCacheConnector, UploadContactDetails}
 import controllers.actions._
 import forms.FileUploadCountProvider
 import javax.inject.{Inject, Singleton}
@@ -41,7 +41,7 @@ class HowManyFilesUploadController @Inject()(
                                               requireContactDetails: ContactDetailsRequiredAction,
                                               formProvider: FileUploadCountProvider,
                                               dataCacheConnector: DataCacheConnector,
-                                              s3: S3Connector,
+                                              uploadContactDetails: UploadContactDetails,
                                               customsDeclarationsService: CustomsDeclarationsService,
                                               implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
@@ -78,7 +78,7 @@ class HowManyFilesUploadController @Inject()(
                 .fold {
                   Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
                 } { request =>
-                  s3.uploadContactDetailsToS3(
+                  uploadContactDetails(
                     req.request.contactDetails,
                     request).
                     flatMap { _ =>
