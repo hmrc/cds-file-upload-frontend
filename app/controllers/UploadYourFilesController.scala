@@ -105,17 +105,18 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
       }
     }
 
-  private def nextPage(ref: String, refs: List[File])(implicit request: Request[_]): Call =
+  private def nextPage(ref: String, refs: List[File])(implicit request: Request[_]) =
     refs
-      .partition(_.reference <= ref)._2
+      .filter(_.reference > ref)
       .collectFirst { case file@File(_, Waiting(_)) => file }
       .map(file => routes.UploadYourFilesController.onPageLoad(file.reference))
       .getOrElse(routes.UploadYourFilesReceiptController.onPageLoad())
 
-  private def getPosition(ref: String, refs: List[String]): Position =
-    if (refs.headOption.contains(ref)) First(refs.size)
-    else if (refs.lastOption.contains(ref)) Last(refs.size)
-    else Middle(refs.indexOf(ref) + 1, refs.size)
+  private def getPosition(ref: String, refs: List[String]) = refs match {
+    case head :: tail if head == ref => First(refs.size)
+    case init :+ last if last == ref => Last(refs.size)
+    case _ => Middle(refs.indexOf(ref) + 1, refs.size)
+  }
 }
 
 sealed trait Position
