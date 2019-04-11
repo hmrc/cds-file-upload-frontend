@@ -33,7 +33,7 @@ trait FakeActions extends Generators {
     }
   }
 
-  class FakeEORIAction(eori: String = arbitrary[String].sample.get) extends EORIAction {
+  class FakeEORIAction(eori: String = arbitrary[String].sample.get) extends EORIRequiredActionImpl {
     override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, EORIRequest[A]]] =
       Future.successful(Right(EORIRequest[A](request, eori)))
   }

@@ -19,7 +19,7 @@ package controllers
 import com.google.inject.Singleton
 import config.AppConfig
 import connectors.DataCacheConnector
-import controllers.actions.{AuthAction, ContactDetailsRequiredAction, DataRetrievalAction, EORIAction}
+import controllers.actions.{AuthAction, ContactDetailsRequiredAction, DataRetrievalAction, EORIRequiredActionImpl}
 import forms.MRNFormProvider
 import javax.inject.Inject
 import pages.MrnEntryPage
@@ -33,14 +33,14 @@ import scala.concurrent.Future
 
 @Singleton
 class MrnEntryController @Inject()(
-  val messagesApi: MessagesApi,
-  authenticate: AuthAction,
-  requireEori: EORIAction,
-  requireContactDetails: ContactDetailsRequiredAction,
-  getData: DataRetrievalAction,
-  formProvider: MRNFormProvider,
-  dataCacheConnector: DataCacheConnector,
-  implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
+                                    val messagesApi: MessagesApi,
+                                    authenticate: AuthAction,
+                                    requireEori: EORIRequiredActionImpl,
+                                    requireContactDetails: ContactDetailsRequiredAction,
+                                    getData: DataRetrievalAction,
+                                    formProvider: MRNFormProvider,
+                                    dataCacheConnector: DataCacheConnector,
+                                    implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
   val form = formProvider()
 

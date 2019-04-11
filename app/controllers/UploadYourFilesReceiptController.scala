@@ -27,12 +27,12 @@ import views.html.upload_your_files_receipt
 
 @Singleton
 class UploadYourFilesReceiptController @Inject()(
-                                           val messagesApi: MessagesApi,
-                                           authenticate: AuthAction,
-                                           requireEori: EORIAction,
-                                           getData: DataRetrievalAction,
-                                           requireResponse: FileUploadResponseRequiredAction,
-                                           implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
+                                                  val messagesApi: MessagesApi,
+                                                  authenticate: AuthAction,
+                                                  requireEori: EORIRequiredActionImpl,
+                                                  getData: DataRetrievalAction,
+                                                  requireResponse: FileUploadResponseRequiredAction,
+                                                  implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
   def onPageLoad: Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireResponse) { implicit req =>

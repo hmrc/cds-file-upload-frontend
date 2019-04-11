@@ -18,7 +18,7 @@ package controllers
 
 import com.google.inject.{Inject, Singleton}
 import config.AppConfig
-import controllers.actions.{AuthAction, EORIAction}
+import controllers.actions.{AuthAction, EORIRequiredActionImpl}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -29,7 +29,7 @@ import views.html.file_warning
 class FileWarningController @Inject()(
                                        val messagesApi: MessagesApi,
                                        authenticate: AuthAction,
-                                       requireEori: EORIAction,
+                                       requireEori: EORIRequiredActionImpl,
                                        implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori) { implicit req =>

@@ -29,8 +29,6 @@ import scala.concurrent.Future
 class DataRetrievalActionImpl @Inject()(val dataCacheConnector: DataCacheConnector) extends DataRetrievalAction {
 
   override protected def transform[A](request: EORIRequest[A]): Future[OptionalDataRequest[A]] = {
-    implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
-
     val id = request.user.internalId
 
     dataCacheConnector.fetch(id).map { data =>

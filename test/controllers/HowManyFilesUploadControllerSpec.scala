@@ -75,7 +75,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       }
     }
 
-  private val fakeContactDetailsRequiredAction = arbitraryFakeContactDetailsActions.arbitrary.sample.get
+  private val fakeContactDetailsRequiredAction = arbitraryFakeContactDetailsActions.arbitrary.retryUntil(_ => true).sample.get
 
   val form = new FileUploadCountProvider()()
 
@@ -94,7 +94,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       new FakeAuthAction(),
       new FakeEORIAction(),
       getEmptyCacheMap,
-      new MrnRequiredActionImpl,
+      new MrnRequiredAction,
       contactDetailsRequiredAction,
       new FileUploadCountProvider,
       mockDataCacheConnector,

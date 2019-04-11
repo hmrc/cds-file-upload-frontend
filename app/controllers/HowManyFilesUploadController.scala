@@ -21,7 +21,7 @@ import connectors.{DataCacheConnector, UploadContactDetails}
 import controllers.actions._
 import forms.FileUploadCountProvider
 import javax.inject.{Inject, Singleton}
-import models.Waiting
+import models.{File, Waiting}
 import pages.HowManyFilesUploadPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
@@ -35,7 +35,7 @@ import scala.concurrent.Future
 class HowManyFilesUploadController @Inject()(
                                               val messagesApi: MessagesApi,
                                               authenticate: AuthAction,
-                                              requireEori: EORIAction,
+                                              requireEori: EORIRequiredActionImpl,
                                               getData: DataRetrievalAction,
                                               requireMrn: MrnRequiredAction,
                                               requireContactDetails: ContactDetailsRequiredAction,
@@ -65,9 +65,9 @@ class HowManyFilesUploadController @Inject()(
         errorForm =>
           Future.successful(BadRequest(how_many_files_upload(errorForm))),
 
-        value => {
+        fileUploadCount => {
           customsDeclarationsService
-            .batchFileUpload(req.eori, req.mrn, value)
+            .batchFileUpload(req.eori, req.mrn, fileUploadCount)
             .flatMap { response =>
 
               response
@@ -83,21 +83,19 @@ class HowManyFilesUploadController @Inject()(
                     request).
                     flatMap { _ =>
 
-                    val answers =
-                      req.userAnswers
-                        .set(HowManyFilesUploadPage, value)
-                        .set(HowManyFilesUploadPage.Response, response)
+                      val answers =
+                        req.userAnswers
+                          .set(HowManyFilesUploadPage, fileUploadCount)
+                          .set(HowManyFilesUploadPage.Response, response)
 
-                    dataCacheConnector.save(answers.cacheMap).map { _ =>
+                      dataCacheConnector.save(answers.cacheMap).map { _ =>
 
-                      val x = response.files.map(x => x.reference)
-                      x.headOption match {
-                        case Some(nextRef) => Redirect(routes.UploadYourFilesController.onPageLoad(nextRef))
-                        case None =>
-                          Redirect(routes.SessionExpiredController.onPageLoad())
+                        response.files match {
+                          case firstFile :: _ => Redirect(routes.UploadYourFilesController.onPageLoad(firstFile.reference))
+                          case Nil => Redirect(routes.SessionExpiredController.onPageLoad())
+                        }
                       }
                     }
-                  }
                 }
 
             }

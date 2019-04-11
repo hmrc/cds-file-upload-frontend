@@ -36,7 +36,7 @@ import scala.concurrent.Future
 class ContactDetailsController @Inject()(
                                           val messagesApi: MessagesApi,
                                           authenticate: AuthAction,
-                                          requireEori: EORIAction,
+                                          requireEori: EORIRequiredActionImpl,
                                           getData: DataRetrievalAction,
                                           dataCacheConnector: DataCacheConnector,
                                           implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {

@@ -16,34 +16,19 @@
 
 package controllers.actions
 
-import com.google.inject.Inject
 import controllers.routes
-import models.requests.{ContactDetailsRequest, MrnRequest, OptionalDataRequest}
+import models.requests.{ContactDetailsRequest, MrnRequest}
 import pages.MrnEntryPage
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, Result}
-import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.Future
 
+class MrnRequiredAction extends ActionRefiner[ContactDetailsRequest, MrnRequest] {
 
-class MrnRequiredActionImpl @Inject() extends MrnRequiredAction {
+  private val onError = Redirect(routes.SessionExpiredController.onPageLoad())
 
   override protected def refine[A](request: ContactDetailsRequest[A]): Future[Either[Result, MrnRequest[A]]] = {
-    implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
-
-    Future.successful(
-      request.userAnswers.get(MrnEntryPage).map(mrn => (request.userAnswers, mrn))
-        .map { case (request.userAnswers, mrn) => MrnRequest(request, request.userAnswers, mrn) }
-        .toRight(Redirect(routes.SessionExpiredController.onPageLoad()))
-    )
-
-    /*    Future.successful(
-          request.userAnswers
-            .flatMap(data => data.get(MrnEntryPage).map(mrn => (data, mrn)))
-            .map { case (data, mrn) => MrnRequest(request.request, data, mrn) }
-            .toRight(Redirect(routes.SessionExpiredController.onPageLoad())))*/
+    Future.successful(request.userAnswers.get(MrnEntryPage).map(mrn => MrnRequest(request, request.userAnswers, mrn)).toRight(onError))
   }
 }
-
-trait MrnRequiredAction extends ActionRefiner[ContactDetailsRequest, MrnRequest]

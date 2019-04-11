@@ -23,17 +23,20 @@ import play.api.mvc._
 
 import scala.concurrent.Future
 
-class EORIActionImpl extends EORIAction {
+class EORIRequiredActionImpl extends EORIRequiredAction {
+
+  private val onError = Redirect(routes.UnauthorisedController.onPageLoad())
 
   override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, EORIRequest[A]]] = {
-    Future.successful(
-      request.user.enrolments
-        .getEnrolment(SignedInUser.cdsEnrolmentName)
-        .flatMap(_.getIdentifier(SignedInUser.eoriIdentifierKey))
-        .filter(_.value.nonEmpty)
-        .map(i => EORIRequest(request, i.value))
-        .toRight(Redirect(routes.UnauthorisedController.onPageLoad)))
+    val eoriRequest =
+      for {
+        e <- request.user.enrolments.getEnrolment(SignedInUser.cdsEnrolmentName)
+        i <- e.getIdentifier(SignedInUser.eoriIdentifierKey)
+        v = i.value if i.value.nonEmpty
+      } yield EORIRequest(request, v)
+
+    Future.successful(eoriRequest.toRight(onError))
   }
 }
 
-trait EORIAction extends ActionRefiner[AuthenticatedRequest, EORIRequest]
+trait EORIRequiredAction extends ActionRefiner[AuthenticatedRequest, EORIRequest]

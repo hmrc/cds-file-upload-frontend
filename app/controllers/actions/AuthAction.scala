@@ -31,13 +31,8 @@ import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuthActionImpl @Inject()(
-  val authConnector: AuthConnector,
-  val config: Configuration,
-  val env: Environment
-)(implicit ec: ExecutionContext) extends AuthAction
-  with AuthorisedFunctions
-  with AuthRedirects {
+class AuthActionImpl @Inject()(val authConnector: AuthConnector, val config: Configuration, val env: Environment)(implicit ec: ExecutionContext)
+  extends AuthAction with AuthorisedFunctions with AuthRedirects {
 
   override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
@@ -59,5 +54,4 @@ class AuthActionImpl @Inject()(
   }
 }
 
-trait AuthAction extends ActionBuilder[AuthenticatedRequest]
-  with ActionRefiner[Request, AuthenticatedRequest]
+trait AuthAction extends ActionBuilder[AuthenticatedRequest] with ActionRefiner[Request, AuthenticatedRequest]

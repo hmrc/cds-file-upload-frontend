@@ -20,13 +20,11 @@ package connectors
 import base.SpecBase
 import models.{ContactDetails, UploadRequest}
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{eq => meq, _}
-import org.mockito.Mockito.{verify, when}
+import org.mockito.ArgumentMatchers.{eq => meq}
+import org.mockito.Mockito.verify
 import org.scalatest.mockito.MockitoSugar
 import play.api.libs.Files.TemporaryFile
-import uk.gov.hmrc.http.cache.client.CacheMap
 
-import scala.concurrent.Future
 import scala.io.Source
 
 class UploadContactDetailsSpec extends SpecBase with MockitoSugar {

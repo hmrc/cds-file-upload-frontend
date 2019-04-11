@@ -40,7 +40,7 @@ class EORIActionSpec extends ControllerSpecBase
   lazy val env  = app.injector.instanceOf[Environment]
 
   def authAction = new AuthActionImpl(mockAuthConnector, conf, env)
-  def eoriAction = new EORIActionImpl()
+  def eoriAction = new EORIRequiredActionImpl()
 
   def eoriController = new TestController(authAction, eoriAction)
 
@@ -83,7 +83,7 @@ class EORIActionSpec extends ControllerSpecBase
     }
   }
 
-  class TestController(auth: AuthAction, eori: EORIAction) extends BaseController {
+  class TestController(auth: AuthAction, eori: EORIRequiredActionImpl) extends BaseController {
 
     def action: Action[AnyContent] = (auth andThen eori).async { request =>
       Future.successful(Ok(request.eori))

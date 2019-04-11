@@ -29,15 +29,15 @@ import scala.concurrent.Future
 
 class ContactDetailsRequiredActionImpl @Inject()(val dataCacheConnector: DataCacheConnector) extends ContactDetailsRequiredAction {
 
-  override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] = {
-    implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
+  private val onError = Redirect(routes.SessionExpiredController.onPageLoad())
 
-    Future.successful(
-      request.userAnswers
-        .flatMap(data => data.get(ContactDetailsPage).map(response => (data, response)))
-        .map { case (data, response) => ContactDetailsRequest(request.request, data, response) }
-        .toRight(Redirect(routes.SessionExpiredController.onPageLoad()))
-    )
+  override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] = {
+    val contactDetailsRequest = for {
+      ua <- request.userAnswers
+      resp <- ua.get(ContactDetailsPage)
+    } yield ContactDetailsRequest(request.request, ua, resp)
+
+    Future.successful(contactDetailsRequest.toRight(onError))
   }
 }
 

@@ -37,7 +37,7 @@ import scala.concurrent.Future
 class UploadYourFilesController @Inject()(
                                            val messagesApi: MessagesApi,
                                            authenticate: AuthAction,
-                                           requireEori: EORIAction,
+                                           requireEori: EORIRequiredActionImpl,
                                            getData: DataRetrievalAction,
                                            requireResponse: FileUploadResponseRequiredAction,
                                            dataCacheConnector: DataCacheConnector,
