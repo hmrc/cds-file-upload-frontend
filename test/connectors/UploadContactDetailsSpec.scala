@@ -19,30 +19,41 @@ package connectors
 
 import base.SpecBase
 import models.{ContactDetails, UploadRequest}
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.mockito.MockitoSugar
+import play.api.libs.Files.TemporaryFile
+import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
+import scala.io.Source
 
 class UploadContactDetailsSpec extends SpecBase with MockitoSugar {
 
   val mockS3Connector = mock[UpscanS3Connector]
 
-  val UploadContactDetails = new UploadContactDetails(mockS3Connector)
+  val uploadContactDetails = new UploadContactDetails(mockS3Connector)
 
   "UploadContactDetails" must {
 
-    "UploadContactDetailsto s3" in {
+    "upload Contact Details to s3" in {
 
       val contactDetails = ContactDetails("name", "companyName", "phoneNumber", "email")
       val uploadRequest = UploadRequest("someUrl", Map("k" -> "v"))
 
-      UploadContactDetails.apply(contactDetails, uploadRequest)
+      uploadContactDetails(contactDetails, uploadRequest)
 
-      when(mockS3Connector.upload(any(), any())).thenReturn(Future.successful())
+      val captor: ArgumentCaptor[TemporaryFile] = ArgumentCaptor.forClass(classOf[TemporaryFile])
+      verify(mockS3Connector).upload(meq(uploadRequest), captor.capture())
 
-      verify(mockS3Connector).upload(any(), any())
+      val file = captor.getValue.file
+      val source = Source.fromFile(file)
+      try {
+        source.mkString mustEqual contactDetails.toString
+      } finally {
+        source.close()
+      }
     }
   }
 }
