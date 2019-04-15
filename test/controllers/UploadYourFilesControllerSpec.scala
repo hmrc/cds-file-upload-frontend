@@ -18,7 +18,7 @@ package controllers
 
 import akka.stream.Materializer
 import connectors.UpscanS3Connector
-import controllers.actions.{DataRetrievalAction, FakeActions, FileUploadResponseRequiredActionImpl}
+import controllers.actions.{DataRetrievalAction, FakeActions, FileUploadResponseRequiredAction}
 import generators.Generators
 import models._
 import org.mockito.ArgumentCaptor
@@ -76,7 +76,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
       new FakeAuthAction(),
       new FakeEORIAction(),
       getData,
-      new FileUploadResponseRequiredActionImpl(),
+      new FileUploadResponseRequiredAction(),
       mockDataCacheConnector,
       upscanConnector,
       appConfig,

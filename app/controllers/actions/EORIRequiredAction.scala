@@ -28,14 +28,13 @@ class EORIRequiredActionImpl extends EORIRequiredAction {
   private val onError = Redirect(routes.UnauthorisedController.onPageLoad())
 
   override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, EORIRequest[A]]] = {
-    val eoriRequest =
-      for {
-        e <- request.user.enrolments.getEnrolment(SignedInUser.cdsEnrolmentName)
-        i <- e.getIdentifier(SignedInUser.eoriIdentifierKey)
-        v = i.value if i.value.nonEmpty
-      } yield EORIRequest(request, v)
+    val req = for {
+      enrolment <- request.user.enrolments.getEnrolment(SignedInUser.cdsEnrolmentName)
+      identifier <- enrolment.getIdentifier(SignedInUser.eoriIdentifierKey)
+      eori = identifier.value if identifier.value.nonEmpty
+    } yield EORIRequest(request, eori)
 
-    Future.successful(eoriRequest.toRight(onError))
+    Future.successful(req.toRight(onError))
   }
 }
 

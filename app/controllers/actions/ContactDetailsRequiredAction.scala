@@ -32,12 +32,12 @@ class ContactDetailsRequiredActionImpl @Inject()(val dataCacheConnector: DataCac
   private val onError = Redirect(routes.SessionExpiredController.onPageLoad())
 
   override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] = {
-    val contactDetailsRequest = for {
-      ua <- request.userAnswers
-      resp <- ua.get(ContactDetailsPage)
-    } yield ContactDetailsRequest(request.request, ua, resp)
+    val req = for {
+      answers <- request.userAnswers
+      response <- answers.get(ContactDetailsPage)
+    } yield ContactDetailsRequest(request.request, answers, response)
 
-    Future.successful(contactDetailsRequest.toRight(onError))
+    Future.successful(req.toRight(onError))
   }
 }
 

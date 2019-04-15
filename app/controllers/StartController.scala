@@ -28,5 +28,4 @@ class StartController @Inject()(val messagesApi: MessagesApi, implicit val appCo
   val displayStartPage = Action { implicit req =>
     Ok(views.html.start())
   }
-
 }

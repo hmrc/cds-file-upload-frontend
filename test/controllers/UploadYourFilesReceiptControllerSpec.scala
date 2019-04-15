@@ -16,11 +16,9 @@
 
 package controllers
 
-import controllers.actions.{DataRetrievalAction, FakeActions, FileUploadResponseRequiredActionImpl}
+import controllers.actions.{DataRetrievalAction, FakeActions, FileUploadResponseRequiredAction}
 import generators.Generators
-import models.{File, FileUploadResponse, UploadRequest}
-import org.scalacheck.Arbitrary._
-import org.scalacheck.Gen
+import models.FileUploadResponse
 import org.scalatest.prop.PropertyChecks
 import pages.HowManyFilesUploadPage
 import play.api.libs.json.Json
@@ -36,13 +34,13 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with Prope
       new FakeAuthAction(),
       new FakeEORIAction(),
       getData,
-      new FileUploadResponseRequiredActionImpl(),
+      new FileUploadResponseRequiredAction(),
       appConfig)
 
   def viewAsString(receipts: List[String]): String =
     upload_your_files_receipt(receipts)(fakeRequest, messages, appConfig).toString
 
-  ".onPageLoad" should {
+  "onPageLoad" should {
 
     "load the view" when {
 

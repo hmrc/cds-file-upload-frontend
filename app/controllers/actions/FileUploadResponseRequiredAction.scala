@@ -27,17 +27,17 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 import scala.concurrent.Future
 
 
-class FileUploadResponseRequiredActionImpl @Inject() extends FileUploadResponseRequiredAction {
+class FileUploadResponseRequiredAction @Inject() extends ActionRefiner[OptionalDataRequest, FileUploadResponseRequest] {
+
+  private val onError = Redirect(routes.SessionExpiredController.onPageLoad())
 
   override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, FileUploadResponseRequest[A]]] = {
-    implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    Future.successful(
-      request.userAnswers
-        .flatMap(data => data.get(HowManyFilesUploadPage.Response).map(response => (data, response)))
-        .map { case (data, response) => FileUploadResponseRequest(request.request, data, response) }
-        .toRight(Redirect(routes.SessionExpiredController.onPageLoad())))
+    val req = for {
+      answers <- request.userAnswers
+      response <- answers.get(HowManyFilesUploadPage.Response)
+    } yield FileUploadResponseRequest(request.request, answers, response)
+
+    Future.successful(req.toRight(onError))
   }
 }
-
-trait FileUploadResponseRequiredAction extends ActionRefiner[OptionalDataRequest, FileUploadResponseRequest]
