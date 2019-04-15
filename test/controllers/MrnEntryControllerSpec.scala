@@ -64,7 +64,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase
       mockDataCacheConnector,
       appConfig)
 
-  def viewAsString(form: Form[_] = form) = mrn_entry(form)(fakeRequest, messages, appConfig).toString
+  def viewAsString(form: Form[MRN] = form) = mrn_entry(form)(fakeRequest, messages, appConfig).toString
 
   "Mrn Entry Page" must {
     "load the correct page when user is logged in " in {

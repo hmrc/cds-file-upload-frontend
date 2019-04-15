@@ -32,13 +32,13 @@ import scala.xml.XML
 class CustomsDeclarationsConnector @Inject()(config: AppConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) {
 
   private val fileUploadUrl = config.microservice.services.customsDeclarations.batchUploadEndpoint
-  private val apiVersion    = config.microservice.services.customsDeclarations.apiVersion
-  private val clientId      = config.developerHubClientId
+  private val apiVersion = config.microservice.services.customsDeclarations.apiVersion
+  private val clientId = config.developerHubClientId
 
   def requestFileUpload(eori: String, request: FileUploadRequest)(implicit hc: HeaderCarrier): Future[FileUploadResponse] = {
-    httpClient.POSTString[HttpResponse](fileUploadUrl, request.toXml.mkString,  eoriHeader(eori) :: headers).map(r =>
+    httpClient.POSTString[HttpResponse](fileUploadUrl, request.toXml.mkString, headers(eori)).map(r =>
       Try(XML.loadString(r.body)) match {
-        case Success(value)     => FileUploadResponse.fromXml(value)
+        case Success(value) => FileUploadResponse.fromXml(value)
         case Failure(exception) =>
           Logger.error(s"Failed to load XML with exception: ${exception.getMessage}")
           throw exception
@@ -46,12 +46,10 @@ class CustomsDeclarationsConnector @Inject()(config: AppConfig, httpClient: Http
     )
   }
 
-  private def eoriHeader(eori: String): (String, String) = "X-EORI-Identifier" -> eori
-
-  private lazy val headers: List[(String, String)] =
-    List(
-      "X-Client-ID" -> clientId,
-      HeaderNames.ACCEPT -> s"application/vnd.hmrc.$apiVersion+xml",
-      HeaderNames.CONTENT_TYPE -> ContentTypes.XML(Codec.utf_8)
-    )
+  private def headers(eori: String) = List(
+    "X-Client-ID" -> clientId,
+    HeaderNames.ACCEPT -> s"application/vnd.hmrc.$apiVersion+xml",
+    HeaderNames.CONTENT_TYPE -> ContentTypes.XML(Codec.utf_8),
+    "X-EORI-Identifier" -> eori
+  )
 }

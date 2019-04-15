@@ -33,7 +33,7 @@ class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with Pro
 
   val messagePrefix = "mrnEntryPage"
 
-  def createViewUsingForm: Form[_] => HtmlFormat.Appendable = (form: Form[_]) => mrn_entry(form)(fakeRequest, messages, appConfig)
+  def createViewUsingForm: Form[MRN] => HtmlFormat.Appendable = form => mrn_entry(form)(fakeRequest, messages, appConfig)
 
   "MRN Entry Page" must {
     behave like normalPage(view, messagePrefix)

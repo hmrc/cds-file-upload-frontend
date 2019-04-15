@@ -35,12 +35,12 @@ import scala.util.Try
 class UpscanS3Connector() {
 
   def upload(template: UploadRequest, file: TemporaryFile): Future[Unit] = {
-    val builder: MultipartEntityBuilder = MultipartEntityBuilder.create
+    val builder = MultipartEntityBuilder.create
 
-    template.fields.foreach(entry => builder.addPart(entry._1, new StringBody(entry._2, ContentType.TEXT_PLAIN)))
+    template.fields.foreach{ case (name, value) => builder.addPart(name, new StringBody(value, ContentType.TEXT_PLAIN))}
     builder.addPart("file", new FileBody(file.file))
 
-    val request: HttpPost = new HttpPost(template.href)
+    val request = new HttpPost(template.href)
     request.setEntity(builder.build())
 
     val client = HttpClientBuilder.create.build
@@ -61,5 +61,4 @@ class UpscanS3Connector() {
     client.close()
     attempt.get
   }
-
 }

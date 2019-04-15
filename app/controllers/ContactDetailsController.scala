@@ -40,16 +40,11 @@ class ContactDetailsController @Inject()(val messagesApi: MessagesApi,
                                           dataCacheConnector: DataCacheConnector,
                                           implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
-  val form = Form(contactDetailsMapping)
+  private val form = Form(contactDetailsMapping)
 
   def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData) { implicit req =>
 
-    val populatedForm =
-      req.userAnswers
-        .flatMap(
-          _.get(ContactDetailsPage)
-            .map(form.fill))
-        .getOrElse(form)
+    val populatedForm = req.userAnswers.flatMap(_.get(ContactDetailsPage)).fold(form)(form.fill)
     Ok(contact_details(populatedForm))
   }
 
@@ -62,8 +57,8 @@ class ContactDetailsController @Inject()(val messagesApi: MessagesApi,
         errorForm =>
           Future.successful(BadRequest(contact_details(errorForm))),
 
-        value => {
-          val cacheMap = userAnswers.set(ContactDetailsPage, value).cacheMap
+        contactDetails => {
+          val cacheMap = userAnswers.set(ContactDetailsPage, contactDetails).cacheMap
 
           dataCacheConnector.save(cacheMap).map { _ =>
             Redirect(routes.MrnEntryController.onPageLoad())

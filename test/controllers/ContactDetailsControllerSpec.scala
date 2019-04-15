@@ -42,7 +42,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase
 
   val form = Form(contactDetailsMapping)
 
-  def view(form: Form[_] = form): String = contact_details(form)(fakeRequest, messages, appConfig).toString
+  def view(form: Form[ContactDetails] = form): String = contact_details(form)(fakeRequest, messages, appConfig).toString
 
   def controller(signedInUser: SignedInUser, eori: String, dataRetrieval: DataRetrievalAction = getEmptyCacheMap) =
     new ContactDetailsController(

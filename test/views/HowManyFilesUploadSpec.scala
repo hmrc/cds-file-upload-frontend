@@ -32,8 +32,7 @@ class HowManyFilesUploadSpec extends DomAssertions with IntViewBehaviours[FileUp
 
   val messagePrefix = "howManyFilesUpload"
 
-  def createViewUsingForm: Form[_] => HtmlFormat.Appendable =
-    (form: Form[_]) => how_many_files_upload(form)(fakeRequest, messages, appConfig)
+  def createViewUsingForm: Form[FileUploadCount] => HtmlFormat.Appendable = form => how_many_files_upload(form)(fakeRequest, messages, appConfig)
 
   "How Many Files Upload Page" must {
     behave like normalPage(view, messagePrefix)

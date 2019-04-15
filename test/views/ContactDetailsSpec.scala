@@ -16,11 +16,9 @@
 
 package views
 
-import com.fasterxml.jackson.databind.util.ViewMatcher
 import forms.mappings.ContactDetailsMapping._
 import generators.Generators
 import models.ContactDetails
-import org.scalatest.MustMatchers._
 import org.scalatest.prop.PropertyChecks
 import play.api.data.Form
 import play.twirl.api.Html
@@ -37,10 +35,10 @@ class ContactDetailsSpec extends DomAssertions
 
   val simpleView: () => Html = () => contact_details(form)(fakeRequest, messages, appConfig)
 
-  def view(form: Form[_] = form): String = contact_details(form)(fakeRequest, messages, appConfig).toString()
+  def view(form: Form[ContactDetails] = form): String = contact_details(form)(fakeRequest, messages, appConfig).toString()
 
   val messagePrefix = "contactDetails"
-
+  
   def getMessage(key: String): String = messages(s"$messagePrefix.$key")
 
   "Contact details page" must {
