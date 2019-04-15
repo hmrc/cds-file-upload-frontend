@@ -17,7 +17,7 @@
 package controllers
 
 import config.AppConfig
-import connectors.{DataCacheConnector, UploadContactDetails}
+import connectors.DataCacheConnector
 import controllers.actions._
 import forms.FileUploadCountProvider
 import javax.inject.{Inject, Singleton}
@@ -25,7 +25,7 @@ import models.{File, Waiting}
 import pages.HowManyFilesUploadPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
-import services.CustomsDeclarationsService
+import services.{CustomsDeclarationsService, UploadContactDetails}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html._
 

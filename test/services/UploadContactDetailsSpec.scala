@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package connectors
-
+package services
 
 import base.SpecBase
+import connectors.UpscanS3Connector
 import models.{ContactDetails, UploadRequest}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => meq}

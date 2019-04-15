@@ -19,7 +19,7 @@ package controllers
 import java.net.URLEncoder
 
 import base.SpecBase
-import connectors.{DataCacheConnector, UploadContactDetails}
+import connectors.DataCacheConnector
 import controllers.actions.{ContactDetailsRequiredAction, DataRetrievalAction, FakeActions}
 import models.ContactDetails
 import models.requests.SignedInUser
@@ -27,6 +27,7 @@ import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mockito.MockitoSugar
+import services.UploadContactDetails
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
 import uk.gov.hmrc.auth.core.retrieve.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package connectors
+package services
 
 import java.io.{File, PrintWriter}
 import java.util.UUID
 
 import com.google.inject.Singleton
+import connectors.UpscanS3Connector
 import javax.inject.Inject
 import models.{ContactDetails, UploadRequest}
 import play.api.libs.Files.TemporaryFile
