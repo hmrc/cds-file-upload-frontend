@@ -36,6 +36,7 @@ import play.api.libs.json.Json
 import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc.{MaxSizeExceeded, MultipartFormData}
 import play.api.test.Helpers._
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import views.html.upload_your_files
 
@@ -331,7 +332,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
           whenReady(result) { _ =>
 
             val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
-            verify(mockDataCacheConnector, atLeastOnce).save(captor.capture())
+            verify(mockDataCacheConnector, atLeastOnce).save(captor.capture())(any[HeaderCarrier])
 
             val updateResponse = captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response)
 

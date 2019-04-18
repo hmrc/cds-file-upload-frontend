@@ -18,15 +18,16 @@ package controllers.actions
 
 import base.SpecBase
 import connectors.DataCacheConnector
-import models.requests.{AuthenticatedRequest, EORIRequest, OptionalDataRequest, SignedInUser}
 import generators.SignedInUserGen
+import models.requests.{AuthenticatedRequest, EORIRequest, OptionalDataRequest, SignedInUser}
+import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.PropertyChecks
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class DataRetrievalActionSpec extends SpecBase with MockitoSugar with ScalaFutures with PropertyChecks with SignedInUserGen {
@@ -42,7 +43,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar with ScalaFutur
         forAll { (user: SignedInUser, eori: String) =>
 
           val dataCacheConnector = mock[DataCacheConnector]
-          when(dataCacheConnector.fetch(user.internalId)) thenReturn Future.successful(None)
+          when(dataCacheConnector.fetch(eqTo(user.internalId))(any[HeaderCarrier])) thenReturn Future.successful(None)
           val action  = new Harness(dataCacheConnector)
           val request = EORIRequest(AuthenticatedRequest(fakeRequest, user), eori)
 
@@ -62,7 +63,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar with ScalaFutur
 
           val id = user.internalId
           val dataCacheConnector = mock[DataCacheConnector]
-          when(dataCacheConnector.fetch(id)) thenReturn Future.successful(Some(new CacheMap(id, Map())))
+          when(dataCacheConnector.fetch(eqTo(id))(any[HeaderCarrier])) thenReturn Future.successful(Some(new CacheMap(id, Map())))
           val action = new Harness(dataCacheConnector)
           val request = EORIRequest(AuthenticatedRequest(fakeRequest, user), eori)
 

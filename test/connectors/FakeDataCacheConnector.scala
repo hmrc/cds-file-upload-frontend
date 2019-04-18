@@ -17,16 +17,17 @@
 package connectors
 
 import play.api.libs.json.Format
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object FakeDataCacheConnector extends DataCacheConnector {
 
-  override def save[A](cacheMap: CacheMap): Future[CacheMap] = Future.successful(cacheMap)
+  def save[A](cacheMap: CacheMap)(implicit hc: HeaderCarrier): Future[CacheMap] =  Future.successful(cacheMap)
 
-  override def fetch(cacheId: String): Future[Option[CacheMap]] = Future.successful(Some(CacheMap(cacheId, Map())))
+  def fetch(cacheId: String)(implicit hc: HeaderCarrier): Future[Option[CacheMap]] = Future.successful(Some(CacheMap(cacheId, Map())))
 
-  override def getEntry[A](cacheId: String, key: String)(implicit fmt: Format[A]): Future[Option[A]] = ???
+  def getEntry[A](cacheId: String, key: String)(implicit hc: HeaderCarrier, fmt: Format[A]): Future[Option[A]] = ???
 }
+

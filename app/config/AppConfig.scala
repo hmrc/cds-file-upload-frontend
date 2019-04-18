@@ -53,7 +53,7 @@ case class GoogleAnalytics(token: String, host: String)
 
 case class Microservice(services: Services)
 
-case class Services(customsDeclarations: CustomsDeclarations, cdsFileUpload: CDSFileUpload)
+case class Services(customsDeclarations: CustomsDeclarations, cdsFileUpload: CDSFileUpload, keystore: Keystore)
 
 case class CustomsDeclarations(protocol: Option[String], host: String, port: Option[Int], batchUploadUri: String, apiVersion: String) {
 
@@ -61,12 +61,17 @@ case class CustomsDeclarations(protocol: Option[String], host: String, port: Opt
 
 }
 
+
 case class CDSFileUpload(protocol: Option[String], host: String, port: Option[Int]) {
 
   val uri: String = s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}"
 
   def saveBatch(eori: EORI): String = s"$uri/cds-file-upload/batch/${eori.value}"
   def getBatches(eori: EORI): String = s"$uri/cds-file-upload/batch/${eori.value}"
+}
+
+case class Keystore(protocol: String = "https", host: String, port: Int, defaultSource: String, domain: String) {
+  lazy val baseUri: String = s"$protocol://$host:$port"
 }
 
 case class FileFormats(maxFileSize: Int, approvedFileExt: String)

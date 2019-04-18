@@ -21,6 +21,7 @@ import forms.mappings.ContactDetailsMapping._
 import generators.Generators
 import models._
 import models.requests.SignedInUser
+import org.mockito.ArgumentMatchers.{eq =>eqTo, _}
 import org.mockito.Mockito.{times, verify}
 import org.scalacheck.Arbitrary._
 import org.scalatest.concurrent.ScalaFutures
@@ -30,6 +31,7 @@ import pages.ContactDetailsPage
 import play.api.data.Form
 import play.api.libs.json.Json
 import play.api.test.Helpers._
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import views.html.contact_details
 
@@ -118,7 +120,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase
           await(controller(user, eori).onSubmit(postRequest))
 
           val expectedMap = CacheMap(user.internalId, Map(ContactDetailsPage.toString -> Json.toJson(contactDetails)))
-          verify(mockDataCacheConnector, times(1)).save(expectedMap)
+          verify(mockDataCacheConnector, times(1)).save(eqTo(expectedMap))(any[HeaderCarrier])
         }
       }
     }

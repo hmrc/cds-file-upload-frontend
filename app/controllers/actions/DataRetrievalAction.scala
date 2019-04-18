@@ -17,10 +17,11 @@
 package controllers.actions
 
 import com.google.inject.Inject
-import play.api.mvc.ActionTransformer
 import connectors.DataCacheConnector
-import models.requests.{EORIRequest, OptionalDataRequest}
 import models.UserAnswers
+import models.requests.{EORIRequest, OptionalDataRequest}
+import play.api.mvc.ActionTransformer
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -30,6 +31,7 @@ class DataRetrievalActionImpl @Inject()(val dataCacheConnector: DataCacheConnect
 
   override protected def transform[A](request: EORIRequest[A]): Future[OptionalDataRequest[A]] = {
     val id = request.user.internalId
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
     dataCacheConnector.fetch(id).map { data =>
       OptionalDataRequest(request, data.map(UserAnswers(_)))

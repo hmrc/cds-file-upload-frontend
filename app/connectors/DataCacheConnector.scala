@@ -20,24 +20,25 @@ import com.google.inject.Inject
 import play.api.libs.json.Format
 import uk.gov.hmrc.http.cache.client.CacheMap
 import repositories.CacheMapRepository
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class MongoCacheConnector @Inject()(val repository: CacheMapRepository) extends DataCacheConnector {
 
-  def save[A](cacheMap: CacheMap): Future[CacheMap] = repository.put(cacheMap).map { _ => cacheMap }
+  def save[A](cacheMap: CacheMap)(implicit hc: HeaderCarrier): Future[CacheMap] = repository.put(cacheMap).map { _ => cacheMap }
 
-  def fetch(cacheId: String): Future[Option[CacheMap]] = repository.get(cacheId)
+  def fetch(cacheId: String)(implicit hc: HeaderCarrier): Future[Option[CacheMap]] = repository.get(cacheId)
 
-  def getEntry[A](cacheId: String, key: String)(implicit fmt: Format[A]): Future[Option[A]] = fetch(cacheId).map(_.flatMap(_.getEntry(key)))
+  def getEntry[A](cacheId: String, key: String)(implicit hc: HeaderCarrier, fmt: Format[A]): Future[Option[A]] = fetch(cacheId).map(_.flatMap(_.getEntry(key)))
 }
 
 trait DataCacheConnector {
 
-  def save[A](cacheMap: CacheMap): Future[CacheMap]
+  def save[A](cacheMap: CacheMap)(implicit hc: HeaderCarrier): Future[CacheMap]
 
-  def fetch(cacheId: String): Future[Option[CacheMap]]
+  def fetch(cacheId: String)(implicit hc: HeaderCarrier): Future[Option[CacheMap]]
 
-  def getEntry[A](cacheId: String, key: String)(implicit fmt: Format[A]): Future[Option[A]]
+  def getEntry[A](cacheId: String, key: String)(implicit hc: HeaderCarrier, fmt: Format[A]): Future[Option[A]]
 }
