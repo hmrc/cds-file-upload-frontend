@@ -34,6 +34,7 @@ import play.api.libs.json.{JsNumber, JsString}
 import play.api.libs.ws.WSResponse
 import play.api.test.Helpers._
 import services.CustomsDeclarationsService
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import views.DomAssertions
 
@@ -164,7 +165,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       ))
       when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(response))
       when(mockUploadContactDetails.apply(any(), any())).thenReturn(Future.successful(()))
-      when(mockDataCacheConnector.save(any())).thenReturn(Future.successful(CacheMap("", Map.empty)))
+      when(mockDataCacheConnector.save(any())(any[HeaderCarrier])).thenReturn(Future.successful(CacheMap("", Map.empty)))
       val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "3")
 
       val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
@@ -173,7 +174,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       val nextRef = response.files.map(_.reference).min
       redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad(nextRef).url)
       val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
-      verify(mockDataCacheConnector).save(captor.capture())
+      verify(mockDataCacheConnector).save(captor.capture())(any[HeaderCarrier])
       val Some(fileUploadCount) = FileUploadCount(3)
       captor.getValue.getEntry[FileUploadCount](HowManyFilesUploadPage) mustBe Some(fileUploadCount)
       captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response) mustBe Some(response)

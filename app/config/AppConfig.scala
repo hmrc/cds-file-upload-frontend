@@ -28,8 +28,7 @@ case class AppConfig(
   assets: Assets,
   googleAnalytics: GoogleAnalytics,
   microservice: Microservice,
-  fileFormats: FileFormats,
-  mongodb: Mongo)
+  fileFormats: FileFormats)
 
 object AppConfig {
   implicit val appNameHint: ProductHint[AppConfig] = ProductHint(new ConfigFieldMapping {
@@ -53,13 +52,14 @@ case class GoogleAnalytics(token: String, host: String)
 
 case class Microservice(services: Services)
 
-case class Services(customsDeclarations: CustomsDeclarations, cdsFileUpload: CDSFileUpload)
+case class Services(customsDeclarations: CustomsDeclarations, cdsFileUpload: CDSFileUpload, keystore: Keystore)
 
 case class CustomsDeclarations(protocol: Option[String], host: String, port: Option[Int], batchUploadUri: String, apiVersion: String) {
 
   def batchUploadEndpoint: String = s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$batchUploadUri"
 
 }
+
 
 case class CDSFileUpload(protocol: Option[String], host: String, port: Option[Int]) {
 
@@ -69,6 +69,8 @@ case class CDSFileUpload(protocol: Option[String], host: String, port: Option[In
   def getBatches(eori: EORI): String = s"$uri/cds-file-upload/batch/${eori.value}"
 }
 
-case class FileFormats(maxFileSize: Int, approvedFileExt: String)
+case class Keystore(protocol: String = "https", host: String, port: Int, defaultSource: String, domain: String) {
+  lazy val baseUri: String = s"$protocol://$host:$port"
+}
 
-case class Mongo(uri: String, encryptionEnabled: Boolean, shortTtl: Duration)
+case class FileFormats(maxFileSize: Int, approvedFileExt: String)

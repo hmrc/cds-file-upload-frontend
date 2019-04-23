@@ -20,6 +20,8 @@ import play.api.mvc.{Request, WrappedRequest}
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.{AffinityGroup, Enrolment, Enrolments}
 import uk.gov.hmrc.auth.core.retrieve._
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.HeaderCarrierConverter
 
 case class SignedInUser(
   credentials: Credentials,

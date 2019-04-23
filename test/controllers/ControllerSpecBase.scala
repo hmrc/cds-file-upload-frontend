@@ -31,6 +31,7 @@ import services.UploadContactDetails
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
 import uk.gov.hmrc.auth.core.retrieve.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
@@ -64,7 +65,7 @@ class ControllerSpecBase extends SpecBase with MockitoSugar with FakeActions wit
   override def beforeEach = {
     reset(mockDataCacheConnector, mockAuthConnector, mockUploadContactDetails)
 
-    when(mockDataCacheConnector.save(any())).thenReturn(Future.successful(CacheMap("", Map())))
+    when(mockDataCacheConnector.save(any[CacheMap])(any[HeaderCarrier])).thenReturn(Future.successful(CacheMap("", Map())))
   }
 
   val escaped: String => String =

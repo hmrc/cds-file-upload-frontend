@@ -17,7 +17,7 @@
 package connectors
 
 import generators.Generators
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito._
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.concurrent.ScalaFutures
@@ -26,34 +26,26 @@ import org.scalatest.prop.PropertyChecks
 import org.scalatest.{MustMatchers, OptionValues, WordSpec}
 import play.api.libs.json.JsString
 import repositories.CacheMapRepository
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
 
-class MongoCacheConnectorSpec
-  extends WordSpec with MustMatchers with PropertyChecks with Generators with MockitoSugar with ScalaFutures with OptionValues {
+class MongoCacheConnectorSpec extends WordSpec with MustMatchers with PropertyChecks with Generators with MockitoSugar with ScalaFutures with OptionValues {
+
+  implicit val hc = mock[HeaderCarrier]
 
   ".save" must {
 
     "save the cache map to the Mongo repository" in {
 
       val mockCacheMapRepository = mock[CacheMapRepository]
-
-      when(mockCacheMapRepository.put(any[CacheMap])) thenReturn Future.successful(())
-
       val mongoCacheConnector = new MongoCacheConnector(mockCacheMapRepository)
 
-      forAll(arbitrary[CacheMap]) {
-        cacheMap =>
-
-          val result = mongoCacheConnector.save(cacheMap)
-
-          whenReady(result) {
-            savedCacheMap =>
-
-              savedCacheMap mustEqual cacheMap
-              verify(mockCacheMapRepository).put(eqTo(cacheMap))
-          }
+      //TODO REMOVE ARB
+      forAll(arbitrary[CacheMap]) { cacheMap =>
+        when(mockCacheMapRepository.put(eqTo(cacheMap))(any(), any(), any[HeaderCarrier])) thenReturn Future.successful(cacheMap)
+        mongoCacheConnector.save(cacheMap).futureValue mustBe cacheMap
       }
     }
   }
@@ -65,22 +57,10 @@ class MongoCacheConnectorSpec
       "return None" in {
 
         val mockCacheMapRepository = mock[CacheMapRepository]
-
-        when(mockCacheMapRepository.get(any())) thenReturn Future.successful(None)
-
+        when(mockCacheMapRepository.get(eqTo("non-existent-cacheId"))(any(), any[HeaderCarrier])) thenReturn Future.successful(None)
         val mongoCacheConnector = new MongoCacheConnector(mockCacheMapRepository)
 
-        forAll(nonEmptyString) {
-          cacheId =>
-
-            val result = mongoCacheConnector.fetch(cacheId)
-
-            whenReady(result) {
-              optionalCacheMap =>
-
-                optionalCacheMap must be(empty)
-            }
-        }
+        mongoCacheConnector.fetch("non-existent-cacheId").futureValue mustBe empty
       }
     }
 
@@ -92,18 +72,10 @@ class MongoCacheConnectorSpec
 
         val mongoCacheConnector = new MongoCacheConnector(mockCacheMapRepository)
 
-        forAll(arbitrary[CacheMap]) {
-          cacheMap =>
-
-            when(mockCacheMapRepository.get(eqTo(cacheMap.id))) thenReturn Future.successful(Some(cacheMap))
-
-            val result = mongoCacheConnector.fetch(cacheMap.id)
-
-            whenReady(result) {
-              optionalCacheMap =>
-
-                optionalCacheMap.value mustEqual cacheMap
-            }
+        //TODO REMOVE ARB
+        forAll(arbitrary[CacheMap]) { cacheMap =>
+          when(mockCacheMapRepository.get(eqTo(cacheMap.id))(any(), any[HeaderCarrier])) thenReturn Future.successful(Some(cacheMap))
+          mongoCacheConnector.fetch(cacheMap.id).futureValue mustBe Some(cacheMap)
         }
       }
     }
@@ -116,22 +88,13 @@ class MongoCacheConnectorSpec
       "return None" in {
 
         val mockCacheMapRepository = mock[CacheMapRepository]
+        val cacheId = "not-found"
 
-        when(mockCacheMapRepository.get(any())) thenReturn Future.successful(None)
+        when(mockCacheMapRepository.get(eqTo(cacheId))(any(), any[HeaderCarrier])) thenReturn Future.successful(None)
 
         val mongoCacheConnector = new MongoCacheConnector(mockCacheMapRepository)
 
-        forAll(nonEmptyString, nonEmptyString) {
-          (cacheId, key) =>
-
-            val result = mongoCacheConnector.getEntry[String](cacheId, key)
-
-            whenReady(result) {
-              optionalValue =>
-
-                optionalValue must be(empty)
-            }
-        }
+        mongoCacheConnector.getEntry[String](cacheId, "some key").futureValue mustBe empty
       }
     }
 
@@ -144,22 +107,14 @@ class MongoCacheConnectorSpec
         val mongoCacheConnector = new MongoCacheConnector(mockCacheMapRepository)
 
         val gen = for {
-          key      <- nonEmptyString
+          key <- nonEmptyString
           cacheMap <- arbitrary[CacheMap]
         } yield (key, cacheMap copy (data = cacheMap.data - key))
 
         forAll(gen) {
           case (key, cacheMap) =>
-
-            when(mockCacheMapRepository.get(eqTo(cacheMap.id))) thenReturn Future.successful(Some(cacheMap))
-
-            val result = mongoCacheConnector.getEntry[String](cacheMap.id, key)
-
-            whenReady(result) {
-              optionalValue =>
-
-                optionalValue must be(empty)
-            }
+            when(mockCacheMapRepository.get(eqTo(cacheMap.id))(any(), any[HeaderCarrier])) thenReturn Future.successful(Some(cacheMap))
+            mongoCacheConnector.getEntry[String](cacheMap.id, key).futureValue mustBe empty
         }
       }
     }
@@ -173,23 +128,15 @@ class MongoCacheConnectorSpec
         val mongoCacheConnector = new MongoCacheConnector(mockCacheMapRepository)
 
         val gen = for {
-          key      <- nonEmptyString
-          value    <- nonEmptyString
+          key <- nonEmptyString
+          value <- nonEmptyString
           cacheMap <- arbitrary[CacheMap]
         } yield (key, value, cacheMap copy (data = cacheMap.data + (key -> JsString(value))))
 
         forAll(gen) {
           case (key, value, cacheMap) =>
-
-            when(mockCacheMapRepository.get(eqTo(cacheMap.id))) thenReturn Future.successful(Some(cacheMap))
-
-            val result = mongoCacheConnector.getEntry[String](cacheMap.id, key)
-
-            whenReady(result) {
-              optionalValue =>
-
-                optionalValue.value mustEqual value
-            }
+            when(mockCacheMapRepository.get(eqTo(cacheMap.id))(any(), any[HeaderCarrier])) thenReturn Future.successful(Some(cacheMap))
+            mongoCacheConnector.getEntry[String](cacheMap.id, key).futureValue mustBe Some(value)
         }
       }
     }

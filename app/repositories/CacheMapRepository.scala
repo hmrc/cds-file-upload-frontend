@@ -16,76 +16,26 @@
 
 package repositories
 
-import com.google.inject.ImplementedBy
-import config.{AppConfig, Crypto}
+import config.AppConfig
 import javax.inject.Inject
-import play.api.libs.json.{JsValue, Json}
-import play.modules.reactivemongo.ReactiveMongoApi
-import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson.BSONDocument
-import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
-import reactivemongo.play.json.collection.JSONCollection
-import uk.gov.hmrc.http.cache.client.CacheMap
-import utils.PredefUtils._
+import play.api.libs.json.{Reads, Writes}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache}
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
+class CacheMapRepository @Inject()(cfg: AppConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) extends SessionCache {
 
-class MongoCacheMapRepository @Inject()(
-  mongo: ReactiveMongoApi,
-  appConfig: AppConfig,
-  crypto: Crypto
-)(implicit ec: ExecutionContext) extends CacheMapRepository {
+  override def baseUri: String = cfg.microservice.services.keystore.baseUri
+  override def domain: String = cfg.microservice.services.keystore.domain
+  override def defaultSource: String = cfg.microservice.services.keystore.defaultSource
 
-  import crypto._
-
-  private val collectionName: String = "cache"
-  private val expireAfterSeconds = "expireAfterSeconds"
-  private val idField = "cacheId"
-  private val dataField = "data"
-  private val ttl = appConfig.mongodb.shortTtl
-
-  private def collection: Future[JSONCollection] =
-    mongo.database.map(_.collection[JSONCollection](collectionName))
-
-  private val index = Index(
-    key  = Seq(idField -> IndexType.Descending),
-    name = Some(s"${idField}_index"),
-    options = BSONDocument(expireAfterSeconds -> ttl.toSeconds)
-  )
-
-  val started: Future[Boolean] = collection.flatMap(_.indexesManager.ensure(index))
+  override def http = httpClient
   
-  def get(id: String): Future[Option[CacheMap]] =
-    collection
-      .flatMap(_.find(Json.obj(idField -> id), None).one[JsValue])
-      .map(_.flatMap { json =>
-        val id   = (json \ idField).asOpt[String]
-        val data = (json \ dataField).asOpt[JsValue].flatMap(decrypt[Map[String, JsValue]])
+  def get(id: String)(implicit r: Reads[CacheMap], hc: HeaderCarrier): Future[Option[CacheMap]] =
+    fetchAndGetEntry[CacheMap](id)
 
-        id.zip(data).map { case (a, b) => CacheMap(a, b) }
-      })
-
-  def put(cacheMap: CacheMap): Future[Unit] = {
-
-    val selector = Json.obj(idField -> cacheMap.id)
-
-    val modifier = Json.obj(
-      "$set" -> Json.obj(
-        dataField -> encrypt(cacheMap.data)
-      )
-    )
-
-    collection.flatMap {
-      _.findAndUpdate(selector, modifier, upsert = true).map(_ => ())
-    }
-  }
-}
-
-@ImplementedBy(classOf[MongoCacheMapRepository])
-trait CacheMapRepository extends Repository {
-
-  def get(id: String): Future[Option[CacheMap]]
-
-  def put(cacheMap: CacheMap): Future[Unit]
+  def put(cacheMap: CacheMap)(implicit r: Reads[CacheMap], w: Writes[CacheMap], hc: HeaderCarrier): Future[CacheMap] =
+    cache[CacheMap](cacheMap.id, cacheMap)
 }

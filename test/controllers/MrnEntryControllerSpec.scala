@@ -21,6 +21,7 @@ import forms.MRNFormProvider
 import generators.Generators
 import models.requests.SignedInUser
 import models.{ContactDetails, MRN}
+import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito._
 import org.scalacheck.Arbitrary._
 import org.scalatest.BeforeAndAfterEach
@@ -30,6 +31,7 @@ import pages.MrnEntryPage
 import play.api.data.Form
 import play.api.libs.json.JsString
 import play.api.test.Helpers.{status, _}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import views.html.mrn_entry
 
@@ -137,7 +139,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase
           val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn.value)
           await(controller(user, eori, fakeContactDetails).onSubmit(postRequest))
 
-          verify(mockDataCacheConnector, times(1)).save(expectedMap)
+          verify(mockDataCacheConnector).save(eqTo(expectedMap))(any[HeaderCarrier])
       }
     }
   }
