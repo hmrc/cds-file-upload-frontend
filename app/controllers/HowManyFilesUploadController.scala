@@ -95,5 +95,5 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
     customsDeclarationsService.batchFileUpload(req.eori, req.mrn, fileUploadCount)
 
   private def firstUploadFile(response: FileUploadResponse): Either[Throwable, (File, UploadRequest)] =
-    response.files.headOption map { case f@File(_, Waiting(r)) => Right(f, r) } getOrElse Left(new IllegalStateException("Unable to initiate upload"))
+    response.files.headOption map { case f@File(_, Waiting(u)) => Right(f, u) } getOrElse Left(new IllegalStateException("Unable to initiate upload"))
 }
