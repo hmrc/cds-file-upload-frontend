@@ -27,7 +27,5 @@ class AppConfigSpec extends PlaySpec with OneAppPerSuite {
     "have test-only batch upload endpoint in packaged configuration" in {
       cfg.microservice.services.customsDeclarations.batchUploadEndpoint must be("http://localhost:6793/cds-file-upload-service/test-only/batch-file-upload")
     }
-
   }
-
 }

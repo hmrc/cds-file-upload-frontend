@@ -21,11 +21,13 @@ import connectors.DataCacheConnector
 import controllers.actions._
 import forms.FileUploadCountProvider
 import javax.inject.{Inject, Singleton}
-import models.{File, Waiting}
+import models.requests.MrnRequest
+import models.{File, FileUploadCount, FileUploadResponse, UploadRequest, UserAnswers, Waiting}
 import pages.HowManyFilesUploadPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import services.{CustomsDeclarationsService, UploadContactDetails}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html._
 
@@ -33,16 +35,16 @@ import scala.concurrent.Future
 
 @Singleton
 class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
-                                              authenticate: AuthAction,
-                                              requireEori: EORIRequiredActionImpl,
-                                              getData: DataRetrievalAction,
-                                              requireMrn: MrnRequiredAction,
-                                              requireContactDetails: ContactDetailsRequiredAction,
-                                              formProvider: FileUploadCountProvider,
-                                              dataCacheConnector: DataCacheConnector,
-                                              uploadContactDetails: UploadContactDetails,
-                                              customsDeclarationsService: CustomsDeclarationsService,
-                                              implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
+                                             authenticate: AuthAction,
+                                             requireEori: EORIRequiredActionImpl,
+                                             getData: DataRetrievalAction,
+                                             requireMrn: MrnRequiredAction,
+                                             requireContactDetails: ContactDetailsRequiredAction,
+                                             formProvider: FileUploadCountProvider,
+                                             dataCacheConnector: DataCacheConnector,
+                                             uploadContactDetails: UploadContactDetails,
+                                             customsDeclarationsService: CustomsDeclarationsService,
+                                             implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
   val form = formProvider()
 
@@ -61,44 +63,37 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
     (authenticate andThen requireEori andThen getData andThen requireContactDetails andThen requireMrn).async { implicit req =>
 
       form.bindFromRequest().fold(
-        errorForm =>
-          Future.successful(BadRequest(how_many_files_upload(errorForm))),
+        errorForm => Future.successful(BadRequest(how_many_files_upload(errorForm))),
 
         fileUploadCount => {
-          customsDeclarationsService
-            .batchFileUpload(req.eori, req.mrn, fileUploadCount)
-            .flatMap { response =>
-
-              response
-                .files
-                .headOption
-                .map(_.state)
-                .collect { case Waiting(request) => request }
-                .fold {
-                  Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
-                } { request =>
-                  uploadContactDetails(
-                    req.request.contactDetails,
-                    request).
-                    flatMap { _ =>
-
-                      val answers =
-                        req.userAnswers
-                          .set(HowManyFilesUploadPage, fileUploadCount)
-                          .set(HowManyFilesUploadPage.Response, response)
-
-                      dataCacheConnector.save(answers.cacheMap).map { _ =>
-
-                        response.files match {
-                          case firstFile :: _ => Redirect(routes.UploadYourFilesController.onPageLoad(firstFile.reference))
-                          case Nil => Redirect(routes.SessionExpiredController.onPageLoad())
-                        }
-                      }
-                    }
-                }
-
-            }
+          upload(req, fileUploadCount) map {
+            case Right(firstFile) => Redirect(routes.UploadYourFilesController.onPageLoad(firstFile.reference))
+            case Left(_) => Redirect(routes.SessionExpiredController.onPageLoad())
+          }
         }
       )
     }
+
+  private def upload(req: MrnRequest[AnyContent], fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier): Future[Either[Throwable, File]] = {
+    initiateUpload(req, fileUploadCount).flatMap { fileUploadResponse =>
+
+      firstUploadFile(fileUploadResponse) match {
+        case Right((f, u)) =>
+          uploadContactDetails(req.request.contactDetails, u).flatMap { _ =>
+            val answers = updateUserAnswers(req.userAnswers, fileUploadCount, fileUploadResponse)
+            dataCacheConnector.save(answers.cacheMap).map { _ => Right(f) }
+          }
+        case Left(error) => Future.successful(Left(error))
+      }
+    }
+  }
+
+  private def updateUserAnswers(userAnswers: UserAnswers, fileUploadCount: FileUploadCount, fileUploadResponse: FileUploadResponse) =
+    userAnswers.set(HowManyFilesUploadPage, fileUploadCount).set(HowManyFilesUploadPage.Response, fileUploadResponse)
+
+  private def initiateUpload(req: MrnRequest[AnyContent], fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier) =
+    customsDeclarationsService.batchFileUpload(req.eori, req.mrn, fileUploadCount)
+
+  private def firstUploadFile(response: FileUploadResponse): Either[Throwable, (File, UploadRequest)] =
+    response.files.headOption map { case f@File(_, Waiting(r)) => Right(f, r) } getOrElse Left(new IllegalStateException("Unable to initiate upload"))
 }
