@@ -24,12 +24,9 @@ import pages.HowManyFilesUploadPage
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import views.html.upload_your_files_receipt
 
 class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with PropertyChecks with Generators with FakeActions {
-
- private  val mockAuditConnector = mock[AuditConnector]
 
   def controller(getData: DataRetrievalAction) =
     new UploadYourFilesReceiptController(
@@ -38,11 +35,9 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with Prope
       new FakeEORIAction(),
       getData,
       new FileUploadResponseRequiredAction(),
-      mockAuditConnector,
       appConfig)
 
-  def viewAsString(receipts: List[String]): String =
-    upload_your_files_receipt(receipts)(fakeRequest, messages, appConfig).toString
+  def viewAsString(receipts: List[String]): String = upload_your_files_receipt(receipts)(fakeRequest, messages, appConfig).toString
 
   "onPageLoad" should {
 

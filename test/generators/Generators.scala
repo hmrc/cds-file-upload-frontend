@@ -48,40 +48,11 @@ trait Generators extends CacheMapGenerator with ModelGenerators with JsonGenerat
     }
   }
 
-  def intsInRangeWithCommas(min: Int, max: Int): Gen[String] = {
-    val numberGen = choose[Int](min, max)
-    genIntersperseString(numberGen.toString, ",")
-  }
-
-  def intsLargerThanMaxValue: Gen[BigInt] =
-    arbitrary[BigInt] suchThat(x => x > Int.MaxValue)
-
-  def intsSmallerThanMinValue: Gen[BigInt] =
-    arbitrary[BigInt] suchThat(x => x < Int.MinValue)
-
-  def nonNumerics: Gen[String] =
-    alphaStr suchThat(_.nonEmpty)
-
-  def decimals: Gen[String] =
-    arbitrary[BigDecimal]
-      .suchThat(_.abs < Int.MaxValue)
-      .suchThat(!_.isValidInt)
-      .map(_.formatted("%f"))
-
   def intsBelowValue(value: Int): Gen[Int] =
     Gen.choose(Int.MinValue, value - 1)
 
   def intsAboveValue(value: Int): Gen[Int] =
     Gen.choose(value + 1, Int.MaxValue)
-
-  def intsOutsideRange(min: Int, max: Int): Gen[Int] =
-    arbitrary[Int] suchThat(x => x < min || x > max)
-
-  def nonBooleans: Gen[String] =
-    arbitrary[String]
-      .suchThat (_.nonEmpty)
-      .suchThat (_ != "true")
-      .suchThat (_ != "false")
 
   def nonEmptyString: Gen[String] =
     arbitrary[String] suchThat (_.nonEmpty)
@@ -92,20 +63,11 @@ trait Generators extends CacheMapGenerator with ModelGenerators with JsonGenerat
       chars <- listOfN(length, arbitrary[Char])
     } yield chars.mkString
 
-  def stringsLongerThan(minLength: Int): Gen[String] = for {
-    maxLength <- (minLength * 2).max(100)
-    length    <- Gen.chooseNum(minLength + 1, maxLength)
-    chars     <- listOfN(length, arbitrary[Char])
-  } yield chars.mkString
-
   def saneString: Gen[String] =
     for {
       length <- choose(1, 100)
       chars  <- listOfN(length, alphaChar)
     } yield chars.mkString
-
-  def stringsExceptSpecificValues(excluded: Set[String]): Gen[String] =
-    nonEmptyString suchThat (!excluded.contains(_))
 
   def minStringLength(length: Int): Gen[String] =
     for {
@@ -121,9 +83,9 @@ trait Generators extends CacheMapGenerator with ModelGenerators with JsonGenerat
       choose(0, vector.size - 1).flatMap(vector(_))
     }
 
-  val validEmailGen: Gen[String] = RegexpGen.from("[a-zA-Z0-9\\.!#$%&'*+/=?^_`{|}~-]{1,25}@[a-zA-Z0-9-.]{1,25}")
+  private val validEmailGen: Gen[String] = RegexpGen.from("[a-zA-Z0-9\\.!#$%&'*+/=?^_`{|}~-]{1,25}@[a-zA-Z0-9-.]{1,25}")
 
-  val validPhoneNumberGen: Gen[String] = RegexpGen.from("[\\d\\s\\+()\\-/]{1,15}")
+  private val validPhoneNumberGen: Gen[String] = RegexpGen.from("[\\d\\s\\+()\\-/]{1,15}")
 
   implicit val arbitraryContactDetails: Arbitrary[ContactDetails] = Arbitrary {
     for {
