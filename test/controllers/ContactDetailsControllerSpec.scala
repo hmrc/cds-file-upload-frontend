@@ -46,7 +46,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase
 
   def view(form: Form[ContactDetails] = form): String = contact_details(form)(fakeRequest, messages, appConfig).toString
 
-  def controller(signedInUser: SignedInUser, eori: String, dataRetrieval: DataRetrievalAction = getEmptyCacheMap) =
+  def controller(signedInUser: SignedInUser, eori: String, dataRetrieval: DataRetrievalAction = new FakeDataRetrievalAction(None)) =
     new ContactDetailsController(
       messagesApi,
       new FakeAuthAction(signedInUser),
@@ -74,7 +74,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
 
         val cacheMap: CacheMap = CacheMap("", Map(ContactDetailsPage.toString -> Json.toJson(contactDetails)))
-        val result = controller(user, eori, getCacheMap(cacheMap)).onPageLoad(fakeRequest)
+        val result = controller(user, eori, fakeDataRetrievalAction(cacheMap)).onPageLoad(fakeRequest)
 
         contentAsString(result) mustBe view(form.fill(contactDetails))
       }

@@ -94,7 +94,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       messagesApi,
       new FakeAuthAction(),
       new FakeEORIAction(),
-      getEmptyCacheMap,
+      new FakeDataRetrievalAction(None),
       new MrnRequiredAction,
       contactDetailsRequiredAction,
       new FileUploadCountProvider,

@@ -115,7 +115,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
               nextPosition(file.reference, response.files.map(_.reference))
 
             val updatedCache = combine(response, cacheMap)
-            val result = controller(getCacheMap(updatedCache)).onPageLoad(file.reference)(fakeRequest)
+            val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad(file.reference)(fakeRequest)
 
             status(result) mustBe OK
             contentAsString(result) mustBe viewAsString(file.reference, refPosition)
@@ -141,7 +141,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
             val nextPage     = routes.UploadYourFilesController.onPageLoad(reference)
             val updatedCache = combine(response, cache)
 
-            val result = controller(getCacheMap(updatedCache)).onPageLoad(file.reference)(fakeRequest)
+            val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad(file.reference)(fakeRequest)
 
             status(result) mustBe SEE_OTHER
             redirectLocation(result) mustBe Some(nextPage.url)
@@ -155,7 +155,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
 
         forAll { ref: String =>
 
-          val result = controller(getEmptyCacheMap).onPageLoad(ref)(fakeRequest)
+          val result = controller(new FakeDataRetrievalAction(None)).onPageLoad(ref)(fakeRequest)
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
@@ -169,7 +169,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
           whenever(!response.files.exists(_.reference == ref)) {
 
             val updatedCache = combine(response, cache)
-            val result = controller(getCacheMap(updatedCache)).onPageLoad(ref)(fakeRequest)
+            val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad(ref)(fakeRequest)
 
             status(result) mustBe SEE_OTHER
             redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
@@ -205,7 +205,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
             val filePart = FilePart[TemporaryFile](key = "file", "file.txt", contentType = None, ref = TemporaryFile("file.txt"))
             val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
 
-            val result = controller(getCacheMap(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Right(form)))
+            val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Right(form)))
 
             status(result) mustBe SEE_OTHER
             redirectLocation(result) mustBe Some(nextPage.url)
@@ -232,7 +232,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
             val filePart = FilePart[TemporaryFile](key = "file", "", contentType = None, ref = TemporaryFile())
             val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
 
-            val result = controller(getCacheMap(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Right(form)))
+            val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Right(form)))
 
             status(result) mustBe SEE_OTHER
             redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad(file.reference).url)
@@ -245,7 +245,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
           case ((file, response), cache) =>
             val updatedCache = combine(response, cache)
 
-            val result = controller(getCacheMap(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Left(MaxSizeExceeded(0))))
+            val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Left(MaxSizeExceeded(0))))
 
             status(result) mustBe SEE_OTHER
             redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad(file.reference).url)
@@ -275,7 +275,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
             val filePart = FilePart[TemporaryFile](key = "file", "file.txt", contentType = None, ref = TemporaryFile("file.txt"))
             val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
 
-            val result = controller(getCacheMap(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Right(form)))
+            val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Right(form)))
 
             status(result) mustBe SEE_OTHER
             redirectLocation(result) mustBe Some(nextPage.url)
@@ -292,7 +292,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
           val filePart = FilePart[TemporaryFile](key = "file", "file.txt", contentType = None, ref = TemporaryFile("file.txt"))
           val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
 
-          val result = controller(getEmptyCacheMap).onSubmit(ref)(fakeRequest.withBody(Right(form)))
+          val result = controller(new FakeDataRetrievalAction(None)).onSubmit(ref)(fakeRequest.withBody(Right(form)))
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
@@ -309,7 +309,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
             val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
 
             val updatedCache = combine(response, cache)
-            val result = controller(getCacheMap(updatedCache)).onSubmit(ref)(fakeRequest.withBody(Right(form)))
+            val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(ref)(fakeRequest.withBody(Right(form)))
 
             status(result) mustBe SEE_OTHER
             redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
@@ -327,7 +327,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
         case ((file, _, response), cache) =>
 
           val updatedCache = combine(response, cache)
-          val result = controller(getCacheMap(updatedCache)).onSuccess(file.reference)(fakeRequest)
+          val result = controller(fakeDataRetrievalAction(updatedCache)).onSuccess(file.reference)(fakeRequest)
 
           whenReady(result) { _ =>
 
@@ -350,7 +350,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
         case ((file, _, response), cache: CacheMap) =>
 
           val updatedCache = combine(response, cache)
-          val result = controller(getCacheMap(updatedCache)).onSuccess(file.reference)(fakeRequest)
+          val result = controller(fakeDataRetrievalAction(updatedCache)).onSuccess(file.reference)(fakeRequest)
           val next = nextRef(file.reference, response.files.collect { case file@File(_, Waiting(_)) => file.reference })
 
           status(result) mustBe SEE_OTHER
@@ -364,7 +364,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
 
         forAll { ref: String =>
 
-          val result = controller(getEmptyCacheMap).onSuccess(ref)(fakeRequest)
+          val result = controller(new FakeDataRetrievalAction(None)).onSuccess(ref)(fakeRequest)
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
@@ -378,7 +378,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
           whenever(!response.files.exists(_.reference == ref)) {
 
             val updatedCache = combine(response, cache)
-            val result = controller(getCacheMap(updatedCache)).onSuccess(ref)(fakeRequest)
+            val result = controller(fakeDataRetrievalAction(updatedCache)).onSuccess(ref)(fakeRequest)
 
             status(result) mustBe SEE_OTHER
             redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)

@@ -50,7 +50,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase
       cache <- arbitrary[CacheMap]
       contactDetails <- arbitrary[ContactDetails]
     } yield {
-      getContactDetails(cache, contactDetails)
+      fakeContactDetailsRequiredAction(cache, contactDetails)
     }
 
   def controller(signedInUser: SignedInUser,
@@ -61,7 +61,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase
       new FakeAuthAction(signedInUser),
       new FakeEORIAction(eori),
       requireContactDetails,
-      getEmptyCacheMap,
+      new FakeDataRetrievalAction(None),
       new MRNFormProvider,
       mockDataCacheConnector,
       appConfig)

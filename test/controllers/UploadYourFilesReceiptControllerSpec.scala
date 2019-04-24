@@ -24,9 +24,12 @@ import pages.HowManyFilesUploadPage
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import views.html.upload_your_files_receipt
 
 class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with PropertyChecks with Generators with FakeActions {
+
+ private  val mockAuditConnector = mock[AuditConnector]
 
   def controller(getData: DataRetrievalAction) =
     new UploadYourFilesReceiptController(
@@ -35,6 +38,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with Prope
       new FakeEORIAction(),
       getData,
       new FileUploadResponseRequiredAction(),
+      mockAuditConnector,
       appConfig)
 
   def viewAsString(receipts: List[String]): String =
@@ -49,7 +53,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with Prope
         forAll { (response: FileUploadResponse, cache: CacheMap) =>
 
           val updatedCache = cache.copy(data = cache.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))
-          val result = controller(getCacheMap(updatedCache)).onPageLoad()(fakeRequest)
+          val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad()(fakeRequest)
 
           status(result) mustBe OK
           contentAsString(result) mustBe viewAsString(response.files.map(_.reference).sorted)
@@ -61,7 +65,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with Prope
 
       "no responses are in the cache" in {
 
-        val result = controller(getEmptyCacheMap).onPageLoad()(fakeRequest)
+        val result = controller(new FakeDataRetrievalAction(None)).onPageLoad()(fakeRequest)
 
         status(result) mustBe SEE_OTHER
         redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)

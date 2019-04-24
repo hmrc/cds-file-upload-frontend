@@ -36,7 +36,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
 
-class ControllerSpecBase extends SpecBase with MockitoSugar with FakeActions with BeforeAndAfterEach {
+abstract class ControllerSpecBase extends SpecBase with MockitoSugar with FakeActions with BeforeAndAfterEach {
 
   lazy val mockAuthConnector: AuthConnector = mock[AuthConnector]
   lazy val mockDataCacheConnector: DataCacheConnector = mock[DataCacheConnector]
@@ -71,10 +71,8 @@ class ControllerSpecBase extends SpecBase with MockitoSugar with FakeActions wit
   val escaped: String => String =
     URLEncoder.encode(_, "utf-8")
 
-  val getEmptyCacheMap: DataRetrievalAction = new FakeDataRetrievalAction(None)
-
-  def getContactDetails(cacheMap: CacheMap, contactDetails: ContactDetails): ContactDetailsRequiredAction =
+  def fakeContactDetailsRequiredAction(cacheMap: CacheMap, contactDetails: ContactDetails): ContactDetailsRequiredAction =
     new FakeContactDetailsRequiredAction(cacheMap, contactDetails)
 
-  def getCacheMap(cacheMap: CacheMap): DataRetrievalAction = new FakeDataRetrievalAction(Some(cacheMap))
+  def fakeDataRetrievalAction(cacheMap: CacheMap): DataRetrievalAction = new FakeDataRetrievalAction(Some(cacheMap))
 }
