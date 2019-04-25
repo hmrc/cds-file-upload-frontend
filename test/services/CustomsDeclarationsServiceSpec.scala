@@ -95,7 +95,7 @@ class CustomsDeclarationsServiceSpec extends SpecBase
         capture(service.batchFileUpload(eori, mrn, fileUploadCount)) {
           (_, request) =>
 
-            request.fileGroupSize mustBe request.files.map(_.fileSequenceNo).max
+            request.files.length mustBe request.files.map(_.fileSequenceNo).max
         }
       }
     }
@@ -124,15 +124,12 @@ class CustomsDeclarationsServiceSpec extends SpecBase
       }
     }
 
-    "have the same number of files as group size" in {
+    "have init an upload request for an additional file for the contact details text" in {
+      val userUploadedFiles = 3
 
-      forAll { (eori: String, mrn: MRN, fileUploadCount: FileUploadCount) =>
-
-        capture(service.batchFileUpload(eori, mrn, fileUploadCount)) {
-          (_, request) =>
-
-            request.fileGroupSize mustBe request.files.length
-        }
+      capture(service.batchFileUpload("GBEORINUMBER12345", MRN("13GB12345678901234").get, FileUploadCount(userUploadedFiles).get)) {
+        (_, request) =>
+          verify(request.files.size mustBe userUploadedFiles + 15)
       }
     }
 

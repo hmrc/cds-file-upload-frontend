@@ -68,7 +68,6 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
           customsDeclarationsService
             .batchFileUpload(req.eori, req.mrn, fileUploadCount)
             .flatMap { response =>
-
               response
                 .files
                 .headOption
