@@ -34,6 +34,8 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import views.html.contact_details
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
+
 
 class ContactDetailsControllerSpec extends ControllerSpecBase
   with ScalaFutures

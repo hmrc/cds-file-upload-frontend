@@ -30,6 +30,7 @@ import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.PropertyChecks
 import pages.{HowManyFilesUploadPage, MrnEntryPage}
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.{JsNumber, JsString}
 import play.api.libs.ws.WSResponse
 import play.api.test.Helpers._

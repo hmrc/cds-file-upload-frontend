@@ -22,16 +22,15 @@ import controllers.actions._
 import forms.FileUploadCountProvider
 import javax.inject.{Inject, Singleton}
 import models.requests.MrnRequest
-import models.{File, FileUploadCount, FileUploadResponse, UploadRequest, UserAnswers, Waiting}
+import models._
 import pages.HowManyFilesUploadPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import services.{CustomsDeclarationsService, UploadContactDetails}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import views.html._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
@@ -44,7 +43,7 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
                                              dataCacheConnector: DataCacheConnector,
                                              uploadContactDetails: UploadContactDetails,
                                              customsDeclarationsService: CustomsDeclarationsService,
-                                             implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
+                                             implicit val appConfig: AppConfig)(implicit ec: ExecutionContext) extends FrontendController with I18nSupport {
 
   val form = formProvider()
 
@@ -56,14 +55,14 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
           .get(HowManyFilesUploadPage)
           .map(form.fill).getOrElse(form)
 
-      Ok(how_many_files_upload(populatedForm))
+      Ok(views.html.how_many_files_upload(populatedForm))
     }
 
   def onSubmit: Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireContactDetails andThen requireMrn).async { implicit req =>
 
       form.bindFromRequest().fold(
-        errorForm => Future.successful(BadRequest(how_many_files_upload(errorForm))),
+        errorForm => Future.successful(BadRequest(views.html.how_many_files_upload(errorForm))),
 
         fileUploadCount => {
           upload(req, fileUploadCount) map {

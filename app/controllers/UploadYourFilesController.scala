@@ -29,11 +29,10 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.Files.TemporaryFile
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.AuditExtensions._
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{Audit, DataEvent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import views.html.upload_your_files
-import uk.gov.hmrc.play.audit.AuditExtensions._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -62,7 +61,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
       req.fileUploadResponse.files.find(_.reference == ref) match {
         case Some(file) =>
           file.state match {
-            case Waiting(_) => Ok(upload_your_files(ref, refPosition))
+            case Waiting(_) => Ok(views.html.upload_your_files(ref, refPosition))
             case _ => Redirect(nextPage(file.reference, req.fileUploadResponse.files))
           }
 
