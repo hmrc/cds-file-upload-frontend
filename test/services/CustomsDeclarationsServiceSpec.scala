@@ -19,17 +19,18 @@ package services
 import base.SpecBase
 import connectors.CustomsDeclarationsConnector
 import generators.Generators
-import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito._
 import models.{FileUploadCount, FileUploadRequest, FileUploadResponse, MRN}
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers._
+import org.mockito.Mockito._
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.PropertyChecks
+import play.api.test.Helpers._
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class CustomsDeclarationsServiceSpec extends SpecBase
   with MockitoSugar
@@ -125,12 +126,14 @@ class CustomsDeclarationsServiceSpec extends SpecBase
     }
 
     "have init an upload request for an additional file for the contact details text" in {
+      val eoriCaptor = ArgumentCaptor.forClass(classOf[String])
+      val fupCaptor = ArgumentCaptor.forClass(classOf[FileUploadRequest])
       val userUploadedFiles = 3
 
-      capture(service.batchFileUpload("GBEORINUMBER12345", MRN("13GB12345678901234").get, FileUploadCount(userUploadedFiles).get)) {
-        (_, request) =>
-          verify(request.files.size mustBe userUploadedFiles + 15)
-      }
+      await(service.batchFileUpload("GBEORINUMBER12345", MRN("13GB12345678901234").get, FileUploadCount(userUploadedFiles).get))
+
+      verify(connector).requestFileUpload(eoriCaptor.capture(), fupCaptor.capture())(any())
+      fupCaptor.getValue.files.size mustBe userUploadedFiles + 1
     }
 
     "return the response from the connector" in {
