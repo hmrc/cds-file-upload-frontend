@@ -37,25 +37,16 @@ class FileUploadRequestSpec extends SpecBase with XmlBehaviours with PropertyChe
     "return Some" when {
 
       "all arguments are valid" in {
-
-        forAll(fileUploadFileGen) {
-          case file @ FileUploadFile(seqNo, docType) =>
-
-            FileUploadFile(seqNo, docType) mustBe Some(file)
-        }
+        FileUploadFile(2, "my doc type") mustBe defined
       }
     }
 
     "return None" when {
 
       "sequence number is less than 1" in {
-
-        forAll(intsBelowValue(1), fileUploadFileGen) {
-          case (seqNo, FileUploadFile(_, documentType)) =>
-
-            FileUploadFile(seqNo, documentType) mustBe None
-        }
+        FileUploadFile(0, "some doc type") mustBe empty
       }
     }
   }
+
 }

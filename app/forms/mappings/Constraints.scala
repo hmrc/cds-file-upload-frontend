@@ -20,7 +20,6 @@ import play.api.data.validation.{Constraint, Invalid, Valid}
 
 trait Constraints {
 
-  val isInt: String => Boolean = _.matches("^[0-9-]*$")
   val isValidEmail: String => Boolean = _.matches("""^[a-zA-Z0-9\.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-.]+$""")
   val isValidPhoneNumber: String => Boolean = _.matches("""^[\d\s\+()\-/]+$""")
 

@@ -26,16 +26,14 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.upload_your_files_receipt
 
 @Singleton
-class UploadYourFilesReceiptController @Inject()(
-                                                  val messagesApi: MessagesApi,
-                                                  authenticate: AuthAction,
-                                                  requireEori: EORIRequiredActionImpl,
-                                                  getData: DataRetrievalAction,
-                                                  requireResponse: FileUploadResponseRequiredAction,
-                                                  implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
+class UploadYourFilesReceiptController @Inject()(val messagesApi: MessagesApi,
+                                                 authenticate: AuthAction,
+                                                 requireEori: EORIRequiredActionImpl,
+                                                 getData: DataRetrievalAction,
+                                                 requireResponse: FileUploadResponseRequiredAction,
+                                                 implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] =
-    (authenticate andThen requireEori andThen getData andThen requireResponse) { implicit req =>
-      Ok(upload_your_files_receipt(req.fileUploadResponse.files.map(_.reference)))
-    }
+  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireResponse) { implicit req =>
+    Ok(upload_your_files_receipt(req.fileUploadResponse.files.map(_.reference)))
+  }
 }

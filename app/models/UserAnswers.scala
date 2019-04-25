@@ -20,7 +20,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import pages._
 import play.api.libs.json._
 
-case class UserAnswers(cacheMap: CacheMap) extends Enumerable.Implicits {
+case class UserAnswers(cacheMap: CacheMap) {
 
   def get[A](page: QuestionPage[A])(implicit rds: Reads[A]): Option[A] =
     cacheMap.getEntry[A](page)

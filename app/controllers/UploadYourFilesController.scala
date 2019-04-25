@@ -22,44 +22,52 @@ import config.AppConfig
 import connectors.{DataCacheConnector, UpscanS3Connector}
 import controllers.actions._
 import javax.inject.Inject
+import models.requests.FileUploadResponseRequest
 import models.{File, FileUploadResponse, Uploaded, Waiting}
-import pages.HowManyFilesUploadPage
+import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.Files.TemporaryFile
 import play.api.mvc._
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.AuditExtensions._
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.audit.model.{Audit, DataEvent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import views.html.upload_your_files
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
 class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
-                                           authenticate: AuthAction,
-                                           requireEori: EORIRequiredActionImpl,
-                                           getData: DataRetrievalAction,
-                                           requireResponse: FileUploadResponseRequiredAction,
-                                           dataCacheConnector: DataCacheConnector,
-                                           upscanS3Connector: UpscanS3Connector,
-                                           implicit val appConfig: AppConfig,
-                                           implicit val mat: Materializer) extends FrontendController with I18nSupport {
+                                          authenticate: AuthAction,
+                                          requireEori: EORIRequiredActionImpl,
+                                          getData: DataRetrievalAction,
+                                          requireResponse: FileUploadResponseRequiredAction,
+                                          dataCacheConnector: DataCacheConnector,
+                                          upscanS3Connector: UpscanS3Connector,
+                                          auditConnector: AuditConnector,
+                                          implicit val appConfig: AppConfig,
+                                          implicit val mat: Materializer) extends FrontendController with I18nSupport {
+
+  private val auditSource = appConfig.appName
+  private val audit = Audit(auditSource, auditConnector)
 
   def onPageLoad(ref: String): Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireResponse) { implicit req =>
 
-      val references  = req.fileUploadResponse.files.map(_.reference)
+      val references = req.fileUploadResponse.files.map(_.reference)
       val refPosition = getPosition(ref, references)
 
       req.fileUploadResponse.files.find(_.reference == ref) match {
         case Some(file) =>
           file.state match {
-            case Waiting(_) => Ok(upload_your_files(ref, refPosition))
+            case Waiting(_) => Ok(views.html.upload_your_files(ref, refPosition))
             case _ => Redirect(nextPage(file.reference, req.fileUploadResponse.files))
           }
 
         case None => Redirect(routes.SessionExpiredController.onPageLoad())
       }
-  }
+    }
 
   def onSubmit(ref: String): Action[Either[MaxSizeExceeded, MultipartFormData[TemporaryFile]]] =
     (authenticate andThen requireEori andThen getData andThen requireResponse)
@@ -90,7 +98,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
   def onSuccess(ref: String): Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
 
-      val files  = req.fileUploadResponse.files
+      val files = req.fileUploadResponse.files
 
       files.find(_.reference == ref) match {
         case Some(file) =>
@@ -105,12 +113,45 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
       }
     }
 
-  private def nextPage(ref: String, refs: List[File])(implicit request: Request[_]) =
-    refs
-      .filter(_.reference > ref)
-      .collectFirst { case file@File(_, Waiting(_)) => file }
-      .map(file => routes.UploadYourFilesController.onPageLoad(file.reference))
-      .getOrElse(routes.UploadYourFilesReceiptController.onPageLoad())
+  private def nextPage(ref: String, files: List[File])(implicit req: FileUploadResponseRequest[_]) = {
+    val nextFileToUpload = files.collectFirst {
+      case file@File(reference, Waiting(_)) if reference > ref => file
+    }
+
+    nextFileToUpload match {
+      case Some(file) => nextFile(file)
+      case None => allFilesUploaded
+    }
+  }
+
+  private def allFilesUploaded(implicit req: FileUploadResponseRequest[_]) = {
+    auditUploadSuccess()
+    routes.UploadYourFilesReceiptController.onPageLoad()
+  }
+
+  private def auditUploadSuccess()(implicit req: FileUploadResponseRequest[_]) = {
+    def auditDetails = {
+      val contactDetails = req.userAnswers.get(ContactDetailsPage).fold(Map.empty[String, String])(cd => Map("fullName" -> cd.name, "companyName" -> cd.companyName, "emailAddress" -> cd.email, "telephoneNumber" -> cd.phoneNumber))
+      val eori = Map("eori" -> req.request.eori)
+      val mrn = req.userAnswers.get(MrnEntryPage).fold(Map.empty[String, String])(m => Map("mrn" -> m.value))
+      val numberOfFiles = req.userAnswers.get(HowManyFilesUploadPage).fold(Map.empty[String, String])(n => Map("numberOfFiles" -> s"${n.value}"))
+      val references = req.fileUploadResponse.files.map(_.reference).foldLeft(Map.empty[String, String]) { (refs: Map[String, String], fileRef: String) => refs + (s"file${refs.size + 1}" -> fileRef) }
+      contactDetails ++ eori ++ mrn ++ numberOfFiles ++ references
+    }
+
+    sendDataEvent(transactionName = "trader-submission", detail = auditDetails, auditType = "UploadSuccess")
+  }
+
+  private def sendDataEvent(transactionName: String, path: String = "N/A", tags: Map[String, String] = Map.empty, detail: Map[String, String], auditType: String)(implicit hc: HeaderCarrier): Unit = {
+    audit.sendDataEvent(DataEvent(
+      auditSource,
+      auditType,
+      tags = hc.toAuditTags(transactionName, path) ++ tags,
+      detail = hc.toAuditDetails(detail.toSeq: _*))
+    )
+  }
+
+  private def nextFile(file: File): Call = routes.UploadYourFilesController.onPageLoad(file.reference)
 
   private def getPosition(ref: String, refs: List[String]) = refs match {
     case head :: tail if head == ref => First(refs.size)
@@ -121,6 +162,8 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
 
 sealed trait Position
 
-case class First(total: Int)              extends Position
+case class First(total: Int) extends Position
+
 case class Middle(index: Int, total: Int) extends Position
-case class Last(total: Int)               extends Position
+
+case class Last(total: Int) extends Position

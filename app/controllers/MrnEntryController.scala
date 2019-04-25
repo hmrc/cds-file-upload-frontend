@@ -26,9 +26,8 @@ import pages.MrnEntryPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import views.html.mrn_entry
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 
 @Singleton
@@ -39,7 +38,7 @@ class MrnEntryController @Inject()(val messagesApi: MessagesApi,
                                     getData: DataRetrievalAction,
                                     formProvider: MRNFormProvider,
                                     dataCacheConnector: DataCacheConnector,
-                                    implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
+                                    implicit val appConfig: AppConfig)(implicit ec: ExecutionContext) extends FrontendController with I18nSupport {
 
   val form = formProvider()
 
@@ -47,7 +46,7 @@ class MrnEntryController @Inject()(val messagesApi: MessagesApi,
     implicit req =>
       val populatedForm = req.userAnswers.get(MrnEntryPage).map(form.fill).getOrElse(form)
 
-      Ok(mrn_entry(populatedForm))
+      Ok(views.html.mrn_entry(populatedForm))
   }
 
   def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireContactDetails).async {
@@ -55,7 +54,7 @@ class MrnEntryController @Inject()(val messagesApi: MessagesApi,
 
       form.bindFromRequest().fold(
         errorForm =>
-          Future.successful(BadRequest(mrn_entry(errorForm))),
+          Future.successful(BadRequest(views.html.mrn_entry(errorForm))),
 
         value => {
           val cacheMap = req.userAnswers.set(MrnEntryPage, value).cacheMap
