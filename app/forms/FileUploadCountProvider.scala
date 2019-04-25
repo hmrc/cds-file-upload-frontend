@@ -16,8 +16,6 @@
 
 package forms
 
-import com.google.inject.Inject
-import forms.mappings.Mappings
 import models.FileUploadCount
 import play.api.data.Forms.of
 import play.api.data.format.Formatter
@@ -25,7 +23,7 @@ import play.api.data.{Form, FormError}
 
 import scala.util.Try
 
-class FileUploadCountProvider @Inject extends Mappings {
+class FileUploadCountProvider {
 
   def apply(): Form[FileUploadCount] = Form("value" -> of(fileUploadCountFormatter("howManyFilesUpload.invalid")))
 

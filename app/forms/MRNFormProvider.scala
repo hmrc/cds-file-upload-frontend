@@ -16,14 +16,12 @@
 
 package forms
 
-import com.google.inject.Inject
-import forms.mappings.Mappings
 import models.MRN
-import play.api.data.format.Formatter
 import play.api.data.Forms.of
+import play.api.data.format.Formatter
 import play.api.data.{Form, FormError}
 
-class MRNFormProvider @Inject() extends Mappings {
+class MRNFormProvider {
 
   def apply(): Form[MRN] =
     Form(
@@ -41,5 +39,4 @@ class MRNFormProvider @Inject() extends Mappings {
     override def unbind(key: String, value: MRN): Map[String, String] =
       Map(key -> value.value)
   }
-
 }

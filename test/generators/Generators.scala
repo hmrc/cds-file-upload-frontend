@@ -28,34 +28,9 @@ trait Generators extends CacheMapGenerator with ModelGenerators with JsonGenerat
 
   val emailRegex = """^[a-zA-Z0-9\.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-.]+$"""
 
-  def genIntersperseString(gen: Gen[String],
-                           value: String,
-                           frequencyV: Int = 1,
-                           frequencyN: Int = 10): Gen[String] = {
+  def intsAboveValue(value: Int): Gen[Int] = Gen.choose(value + 1, Int.MaxValue)
 
-    val genValue: Gen[Option[String]] = Gen.frequency(frequencyN -> None, frequencyV -> Gen.const(Some(value)))
-
-    for {
-      seq1 <- gen
-      seq2 <- Gen.listOfN(seq1.length, genValue)
-    } yield {
-      seq1.toSeq.zip(seq2).foldRight("") {
-        case ((n, Some(v)), m) =>
-          m + n + v
-        case ((n, _), m) =>
-          m + n
-      }
-    }
-  }
-
-  def intsBelowValue(value: Int): Gen[Int] =
-    Gen.choose(Int.MinValue, value - 1)
-
-  def intsAboveValue(value: Int): Gen[Int] =
-    Gen.choose(value + 1, Int.MaxValue)
-
-  def nonEmptyString: Gen[String] =
-    arbitrary[String] suchThat (_.nonEmpty)
+  def nonEmptyString: Gen[String] = arbitrary[String] suchThat (_.nonEmpty)
 
   def stringsWithMaxLength(maxLength: Int): Gen[String] =
     for {
