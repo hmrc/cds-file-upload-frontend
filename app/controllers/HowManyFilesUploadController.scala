@@ -66,23 +66,31 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
 
         fileUploadCount => {
           upload(req, fileUploadCount) map {
-            case Right(firstFile) => Redirect(routes.UploadYourFilesController.onPageLoad(firstFile.reference))
-            case Left(_) => Redirect(routes.SessionExpiredController.onPageLoad())
+            case Right(firstFile) =>
+              Redirect(routes.UploadYourFilesController.onPageLoad(firstFile.reference))
+            case Left(_) =>
+              Redirect(routes.SessionExpiredController.onPageLoad())
           }
         }
       )
     }
 
   private def upload(req: MrnRequest[AnyContent], fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier): Future[Either[Throwable, File]] = {
+    def saveRemainingFileUploadsToCache(fileUploadResponse: FileUploadResponse) = {
+      val remainingFileUploads = fileUploadResponse.files.tail
+      val answers = updateUserAnswers(req.userAnswers, fileUploadCount, FileUploadResponse(remainingFileUploads))
+      dataCacheConnector.save(answers.cacheMap).map { _ => remainingFileUploads }
+    }
+
     initiateUpload(req, fileUploadCount).flatMap { fileUploadResponse =>
 
       firstUploadFile(fileUploadResponse) match {
         case Right((f, u)) =>
           uploadContactDetails(req.request.contactDetails, u).flatMap { _ =>
-            val answers = updateUserAnswers(req.userAnswers, fileUploadCount, fileUploadResponse)
-            dataCacheConnector.save(answers.cacheMap).map { _ => Right(f) }
+            saveRemainingFileUploadsToCache(fileUploadResponse).map(uploads => Right(uploads.head))
           }
-        case Left(error) => Future.successful(Left(error))
+        case Left(error) =>
+          Future.successful(Left(error))
       }
     }
   }

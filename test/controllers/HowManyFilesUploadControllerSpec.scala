@@ -159,26 +159,28 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
     }
 
     "return an ok and save to the data cache when valid data is submitted" in {
-      val response = FileUploadResponse(List(
+      val fileUploadResponse = FileUploadResponse(List(
         File("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> "")))),
         File("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> "")))),
         File("someFileRef3", Waiting(UploadRequest("http://s3bucket/myfile3", Map("" -> ""))))
       ))
-      when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(response))
+      val fileUploadsAfterContactDetails = fileUploadResponse.files.tail
+
+      when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
       when(mockUploadContactDetails.apply(any(), any())).thenReturn(Future.successful(()))
       when(mockDataCacheConnector.save(any())(any[HeaderCarrier])).thenReturn(Future.successful(CacheMap("", Map.empty)))
-      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "3")
+      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2")
 
       val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
 
       status(result) mustBe SEE_OTHER
-      val nextRef = response.files.map(_.reference).min
+      val nextRef = fileUploadsAfterContactDetails.map(_.reference).min
       redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad(nextRef).url)
       val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
       verify(mockDataCacheConnector).save(captor.capture())(any[HeaderCarrier])
-      val Some(fileUploadCount) = FileUploadCount(3)
+      val Some(fileUploadCount) = FileUploadCount(2)
       captor.getValue.getEntry[FileUploadCount](HowManyFilesUploadPage) mustBe Some(fileUploadCount)
-      captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response) mustBe Some(response)
+      captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response) mustBe Some(FileUploadResponse(fileUploadResponse.files.tail))
     }
 
     "make a request to customs declarations" in {
