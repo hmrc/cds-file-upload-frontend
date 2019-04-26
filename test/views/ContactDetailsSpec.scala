@@ -22,14 +22,11 @@ import models.ContactDetails
 import org.scalatest.prop.PropertyChecks
 import play.api.data.Form
 import play.twirl.api.Html
-import views.behaviours.StringViewBehaviours
+import views.behaviours.{StringViewBehaviours, ViewBehaviours}
 import views.html.components.input_text
 import views.html.contact_details
 
-class ContactDetailsSpec extends DomAssertions
-  with StringViewBehaviours[ContactDetails]
-  with PropertyChecks
-  with Generators {
+class ContactDetailsSpec extends DomAssertions with ViewBehaviours with PropertyChecks with Generators {
 
   val form: Form[ContactDetails] = Form(contactDetailsMapping)
 

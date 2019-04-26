@@ -18,135 +18,79 @@ package services
 
 import base.SpecBase
 import connectors.CustomsDeclarationsConnector
-import generators.Generators
-import models.{FileUploadCount, FileUploadRequest, FileUploadResponse, MRN}
+import models._
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers._
+import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito._
 import org.scalatest._
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.prop.PropertyChecks
 import play.api.test.Helpers._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class CustomsDeclarationsServiceSpec extends SpecBase
-  with MockitoSugar
-  with PropertyChecks
-  with Generators
-  with BeforeAndAfterEach
-  with ScalaFutures {
+class CustomsDeclarationsServiceSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach {
 
-  lazy val connector = mock[CustomsDeclarationsConnector]
-  lazy val service = new CustomsDeclarationsServiceImpl(connector)
-
+  lazy val mockConnector = mock[CustomsDeclarationsConnector]
+  lazy val service = new CustomsDeclarationsServiceImpl(mockConnector)
 
   def capture[A](action: => Future[A])(f: (String, FileUploadRequest) => Unit): Future[Unit] = {
-
     val eoriCaptor = ArgumentCaptor.forClass(classOf[String])
     val fupCaptor = ArgumentCaptor.forClass(classOf[FileUploadRequest])
 
     action.map { _ =>
-      verify(connector).requestFileUpload(eoriCaptor.capture(), fupCaptor.capture())(any())
-
+      verify(mockConnector).requestFileUpload(eoriCaptor.capture(), fupCaptor.capture())(any())
       f(eoriCaptor.getValue, fupCaptor.getValue)
     }
   }
 
-
   override def beforeEach = {
-    reset(connector)
-
-    when(connector.requestFileUpload(any(), any())(any()))
-      .thenReturn(Future.successful(FileUploadResponse(List())))
+    reset(mockConnector)
+    when(mockConnector.requestFileUpload(any(), any())(any())).thenReturn(Future.successful(FileUploadResponse(List())))
   }
 
   ".batchFileUpload" must {
 
-    "not change eori number" in {
-
-      forAll { (eori: String, mrn: MRN, fileUploadCount: FileUploadCount) =>
-
-        capture(service.batchFileUpload(eori, mrn, fileUploadCount)) {
-          (newEori, _) =>
-
-            newEori mustBe eori
-        }
-      }
-    }
-
-    "use the mrn for the declaration id" in {
-
-      forAll { (eori: String, mrn: MRN, fileUploadCount: FileUploadCount) =>
-
-        capture(service.batchFileUpload(eori, mrn, fileUploadCount)) {
-          (_, request) =>
-
-            request.declarationId mustBe mrn
-        }
-      }
-    }
-
-    "have a max file sequence number as group size" in {
-
-      forAll { (eori: String, mrn: MRN, fileUploadCount: FileUploadCount) =>
-
-        capture(service.batchFileUpload(eori, mrn, fileUploadCount)) {
-          (_, request) =>
-
-            request.files.length mustBe request.files.map(_.fileSequenceNo).max
-        }
-      }
-    }
-
-    "start file sequence number at 1" in {
-
-      forAll { (eori: String, mrn: MRN, fileUploadCount: FileUploadCount) =>
-
-        capture(service.batchFileUpload(eori, mrn, fileUploadCount)) {
-          (_, request) =>
-
-            request.files.map(_.fileSequenceNo).min mustBe 1
-        }
-      }
-    }
-
-    "not have duplicate file sequence numbers" in {
-
-      forAll { (eori: String, mrn: MRN, fileUploadCount: FileUploadCount) =>
-
-        capture(service.batchFileUpload(eori, mrn, fileUploadCount)) {
-          (_, request) =>
-
-            request.files.groupBy(_.fileSequenceNo) mustBe request.files
-        }
-      }
-    }
-
-    "have init an upload request for an additional file for the contact details text" in {
-      val eoriCaptor = ArgumentCaptor.forClass(classOf[String])
-      val fupCaptor = ArgumentCaptor.forClass(classOf[FileUploadRequest])
-      val userUploadedFiles = 3
-
-      await(service.batchFileUpload("GBEORINUMBER12345", MRN("13GB12345678901234").get, FileUploadCount(userUploadedFiles).get))
-
-      verify(connector).requestFileUpload(eoriCaptor.capture(), fupCaptor.capture())(any())
-      fupCaptor.getValue.files.size mustBe userUploadedFiles + 1
-    }
-
-    "return the response from the connector" in {
-
-      forAll { (eori: String, mrn: MRN, fileUploadCount: FileUploadCount, response: FileUploadResponse) =>
-
-        when(connector.requestFileUpload(any(), any())(any()))
-          .thenReturn(Future.successful(response))
-
-        whenReady(service.batchFileUpload(eori, mrn, fileUploadCount)) { actual =>
-          actual mustBe response
-        }
-      }
+    "use eori number for the upload" in {
+      await(service.batchFileUpload("GBEORINUMBER12345", MRN("13GB12345678901234").get, FileUploadCount(5).get))
+      verify(mockConnector).requestFileUpload(eqTo("GBEORINUMBER12345"), any())(any())
     }
   }
+
+  "use the mrn for the declaration id" in {
+    await(service.batchFileUpload("GBEORINUMBER12345", MRN("13GB12345678901234").get, FileUploadCount(1).get))
+    verify(mockConnector).requestFileUpload(any(), eqTo(FileUploadRequest(MRN("13GB12345678901234").get, expectedUploadFiles(2))))(any())
+  }
+
+  "have a max file sequence number as group size" in {
+    val captor: ArgumentCaptor[FileUploadRequest] = ArgumentCaptor.forClass(classOf[FileUploadRequest])
+
+    await(service.batchFileUpload("GBEORINUMBER12345", MRN("13GB12345678901234").get, FileUploadCount(3).get))
+    verify(mockConnector).requestFileUpload(any(), captor.capture())(any())
+
+    val request = captor.getValue
+    request.files.length mustBe request.files.map(_.fileSequenceNo).max
+  }
+
+  "start file sequence number at 1" in {
+    val captor: ArgumentCaptor[FileUploadRequest] = ArgumentCaptor.forClass(classOf[FileUploadRequest])
+
+    await(service.batchFileUpload("GBEORINUMBER12345", MRN("13GB12345678901234").get, FileUploadCount(4).get))
+    verify(mockConnector).requestFileUpload(any(), captor.capture())(any())
+
+    val request = captor.getValue
+    request.files.map(_.fileSequenceNo).min mustBe 1
+  }
+
+  "have init an upload request for an additional file for the contact details text" in {
+    val captor: ArgumentCaptor[FileUploadRequest] = ArgumentCaptor.forClass(classOf[FileUploadRequest])
+    val userUploadedFiles = 3
+
+    await(service.batchFileUpload("GBEORINUMBER12345", MRN("13GB12345678901234").get, FileUploadCount(userUploadedFiles).get))
+
+    verify(mockConnector).requestFileUpload(any(), captor.capture())(any())
+    captor.getValue.files.size mustBe userUploadedFiles + 1
+  }
+
+  private def expectedUploadFiles(n: Int) = (1 to n).map(FileUploadFile(_, "").get)
 }
