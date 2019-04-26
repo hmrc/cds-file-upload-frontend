@@ -79,7 +79,7 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
       firstUploadFile(fileUploadResponse) match {
         case Right((f, u)) =>
           uploadContactDetails(req.request.contactDetails, u).flatMap { _ =>
-            val answers = updateUserAnswers(req.userAnswers, fileUploadCount, fileUploadResponse)
+            val answers = updateUserAnswers(req.userAnswers, fileUploadCount, FileUploadResponse(fileUploadResponse.files.tail))
             dataCacheConnector.save(answers.cacheMap).map { _ => Right(f) }
           }
         case Left(error) => Future.successful(Left(error))
