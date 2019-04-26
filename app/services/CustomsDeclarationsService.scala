@@ -34,10 +34,10 @@ class CustomsDeclarationsServiceImpl @Inject()(customsDeclarationsConnector: Cus
   override def batchFileUpload(eori: String, mrn: MRN, fileUploadCount: FileUploadCount)
                               (implicit hc: HeaderCarrier): Future[FileUploadResponse] = {
 
-    val files = for(i <- 1 to fileUploadCount.value) yield FileUploadFile(i, "")
+    val files = for(i <- 1 to fileUploadCount.value + 1) yield FileUploadFile(i, "")
     val fileSeq = files.collect { case Some(v) => v }
 
-    val request = FileUploadRequest(mrn, fileUploadCount, fileSeq)
+    val request = FileUploadRequest(mrn, fileSeq)
 
     customsDeclarationsConnector.requestFileUpload(eori, request)
   }

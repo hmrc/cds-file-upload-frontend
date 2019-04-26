@@ -20,13 +20,12 @@ import scala.xml.Elem
 
 final case class FileUploadRequest(
   declarationId: MRN,
-  fileGroupSize: FileUploadCount,
   files: Seq[FileUploadFile]) {
 
   def toXml: Elem =
     <FileUploadRequest xmlns="hmrc:fileupload">
       <DeclarationID>{declarationId.value}</DeclarationID>
-      <FileGroupSize>{fileGroupSize.value}</FileGroupSize>
+      <FileGroupSize>{files.length}</FileGroupSize>
       <Files>{files.map(_.toXml)}</Files>
     </FileUploadRequest>
 }
