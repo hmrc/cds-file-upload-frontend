@@ -37,8 +37,7 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with Propert
                           "listItem2",
                           "listItem3",
                           "listItem4",
-                          "listItem5",
-                          "listItem6"
+                          "listItem5"
                         )
 
   "Upload your files page" must {
