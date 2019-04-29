@@ -34,16 +34,6 @@ class CustomsDeclarationsServiceSpec extends SpecBase with MockitoSugar with Bef
   lazy val mockConnector = mock[CustomsDeclarationsConnector]
   lazy val service = new CustomsDeclarationsServiceImpl(mockConnector)
 
-  def capture[A](action: => Future[A])(f: (String, FileUploadRequest) => Unit): Future[Unit] = {
-    val eoriCaptor = ArgumentCaptor.forClass(classOf[String])
-    val fupCaptor = ArgumentCaptor.forClass(classOf[FileUploadRequest])
-
-    action.map { _ =>
-      verify(mockConnector).requestFileUpload(eoriCaptor.capture(), fupCaptor.capture())(any())
-      f(eoriCaptor.getValue, fupCaptor.getValue)
-    }
-  }
-
   override def beforeEach = {
     reset(mockConnector)
     when(mockConnector.requestFileUpload(any(), any())(any())).thenReturn(Future.successful(FileUploadResponse(List())))

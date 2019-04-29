@@ -73,4 +73,4 @@ case class Keystore(protocol: String = "https", host: String, port: Int, default
   lazy val baseUri: String = s"$protocol://$host:$port"
 }
 
-case class FileFormats(maxFileSize: Int, approvedFileExt: String)
+case class FileFormats(maxFileSize: Int, approvedFileTypes: String)
