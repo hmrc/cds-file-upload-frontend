@@ -55,7 +55,7 @@
 
     @hmrcHelpers.form(controllers.routes.UploadYourFilesController.onSubmit(ref), ('enctype, "multipart/form-data"), ('class, "js-form")) {
 
-        <div class="form-field-group">
+        <div class="form-group">
             @errorInline(
                 errorKey = "upload-file",
                 errorMessage = "",
@@ -74,7 +74,7 @@
             data-msg-filesize="@messages("fileUploadPage.validation.filesize")" />
         </div>
 
-        @components.submit_button()
+        <button id="submit" class="button">@messages("fileUploadPage.button")</button>
     }
 
 </div>
