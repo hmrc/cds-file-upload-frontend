@@ -201,7 +201,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
         forAll(fileUploadedGen, arbitrary[CacheMap]) {
           case ((file, response), cache) =>
             reset(mockUpscanConnector)
-            given(mockUpscanConnector.upload(any[UploadRequest], any[TemporaryFile])) willReturn Future.successful((): Unit)
+            given(mockUpscanConnector.upload(any[UploadRequest], any[TemporaryFile], any[String])) willReturn Future.successful((): Unit)
 
             val nextPage = routes.UploadYourFilesController.onSuccess(file.reference)
             val updatedCache = combine(response, cache)
@@ -215,7 +215,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
             status(result) mustBe SEE_OTHER
             redirectLocation(result) mustBe Some(nextPage.url)
 
-            verify(mockUpscanConnector).upload(refEq(upscanRequest), any[TemporaryFile])
+            verify(mockUpscanConnector).upload(refEq(upscanRequest), any[TemporaryFile], any[String])
         }
       }
     }

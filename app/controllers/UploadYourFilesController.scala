@@ -16,7 +16,9 @@
 
 package controllers
 
-import akka.stream.Materializer
+import akka.stream.scaladsl.Source
+import akka.stream.{IOResult, Materializer}
+import akka.util.ByteString
 import com.google.inject.Singleton
 import config.AppConfig
 import connectors.{DataCacheConnector, UpscanS3Connector}
@@ -27,6 +29,7 @@ import models.{File, FileUploadResponse, Uploaded, Waiting}
 import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.Files.TemporaryFile
+import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
@@ -80,7 +83,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
                 req.body match {
                   case Right(form) if form.file("file").exists(_.filename.nonEmpty) =>
                     upscanS3Connector
-                      .upload(request, form.file("file").get.ref)
+                      .upload(request, form.file("file").get.ref, form.file("file").get.filename)
                       .map(_ => Redirect(routes.UploadYourFilesController.onSuccess(ref)))
 
                   case Right(_) | Left(MaxSizeExceeded(_)) =>

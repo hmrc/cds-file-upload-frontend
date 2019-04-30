@@ -34,11 +34,14 @@ import scala.util.Try
 @Singleton
 class UpscanS3Connector() {
 
-  def upload(template: UploadRequest, file: TemporaryFile): Future[Unit] = {
+  def upload(template: UploadRequest, file: TemporaryFile, fileName: String): Future[Unit] = {
     val builder = MultipartEntityBuilder.create
 
-    template.fields.foreach{ case (name, value) => builder.addPart(name, new StringBody(value, ContentType.TEXT_PLAIN))}
-    builder.addPart("file", new FileBody(file.file))
+    template.fields.foreach {
+      case (name, value) => builder.addPart(name, new StringBody(value, ContentType.TEXT_PLAIN))
+    }
+
+    builder.addPart("file", new FileBody(file.file, ContentType.DEFAULT_BINARY,  fileName))
 
     val request = new HttpPost(template.href)
     request.setEntity(builder.build())

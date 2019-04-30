@@ -30,11 +30,12 @@ import scala.concurrent.Future
 @Singleton
 class UploadContactDetails @Inject()(upscanConnector: UpscanS3Connector) {
 
-  def apply(contactDetails: ContactDetails, uploadRequest: UploadRequest): Future[Unit] = upscanConnector.upload(uploadRequest, toFile(contactDetails))
+  def fileName = s"contact_details_${UUID.randomUUID().toString}.txt"
+
+  def apply(contactDetails: ContactDetails, uploadRequest: UploadRequest): Future[Unit] = upscanConnector.upload(uploadRequest, toFile(contactDetails), fileName)
 
   def toFile(contactDetails: ContactDetails): TemporaryFile = {
-    val fileName = s"contact_details_${UUID.randomUUID().toString}.txt"
-    val uploadFile = File.createTempFile(fileName, "")
+    val uploadFile = File.createTempFile("cds-file-upload-ui", "")
 
     new PrintWriter(uploadFile) {
       try {

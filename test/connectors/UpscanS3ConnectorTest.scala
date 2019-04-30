@@ -51,7 +51,7 @@ class UpscanS3ConnectorTest extends WordSpec with WiremockTestServer with MustMa
         )
       )
 
-      await(connector.upload(templateUploading, TemporaryFile("example-file.json")))
+      await(connector.upload(templateUploading, TemporaryFile("example-file.json"),"exampleFilename"))
 
       verify(
         postRequestedFor(urlEqualTo("/path"))
@@ -76,7 +76,7 @@ class UpscanS3ConnectorTest extends WordSpec with WiremockTestServer with MustMa
       )
 
       intercept[RuntimeException] {
-        await(connector.upload(templateUploading, TemporaryFile("example-file.json")))
+        await(connector.upload(templateUploading, TemporaryFile("example-file.json"), "exampleFileName"))
       }.getMessage mustBe "Bad AWS response with status [502] body [content]"
 
       verify(
