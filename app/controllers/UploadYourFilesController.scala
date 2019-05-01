@@ -16,21 +16,17 @@
 
 package controllers
 
-import akka.stream.scaladsl.Source
-import akka.stream.{IOResult, Materializer}
-import akka.util.ByteString
+import akka.stream.Materializer
 import com.google.inject.Singleton
 import config.AppConfig
 import connectors.{DataCacheConnector, UpscanS3Connector}
 import controllers.actions._
 import javax.inject.Inject
+import models._
 import models.requests.FileUploadResponseRequest
-import models.{FileUpload, FileUploadResponse, Uploaded, UserAnswers, Waiting}
 import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.Files.TemporaryFile
-import play.api.libs.json.Json
-import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
@@ -38,7 +34,6 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{Audit, DataEvent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.collection.immutable.ListMap
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 

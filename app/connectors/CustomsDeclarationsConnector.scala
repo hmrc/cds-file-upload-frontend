@@ -40,7 +40,7 @@ class CustomsDeclarationsConnector @Inject()(config: AppConfig, httpClient: Http
       Try(XML.loadString(r.body)) match {
         case Success(value) => FileUploadResponse.fromXml(value)
         case Failure(exception) =>
-          Logger.error(s"Failed to load XML with exception: ${exception.getMessage}")
+          Logger.error("Failed to load XML")
           throw exception
       }
     )
