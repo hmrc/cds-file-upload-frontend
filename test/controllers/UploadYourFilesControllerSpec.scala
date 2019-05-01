@@ -171,26 +171,41 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
     "upload to upscan, save the filename and redirect to next page when file is valid" in {
 
-      val fileName = "file.txt"
-      val uploadedFile = FileUpload("someref", Waiting(UploadRequest("href", Map())), fileName)
-      val uploadResponse = FileUploadResponse(List(uploadedFile))
+      val upscanRequest = UploadRequest("href", Map())
+      val fileUploadedGen = responseGen.map {
+        case (file, _) =>
+          val uploadedFile = file.copy(state = Waiting(upscanRequest))
+          (uploadedFile, FileUploadResponse(List(uploadedFile)))
+      }
 
-      when(mockUpscanConnector.upload(any[UploadRequest], any[TemporaryFile], any[String])).thenReturn(Future.successful(()))
-      val nextPage = routes.UploadYourFilesController.onSuccess(uploadedFile.reference)
-      val updatedCache = combine(uploadResponse, CacheMap("id", Map.empty))
-      val tempFile = TemporaryFile()
-      val filePart = FilePart[TemporaryFile](key = "file", fileName, contentType = None, ref = tempFile)
-      val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
+      forAll(fileUploadedGen, arbitrary[CacheMap]) {
+        case ((file, response), cache) =>
+          reset(mockUpscanConnector)
+          reset(mockDataCacheConnector)
+          when(mockDataCacheConnector.save(any[CacheMap])(any[HeaderCarrier])).thenReturn(Future.successful(CacheMap("", Map())))
+          when(mockUpscanConnector.upload(any[UploadRequest], any[TemporaryFile], any[String])).thenReturn(Future.successful(()))
 
-      val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(uploadedFile.reference)(fakeRequest.withBody(Right(form)))
+          val nextPage = routes.UploadYourFilesController.onSuccess(file.reference)
+          val updatedCache = combine(response, cache)
 
-      verify(mockUpscanConnector).upload(UploadRequest("href", Map()), filePart.ref, fileName)
-      val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
-      verify(mockDataCacheConnector).save(captor.capture())(any[HeaderCarrier])
-      val answers = captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response)
-      answers.get.files.head.filename mustBe fileName
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(nextPage.url)
+          val fileName = "file.txt"
+          val tempFile = TemporaryFile(fileName)
+
+          val filePart = FilePart[TemporaryFile](key = "file", fileName, contentType = None, ref = tempFile)
+          val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
+
+          val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Right(form)))
+
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(nextPage.url)
+
+          verify(mockUpscanConnector).upload(refEq(upscanRequest), refEq(tempFile), eqTo(fileName))
+
+          val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
+          verify(mockDataCacheConnector).save(captor.capture())(any[HeaderCarrier])
+          val answers = captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response)
+          answers.get.files.head.filename mustBe fileName
+      }
     }
 
     "redirect to the previous page" when {
@@ -198,7 +213,6 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
       val fileUploadedGen = responseGen.map {
         case (file, _) =>
           val uploadedFile = file.copy(state = Waiting(upscanRequest))
-
           (uploadedFile, FileUploadResponse(List(uploadedFile)))
       }
 
@@ -265,16 +279,13 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
       "no responses are in the cache" in {
 
-        forAll { ref: String =>
+        val filePart = FilePart[TemporaryFile](key = "file", "file.txt", contentType = None, ref = TemporaryFile("file.txt"))
+        val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
 
-          val filePart = FilePart[TemporaryFile](key = "file", "file.txt", contentType = None, ref = TemporaryFile("file.txt"))
-          val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
+        val result = controller(new FakeDataRetrievalAction(None)).onSubmit("someRef")(fakeRequest.withBody(Right(form)))
 
-          val result = controller(new FakeDataRetrievalAction(None)).onSubmit(ref)(fakeRequest.withBody(Right(form)))
-
-          status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
-        }
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
       }
 
       "file reference is not in response" in {
@@ -296,7 +307,6 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
       }
     }
   }
-
 
   ".onSuccess" should {
 
@@ -361,7 +371,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
       status(result) mustBe SEE_OTHER
 
       val captor: ArgumentCaptor[DataEvent] = ArgumentCaptor.forClass(classOf[DataEvent])
-      verify(mockAuditConnector, atLeastOnce).sendEvent(captor.capture())(any[HeaderCarrier], any[ExecutionContext])
+      verify(mockAuditConnector).sendEvent(captor.capture())(any[HeaderCarrier], any[ExecutionContext])
 
       val dataEvent = captor.getValue
       dataEvent.auditType mustBe "UploadSuccess"
