@@ -34,6 +34,6 @@ class UploadYourFilesReceiptController @Inject()(val messagesApi: MessagesApi,
                                                  implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireResponse) { implicit req =>
-    Ok(upload_your_files_receipt(req.fileUploadResponse.files.map(_.reference)))
+    Ok(upload_your_files_receipt(req.fileUploadResponse.files))
   }
 }

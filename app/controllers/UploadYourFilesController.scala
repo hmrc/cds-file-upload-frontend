@@ -25,10 +25,11 @@ import connectors.{DataCacheConnector, UpscanS3Connector}
 import controllers.actions._
 import javax.inject.Inject
 import models.requests.FileUploadResponseRequest
-import models.{FileUpload, FileUploadResponse, Uploaded, Waiting}
+import models.{FileUpload, FileUploadResponse, Uploaded, UserAnswers, Waiting}
 import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.Files.TemporaryFile
+import play.api.libs.json.Json
 import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -77,14 +78,22 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
     (authenticate andThen requireEori andThen getData andThen requireResponse)
       .async(parse.maxLength(appConfig.fileFormats.maxFileSize, parse.multipartFormData)) { implicit req =>
 
-        req.fileUploadResponse.files.find(_.reference == ref) match {
+        val files = req.fileUploadResponse.files
+
+        files.find(_.reference == ref) match {
           case Some(file) =>
             file.state match {
               case Waiting(request) =>
                 req.body match {
                   case Right(form) if form.file("file").exists(_.filename.nonEmpty) =>
+                    val filename = form.file("file").get.filename
                     upscanS3Connector
-                      .upload(request, form.file("file").get.ref, form.file("file").get.filename)
+                      .upload(request, form.file("file").get.ref, filename)
+                      .flatMap { _ =>
+                        val updatedFiles = file.copy(filename = filename) :: files.filterNot(_.reference == ref)
+                        val answers = req.userAnswers.set(HowManyFilesUploadPage.Response, FileUploadResponse(updatedFiles))
+                        dataCacheConnector.save(answers.cacheMap)
+                      }
                       .map(_ => Redirect(routes.UploadYourFilesController.onSuccess(ref)))
 
                   case Right(_) | Left(MaxSizeExceeded(_)) =>
@@ -107,7 +116,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
       files.find(_.reference == ref) match {
         case Some(file) =>
           val updatedFiles = file.copy(state = Uploaded) :: files.filterNot(_.reference == ref)
-          val answers = req.userAnswers.set(HowManyFilesUploadPage.Response, FileUploadResponse(updatedFiles))
+          val answers: UserAnswers = req.userAnswers.set(HowManyFilesUploadPage.Response, FileUploadResponse(updatedFiles))
 
           dataCacheConnector.save(answers.cacheMap).map { _ =>
             Redirect(nextPage(ref, files))
@@ -119,7 +128,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
 
   private def nextPage(ref: String, files: List[FileUpload])(implicit req: FileUploadResponseRequest[_]) = {
     val nextFileToUpload = files.collectFirst {
-      case file@FileUpload(reference, Waiting(_)) if reference > ref => file
+      case file@FileUpload(reference, Waiting(_), _) if reference > ref => file
     }
 
     nextFileToUpload match {
@@ -139,8 +148,8 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
       val eori = Map("eori" -> req.request.eori)
       val mrn = req.userAnswers.get(MrnEntryPage).fold(Map.empty[String, String])(m => Map("mrn" -> m.value))
       val numberOfFiles = req.userAnswers.get(HowManyFilesUploadPage).fold(Map.empty[String, String])(n => Map("numberOfFiles" -> s"${n.value}"))
-     //TODO      ListMap((1 to files.size).map(i => s"file$i").zip(files.map(_.reference)): _*)
-      val references = req.fileUploadResponse.files.map(_.reference).foldLeft(Map.empty[String, String]) { (refs: Map[String, String], fileRef: String) => refs + (s"file${refs.size + 1}" -> fileRef) }
+      //TODO      ListMap((1 to files.size).map(i => s"file$i").zip(files.map(_.reference)): _*)
+      val references = req.fileUploadResponse.files.map(_.reference).foldLeft(Map.empty[String, String]) { (refs: Map[String, String], fileRef: String) => refs + ("fileReference" -> fileRef) }
       contactDetails ++ eori ++ mrn ++ numberOfFiles ++ references
     }
 

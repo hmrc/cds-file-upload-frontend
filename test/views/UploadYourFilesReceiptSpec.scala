@@ -17,16 +17,15 @@
 package views
 
 import generators.Generators
+import models.FileUpload
 import org.scalacheck.Gen
 import org.scalatest.prop.PropertyChecks
 import play.twirl.api.Html
 import views.behaviours.ViewBehaviours
-import views.html.upload_your_files_receipt
 
 class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with PropertyChecks with Generators {
 
-  def view(receipts: List[String]): Html =
-    upload_your_files_receipt(receipts)(fakeRequest, messages, appConfig)
+  def view(receipts: List[FileUpload]): Html = views.html.upload_your_files_receipt(receipts)(fakeRequest, messages, appConfig)
 
   val view: () => Html = () => view(Nil)
 
@@ -48,9 +47,9 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
 
     "have title" in {
 
-      forAll { receipts: List[String] =>
+      forAll { fileUploads: List[FileUpload] =>
 
-        val doc = asDocument(view(receipts))
+        val doc = asDocument(view(fileUploads))
 
         assertEqualsMessage(doc, "title", s"$messagePrefix.title")
       }
@@ -58,21 +57,24 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
 
     "have heading" in {
 
-      forAll { receipts: List[String] =>
+      forAll { fileUploads: List[FileUpload] =>
 
-        val doc = asDocument(view(receipts))
+        val doc = asDocument(view(fileUploads))
 
-        assertH1EqualsMessage(doc, s"$messagePrefix.heading", receipts.length)
+        assertH1EqualsMessage(doc, s"$messagePrefix.heading", fileUploads.length)
       }
     }
 
     "display all receipts" in {
 
-      forAll(Gen.listOf(saneString)) { receipts: List[String] =>
+      forAll { fileUploads: List[FileUpload] =>
 
-        val doc = asDocument(view(receipts))
+        val doc = asDocument(view(fileUploads))
 
-        receipts.foreach(assertContainsText(doc, _))
+        fileUploads.foreach { fu =>
+          assertContainsText(doc, fu.filename)
+          assertContainsText(doc, fu.reference)
+        }
       }
     }
   }

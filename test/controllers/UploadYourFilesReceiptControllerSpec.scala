@@ -17,18 +17,17 @@
 package controllers
 
 import controllers.actions.{DataRetrievalAction, FileUploadResponseRequiredAction}
-import models.FileUploadResponse
+import models.{FileUpload, FileUploadResponse}
 import pages.HowManyFilesUploadPage
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
-import views.html.upload_your_files_receipt
 
 class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase {
 
   def controller(getData: DataRetrievalAction) = new UploadYourFilesReceiptController(messagesApi, new FakeAuthAction(), new FakeEORIAction(), getData, new FileUploadResponseRequiredAction(), appConfig)
 
-  def viewAsString(receipts: List[String]): String = upload_your_files_receipt(receipts)(fakeRequest, messages, appConfig).toString
+  def viewAsString(receipts: List[FileUpload]): String = views.html.upload_your_files_receipt(receipts)(fakeRequest, messages, appConfig).toString
 
   "onPageLoad" should {
 
@@ -42,7 +41,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase {
           val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad()(fakeRequest)
 
           status(result) mustBe OK
-          contentAsString(result) mustBe viewAsString(response.files.map(_.reference).sorted)
+          contentAsString(result) mustBe viewAsString(response.files.sortBy(_.reference))
         }
       }
     }

@@ -28,7 +28,7 @@ object UploadRequest {
   implicit val format = Json.format[UploadRequest]
 }
 
-case class FileUpload(reference: String, state: FileState)
+case class FileUpload(reference: String, state: FileState, filename: String = "")
 
 object FileUpload {
 

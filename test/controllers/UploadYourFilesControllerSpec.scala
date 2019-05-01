@@ -21,8 +21,7 @@ import connectors.UpscanS3Connector
 import controllers.actions.{DataRetrievalAction, FileUploadResponseRequiredAction}
 import models._
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers._
-import org.mockito.BDDMockito._
+import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito._
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen
@@ -48,14 +47,14 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
   private val mockUpscanConnector: UpscanS3Connector = mock[UpscanS3Connector]
   private val mockAuditConnector = mock[AuditConnector]
 
-  val responseGen: Gen[(FileUpload, FileUploadResponse)] =
+  private val responseGen: Gen[(FileUpload, FileUploadResponse)] =
     for {
       response <- arbitrary[FileUploadResponse]
       index <- Gen.choose(0, response.files.length - 1)
       file = response.files(index)
     } yield (file, response)
 
-  val waitingGen: Gen[(FileUpload, UploadRequest, FileUploadResponse)] =
+  private val waitingGen: Gen[(FileUpload, UploadRequest, FileUploadResponse)] =
     responseGen.flatMap {
       case (file, response) =>
         arbitrary[Waiting].map { waiting =>
@@ -78,17 +77,6 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
       mockAuditConnector,
       appConfig,
       mockMaterializer)
-
-  def viewAsString(reference: String, refPosition: Position): String =
-    upload_your_files(reference, refPosition)(fakeRequest, messages, appConfig).toString
-
-  private def combine(response: FileUploadResponse, cache: CacheMap): CacheMap =
-    cache.copy(data = cache.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))
-
-  private def nextRef(ref: String, refs: List[String]): String = {
-    val index = refs.sorted.indexOf(ref)
-    refs.sorted.drop(index + 1).headOption.getOrElse("receipt")
-  }
 
   ".onPageLoad" should {
 
@@ -177,37 +165,35 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
   ".onSubmit" should {
 
-    "upload to upscan & redirect to next page" when {
+    "upload to upscan, save the filename and redirect to next page when file is valid" in {
 
       val upscanRequest = UploadRequest("href", Map())
       val fileUploadedGen = responseGen.map {
         case (file, _) =>
           val uploadedFile = file.copy(state = Waiting(upscanRequest))
-
           (uploadedFile, FileUploadResponse(List(uploadedFile)))
       }
 
-      "file is valid" in {
+      forAll(fileUploadedGen, arbitrary[CacheMap]) {
+        case ((file, response), cache) =>
+          reset(mockUpscanConnector)
+          when(mockUpscanConnector.upload(any[UploadRequest], any[TemporaryFile], any[String])).thenReturn(Future.successful(()))
 
-        forAll(fileUploadedGen, arbitrary[CacheMap]) {
-          case ((file, response), cache) =>
-            reset(mockUpscanConnector)
-            given(mockUpscanConnector.upload(any[UploadRequest], any[TemporaryFile], any[String])) willReturn Future.successful((): Unit)
+          val nextPage = routes.UploadYourFilesController.onSuccess(file.reference)
+          val updatedCache = combine(response, cache)
 
-            val nextPage = routes.UploadYourFilesController.onSuccess(file.reference)
-            val updatedCache = combine(response, cache)
+          val fileName = "file.txt"
+          val tempFile = TemporaryFile(fileName)
 
+          val filePart = FilePart[TemporaryFile](key = "file", fileName, contentType = None, ref = tempFile)
+          val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
 
-            val filePart = FilePart[TemporaryFile](key = "file", "file.txt", contentType = None, ref = TemporaryFile("file.txt"))
-            val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
+          val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Right(form)))
 
-            val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Right(form)))
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(nextPage.url)
 
-            status(result) mustBe SEE_OTHER
-            redirectLocation(result) mustBe Some(nextPage.url)
-
-            verify(mockUpscanConnector).upload(refEq(upscanRequest), any[TemporaryFile], any[String])
-        }
+          verify(mockUpscanConnector).upload(refEq(upscanRequest), refEq(tempFile), eqTo(fileName))
       }
     }
 
@@ -342,7 +328,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
           val updatedCache = combine(response, cache)
           val result = controller(fakeDataRetrievalAction(updatedCache)).onSuccess(file.reference)(fakeRequest)
-          val next = nextRef(file.reference, response.files.collect { case file@FileUpload(_, Waiting(_)) => file.reference })
+          val next = nextRef(file.reference, response.files.collect { case FileUpload(reference, Waiting(_), _) => reference })
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad(next).url)
@@ -417,5 +403,15 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
     }
   }
 
-  private def referencesMap(files: List[FileUpload]): Map[String, String] = ListMap((1 to files.size).map(i => s"file$i").zip(files.map(_.reference)): _*)
+  private def viewAsString(reference: String, refPosition: Position) = upload_your_files(reference, refPosition)(fakeRequest, messages, appConfig).toString
+
+  private def combine(response: FileUploadResponse, cache: CacheMap) =
+    cache.copy(data = cache.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))
+
+  private def nextRef(ref: String, refs: List[String]) = {
+    val index = refs.sorted.indexOf(ref)
+    refs.sorted.drop(index + 1).headOption.getOrElse("receipt")
+  }
+
+  private def referencesMap(files: List[FileUpload]): Map[String, String] = ListMap((1 to files.size).map(i => "fileReference").zip(files.map(_.reference)): _*)
 }
