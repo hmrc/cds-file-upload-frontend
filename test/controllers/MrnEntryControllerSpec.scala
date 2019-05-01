@@ -16,17 +16,13 @@
 
 package controllers
 
-import controllers.actions.{ContactDetailsRequiredAction, FakeActions}
+import controllers.actions.ContactDetailsRequiredAction
 import forms.MRNFormProvider
-import generators.Generators
 import models.requests.SignedInUser
 import models.{ContactDetails, MRN}
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito._
 import org.scalacheck.Arbitrary._
-import org.scalatest.BeforeAndAfterEach
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.prop.PropertyChecks
 import pages.MrnEntryPage
 import play.api.data.Form
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -35,13 +31,7 @@ import play.api.test.Helpers.{status, _}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 
-
-class MrnEntryControllerSpec extends ControllerSpecBase
-  with MockitoSugar
-  with PropertyChecks
-  with Generators
-  with FakeActions
-  with BeforeAndAfterEach {
+class MrnEntryControllerSpec extends ControllerSpecBase {
 
   val form = new MRNFormProvider()()
 

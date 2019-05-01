@@ -18,8 +18,7 @@ package controllers
 
 import akka.stream.Materializer
 import connectors.UpscanS3Connector
-import controllers.actions.{DataRetrievalAction, FakeActions, FileUploadResponseRequiredAction}
-import generators.Generators
+import controllers.actions.{DataRetrievalAction, FileUploadResponseRequiredAction}
 import models._
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers._
@@ -27,9 +26,6 @@ import org.mockito.BDDMockito._
 import org.mockito.Mockito._
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.prop.PropertyChecks
 import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
 import play.api.libs.Files.TemporaryFile
 import play.api.libs.json.Json
@@ -46,25 +42,20 @@ import scala.collection.immutable.ListMap
 import scala.concurrent.{ExecutionContext, Future}
 
 
-class UploadYourFilesControllerSpec extends ControllerSpecBase
-  with ScalaFutures
-  with MockitoSugar
-  with PropertyChecks
-  with Generators
-  with FakeActions {
+class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
   private val mockMaterializer: Materializer = mock[Materializer]
   private val mockUpscanConnector: UpscanS3Connector = mock[UpscanS3Connector]
   private val mockAuditConnector = mock[AuditConnector]
 
-  val responseGen: Gen[(File, FileUploadResponse)] =
+  val responseGen: Gen[(FileUpload, FileUploadResponse)] =
     for {
       response <- arbitrary[FileUploadResponse]
       index <- Gen.choose(0, response.files.length - 1)
       file = response.files(index)
     } yield (file, response)
 
-  val waitingGen: Gen[(File, UploadRequest, FileUploadResponse)] =
+  val waitingGen: Gen[(FileUpload, UploadRequest, FileUploadResponse)] =
     responseGen.flatMap {
       case (file, response) =>
         arbitrary[Waiting].map { waiting =>
@@ -351,7 +342,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
 
           val updatedCache = combine(response, cache)
           val result = controller(fakeDataRetrievalAction(updatedCache)).onSuccess(file.reference)(fakeRequest)
-          val next = nextRef(file.reference, response.files.collect { case file@File(_, Waiting(_)) => file.reference })
+          val next = nextRef(file.reference, response.files.collect { case file@FileUpload(_, Waiting(_)) => file.reference })
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad(next).url)
@@ -360,9 +351,9 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
 
     "audit upload success" in {
 
-      val file1 = File("fileRef1", Waiting(UploadRequest("some href", Map.empty)))
-      val file2 = File("fileRef2", Waiting(UploadRequest("some other href", Map.empty)))
-      val lastFile = File("fileRef3", Waiting(UploadRequest("another href", Map.empty)))
+      val file1 = FileUpload("fileRef1", Waiting(UploadRequest("some href", Map.empty)))
+      val file2 = FileUpload("fileRef2", Waiting(UploadRequest("some other href", Map.empty)))
+      val lastFile = FileUpload("fileRef3", Waiting(UploadRequest("another href", Map.empty)))
       val response = FileUploadResponse(List(file1, file2, lastFile))
 
       val Some(mrn) = MRN("34GB1234567ABCDEFG")
@@ -426,5 +417,5 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase
     }
   }
 
-  private def referencesMap(files: List[File]): Map[String, String] = ListMap((1 to files.size).map(i => s"file$i").zip(files.map(_.reference)): _*)
+  private def referencesMap(files: List[FileUpload]): Map[String, String] = ListMap((1 to files.size).map(i => s"file$i").zip(files.map(_.reference)): _*)
 }

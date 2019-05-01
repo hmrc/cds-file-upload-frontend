@@ -32,10 +32,7 @@ import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AuthActionSpec extends ControllerSpecBase
-  with PropertyChecks
-  with MockitoSugar
-  with SignedInUserGen {
+class AuthActionSpec extends ControllerSpecBase with SignedInUserGen {
 
   lazy val conf = app.injector.instanceOf[Configuration]
   lazy val env  = app.injector.instanceOf[Environment]

@@ -18,9 +18,8 @@ package models
 
 import base.SpecBase
 import org.scalacheck.Gen
-import org.scalatest.prop.PropertyChecks
 
-class FileUploadCountSpec extends SpecBase with PropertyChecks {
+class FileUploadCountSpec extends SpecBase {
 
   val fileUploadNumber: Gen[Int] = Gen.chooseNum(-100, 100)
 

@@ -16,37 +16,27 @@
 
 package controllers
 
-import controllers.actions.{DataRetrievalAction, FakeActions}
+import controllers.actions.DataRetrievalAction
 import forms.mappings.ContactDetailsMapping._
-import generators.Generators
 import models._
 import models.requests.SignedInUser
-import org.mockito.ArgumentMatchers.{eq =>eqTo, _}
+import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito.{times, verify}
 import org.scalacheck.Arbitrary._
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.prop.PropertyChecks
 import pages.ContactDetailsPage
 import play.api.data.Form
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
-import views.html.contact_details
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 
-class ContactDetailsControllerSpec extends ControllerSpecBase
-  with ScalaFutures
-  with MockitoSugar
-  with PropertyChecks
-  with Generators
-  with FakeActions {
+class ContactDetailsControllerSpec extends ControllerSpecBase {
 
-  val form = Form(contactDetailsMapping)
+  private val form = Form(contactDetailsMapping)
 
-  def view(form: Form[ContactDetails] = form): String = contact_details(form)(fakeRequest, messages, appConfig).toString
+  def view(form: Form[ContactDetails] = form): String = views.html.contact_details(form)(fakeRequest, messages, appConfig).toString
 
   def controller(signedInUser: SignedInUser, eori: String, dataRetrieval: DataRetrievalAction = new FakeDataRetrievalAction(None)) =
     new ContactDetailsController(

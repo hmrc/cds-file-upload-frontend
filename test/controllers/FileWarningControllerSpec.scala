@@ -16,19 +16,11 @@
 
 package controllers
 
-import controllers.actions.FakeActions
-import generators.Generators
 import models.requests.SignedInUser
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.prop.PropertyChecks
-import views.html.file_warning
 import play.api.test.Helpers._
+import views.html.file_warning
 
-class FileWarningControllerSpec extends ControllerSpecBase
-  with MockitoSugar
-  with FakeActions
-  with PropertyChecks
-  with Generators {
+class FileWarningControllerSpec extends ControllerSpecBase {
 
   def controller(signedInUser: SignedInUser, eori: String) =
     new FileWarningController(messagesApi, new FakeAuthAction(signedInUser), new FakeEORIAction(eori), appConfig)

@@ -20,7 +20,7 @@ import base.SpecBase
 import generators.Generators
 import org.scalatest.prop.PropertyChecks
 
-class FileUploadRequestSpec extends SpecBase with XmlBehaviours with PropertyChecks with Generators {
+class FileUploadRequestSpec extends SpecBase with XmlBehaviours {
 
   ".toXml" should {
     "pass schema validation" in {

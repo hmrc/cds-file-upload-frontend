@@ -18,7 +18,7 @@ package models
 
 import play.api.libs.json.Json
 
-case class BatchFileUpload(mrn: MRN, files: List[File])
+case class BatchFileUpload(mrn: MRN, files: List[FileUpload])
 
 object BatchFileUpload {
   implicit val formats = Json.format[BatchFileUpload]

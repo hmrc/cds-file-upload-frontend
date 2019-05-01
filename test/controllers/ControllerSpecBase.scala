@@ -36,7 +36,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
 
-abstract class ControllerSpecBase extends SpecBase with MockitoSugar with FakeActions with BeforeAndAfterEach {
+abstract class ControllerSpecBase extends SpecBase with FakeActions {
 
   lazy val mockAuthConnector: AuthConnector = mock[AuthConnector]
   lazy val mockDataCacheConnector: DataCacheConnector = mock[DataCacheConnector]

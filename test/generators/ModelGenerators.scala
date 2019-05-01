@@ -55,7 +55,7 @@ trait ModelGenerators extends SignedInUserGen with OptionValues {
     Arbitrary {
       for {
         i     <- Gen.choose(1, 10)
-        files <- Gen.listOfN(i, arbitrary[File])
+        files <- Gen.listOfN(i, arbitrary[FileUpload])
       } yield {
         FileUploadResponse(files)
       }
@@ -68,13 +68,13 @@ trait ModelGenerators extends SignedInUserGen with OptionValues {
       oneOf(List(arbitrary[Waiting], const(Uploaded), const(Successful), const(Failed), const(VirusDetected), const(UnacceptableMimeType)))
     }
 
-  implicit val arbitraryFile: Arbitrary[File] =
+  implicit val arbitraryFile: Arbitrary[FileUpload] =
     Arbitrary {
       for {
         ref       <- saneString
         fileState <- arbitrary[FileState]
       } yield {
-        File(ref, fileState)
+        FileUpload(ref, fileState)
       }
     }
 

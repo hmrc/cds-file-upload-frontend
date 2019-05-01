@@ -25,7 +25,7 @@ import connectors.{DataCacheConnector, UpscanS3Connector}
 import controllers.actions._
 import javax.inject.Inject
 import models.requests.FileUploadResponseRequest
-import models.{File, FileUploadResponse, Uploaded, Waiting}
+import models.{FileUpload, FileUploadResponse, Uploaded, Waiting}
 import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.Files.TemporaryFile
@@ -37,6 +37,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{Audit, DataEvent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
+import scala.collection.immutable.ListMap
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -116,9 +117,9 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
       }
     }
 
-  private def nextPage(ref: String, files: List[File])(implicit req: FileUploadResponseRequest[_]) = {
+  private def nextPage(ref: String, files: List[FileUpload])(implicit req: FileUploadResponseRequest[_]) = {
     val nextFileToUpload = files.collectFirst {
-      case file@File(reference, Waiting(_)) if reference > ref => file
+      case file@FileUpload(reference, Waiting(_)) if reference > ref => file
     }
 
     nextFileToUpload match {
@@ -138,6 +139,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
       val eori = Map("eori" -> req.request.eori)
       val mrn = req.userAnswers.get(MrnEntryPage).fold(Map.empty[String, String])(m => Map("mrn" -> m.value))
       val numberOfFiles = req.userAnswers.get(HowManyFilesUploadPage).fold(Map.empty[String, String])(n => Map("numberOfFiles" -> s"${n.value}"))
+     //TODO      ListMap((1 to files.size).map(i => s"file$i").zip(files.map(_.reference)): _*)
       val references = req.fileUploadResponse.files.map(_.reference).foldLeft(Map.empty[String, String]) { (refs: Map[String, String], fileRef: String) => refs + (s"file${refs.size + 1}" -> fileRef) }
       contactDetails ++ eori ++ mrn ++ numberOfFiles ++ references
     }
@@ -154,7 +156,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
     )
   }
 
-  private def nextFile(file: File): Call = routes.UploadYourFilesController.onPageLoad(file.reference)
+  private def nextFile(file: FileUpload): Call = routes.UploadYourFilesController.onPageLoad(file.reference)
 
   private def getPosition(ref: String, refs: List[String]) = refs match {
     case head :: tail if head == ref => First(refs.size)

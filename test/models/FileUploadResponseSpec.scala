@@ -24,10 +24,10 @@ import org.scalacheck.Gen
 import org.scalacheck.Gen._
 import org.scalatest.prop.PropertyChecks
 
-class FileUploadResponseSpec extends SpecBase with XmlBehaviours with PropertyChecks with Generators {
+class FileUploadResponseSpec extends SpecBase with XmlBehaviours {
 
-  val fileGen: Gen[File] = arbitrary[File].flatMap(file => arbitrary[Waiting].map(waiting => file.copy(state = waiting)))
-  val responseGen: Gen[FileUploadResponse] =
+  private val fileGen: Gen[FileUpload] = arbitrary[FileUpload].flatMap(file => arbitrary[Waiting].map(waiting => file.copy(state = waiting)))
+  private val responseGen: Gen[FileUploadResponse] =
     listOfN(10, fileGen).map(files => FileUploadResponse(files))
 
   ".fromXml" should {

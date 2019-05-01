@@ -28,24 +28,24 @@ object UploadRequest {
   implicit val format = Json.format[UploadRequest]
 }
 
-case class File(reference: String, state: FileState)
+case class FileUpload(reference: String, state: FileState)
 
-object File {
+object FileUpload {
 
-  implicit val format = Json.format[File]
+  implicit val format = Json.format[FileUpload]
 }
 
-sealed abstract case class FileUploadResponse(files: List[File])
+sealed abstract case class FileUploadResponse(files: List[FileUpload])
 
 object FileUploadResponse {
 
-  def apply(files: List[File]): FileUploadResponse =
+  def apply(files: List[FileUpload]): FileUploadResponse =
     new FileUploadResponse(files.sortBy(_.reference)) {}
 
   implicit val format = Json.format[FileUploadResponse]
 
   def fromXml(xml: Elem): FileUploadResponse = {
-    val files: List[File] = (xml \ "Files" \ "_").theSeq.collect {
+    val files: List[FileUpload] = (xml \ "Files" \ "_").theSeq.collect {
       case file =>
         val reference = (file \ "Reference").text.trim
         val href = (file \ "UploadRequest" \ "Href").text.trim
@@ -55,7 +55,7 @@ object FileUploadResponse {
             .map(field => field.label -> field.text.trim)
             .toMap
 
-        File(reference, Waiting(UploadRequest(href, fields)))
+        FileUpload(reference, Waiting(UploadRequest(href, fields)))
     }.toList
 
     FileUploadResponse(files)

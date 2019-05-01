@@ -16,11 +16,10 @@
 
 package controllers
 
-import org.scalatest.concurrent.ScalaFutures
-import views.html.unauthorised
 import play.api.test.Helpers._
+import views.html.unauthorised
 
-class UnauthorisedControllerSpec extends ControllerSpecBase with ScalaFutures {
+class UnauthorisedControllerSpec extends ControllerSpecBase {
 
   lazy val view = unauthorised()(fakeRequest, messages, appConfig)
   def controller = new UnauthorisedController(messagesApi, appConfig)

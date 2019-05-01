@@ -30,7 +30,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
 
-class DataRetrievalActionSpec extends SpecBase with MockitoSugar with ScalaFutures with PropertyChecks with SignedInUserGen {
+class DataRetrievalActionSpec extends SpecBase with SignedInUserGen {
 
   class Harness(dataCacheConnector: DataCacheConnector) extends DataRetrievalActionImpl(dataCacheConnector) {
     def callTransform[A](request: EORIRequest[A]): Future[OptionalDataRequest[A]] = transform(request)

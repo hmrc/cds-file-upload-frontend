@@ -18,7 +18,6 @@ package controllers
 
 import controllers.actions._
 import forms.FileUploadCountProvider
-import generators.Generators
 import models._
 import models.requests.SignedInUser
 import org.mockito.ArgumentCaptor
@@ -26,9 +25,6 @@ import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito._
 import org.scalacheck.Arbitrary._
 import org.scalacheck.{Arbitrary, Gen}
-import org.scalatest.BeforeAndAfterEach
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.prop.PropertyChecks
 import pages.{HowManyFilesUploadPage, MrnEntryPage}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.{JsNumber, JsString}
@@ -41,20 +37,14 @@ import views.DomAssertions
 
 import scala.concurrent.Future
 
-class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssertions
-  with MockitoSugar
-  with PropertyChecks
-  with Generators
-  with FakeActions
-  with BeforeAndAfterEach {
+class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssertions {
 
   type UserInfo = (SignedInUser, String)
 
   def zip[A, B](ga: Gen[A], gb: Gen[B]): Gen[(A, B)] =
     ga.flatMap(a => gb.map(b => (a, b)))
 
-  implicit val arbitraryUserInfo: Arbitrary[UserInfo] =
-    Arbitrary(zip(userGen, arbitrary[String]))
+  implicit val arbitraryUserInfo: Arbitrary[UserInfo] = Arbitrary(zip(userGen, arbitrary[String]))
 
   implicit val arbitraryMrnCacheMap: Arbitrary[CacheMap] =
     Arbitrary {
@@ -78,9 +68,6 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
     }
 
   private val fakeContactDetailsRequiredAction = arbitraryFakeContactDetailsActions.arbitrary.retryUntil(_ => true).sample.get
-
-  val form = new FileUploadCountProvider()()
-
   private val mockCustomsDeclarationsService = mock[CustomsDeclarationsService]
   private val mockWSResponse = mock[WSResponse]
 
@@ -90,7 +77,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
     when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(FileUploadResponse(List())))
   }
 
-  def controller(contactDetailsRequiredAction: ContactDetailsRequiredAction) =
+  private def controller(contactDetailsRequiredAction: ContactDetailsRequiredAction) =
     new HowManyFilesUploadController(
       messagesApi,
       new FakeAuthAction(),
@@ -160,9 +147,9 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
 
     "return an ok and save to the data cache when valid data is submitted" in {
       val fileUploadResponse = FileUploadResponse(List(
-        File("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> "")))),
-        File("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> "")))),
-        File("someFileRef3", Waiting(UploadRequest("http://s3bucket/myfile3", Map("" -> ""))))
+        FileUpload("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> "")))),
+        FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> "")))),
+        FileUpload("someFileRef3", Waiting(UploadRequest("http://s3bucket/myfile3", Map("" -> ""))))
       ))
       val fileUploadsAfterContactDetails = fileUploadResponse.files.tail
 

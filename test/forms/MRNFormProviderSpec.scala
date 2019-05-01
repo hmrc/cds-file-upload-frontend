@@ -23,10 +23,10 @@ import org.scalatest.prop.PropertyChecks
 import play.api.data.Form
 import wolfendale.scalacheck.regexp.RegexpGen
 
-class MRNFormProviderSpec extends SpecBase with PropertyChecks {
+class MRNFormProviderSpec extends SpecBase {
 
-  val validMRNGen: Gen[String] = RegexpGen.from(MRN.validRegex)
-  val form: Form[MRN] = new MRNFormProvider()()
+  val validMRNGen = RegexpGen.from(MRN.validRegex)
+  val form = new MRNFormProvider()()
 
   val errorMessage: Form[_] => String = _.errors.map(_.message).headOption.getOrElse("")
 

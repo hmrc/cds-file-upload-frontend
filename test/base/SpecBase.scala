@@ -17,6 +17,11 @@
 package base
 
 import config.AppConfig
+import generators.Generators
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.mockito.MockitoSugar
+import org.scalatest.prop.PropertyChecks
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice._
 import play.api.i18n.{Messages, MessagesApi}
@@ -24,7 +29,7 @@ import play.api.inject.Injector
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
-trait SpecBase extends PlaySpec with GuiceOneAppPerSuite {
+trait SpecBase extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar with BeforeAndAfterEach with PropertyChecks with Generators with ScalaFutures {
 
   lazy val injector: Injector = app.injector
 

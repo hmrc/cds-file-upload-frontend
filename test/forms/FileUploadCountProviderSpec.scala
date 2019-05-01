@@ -24,10 +24,9 @@ import play.api.data.Form
 
 class FileUploadCountProviderSpec extends SpecBase with PropertyChecks {
 
-  val validFileUploadCountGen: Gen[Int] = Gen.chooseNum(1, 10)
-  val form: Form[FileUploadCount] = new FileUploadCountProvider()()
-
-  val errorMessage: Form[_] => String = _.errors.map(_.message).headOption.getOrElse("")
+  private val validFileUploadCountGen = Gen.chooseNum(1, 10)
+  private val form = new FileUploadCountProvider()()
+  private val errorMessage: Form[_] => String = _.errors.map(_.message).headOption.getOrElse("")
 
   "formProvider" should {
 
