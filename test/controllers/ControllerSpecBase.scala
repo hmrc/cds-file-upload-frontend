@@ -25,12 +25,10 @@ import models.ContactDetails
 import models.requests.SignedInUser
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, when}
-import org.scalatest.BeforeAndAfterEach
-import org.scalatest.mockito.MockitoSugar
 import services.UploadContactDetails
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
 import uk.gov.hmrc.auth.core.retrieve.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 
@@ -38,9 +36,9 @@ import scala.concurrent.Future
 
 abstract class ControllerSpecBase extends SpecBase with FakeActions {
 
-  lazy val mockAuthConnector: AuthConnector = mock[AuthConnector]
-  lazy val mockDataCacheConnector: DataCacheConnector = mock[DataCacheConnector]
-  lazy val mockUploadContactDetails: UploadContactDetails = mock[UploadContactDetails]
+  val mockAuthConnector: AuthConnector = mock[AuthConnector]
+  val mockDataCacheConnector: DataCacheConnector = mock[DataCacheConnector]
+  val mockUploadContactDetails: UploadContactDetails = mock[UploadContactDetails]
 
   def withSignedInUser(user: SignedInUser)(test: => Unit): Unit = {
     when(
@@ -68,8 +66,7 @@ abstract class ControllerSpecBase extends SpecBase with FakeActions {
     when(mockDataCacheConnector.save(any[CacheMap])(any[HeaderCarrier])).thenReturn(Future.successful(CacheMap("", Map())))
   }
 
-  val escaped: String => String =
-    URLEncoder.encode(_, "utf-8")
+  val escaped: String => String = URLEncoder.encode(_, "utf-8")
 
   def fakeContactDetailsRequiredAction(cacheMap: CacheMap, contactDetails: ContactDetails): ContactDetailsRequiredAction =
     new FakeContactDetailsRequiredAction(cacheMap, contactDetails)

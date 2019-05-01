@@ -54,16 +54,20 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
       file = response.files(index)
     } yield (file, response)
 
-  private val waitingGen: Gen[(FileUpload, UploadRequest, FileUploadResponse)] =
-    responseGen.flatMap {
-      case (file, response) =>
-        arbitrary[Waiting].map { waiting =>
-          val uploadedFile = file.copy(state = waiting)
-          val updatedFiles = uploadedFile :: response.files.filterNot(_ == file)
+  private val waitingGen: Gen[(FileUpload, UploadRequest, FileUploadResponse)] = responseGen.flatMap {
+    case (file, response) =>
+      arbitrary[Waiting].map { waiting =>
+        val uploadedFile = file.copy(state = waiting)
+        val updatedFiles = uploadedFile :: response.files.filterNot(_ == file)
 
-          (uploadedFile, waiting.uploadRequest, FileUploadResponse(updatedFiles))
-        }
-    }
+        (uploadedFile, waiting.uploadRequest, FileUploadResponse(updatedFiles))
+      }
+  }
+
+  override def beforeEach = {
+    super.beforeEach
+    reset(mockMaterializer, mockUpscanConnector, mockAuditConnector)
+  }
 
   def controller(getData: DataRetrievalAction) =
     new UploadYourFilesController(
@@ -167,34 +171,26 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
     "upload to upscan, save the filename and redirect to next page when file is valid" in {
 
-      val upscanRequest = UploadRequest("href", Map())
-      val fileUploadedGen = responseGen.map {
-        case (file, _) =>
-          val uploadedFile = file.copy(state = Waiting(upscanRequest))
-          (uploadedFile, FileUploadResponse(List(uploadedFile)))
-      }
+      val fileName = "file.txt"
+      val uploadedFile = FileUpload("someref", Waiting(UploadRequest("href", Map())), fileName)
+      val uploadResponse = FileUploadResponse(List(uploadedFile))
 
-      forAll(fileUploadedGen, arbitrary[CacheMap]) {
-        case ((file, response), cache) =>
-          reset(mockUpscanConnector)
-          when(mockUpscanConnector.upload(any[UploadRequest], any[TemporaryFile], any[String])).thenReturn(Future.successful(()))
+      when(mockUpscanConnector.upload(any[UploadRequest], any[TemporaryFile], any[String])).thenReturn(Future.successful(()))
+      val nextPage = routes.UploadYourFilesController.onSuccess(uploadedFile.reference)
+      val updatedCache = combine(uploadResponse, CacheMap("id", Map.empty))
+      val tempFile = TemporaryFile()
+      val filePart = FilePart[TemporaryFile](key = "file", fileName, contentType = None, ref = tempFile)
+      val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
 
-          val nextPage = routes.UploadYourFilesController.onSuccess(file.reference)
-          val updatedCache = combine(response, cache)
+      val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(uploadedFile.reference)(fakeRequest.withBody(Right(form)))
 
-          val fileName = "file.txt"
-          val tempFile = TemporaryFile(fileName)
-
-          val filePart = FilePart[TemporaryFile](key = "file", fileName, contentType = None, ref = tempFile)
-          val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
-
-          val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Right(form)))
-
-          status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(nextPage.url)
-
-          verify(mockUpscanConnector).upload(refEq(upscanRequest), refEq(tempFile), eqTo(fileName))
-      }
+      verify(mockUpscanConnector).upload(UploadRequest("href", Map()), filePart.ref, fileName)
+      val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
+      verify(mockDataCacheConnector).save(captor.capture())(any[HeaderCarrier])
+      val answers = captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response)
+      answers.get.files.head.filename mustBe fileName
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(nextPage.url)
     }
 
     "redirect to the previous page" when {
