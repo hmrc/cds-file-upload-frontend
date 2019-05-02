@@ -57,12 +57,13 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
     (authenticate andThen requireEori andThen getData andThen requireResponse) { implicit req =>
 
       val references = req.fileUploadResponse.files.map(_.reference)
+      val filenames = req.fileUploadResponse.files.map(_.filename).filter(_.nonEmpty)
       val refPosition = getPosition(ref, references)
 
       req.fileUploadResponse.files.find(_.reference == ref) match {
         case Some(file) =>
           file.state match {
-            case Waiting(_) => Ok(views.html.upload_your_files(ref, refPosition))
+            case Waiting(_) => Ok(views.html.upload_your_files(ref, refPosition, filenames))
             case _ => Redirect(nextPage(file.reference, req.fileUploadResponse.files))
           }
 

@@ -29,7 +29,7 @@ import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
 import play.api.libs.Files.TemporaryFile
 import play.api.libs.json.Json
 import play.api.mvc.MultipartFormData.FilePart
-import play.api.mvc.{Flash, MaxSizeExceeded, MultipartFormData}
+import play.api.mvc.{MaxSizeExceeded, MultipartFormData}
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -99,14 +99,13 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
         forAll(waitingGen, arbitrary[CacheMap]) {
           case ((file, _, response), cacheMap) =>
 
-            val refPosition: Position =
-              nextPosition(file.reference, response.files.map(_.reference))
+            val refPosition: Position = nextPosition(file.reference, response.files.map(_.reference))
 
             val updatedCache = combine(response, cacheMap)
             val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad(file.reference)(fakeRequest)
 
             status(result) mustBe OK
-            contentAsString(result) mustBe viewAsString(file.reference, refPosition, fakeRequest.flash)
+            contentAsString(result) mustBe viewAsString(file.reference, refPosition, List.empty)
         }
       }
     }
@@ -409,7 +408,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
     }
   }
 
-  private def viewAsString(reference: String, refPosition: Position, flash: Flash) = upload_your_files(reference, refPosition)(fakeRequest, messages, appConfig, flash).toString
+  private def viewAsString(reference: String, refPosition: Position, filenames: List[String]) = upload_your_files(reference, refPosition, filenames)(fakeRequest, messages, appConfig, fakeRequest.flash).toString
 
   private def combine(response: FileUploadResponse, cache: CacheMap) =
     cache.copy(data = cache.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))
