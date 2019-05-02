@@ -29,7 +29,7 @@ import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
 import play.api.libs.Files.TemporaryFile
 import play.api.libs.json.Json
 import play.api.mvc.MultipartFormData.FilePart
-import play.api.mvc.{MaxSizeExceeded, MultipartFormData}
+import play.api.mvc.{Flash, MaxSizeExceeded, MultipartFormData}
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -106,7 +106,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
             val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad(file.reference)(fakeRequest)
 
             status(result) mustBe OK
-            contentAsString(result) mustBe viewAsString(file.reference, refPosition)
+            contentAsString(result) mustBe viewAsString(file.reference, refPosition, fakeRequest.flash)
         }
       }
     }
@@ -409,7 +409,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
     }
   }
 
-  private def viewAsString(reference: String, refPosition: Position) = upload_your_files(reference, refPosition)(fakeRequest, messages, appConfig).toString
+  private def viewAsString(reference: String, refPosition: Position, flash: Flash) = upload_your_files(reference, refPosition)(fakeRequest, messages, appConfig, flash).toString
 
   private def combine(response: FileUploadResponse, cache: CacheMap) =
     cache.copy(data = cache.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))

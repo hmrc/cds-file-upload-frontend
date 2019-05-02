@@ -49,6 +49,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
                                           implicit val appConfig: AppConfig,
                                           implicit val mat: Materializer) extends FrontendController with I18nSupport {
 
+  private val MaxFileSizeInMB = appConfig.fileFormats.maxFileSizeMb
   private val auditSource = appConfig.appName
   private val audit = Audit(auditSource, auditConnector)
 
@@ -71,7 +72,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
 
   def onSubmit(ref: String): Action[Either[MaxSizeExceeded, MultipartFormData[TemporaryFile]]] =
     (authenticate andThen requireEori andThen getData andThen requireResponse)
-      .async(parse.maxLength(appConfig.fileFormats.maxFileSize, parse.multipartFormData)) { implicit req =>
+      .async(parse.maxLength(MaxFileSizeInMB * 1024 * 1024, parse.multipartFormData)) { implicit req =>
 
         val files = req.fileUploadResponse.files
 
@@ -91,7 +92,9 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
                       }
                       .map(_ => Redirect(routes.UploadYourFilesController.onSuccess(ref)))
 
-                  case Right(_) | Left(MaxSizeExceeded(_)) =>
+                  case Left(MaxSizeExceeded(_)) =>
+                    Future.successful(Redirect(routes.UploadYourFilesController.onPageLoad(ref)).flashing("fileSizeError" -> messagesApi.apply("fileUploadPage.validation.filesize", MaxFileSizeInMB)))
+                  case _ =>
                     Future.successful(Redirect(routes.UploadYourFilesController.onPageLoad(ref)))
                 }
 
@@ -102,6 +105,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
           case None => Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
         }
       }
+
 
   def onSuccess(ref: String): Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>

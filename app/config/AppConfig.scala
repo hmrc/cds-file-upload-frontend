@@ -19,8 +19,6 @@ package config
 import models.EORI
 import pureconfig.{CamelCase, ConfigFieldMapping, KebabCase, ProductHint}
 
-import scala.concurrent.duration.Duration
-
 case class AppConfig(
   appName: String,
   developerHubClientId: String,
@@ -73,4 +71,4 @@ case class Keystore(protocol: String = "https", host: String, port: Int, default
   lazy val baseUri: String = s"$protocol://$host:$port"
 }
 
-case class FileFormats(maxFileSize: Int, approvedFileTypes: String)
+case class FileFormats(maxFileSizeMb: Int, approvedFileTypes: String)

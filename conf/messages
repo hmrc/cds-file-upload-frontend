@@ -85,7 +85,7 @@ fileUploadPage.listItem5=MS Excel spreadsheet (.xls or .xlsx)
 fileUploadPage.filesUploaded=You have uploaded {0} of {1} files
 fileUploadPage.validation.required=You must choose a file to upload
 fileUploadPage.validation.accept=The file you have chosen is not a permitted file type
-fileUploadPage.validation.filesize=The file you have chosen is bigger than 10MB and is not permitted
+fileUploadPage.validation.filesize=The file you have chosen is bigger than {0}MB and is not permitted
 fileUploadPage.paragraph1=Ensure that you select the correct documents as requested by HMRC.
 fileUploadPage.button=Upload a document
 
