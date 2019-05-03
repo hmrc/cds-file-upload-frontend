@@ -154,7 +154,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       val fileUploadsAfterContactDetails = fileUploadResponse.files.tail
 
       when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
-      when(mockUploadContactDetails.apply(any(), any())).thenReturn(Future.successful(()))
+      when(mockUploadContactDetails.upload(any(), any())).thenReturn(Right(Future.successful(())))
       when(mockDataCacheConnector.save(any())(any[HeaderCarrier])).thenReturn(Future.successful(CacheMap("", Map.empty)))
       val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2")
 
@@ -170,6 +170,28 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response) mustBe Some(FileUploadResponse(fileUploadResponse.files.tail))
     }
 
+    "redirect to error page when contact details upload fails" in {
+
+      val fileUploadResponse = FileUploadResponse(List(
+        FileUpload("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> "")))),
+        FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> ""))))
+      ))
+      reset(mockUploadContactDetails)
+      when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
+      when(mockUploadContactDetails.upload(any(), any())).thenReturn(Left(new IllegalStateException()))
+
+
+      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2")
+
+
+      val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
+      status(result) mustBe SEE_OTHER
+
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(s"/cds-file-upload-service/this-service-has-been-reset")
+
+    }
+
     "make a request to customs declarations" in {
       val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2")
       await(controller(fakeContactDetailsRequiredAction).onSubmit(postRequest))
@@ -178,4 +200,5 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       verify(mockCustomsDeclarationsService).batchFileUpload(any(), eqTo(fakeContactDetailsRequiredAction.cacheMap.getEntry[MRN](MrnEntryPage).get), eqTo(fileUploadCount))(any())
     }
   }
+
 }

@@ -21,8 +21,8 @@ import connectors.DataCacheConnector
 import controllers.actions._
 import forms.FileUploadCountProvider
 import javax.inject.{Inject, Singleton}
-import models.requests.MrnRequest
 import models._
+import models.requests.MrnRequest
 import pages.HowManyFilesUploadPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
@@ -65,7 +65,7 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
         errorForm => Future.successful(BadRequest(views.html.how_many_files_upload(errorForm))),
 
         fileUploadCount => {
-          upload(req, fileUploadCount) map {
+          uploadContactDetails(req, fileUploadCount) map {
             case Right(firstFile) =>
               Redirect(routes.UploadYourFilesController.onPageLoad(firstFile.reference))
             case Left(_) =>
@@ -75,20 +75,21 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
       )
     }
 
-  private def upload(req: MrnRequest[AnyContent], fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier): Future[Either[Throwable, FileUpload]] = {
-    def saveRemainingFileUploadsToCache(fileUploadResponse: FileUploadResponse) = {
+  private def uploadContactDetails(req: MrnRequest[AnyContent], fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier): Future[Either[Throwable, FileUpload]] = {
+    def saveRemainingFileUploadsToCache(fileUploadResponse: FileUploadResponse): Future[List[FileUpload]] = {
       val remainingFileUploads = fileUploadResponse.files.tail
       val answers = updateUserAnswers(req.userAnswers, fileUploadCount, FileUploadResponse(remainingFileUploads))
       dataCacheConnector.save(answers.cacheMap).map { _ => remainingFileUploads }
     }
 
     initiateUpload(req, fileUploadCount).flatMap { fileUploadResponse =>
-
       firstUploadFile(fileUploadResponse) match {
-        case Right((f, u)) =>
-          uploadContactDetails(req.request.contactDetails, u).flatMap { _ =>
-            saveRemainingFileUploadsToCache(fileUploadResponse).map(uploads => Right(uploads.head))
+        case Right((_, s3UploadRequest)) =>
+          uploadContactDetails.upload(req.request.contactDetails, s3UploadRequest) match {
+            case Right(success) => success.flatMap( _ => saveRemainingFileUploadsToCache(fileUploadResponse).map(uploads => Right(uploads.head)))
+            case Left(e) => Future.successful(Left(e))
           }
+
         case Left(error) =>
           Future.successful(Left(error))
       }

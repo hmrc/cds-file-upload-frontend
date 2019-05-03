@@ -40,7 +40,7 @@ class UploadContactDetailsSpec extends SpecBase with MockitoSugar {
       val contactDetails = ContactDetails("name", "companyName", "phoneNumber", "email")
       val uploadRequest = UploadRequest("someUrl", Map("k" -> "v"))
 
-      uploadContactDetails(contactDetails, uploadRequest)
+      uploadContactDetails.upload(contactDetails, uploadRequest)
 
       val fileCaptor: ArgumentCaptor[TemporaryFile] = ArgumentCaptor.forClass(classOf[TemporaryFile])
       val fileNameCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])

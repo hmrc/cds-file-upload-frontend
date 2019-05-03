@@ -26,13 +26,18 @@ import models.{ContactDetails, UploadRequest}
 import play.api.libs.Files.TemporaryFile
 
 import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class UploadContactDetails @Inject()(upscanConnector: UpscanS3Connector) {
 
   def fileName = s"contact_details_${UUID.randomUUID().toString}.txt"
 
-  def apply(contactDetails: ContactDetails, uploadRequest: UploadRequest): Future[Unit] = upscanConnector.upload(uploadRequest, toFile(contactDetails), fileName)
+  def upload(contactDetails: ContactDetails, uploadRequest: UploadRequest): Either[Throwable, Future[Unit]] =
+    Try(upscanConnector.upload(uploadRequest, toFile(contactDetails), fileName)) match {
+      case Success(u) => Right(u)
+      case Failure(e) => Left(e)
+    }
 
   def toFile(contactDetails: ContactDetails): TemporaryFile = {
     val uploadFile = File.createTempFile("cds-file-upload-ui", "")
