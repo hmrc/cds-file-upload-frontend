@@ -148,9 +148,10 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
       val eori = Map("eori" -> req.request.eori)
       val mrn = req.userAnswers.get(MrnEntryPage).fold(Map.empty[String, String])(m => Map("mrn" -> m.value))
       val numberOfFiles = req.userAnswers.get(HowManyFilesUploadPage).fold(Map.empty[String, String])(n => Map("numberOfFiles" -> s"${n.value}"))
-      //TODO      ListMap((1 to files.size).map(i => s"file$i").zip(files.map(_.reference)): _*)
-      val references = req.fileUploadResponse.files.map(_.reference).foldLeft(Map.empty[String, String]) { (refs: Map[String, String], fileRef: String) => refs + ("fileReference" -> fileRef) }
-      contactDetails ++ eori ++ mrn ++ numberOfFiles ++ references
+      val files = req.fileUploadResponse.files
+      val fileReferences = (1 to files.size).map(i => s"fileReference$i").zip(files.map(_.reference)).toMap
+      val fileNames = (1 to files.size).map(i => s"fileName$i").zip(files.map(_.filename)).toMap
+      contactDetails ++ eori ++ mrn ++ numberOfFiles ++ fileReferences ++ fileNames
     }
 
     sendDataEvent(transactionName = "trader-submission", detail = auditDetails, auditType = "UploadSuccess")
