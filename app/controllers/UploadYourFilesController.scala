@@ -49,6 +49,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
                                           implicit val appConfig: AppConfig,
                                           implicit val mat: Materializer) extends FrontendController with I18nSupport {
 
+  private val MaxFileSizeInMB = appConfig.fileFormats.maxFileSizeMb
   private val auditSource = appConfig.appName
   private val audit = Audit(auditSource, auditConnector)
 
@@ -56,12 +57,13 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
     (authenticate andThen requireEori andThen getData andThen requireResponse) { implicit req =>
 
       val references = req.fileUploadResponse.files.map(_.reference)
+      val filenames = req.fileUploadResponse.files.map(_.filename).filter(_.nonEmpty)
       val refPosition = getPosition(ref, references)
 
       req.fileUploadResponse.files.find(_.reference == ref) match {
         case Some(file) =>
           file.state match {
-            case Waiting(_) => Ok(views.html.upload_your_files(ref, refPosition))
+            case Waiting(_) => Ok(views.html.upload_your_files(ref, refPosition, filenames))
             case _ => Redirect(nextPage(file.reference, req.fileUploadResponse.files))
           }
 
@@ -71,7 +73,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
 
   def onSubmit(ref: String): Action[Either[MaxSizeExceeded, MultipartFormData[TemporaryFile]]] =
     (authenticate andThen requireEori andThen getData andThen requireResponse)
-      .async(parse.maxLength(appConfig.fileFormats.maxFileSize, parse.multipartFormData)) { implicit req =>
+      .async(parse.maxLength(MaxFileSizeInMB * 1024 * 1024, parse.multipartFormData)) { implicit req =>
 
         val files = req.fileUploadResponse.files
 
@@ -91,7 +93,9 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
                       }
                       .map(_ => Redirect(routes.UploadYourFilesController.onSuccess(ref)))
 
-                  case Right(_) | Left(MaxSizeExceeded(_)) =>
+                  case Left(MaxSizeExceeded(_)) =>
+                    Future.successful(Redirect(routes.UploadYourFilesController.onPageLoad(ref)).flashing("fileSizeError" -> messagesApi.apply("fileUploadPage.validation.filesize", MaxFileSizeInMB)))
+                  case _ =>
                     Future.successful(Redirect(routes.UploadYourFilesController.onPageLoad(ref)))
                 }
 
@@ -102,6 +106,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
           case None => Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
         }
       }
+
 
   def onSuccess(ref: String): Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
@@ -143,9 +148,10 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
       val eori = Map("eori" -> req.request.eori)
       val mrn = req.userAnswers.get(MrnEntryPage).fold(Map.empty[String, String])(m => Map("mrn" -> m.value))
       val numberOfFiles = req.userAnswers.get(HowManyFilesUploadPage).fold(Map.empty[String, String])(n => Map("numberOfFiles" -> s"${n.value}"))
-      //TODO      ListMap((1 to files.size).map(i => s"file$i").zip(files.map(_.reference)): _*)
-      val references = req.fileUploadResponse.files.map(_.reference).foldLeft(Map.empty[String, String]) { (refs: Map[String, String], fileRef: String) => refs + ("fileReference" -> fileRef) }
-      contactDetails ++ eori ++ mrn ++ numberOfFiles ++ references
+      val files = req.fileUploadResponse.files
+      val fileReferences = (1 to files.size).map(i => s"fileReference$i").zip(files.map(_.reference)).toMap
+      val fileNames = (1 to files.size).map(i => s"fileName$i").zip(files.map(_.filename)).toMap
+      contactDetails ++ eori ++ mrn ++ numberOfFiles ++ fileReferences ++ fileNames
     }
 
     sendDataEvent(transactionName = "trader-submission", detail = auditDetails, auditType = "UploadSuccess")

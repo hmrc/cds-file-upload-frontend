@@ -37,7 +37,6 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
 import views.html.upload_your_files
 
-import scala.collection.immutable.ListMap
 import scala.concurrent.{ExecutionContext, Future}
 
 
@@ -99,14 +98,13 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
         forAll(waitingGen, arbitrary[CacheMap]) {
           case ((file, _, response), cacheMap) =>
 
-            val refPosition: Position =
-              nextPosition(file.reference, response.files.map(_.reference))
+            val refPosition: Position = nextPosition(file.reference, response.files.map(_.reference))
 
             val updatedCache = combine(response, cacheMap)
             val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad(file.reference)(fakeRequest)
 
             status(result) mustBe OK
-            contentAsString(result) mustBe viewAsString(file.reference, refPosition)
+            contentAsString(result) mustBe viewAsString(file.reference, refPosition, List.empty)
         }
       }
     }
@@ -343,13 +341,13 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
     "audit upload success" in {
 
-      val file1 = FileUpload("fileRef1", Waiting(UploadRequest("some href", Map.empty)))
-      val file2 = FileUpload("fileRef2", Waiting(UploadRequest("some other href", Map.empty)))
-      val lastFile = FileUpload("fileRef3", Waiting(UploadRequest("another href", Map.empty)))
+      val file1 = FileUpload("fileRef1", Waiting(UploadRequest("some href", Map.empty)), "file1.jpeg")
+      val file2 = FileUpload("fileRef2", Waiting(UploadRequest("some other href", Map.empty)), "file2.pdf")
+      val lastFile = FileUpload("fileRef3", Waiting(UploadRequest("another href", Map.empty)), "file3.doc")
       val response = FileUploadResponse(List(file1, file2, lastFile))
 
       val Some(mrn) = MRN("34GB1234567ABCDEFG")
-      val cd = ContactDetails("someNicky", "toNicky", "0123456789", "ntn@nicky.nz")
+      val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456", "joe@bloggs.com")
       val cache = CacheMap("someId", Map(
         MrnEntryPage.toString -> Json.toJson(mrn),
         HowManyFilesUploadPage.toString -> Json.toJson(FileUploadCount(3)),
@@ -359,13 +357,19 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
       val expectedDetail = Map(
         "eori" -> "GB987654321012",
-        "fullName" -> cd.name,
-        "companyName" -> cd.companyName,
-        "emailAddress" -> cd.email,
-        "telephoneNumber" -> cd.phoneNumber,
-        "mrn" -> mrn.value,
-        "numberOfFiles" -> "3"
-      ) ++ referencesMap(response.files)
+        "fullName" -> "Joe Bloggs",
+        "companyName" -> "Bloggs Inc",
+        "emailAddress" -> "joe@bloggs.com",
+        "telephoneNumber" -> "07998123456",
+        "mrn" -> "34GB1234567ABCDEFG",
+        "numberOfFiles" -> "3",
+        "fileReference1" -> "fileRef1",
+        "fileReference2" -> "fileRef2",
+        "fileReference3" -> "fileRef3",
+        "fileName1" -> "file1.jpeg",
+        "fileName2" -> "file2.pdf",
+        "fileName3" -> "file3.doc"
+      )
 
       val result = controller(fakeDataRetrievalAction(updatedCache)).onSuccess(lastFile.reference)(fakeRequest)
       status(result) mustBe SEE_OTHER
@@ -409,7 +413,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
     }
   }
 
-  private def viewAsString(reference: String, refPosition: Position) = upload_your_files(reference, refPosition)(fakeRequest, messages, appConfig).toString
+  private def viewAsString(reference: String, refPosition: Position, filenames: List[String]) = upload_your_files(reference, refPosition, filenames)(fakeRequest, messages, appConfig, fakeRequest.flash).toString
 
   private def combine(response: FileUploadResponse, cache: CacheMap) =
     cache.copy(data = cache.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))
@@ -418,6 +422,4 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
     val index = refs.sorted.indexOf(ref)
     refs.sorted.drop(index + 1).headOption.getOrElse("receipt")
   }
-
-  private def referencesMap(files: List[FileUpload]): Map[String, String] = ListMap((1 to files.size).map(i => "fileReference").zip(files.map(_.reference)): _*)
 }
