@@ -50,8 +50,9 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
                                           implicit val mat: Materializer) extends FrontendController with I18nSupport {
 
   private val MaxFileSizeInMB = appConfig.fileFormats.maxFileSizeMb
-  private val auditSource = appConfig.appName
-  private val audit = Audit(auditSource, auditConnector)
+  private val FileTypes = appConfig.fileFormats.approvedFileTypes.split(',').map(_.trim)
+  private val AuditSource = appConfig.appName
+  private val audit = Audit(AuditSource, auditConnector)
 
   def onPageLoad(ref: String): Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireResponse) { implicit req =>
@@ -82,10 +83,10 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
             file.state match {
               case Waiting(request) =>
                 req.body match {
-                  case Right(form) if form.file("file").exists(_.filename.nonEmpty) =>
-                    val filename = form.file("file").get.filename
+                  case Right(form) if permittedFileType(form) =>
+                    val Some((tempFile, filename)) = form.file("file") map (f => (f.ref, f.filename))
                     upscanS3Connector
-                      .upload(request, form.file("file").get.ref, filename)
+                      .upload(request, tempFile, filename)
                       .flatMap { _ =>
                         val updatedFiles = file.copy(filename = filename) :: files.filterNot(_.reference == ref)
                         val answers = req.userAnswers.set(HowManyFilesUploadPage.Response, FileUploadResponse(updatedFiles))
@@ -94,9 +95,9 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
                       .map(_ => Redirect(routes.UploadYourFilesController.onSuccess(ref)))
 
                   case Left(MaxSizeExceeded(_)) =>
-                    Future.successful(Redirect(routes.UploadYourFilesController.onPageLoad(ref)).flashing("fileSizeError" -> messagesApi.apply("fileUploadPage.validation.filesize", MaxFileSizeInMB)))
+                    Future.successful(Redirect(routes.UploadYourFilesController.onPageLoad(ref)).flashing("fileUploadError" -> messagesApi.apply("fileUploadPage.validation.filesize", MaxFileSizeInMB)))
                   case _ =>
-                    Future.successful(Redirect(routes.UploadYourFilesController.onPageLoad(ref)))
+                    Future.successful(Redirect(routes.UploadYourFilesController.onPageLoad(ref)).flashing("fileUploadError" -> messagesApi.apply("fileUploadPage.validation.accept")))
                 }
 
               case _ =>
@@ -107,6 +108,9 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
         }
       }
 
+  private def permittedFileType(form: MultipartFormData[TemporaryFile]) = {
+    form.file("file").exists(_.contentType.exists(FileTypes.contains(_)))
+  }
 
   def onSuccess(ref: String): Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
@@ -159,7 +163,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
 
   private def sendDataEvent(transactionName: String, path: String = "N/A", tags: Map[String, String] = Map.empty, detail: Map[String, String], auditType: String)(implicit hc: HeaderCarrier): Unit = {
     audit.sendDataEvent(DataEvent(
-      auditSource,
+      AuditSource,
       auditType,
       tags = hc.toAuditTags(transactionName, path) ++ tags,
       detail = hc.toAuditDetails(detail.toSeq: _*))
@@ -175,10 +179,3 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
   }
 }
 
-sealed trait Position
-
-case class First(total: Int) extends Position
-
-case class Middle(index: Int, total: Int) extends Position
-
-case class Last(total: Int) extends Position

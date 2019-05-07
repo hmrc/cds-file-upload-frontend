@@ -16,8 +16,8 @@
 
 package views
 
-import controllers.{First, Last, Middle, Position}
 import generators.Generators
+import models.{First, Last, Middle, Position}
 import org.scalatest.prop.PropertyChecks
 import play.twirl.api.Html
 import views.behaviours.ViewBehaviours

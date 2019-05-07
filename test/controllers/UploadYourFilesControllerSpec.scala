@@ -186,10 +186,10 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
           val nextPage = routes.UploadYourFilesController.onSuccess(file.reference)
           val updatedCache = combine(response, cache)
 
-          val fileName = "file.txt"
+          val fileName = "file.doc"
           val tempFile = TemporaryFile(fileName)
 
-          val filePart = FilePart[TemporaryFile](key = "file", fileName, contentType = None, ref = tempFile)
+          val filePart = FilePart[TemporaryFile](key = "file", fileName, contentType = Some("application/msword"), ref = tempFile)
           val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
 
           val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Right(form)))
@@ -214,12 +214,12 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
           (uploadedFile, FileUploadResponse(List(uploadedFile)))
       }
 
-      "file is Missing" in {
+      "file is incorrect type" in {
         forAll(fileUploadedGen, arbitrary[CacheMap]) {
           case ((file, response), cache) =>
             val updatedCache = combine(response, cache)
 
-            val filePart = FilePart[TemporaryFile](key = "file", "", contentType = None, ref = TemporaryFile())
+            val filePart = FilePart[TemporaryFile](key = "file", "foo.txt", contentType = Some("text/plain"), ref = TemporaryFile())
             val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
 
             val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Right(form)))
@@ -235,7 +235,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
           case ((file, response), cache) =>
             val updatedCache = combine(response, cache)
 
-            val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Left(MaxSizeExceeded(0))))
+            val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Left(MaxSizeExceeded(11 * 1024 * 1024))))
 
             status(result) mustBe SEE_OTHER
             redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad(file.reference).url)
