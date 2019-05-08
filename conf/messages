@@ -1,7 +1,5 @@
 ## common
 common.service.name=Upload a customs document
-common.sign-in=Sign in
-common.sign-out=Sign out
 common.phase=Alpha
 common.feedbackFirst=This is a new service - your
 common.feedbackSecond=feedback
@@ -64,8 +62,7 @@ fileWarning.button=I understand
 
 ## How many files do you need to upload page
 
-howmany.how-many-files=How many files do you need to upload?
-howManyFilesUpload.title=How many files are you uploading?
+howManyFilesUpload.title=How many files do you need to upload?
 howManyFilesUpload.heading=How many files do you need to upload?
 
 howManyFilesUpload.invalid=You have entered an invalid number of files, you can upload 1 or more files up to a maximum number of 10 files. Re-enter the number of files you wish to upload.
@@ -89,7 +86,7 @@ fileUploadPage.validation.filesize=The file you have chosen is bigger than {0}MB
 fileUploadPage.paragraph1=Ensure that you select the correct documents as requested by HMRC.
 fileUploadPage.button=Upload a document
 
-fileUploadReceiptPage.title=Upload your files receipt
+fileUploadReceiptPage.title=Upload your files
 fileUploadReceiptPage.heading=You have uploaded {0} files:
 fileUploadReceiptPage.paragraphIntro=Ensure you take a copy or print your receipt numbers listed below.
 fileUploadReceiptPage.whatHappensNext=What happens next?

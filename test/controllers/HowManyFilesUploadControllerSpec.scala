@@ -101,7 +101,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
 
         status(result) mustBe OK
         val doc = asDocument(contentAsString(result))
-        doc.title mustEqual "How many files are you uploading?"
+        doc.title mustEqual "How many files do you need to upload?"
       }
     }
 
@@ -189,7 +189,6 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
 
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(s"/cds-file-upload-service/this-service-has-been-reset")
-
     }
 
     "make a request to customs declarations" in {
@@ -200,5 +199,4 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       verify(mockCustomsDeclarationsService).batchFileUpload(any(), eqTo(fakeContactDetailsRequiredAction.cacheMap.getEntry[MRN](MrnEntryPage).get), eqTo(fileUploadCount))(any())
     }
   }
-
 }

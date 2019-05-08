@@ -230,7 +230,6 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
       }
 
       "file is too large" in {
-
         forAll(fileUploadedGen, arbitrary[CacheMap]) {
           case ((file, response), cache) =>
             val updatedCache = combine(response, cache)
@@ -242,7 +241,6 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
         }
       }
     }
-
 
     "redirect to the next page" when {
 
@@ -262,7 +260,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
             val nextPage = routes.UploadYourFilesController.onSubmit(reference)
             val updatedCache = combine(response, cache)
 
-            val filePart = FilePart[TemporaryFile](key = "file", "file.txt", contentType = None, ref = TemporaryFile("file.txt"))
+            val filePart = FilePart[TemporaryFile](key = "file", "file.pdf", contentType = Some("application/pdf"), ref = TemporaryFile())
             val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
 
             val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Right(form)))
@@ -277,7 +275,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
       "no responses are in the cache" in {
 
-        val filePart = FilePart[TemporaryFile](key = "file", "file.txt", contentType = None, ref = TemporaryFile("file.txt"))
+        val filePart = FilePart[TemporaryFile](key = "file", "file.pdf", contentType = Some("application/pdf"), ref = TemporaryFile())
         val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
 
         val result = controller(new FakeDataRetrievalAction(None)).onSubmit("someRef")(fakeRequest.withBody(Right(form)))
@@ -292,7 +290,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
           whenever(!response.files.exists(_.reference == ref)) {
 
-            val filePart = FilePart[TemporaryFile](key = "file", "file.txt", contentType = None, ref = TemporaryFile("file.txt"))
+            val filePart = FilePart[TemporaryFile](key = "file", "file.jpeg", contentType = Some("image/jpeg"), ref = TemporaryFile())
             val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
 
             val updatedCache = combine(response, cache)
