@@ -16,22 +16,17 @@
 
 package connectors
 
-import java.util.concurrent.TimeUnit
-
 import com.github.tomakehurst.wiremock.client.WireMock._
 import models.UploadRequest
+import org.scalatest.TryValues._
 import org.scalatest.{MustMatchers, WordSpec}
 import play.api.http.Status
 import play.api.libs.Files.TemporaryFile
-
-import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.{Await, Future}
 
 class UpscanS3ConnectorTest extends WordSpec with WiremockTestServer with MustMatchers {
 
   private val connector = new UpscanS3Connector()
 
-  private def await[T](future: Future[T]): T = Await.result(future, FiniteDuration(5, TimeUnit.SECONDS))
 
   "Upload" should {
 
@@ -51,7 +46,7 @@ class UpscanS3ConnectorTest extends WordSpec with WiremockTestServer with MustMa
         )
       )
 
-      await(connector.upload(templateUploading, TemporaryFile("example-file.json"),"exampleFilename"))
+      connector.upload(templateUploading, TemporaryFile("example-file.json"), "exampleFilename")
 
       verify(
         postRequestedFor(urlEqualTo("/path"))
@@ -75,9 +70,8 @@ class UpscanS3ConnectorTest extends WordSpec with WiremockTestServer with MustMa
         )
       )
 
-      intercept[RuntimeException] {
-        await(connector.upload(templateUploading, TemporaryFile("example-file.json"), "exampleFileName"))
-      }.getMessage mustBe "Bad AWS response with status [502] body [content]"
+      val result = connector.upload(templateUploading, TemporaryFile("example-file.json"), "exampleFileName")
+      result.failure.exception must have message "Bad AWS response with status [502] body [content]"
 
       verify(
         postRequestedFor(urlEqualTo("/path"))

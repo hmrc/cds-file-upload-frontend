@@ -154,7 +154,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       val fileUploadsAfterContactDetails = fileUploadResponse.files.tail
 
       when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
-      when(mockUploadContactDetails.upload(any(), any())).thenReturn(Right(Future.successful(())))
+      when(mockUploadContactDetails.upload(any(), any())).thenReturn(Right(202))
       when(mockDataCacheConnector.save(any())(any[HeaderCarrier])).thenReturn(Future.successful(CacheMap("", Map.empty)))
       val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2")
 

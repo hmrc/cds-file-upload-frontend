@@ -20,12 +20,13 @@ import base.SpecBase
 import connectors.UpscanS3Connector
 import models.{ContactDetails, UploadRequest}
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{eq => meq}
-import org.mockito.Mockito.verify
+import org.mockito.ArgumentMatchers.{any, eq => meq}
+import org.mockito.Mockito.{verify, when}
 import org.scalatest.mockito.MockitoSugar
 import play.api.libs.Files.TemporaryFile
 
 import scala.io.Source
+import scala.util.Try
 
 class UploadContactDetailsSpec extends SpecBase with MockitoSugar {
 
@@ -39,6 +40,8 @@ class UploadContactDetailsSpec extends SpecBase with MockitoSugar {
 
       val contactDetails = ContactDetails("name", "companyName", "phoneNumber", "email")
       val uploadRequest = UploadRequest("someUrl", Map("k" -> "v"))
+
+      when(mockS3Connector.upload(any[UploadRequest], any[TemporaryFile], any[String])).thenReturn(Try(202))
 
       uploadContactDetails.upload(contactDetails, uploadRequest)
 

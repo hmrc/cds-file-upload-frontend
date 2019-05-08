@@ -86,7 +86,7 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
       firstUploadFile(fileUploadResponse) match {
         case Right((_, s3UploadRequest)) =>
           uploadContactDetails.upload(req.request.contactDetails, s3UploadRequest) match {
-            case Right(success) => success.flatMap( _ => saveRemainingFileUploadsToCache(fileUploadResponse).map(uploads => Right(uploads.head)))
+            case Right(success) => saveRemainingFileUploadsToCache(fileUploadResponse).map(uploads => Right(uploads.head))
             case Left(e) => Future.successful(Left(e))
           }
 

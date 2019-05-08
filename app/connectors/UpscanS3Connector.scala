@@ -27,41 +27,35 @@ import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.util.EntityUtils
 import play.api.libs.Files.TemporaryFile
 
-import scala.concurrent.Future
-import scala.concurrent.Future.{failed, successful}
 import scala.util.Try
 
 @Singleton
 class UpscanS3Connector() {
 
-  def upload(template: UploadRequest, file: TemporaryFile, fileName: String): Future[Unit] = {
+  def upload(template: UploadRequest, file: TemporaryFile, fileName: String): Try[Int] = {
     val builder = MultipartEntityBuilder.create
 
     template.fields.foreach {
       case (name, value) => builder.addPart(name, new StringBody(value, ContentType.TEXT_PLAIN))
     }
 
-    builder.addPart("file", new FileBody(file.file, ContentType.DEFAULT_BINARY,  fileName))
+    builder.addPart("file", new FileBody(file.file, ContentType.DEFAULT_BINARY, fileName))
 
     val request = new HttpPost(template.href)
     request.setEntity(builder.build())
 
     val client = HttpClientBuilder.create.build
 
-    val attempt = Try(client.execute(request)).map { response: HttpResponse =>
+    val attempt = Try(client.execute(request)) map { response: HttpResponse =>
       val code = response.getStatusLine.getStatusCode
       if (code >= 200 && code < 300) {
-        successful(() : Unit)
+        code
       } else {
-        failed(
-          new RuntimeException(
-            s"Bad AWS response with status [$code] body [${EntityUtils.toString(response.getEntity)}]"
-          )
-        )
+        throw new RuntimeException(s"Bad AWS response with status [$code] body [${EntityUtils.toString(response.getEntity)}]")
       }
     }
 
     client.close()
-    attempt.get
+    attempt
   }
 }

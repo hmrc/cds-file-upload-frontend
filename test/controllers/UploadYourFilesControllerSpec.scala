@@ -38,6 +38,7 @@ import uk.gov.hmrc.play.audit.model.DataEvent
 import views.html.upload_your_files
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Try}
 
 
 class UploadYourFilesControllerSpec extends ControllerSpecBase {
@@ -165,23 +166,25 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
     }
   }
 
+
   ".onSubmit" should {
+
+    val upscanRequest = UploadRequest("href", Map())
+    val fileUploadedGen = responseGen.map {
+      case (file, _) =>
+        val uploadedFile = file.copy(state = Waiting(upscanRequest))
+        (uploadedFile, FileUploadResponse(List(uploadedFile)))
+    }
 
     "upload to upscan, save the filename and redirect to next page when file is valid" in {
 
-      val upscanRequest = UploadRequest("href", Map())
-      val fileUploadedGen = responseGen.map {
-        case (file, _) =>
-          val uploadedFile = file.copy(state = Waiting(upscanRequest))
-          (uploadedFile, FileUploadResponse(List(uploadedFile)))
-      }
 
       forAll(fileUploadedGen, arbitrary[CacheMap]) {
         case ((file, response), cache) =>
           reset(mockUpscanConnector)
           reset(mockDataCacheConnector)
           when(mockDataCacheConnector.save(any[CacheMap])(any[HeaderCarrier])).thenReturn(Future.successful(CacheMap("", Map())))
-          when(mockUpscanConnector.upload(any[UploadRequest], any[TemporaryFile], any[String])).thenReturn(Future.successful(()))
+          when(mockUpscanConnector.upload(any[UploadRequest], any[TemporaryFile], any[String])).thenReturn(Try(200))
 
           val nextPage = routes.UploadYourFilesController.onSuccess(file.reference)
           val updatedCache = combine(response, cache)
@@ -207,12 +210,6 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
     }
 
     "redirect to the previous page" when {
-      val upscanRequest = UploadRequest("href", Map())
-      val fileUploadedGen = responseGen.map {
-        case (file, _) =>
-          val uploadedFile = file.copy(state = Waiting(upscanRequest))
-          (uploadedFile, FileUploadResponse(List(uploadedFile)))
-      }
 
       "file is incorrect type" in {
         forAll(fileUploadedGen, arbitrary[CacheMap]) {
@@ -239,6 +236,22 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
             status(result) mustBe SEE_OTHER
             redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad(file.reference).url)
         }
+      }
+    }
+
+    "redirect to the error page when Upscan connector fails" in {
+      forAll(fileUploadedGen, arbitrary[CacheMap]) {
+        case ((file, response), cache) =>
+          val updatedCache = combine(response, cache)
+          val filePart = FilePart[TemporaryFile](key = "file", "foo.pdf", contentType = Some("application/pdf"), ref = TemporaryFile())
+          val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
+          when(mockUpscanConnector.upload(any[UploadRequest], any[TemporaryFile], any[String])).thenReturn(Failure(new RuntimeException()))
+
+          val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Right(form)))
+
+          status(result) mustBe SEE_OTHER
+          //TODO redirect to the error page
+//          redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
       }
     }
 

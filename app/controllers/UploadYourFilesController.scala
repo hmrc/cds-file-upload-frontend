@@ -36,6 +36,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 @Singleton
 class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
@@ -85,14 +86,14 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
                 req.body match {
                   case Right(form) if permittedFileType(form) =>
                     val Some((tempFile, filename)) = form.file("file") map (f => (f.ref, f.filename))
-                    upscanS3Connector
-                      .upload(request, tempFile, filename)
-                      .flatMap { _ =>
+                    upscanS3Connector.upload(request, tempFile, filename) match {
+                      case Success(_) =>
                         val updatedFiles = file.copy(filename = filename) :: files.filterNot(_.reference == ref)
                         val answers = req.userAnswers.set(HowManyFilesUploadPage.Response, FileUploadResponse(updatedFiles))
-                        dataCacheConnector.save(answers.cacheMap)
-                      }
-                      .map(_ => Redirect(routes.UploadYourFilesController.onSuccess(ref)))
+                        dataCacheConnector.save(answers.cacheMap).map(_ => Redirect(routes.UploadYourFilesController.onSuccess(ref)))
+                      case Failure(e) =>
+                        Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
+                    }
 
                   case Left(MaxSizeExceeded(_)) =>
                     Future.successful(Redirect(routes.UploadYourFilesController.onPageLoad(ref)).flashing("fileUploadError" -> messagesApi.apply("fileUploadPage.validation.filesize", MaxFileSizeInMB)))
