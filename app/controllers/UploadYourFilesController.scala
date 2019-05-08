@@ -25,6 +25,7 @@ import javax.inject.Inject
 import models._
 import models.requests.FileUploadResponseRequest
 import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
+import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.Files.TemporaryFile
 import play.api.mvc._
@@ -69,7 +70,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
             case _ => Redirect(nextPage(file.reference, req.fileUploadResponse.files))
           }
 
-        case None => Redirect(routes.SessionExpiredController.onPageLoad())
+        case None => Redirect(routes.ErrorPageController.sessionExpired())
       }
     }
 
@@ -86,13 +87,15 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
                 req.body match {
                   case Right(form) if permittedFileType(form) =>
                     val Some((tempFile, filename)) = form.file("file") map (f => (f.ref, f.filename))
+
                     upscanS3Connector.upload(request, tempFile, filename) match {
                       case Success(_) =>
                         val updatedFiles = file.copy(filename = filename) :: files.filterNot(_.reference == ref)
                         val answers = req.userAnswers.set(HowManyFilesUploadPage.Response, FileUploadResponse(updatedFiles))
                         dataCacheConnector.save(answers.cacheMap).map(_ => Redirect(routes.UploadYourFilesController.onSuccess(ref)))
                       case Failure(e) =>
-                        Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
+                        Logger.error(s"Failed to upload file: $filename", e)
+                        Future.successful(Redirect(routes.ErrorPageController.uploadError()))
                     }
 
                   case Left(MaxSizeExceeded(_)) =>
@@ -105,13 +108,12 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
                 Future.successful(Redirect(nextPage(file.reference, req.fileUploadResponse.files)))
             }
 
-          case None => Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
+          case None =>
+            Future.successful(Redirect(routes.ErrorPageController.sessionExpired()))
         }
       }
 
-  private def permittedFileType(form: MultipartFormData[TemporaryFile]) = {
-    form.file("file").exists(_.contentType.exists(FileTypes.contains(_)))
-  }
+  private def permittedFileType(form: MultipartFormData[TemporaryFile]) = form.file("file").exists(_.contentType.exists(FileTypes.contains(_)))
 
   def onSuccess(ref: String): Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
@@ -127,7 +129,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
             Redirect(nextPage(ref, files))
           }
 
-        case None => Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
+        case None => Future.successful(Redirect(routes.ErrorPageController.sessionExpired()))
       }
     }
 

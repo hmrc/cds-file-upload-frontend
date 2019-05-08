@@ -53,7 +53,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase {
         val result = controller(new FakeDataRetrievalAction(None)).onPageLoad()(fakeRequest)
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
+        redirectLocation(result) mustBe Some(routes.ErrorPageController.sessionExpired().url)
       }
     }
   }

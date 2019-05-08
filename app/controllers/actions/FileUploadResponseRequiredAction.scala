@@ -20,16 +20,15 @@ import com.google.inject.Inject
 import controllers.routes
 import models.requests.{FileUploadResponseRequest, OptionalDataRequest}
 import pages.HowManyFilesUploadPage
-import play.api.mvc.{ActionRefiner, Result}
 import play.api.mvc.Results.Redirect
-import uk.gov.hmrc.play.HeaderCarrierConverter
+import play.api.mvc.{ActionRefiner, Result}
 
 import scala.concurrent.Future
 
 
 class FileUploadResponseRequiredAction @Inject() extends ActionRefiner[OptionalDataRequest, FileUploadResponseRequest] {
 
-  private val onError = Redirect(routes.SessionExpiredController.onPageLoad())
+  private val onError = Redirect(routes.ErrorPageController.sessionExpired())
 
   override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, FileUploadResponseRequest[A]]] = {
 

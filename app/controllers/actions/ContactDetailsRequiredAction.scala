@@ -23,13 +23,12 @@ import models.requests.{ContactDetailsRequest, OptionalDataRequest}
 import pages.ContactDetailsPage
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, Result}
-import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.Future
 
 class ContactDetailsRequiredActionImpl @Inject()(val dataCacheConnector: DataCacheConnector) extends ContactDetailsRequiredAction {
 
-  private val onError = Redirect(routes.SessionExpiredController.onPageLoad())
+  private val onError = Redirect(routes.ErrorPageController.sessionExpired())
 
   override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] = {
     val req = for {

@@ -48,6 +48,7 @@ class UpscanS3Connector() {
 
     val attempt = Try(client.execute(request)) map { response: HttpResponse =>
       val code = response.getStatusLine.getStatusCode
+
       if (code >= 200 && code < 300) {
         code
       } else {
@@ -56,6 +57,7 @@ class UpscanS3Connector() {
     }
 
     client.close()
+
     attempt
   }
 }

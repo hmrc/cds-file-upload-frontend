@@ -21,11 +21,15 @@ import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import views.html.session_expired
+import views.html._
 
-class SessionExpiredController @Inject()(val messagesApi: MessagesApi, implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
+class ErrorPageController @Inject()(val messagesApi: MessagesApi, implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = Action { implicit request =>
+  def sessionExpired: Action[AnyContent] = Action { implicit request =>
     Ok(session_expired())
+  }
+
+  def uploadError: Action[AnyContent]= Action { implicit request =>
+    Ok(upload_error())
   }
 }

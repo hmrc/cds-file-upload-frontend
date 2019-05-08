@@ -69,7 +69,7 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
             case Right(firstFile) =>
               Redirect(routes.UploadYourFilesController.onPageLoad(firstFile.reference))
             case Left(_) =>
-              Redirect(routes.SessionExpiredController.onPageLoad())
+              Redirect(routes.ErrorPageController.sessionExpired())
           }
         }
       )

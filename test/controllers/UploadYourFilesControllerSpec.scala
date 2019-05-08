@@ -145,7 +145,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
           val result = controller(new FakeDataRetrievalAction(None)).onPageLoad(ref)(fakeRequest)
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
+          redirectLocation(result) mustBe Some(routes.ErrorPageController.sessionExpired().url)
         }
       }
 
@@ -159,7 +159,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
             val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad(ref)(fakeRequest)
 
             status(result) mustBe SEE_OTHER
-            redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
+            redirectLocation(result) mustBe Some(routes.ErrorPageController.sessionExpired().url)
           }
         }
       }
@@ -250,8 +250,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
           val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Right(form)))
 
           status(result) mustBe SEE_OTHER
-          //TODO redirect to the error page
-//          redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
+          redirectLocation(result) mustBe Some(routes.ErrorPageController.uploadError().url)
       }
     }
 
@@ -294,7 +293,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
         val result = controller(new FakeDataRetrievalAction(None)).onSubmit("someRef")(fakeRequest.withBody(Right(form)))
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
+        redirectLocation(result) mustBe Some(routes.ErrorPageController.sessionExpired().url)
       }
 
       "file reference is not in response" in {
@@ -310,7 +309,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
             val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(ref)(fakeRequest.withBody(Right(form)))
 
             status(result) mustBe SEE_OTHER
-            redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
+            redirectLocation(result) mustBe Some(routes.ErrorPageController.sessionExpired().url)
           }
         }
       }
@@ -403,7 +402,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
           val result = controller(new FakeDataRetrievalAction(None)).onSuccess(ref)(fakeRequest)
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
+          redirectLocation(result) mustBe Some(routes.ErrorPageController.sessionExpired().url)
         }
       }
 
@@ -417,7 +416,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
             val result = controller(fakeDataRetrievalAction(updatedCache)).onSuccess(ref)(fakeRequest)
 
             status(result) mustBe SEE_OTHER
-            redirectLocation(result) mustBe Some(routes.SessionExpiredController.onPageLoad().url)
+            redirectLocation(result) mustBe Some(routes.ErrorPageController.sessionExpired().url)
           }
         }
       }
