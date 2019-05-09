@@ -170,7 +170,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response) mustBe Some(FileUploadResponse(fileUploadResponse.files.tail))
     }
 
-    "redirect to upload error page when contact details upload fails" in {
+    "redirect to error page when contact details upload fails" in {
       val fileUploadResponse = FileUploadResponse(List(
         FileUpload("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> "")))),
         FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> ""))))
@@ -184,7 +184,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some("/cds-file-upload-service/upload-error")
+      redirectLocation(result) mustBe Some("/cds-file-upload-service/error")
     }
 
     "make a request to customs declarations" in {

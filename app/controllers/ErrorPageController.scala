@@ -32,4 +32,8 @@ class ErrorPageController @Inject()(val messagesApi: MessagesApi, implicit val a
   def uploadError: Action[AnyContent]= Action { implicit request =>
     Ok(upload_error())
   }
+
+  def error: Action[AnyContent]= Action { implicit request =>
+    Ok(generic_error())
+  }
 }

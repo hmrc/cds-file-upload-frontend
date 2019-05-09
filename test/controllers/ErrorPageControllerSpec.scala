@@ -34,5 +34,11 @@ class ErrorPageControllerSpec extends ControllerSpecBase {
       status(result) mustBe OK
       contentAsString(result) mustBe upload_error()(fakeRequest, messages, appConfig).toString
     }
+
+    "return the correct view for generic error" in {
+      val result = new ErrorPageController(messagesApi, appConfig).error()(fakeRequest)
+      status(result) mustBe OK
+      contentAsString(result) mustBe generic_error()(fakeRequest, messages, appConfig).toString
+    }
   }
 }

@@ -4,6 +4,7 @@ GET         /assets/*file                       controllers.Assets.versioned(pat
 
 GET         /start                              controllers.StartController.displayStartPage
 
+GET         /error                              controllers.ErrorPageController.error
 GET         /this-service-has-been-reset        controllers.ErrorPageController.sessionExpired
 GET         /upload-error                       controllers.ErrorPageController.uploadError
 

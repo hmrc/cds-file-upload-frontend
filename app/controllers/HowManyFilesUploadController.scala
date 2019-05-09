@@ -69,7 +69,7 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
             case Right(firstFile) =>
               Redirect(routes.UploadYourFilesController.onPageLoad(firstFile.reference))
             case Left(_) =>
-              Redirect(routes.ErrorPageController.uploadError())
+              Redirect(routes.ErrorPageController.error())
           }
         }
       )
