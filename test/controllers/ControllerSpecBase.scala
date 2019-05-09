@@ -26,7 +26,7 @@ import models.requests.SignedInUser
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, when}
 import services.UploadContactDetails
-import uk.gov.hmrc.auth.core.retrieve.Retrievals._
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -47,7 +47,7 @@ abstract class ControllerSpecBase extends SpecBase with FakeActions {
           any(),
           eqTo(credentials and name and email and affinityGroup and internalId and allEnrolments))(any(), any())
     ).thenReturn(
-      Future.successful(new ~(new ~(new ~(new ~(new ~(user.credentials, user.name), user.email), user.affinityGroup), Some(user.internalId)), user.enrolments))
+      Future.successful(new ~(new ~(new ~(new ~(new ~(Some(user.credentials), Some(user.name)), user.email), user.affinityGroup), Some(user.internalId)), user.enrolments))
     )
 
     test

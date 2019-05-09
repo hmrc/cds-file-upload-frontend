@@ -18,24 +18,22 @@ package controllers.actions
 
 import controllers.ControllerSpecBase
 import models.requests.SignedInUser
-import generators.SignedInUserGen
-import org.scalacheck.{Arbitrary, Gen}
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.prop.PropertyChecks
-import play.api.{Configuration, Environment}
 import play.api.mvc.{Action, AnyContent}
 import play.api.test.Helpers._
 import play.api.test._
+import play.api.{Configuration, Environment}
+import uk.gov.hmrc.auth.core.AffinityGroup.Individual
 import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.retrieve.{Credentials, Name}
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-class AuthActionSpec extends ControllerSpecBase with SignedInUserGen {
+class AuthActionSpec extends ControllerSpecBase {
 
   lazy val conf = app.injector.instanceOf[Configuration]
-  lazy val env  = app.injector.instanceOf[Environment]
+  lazy val env = app.injector.instanceOf[Environment]
 
   def authAction = new AuthActionImpl(mockAuthConnector, conf, env)
 
@@ -43,59 +41,40 @@ class AuthActionSpec extends ControllerSpecBase with SignedInUserGen {
 
   "AuthAction" should {
 
-    "returned authenticated user" in {
+    "return authenticated user" in {
 
-      forAll { user: SignedInUser =>
-        withSignedInUser(user) {
+      val user = SignedInUser(Credentials("providerId", "providerType"), Name(Some("John"), Some("Doe")), Some("john@doe.com"), Some(Individual), "internalID", Enrolments(Set(Enrolment("HMRC-CUS-ORG", Seq(EnrolmentIdentifier("EORINumber", "GB1234567890")), ""))))
 
-          val response = authController.action(FakeRequest())
+      withSignedInUser(user) {
 
-          status(response) mustBe OK
-          contentAsString(response) mustBe user.toString
-        }
+        val response = authController.action(FakeRequest())
+
+        status(response) mustBe OK
+        contentAsString(response) mustBe user.toString
       }
     }
 
-    "redirect to gg sign in" when {
+    "redirect to gg sign in when NoActiveSession is returned" in {
 
-      "NoActiveSession is returned" in {
+      withAuthError(new NoActiveSession("") {}) {
 
-        forAll { uri: String =>
-          withAuthError(new NoActiveSession("") {}) {
+        val myURI = "http://myservice:1234/somecontext"
+        val request = FakeRequest().copyFakeRequest(uri = myURI)
+        val response = authController.action(request)
 
-            val request = FakeRequest().copyFakeRequest(uri = uri)
-            val response = authController.action(request)
-
-            status(response) mustBe SEE_OTHER
-            redirectLocation(response) mustBe Some(s"/gg/sign-in?continue=${escaped(uri)}&origin=cds-file-upload-frontend")
-          }
-        }
+        status(response) mustBe SEE_OTHER
+        redirectLocation(response) mustBe Some(s"/gg/sign-in?continue=${escaped(myURI)}&origin=cds-file-upload-frontend")
       }
     }
 
-    "redirect to Unauthorised" when {
+    "redirect to Unauthorised when authorisation fails" in {
 
-      implicit val arbitraryAuthException: Arbitrary[AuthorisationException] = Arbitrary {
-        Gen.oneOf(
-          InsufficientEnrolments(""),
-          InsufficientConfidenceLevel(""),
-          UnsupportedAffinityGroup(""),
-          UnsupportedAuthProvider(""),
-          UnsupportedCredentialRole("")
-        )
-      }
+      withAuthError(InsufficientEnrolments("")) {
 
-      "authorisation fails" in {
-        forAll { authException: AuthorisationException =>
+        val response = authController.action(FakeRequest())
 
-          withAuthError(authException) {
-
-            val response = authController.action(FakeRequest())
-
-            status(response) mustBe SEE_OTHER
-            redirectLocation(response) mustBe Some(controllers.routes.UnauthorisedController.onPageLoad.url)
-          }
-        }
+        status(response) mustBe SEE_OTHER
+        redirectLocation(response) mustBe Some(controllers.routes.UnauthorisedController.onPageLoad.url)
       }
     }
   }
@@ -106,4 +85,5 @@ class AuthActionSpec extends ControllerSpecBase with SignedInUserGen {
       Future.successful(Ok(request.user.toString))
     }
   }
+
 }

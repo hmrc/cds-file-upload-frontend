@@ -22,10 +22,10 @@ import models.requests.{AuthenticatedRequest, SignedInUser}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionBuilder, ActionRefiner, Request, Result}
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.auth.core.retrieve.Retrievals._
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, NoActiveSession}
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, UnauthorizedException}
+import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 
@@ -38,19 +38,27 @@ class AuthActionImpl @Inject()(val authConnector: AuthConnector, val config: Con
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
     authorised(SignedInUser.authorisationPredicate)
-      .retrieve(credentials and name and email and affinityGroup and internalId and allEnrolments) {
+      .retrieve(
+        credentials and
+          name and
+          email and
+          affinityGroup and
+          internalId and
+          allEnrolments) {
 
-        case credentials ~ name ~ email ~ affinityGroup ~ Some(identifier) ~ enrolments =>
+        case Some(credentials) ~ Some(name) ~ email ~ affinityGroup ~ Some(identifier) ~ enrolments =>
           val signedInUser = SignedInUser(credentials, name, email, affinityGroup, identifier, enrolments)
           Future.successful(Right(AuthenticatedRequest(request, signedInUser)))
 
         case _ =>
+
+          //TODO Change this msg
           throw new UnauthorizedException("Unable to retrieve internal Id")
 
       } recover {
-        case _: NoActiveSession => Left(toGGLogin(request.uri))
-        case _                  => Left(Redirect(routes.UnauthorisedController.onPageLoad))
-      }
+      case _: NoActiveSession => Left(toGGLogin(request.uri))
+      case _ => Left(Redirect(routes.UnauthorisedController.onPageLoad()))
+    }
   }
 }
 
