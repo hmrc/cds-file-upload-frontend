@@ -28,7 +28,7 @@ import scala.concurrent.Future
 
 class ContactDetailsRequiredActionImpl @Inject()(val dataCacheConnector: DataCacheConnector) extends ContactDetailsRequiredAction {
 
-  private val onError = Redirect(routes.ErrorPageController.sessionExpired())
+  private val onError = Redirect(routes.ErrorPageController.error())
 
   override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] = {
     val req = for {

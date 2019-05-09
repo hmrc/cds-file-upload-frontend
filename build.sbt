@@ -23,6 +23,7 @@ val compileDependencies = Seq(
   "uk.gov.hmrc" %% "govuk-template" % "5.25.0-play-25",
   "uk.gov.hmrc" %% "play-ui" % "7.33.0-play-25",
   "uk.gov.hmrc" %% "bootstrap-play-25" % "4.10.0",
+  "uk.gov.hmrc" %% "auth-client" % "2.17.0-play-25",
   "com.github.pureconfig" %% "pureconfig" % "0.9.2",
   "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
   "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,

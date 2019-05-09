@@ -46,14 +46,14 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase {
       }
     }
 
-    "redirect to session expired page" when {
+    "redirect to error page" when {
 
       "no responses are in the cache" in {
 
         val result = controller(new FakeDataRetrievalAction(None)).onPageLoad()(fakeRequest)
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.ErrorPageController.sessionExpired().url)
+        redirectLocation(result) mustBe Some(routes.ErrorPageController.error().url)
       }
     }
   }

@@ -25,10 +25,6 @@ import views.html._
 
 class ErrorPageController @Inject()(val messagesApi: MessagesApi, implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
-  def sessionExpired: Action[AnyContent] = Action { implicit request =>
-    Ok(session_expired())
-  }
-
   def uploadError: Action[AnyContent]= Action { implicit request =>
     Ok(upload_error())
   }

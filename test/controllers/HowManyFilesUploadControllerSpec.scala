@@ -115,7 +115,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       doc.select("#value").`val` mustEqual "7"
     }
 
-    "load session expired page when data does not exist for onPageLoad" in {
+    "redirect to error page when no data is found in the cache on page load" in {
 
       forAll { contactDetails: ContactDetails =>
 
@@ -123,11 +123,11 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
         val result = controller(action).onPageLoad(fakeRequest)
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some("/cds-file-upload-service/this-service-has-been-reset")
+        redirectLocation(result) mustBe Some("/cds-file-upload-service/error")
       }
     }
 
-    "load session expired page when data does not exist for onSubmit" in {
+    "redirect to error page when no data is found in the cache on submit" in {
 
       forAll { contactDetails: ContactDetails =>
 
@@ -135,7 +135,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
         val result = controller(action).onSubmit(fakeRequest)
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some("/cds-file-upload-service/this-service-has-been-reset")
+        redirectLocation(result) mustBe Some("/cds-file-upload-service/error")
       }
     }
 

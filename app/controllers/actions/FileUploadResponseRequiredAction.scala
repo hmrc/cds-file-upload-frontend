@@ -28,7 +28,7 @@ import scala.concurrent.Future
 
 class FileUploadResponseRequiredAction @Inject() extends ActionRefiner[OptionalDataRequest, FileUploadResponseRequest] {
 
-  private val onError = Redirect(routes.ErrorPageController.sessionExpired())
+  private val onError = Redirect(routes.ErrorPageController.error())
 
   override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, FileUploadResponseRequest[A]]] = {
 

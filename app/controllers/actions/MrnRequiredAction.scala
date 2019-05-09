@@ -26,7 +26,7 @@ import scala.concurrent.Future
 
 class MrnRequiredAction extends ActionRefiner[ContactDetailsRequest, MrnRequest] {
 
-  private val onError = Redirect(routes.ErrorPageController.sessionExpired())
+  private val onError = Redirect(routes.ErrorPageController.error())
 
   override protected def refine[A](request: ContactDetailsRequest[A]): Future[Either[Result, MrnRequest[A]]] = {
     Future.successful(request.userAnswers.get(MrnEntryPage).map(mrn => MrnRequest(request, request.userAnswers, mrn)).toRight(onError))

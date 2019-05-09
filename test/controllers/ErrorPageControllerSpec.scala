@@ -23,12 +23,6 @@ class ErrorPageControllerSpec extends ControllerSpecBase {
 
   "Error Controller" must {
 
-    "return the correct view for session expired" in {
-      val result = new ErrorPageController(messagesApi, appConfig).sessionExpired()(fakeRequest)
-      status(result) mustBe OK
-      contentAsString(result) mustBe session_expired()(fakeRequest, messages, appConfig).toString
-    }
-
     "return the correct view for upload error" in {
       val result = new ErrorPageController(messagesApi, appConfig).uploadError()(fakeRequest)
       status(result) mustBe OK

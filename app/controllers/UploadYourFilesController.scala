@@ -70,7 +70,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
             case _ => Redirect(nextPage(file.reference, req.fileUploadResponse.files))
           }
 
-        case None => Redirect(routes.ErrorPageController.sessionExpired())
+        case None => Redirect(routes.ErrorPageController.error())
       }
     }
 
@@ -109,7 +109,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
             }
 
           case None =>
-            Future.successful(Redirect(routes.ErrorPageController.sessionExpired()))
+            Future.successful(Redirect(routes.ErrorPageController.error()))
         }
       }
 
@@ -129,7 +129,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
             Redirect(nextPage(ref, files))
           }
 
-        case None => Future.successful(Redirect(routes.ErrorPageController.sessionExpired()))
+        case None => Future.successful(Redirect(routes.ErrorPageController.error()))
       }
     }
 
