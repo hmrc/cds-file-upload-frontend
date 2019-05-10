@@ -36,6 +36,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import views.DomAssertions
 
 import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssertions {
 
@@ -154,7 +155,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       val fileUploadsAfterContactDetails = fileUploadResponse.files.tail
 
       when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
-      when(mockUploadContactDetails.upload(any(), any())).thenReturn(Right(202))
+      when(mockUploadContactDetails.upload(any(), any())).thenReturn(Success(202))
       when(mockDataCacheConnector.save(any())(any[HeaderCarrier])).thenReturn(Future.successful(CacheMap("", Map.empty)))
       val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2")
 
@@ -177,7 +178,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       ))
       reset(mockUploadContactDetails)
       when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
-      when(mockUploadContactDetails.upload(any(), any())).thenReturn(Left(new IllegalStateException()))
+      when(mockUploadContactDetails.upload(any(), any())).thenReturn(Failure(new IllegalStateException()))
 
       val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2")
 

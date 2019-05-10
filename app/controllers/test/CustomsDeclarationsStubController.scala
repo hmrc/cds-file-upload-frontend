@@ -24,12 +24,14 @@ import models.{FileUpload, FileUploadResponse, UploadRequest, Waiting}
 import play.api.http.ContentTypes
 import play.api.libs.Files
 import play.api.mvc.{Action, MultipartFormData}
+import services.NotificationService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
+import scala.concurrent.Future
 import scala.xml._
 
 @Singleton
-class CustomsDeclarationsStubController @Inject()() extends FrontendController {
+class CustomsDeclarationsStubController @Inject()(notificationService: NotificationService) extends FrontendController {
 
   // for now, we will just return some random
   def handleBatchFileUploadRequest: Action[NodeSeq] = Action(parse.xml) { implicit req =>
@@ -50,7 +52,17 @@ class CustomsDeclarationsStubController @Inject()() extends FrontendController {
     Ok(XmlHelper.toXml(resp)).as(ContentTypes.XML)
   }
 
-  def handleS3FileUploadRequest: Action[MultipartFormData[Files.TemporaryFile]] = Action(parse.multipartFormData) { implicit req => NoContent }
+  def handleS3FileUploadRequest: Action[MultipartFormData[Files.TemporaryFile]] = Action(parse.multipartFormData) { implicit req =>
+    Future { callBack() }
+    NoContent
+  }
+
+
+  def callBack() = {
+    Thread.sleep(1000)
+    val notification = <notification>success</notification>
+    notificationService.save(notification)
+  }
 }
 
 object XmlHelper {
