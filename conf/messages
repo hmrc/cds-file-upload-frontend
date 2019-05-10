@@ -99,6 +99,7 @@ fileUploadReceiptPage.imports=Imports helpline:
 fileUploadReceiptPage.imports.tel=03000 588 454
 fileUploadReceiptPage.exports=Exports helpline:
 fileUploadReceiptPage.exports.tel=03000 588 401
+helplineNumber.paragraph1=If you have any problems call the helpline.
 
 # Errors
 unauthorised.title=You can’t access this service with this account
