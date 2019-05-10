@@ -21,6 +21,9 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 class NotificationCallbackController extends FrontendController {
 
-  def onNotify = Action { implicit req => Accepted }
+  def onNotify = Action { implicit req =>
+
+//    notificationService.save(notification)
+    Accepted }
 
 }

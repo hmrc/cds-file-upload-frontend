@@ -30,6 +30,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.Files.TemporaryFile
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.AuditExtensions._
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{Audit, DataEvent}
@@ -57,7 +58,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
   private val audit = Audit(AuditSource, auditConnector)
 
   def onPageLoad(ref: String): Action[AnyContent] =
-    (authenticate andThen requireEori andThen getData andThen requireResponse) { implicit req =>
+    (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
 
       val references = req.fileUploadResponse.files.map(_.reference)
       val filenames = req.fileUploadResponse.files.map(_.filename).filter(_.nonEmpty)
@@ -66,11 +67,11 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
       req.fileUploadResponse.files.find(_.reference == ref) match {
         case Some(file) =>
           file.state match {
-            case Waiting(_) => Ok(views.html.upload_your_files(ref, refPosition, filenames))
-            case _ => Redirect(nextPage(file.reference, req.fileUploadResponse.files))
+            case Waiting(_) => Future.successful(Ok(views.html.upload_your_files(ref, refPosition, filenames)))
+            case _ => nextPage(file.reference, req.fileUploadResponse.files)
           }
 
-        case None => Redirect(routes.ErrorPageController.error())
+        case None => Future.successful(Redirect(routes.ErrorPageController.error()))
       }
     }
 
@@ -105,7 +106,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
                 }
 
               case _ =>
-                Future.successful(Redirect(nextPage(file.reference, req.fileUploadResponse.files)))
+                nextPage(file.reference, req.fileUploadResponse.files)
             }
 
           case None =>
@@ -125,8 +126,8 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
           val updatedFiles = file.copy(state = Uploaded) :: files.filterNot(_.reference == ref)
           val answers: UserAnswers = req.userAnswers.set(HowManyFilesUploadPage.Response, FileUploadResponse(updatedFiles))
 
-          dataCacheConnector.save(answers.cacheMap).map { _ =>
-            Redirect(nextPage(ref, files))
+          dataCacheConnector.save(answers.cacheMap).flatMap { _ =>
+            nextPage(ref, files)
           }
 
         case None => Future.successful(Redirect(routes.ErrorPageController.error()))
@@ -139,15 +140,40 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
     }
 
     nextFileToUpload match {
-      case Some(file) => nextFile(file)
+      case Some(file) => Future.successful(Redirect(nextFile(file)))
       case None => allFilesUploaded
     }
   }
 
+
+  def failedUpload(cache: CacheMap): Boolean = cache.data("outcome").toString() != "SUCCESS"
+
   private def allFilesUploaded(implicit req: FileUploadResponseRequest[_]) = {
-    auditUploadSuccess()
-    //TODOcheck cache -> wait until all receipts are processed -> only load page if all good
-    routes.UploadYourFilesReceiptController.onPageLoad()
+    val uploads = req.fileUploadResponse.files
+
+    def retrieveNotifications(retries: Int = 0): Future[Result] = {
+      val receivedNotifications = Future.sequence(uploads.map(upload => dataCacheConnector.fetch(upload.reference)))
+
+      receivedNotifications.flatMap {
+        case ns if ns.flatten.exists(failedUpload) =>
+          println("********* THERE IS A FAILED UPLOAD *********")
+          Future.successful(Redirect(routes.ErrorPageController.uploadError()))
+
+        case ns if ns.flatten.length == uploads.length =>
+          auditUploadSuccess()
+          Future.successful(Redirect(routes.UploadYourFilesReceiptController.onPageLoad()))
+
+        case ns if retries < 10 =>
+          println("************* NOTIFICATIONS: " + ns)
+          Thread.sleep(5000)
+          retrieveNotifications(retries + 1)
+        case _ =>
+          println("********* MAX RETRIES EXCEEDED *********")
+          Future.successful(Redirect(routes.ErrorPageController.uploadError()))
+      }
+    }
+
+    retrieveNotifications()
   }
 
   private def auditUploadSuccess()(implicit req: FileUploadResponseRequest[_]) = {
@@ -174,7 +200,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
     )
   }
 
-  private def nextFile(file: FileUpload): Call = routes.UploadYourFilesController.onPageLoad(file.reference)
+  private def nextFile(file: FileUpload) = routes.UploadYourFilesController.onPageLoad(file.reference)
 
   private def getPosition(ref: String, refs: List[String]) = refs match {
     case head :: tail if head == ref => First(refs.size)

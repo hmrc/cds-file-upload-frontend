@@ -16,8 +16,6 @@
 
 package controllers.test
 
-import java.util.UUID
-
 import javax.inject.{Inject, Singleton}
 import models.Field._
 import models.{FileUpload, FileUploadResponse, UploadRequest, Waiting}
@@ -25,6 +23,7 @@ import play.api.http.ContentTypes
 import play.api.libs.Files
 import play.api.mvc.{Action, MultipartFormData}
 import services.NotificationService
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.Future
@@ -33,19 +32,22 @@ import scala.xml._
 @Singleton
 class CustomsDeclarationsStubController @Inject()(notificationService: NotificationService) extends FrontendController {
 
+  var fileRef = 1
+
   // for now, we will just return some random
   def handleBatchFileUploadRequest: Action[NodeSeq] = Action(parse.xml) { implicit req =>
+    fileRef = 1
     val fileGroupSize = (scala.xml.XML.loadString(req.body.mkString) \ "FileGroupSize").text.toInt
     val resp = FileUploadResponse((1 to fileGroupSize).map { i =>
-      FileUpload(reference = UUID.randomUUID().toString, Waiting(UploadRequest(
+      FileUpload(reference = i.toString, Waiting(UploadRequest(
         href = "http://localhost:6793/cds-file-upload-service/test-only/s3-bucket",
         fields = Map(
-          Algorithm.toString   -> "AWS4-HMAC-SHA256",
-          Signature.toString   -> "xxxx",
-          Key.toString         -> "xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-          ACL.toString         -> "private",
+          Algorithm.toString -> "AWS4-HMAC-SHA256",
+          Signature.toString -> "xxxx",
+          Key.toString -> "xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+          ACL.toString -> "private",
           Credentials.toString -> "ASIAxxxxxxxxx/20180202/eu-west-2/s3/aws4_request",
-          Policy.toString      -> "xxxxxxxx=="
+          Policy.toString -> "xxxxxxxx=="
         )
       )))
     }.toList)
@@ -53,14 +55,28 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
   }
 
   def handleS3FileUploadRequest: Action[MultipartFormData[Files.TemporaryFile]] = Action(parse.multipartFormData) { implicit req =>
-    Future { callBack() }
+
+    Future {
+      callBack()
+    }
     NoContent
   }
 
 
-  def callBack() = {
+  def callBack()(implicit hc:HeaderCarrier) = {
+
     Thread.sleep(1000)
-    val notification = <notification>success</notification>
+
+    val notification =
+      <Root>
+        <FileReference>{fileRef}</FileReference>
+        <BatchId>5e634e09-77f6-4ff1-b92a-8a9676c715c4</BatchId>
+        <FileName>sample.pdf</FileName>
+        <Outcome>SUCCESS</Outcome>
+        <Details>[detail block]</Details>
+      </Root>
+
+    fileRef += 1
     notificationService.save(notification)
   }
 }
@@ -72,7 +88,9 @@ object XmlHelper {
 
   def toXml(uploadRequest: UploadRequest): Elem =
     <UploadRequest>
-      <Href>{uploadRequest.href}</Href>
+      <Href>
+        {uploadRequest.href}
+      </Href>
       <Fields>
         {uploadRequest.fields.map(toXml)}
       </Fields>
@@ -80,15 +98,19 @@ object XmlHelper {
 
   def toXml(file: FileUpload): Elem =
     <File>
-      <Reference>{file.reference}</Reference>{file.state match {
-        case Waiting(request) => toXml(request)
-        case _ => NodeSeq.Empty
-      }}
+      <Reference>
+        {file.reference}
+      </Reference>{file.state match {
+      case Waiting(request) => toXml(request)
+      case _ => NodeSeq.Empty
+    }}
     </File>
 
   def toXml(response: FileUploadResponse): Elem = {
     <FileUploadResponse xmlns="hmrc:fileupload">
-      <Files>{response.files.map(toXml)}</Files>
+      <Files>
+        {response.files.map(toXml)}
+      </Files>
     </FileUploadResponse>
   }
 
