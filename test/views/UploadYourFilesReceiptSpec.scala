@@ -35,11 +35,7 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
     "whatHappensNext",
     "paragraph1",
     "paragraph2",
-    "helpline",
-    "imports",
-    "imports.tel",
-    "exports",
-    "exports.tel"
+    "helpline"
   )
 
   "File Upload Receipt Page" must {

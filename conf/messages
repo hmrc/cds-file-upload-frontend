@@ -95,13 +95,16 @@ fileUploadReceiptPage.paragraph1=As long as you have provided the documents that
 fileUploadReceiptPage.paragraph2=Air freight/RoRo (Roll-on/roll-off ships are vessels that carry wheeled cargo, for example lorries) - within two hours of receipt.
 fileUploadReceiptPage.paragraph3=Maritime freight - within three hours of receipt between 0800 hrs and 1500 hrs.  Declarations received after 1500 will be cleared by 0800 the following day.
 fileUploadReceiptPage.helpline=If clearance has not been granted within these times you can call the relevant helpline listed below;
-fileUploadReceiptPage.imports=Imports helpline:
-fileUploadReceiptPage.imports.tel=03000 588 454
-fileUploadReceiptPage.exports=Exports helpline:
-fileUploadReceiptPage.exports.tel=03000 588 401
-helplineNumber.paragraph1=If you have any problems call the helpline.
 
-# Errors
+## Helpline
+
+helpline.imports=Imports helpline:
+helpline.imports.tel=03000 588 454
+helpline.exports=Exports helpline:
+helpline.exports.tel=03000 588 401
+helpline.paragraph1=If you have any problems call the helpline.
+
+## Errors
 unauthorised.title=You can’t access this service with this account
 unauthorised.heading=You can’t access this service with this account
 
