@@ -29,17 +29,10 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
 
   val view: () => Html = () => view(Nil)
 
-  val messagePrefix = "fileUploadReceiptPage"
-
-  val messageKeys = List(
-    "whatHappensNext",
-    "paragraph1",
-    "paragraph2",
-    "helpline"
-  )
+  val pagePrefix = "fileUploadReceiptPage"
 
   "File Upload Receipt Page" must {
-    behave like pageWithoutHeading(view, messagePrefix, messageKeys: _*)
+    behave like pageWithoutHeading(view, pagePrefix, "whatHappensNext", "paragraph1", "paragraph2", "helpline")
 
     "have title" in {
 
@@ -47,7 +40,7 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
 
         val doc = asDocument(view(fileUploads))
 
-        assertEqualsMessage(doc, "title", s"$messagePrefix.title")
+        assertEqualsMessage(doc, "title", s"$pagePrefix.title")
       }
     }
 
@@ -57,7 +50,7 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
 
         val doc = asDocument(view(fileUploads))
 
-        assertH1EqualsMessage(doc, s"$messagePrefix.heading", fileUploads.length)
+        assertH1EqualsMessage(doc, s"$pagePrefix.heading", fileUploads.length)
       }
     }
 
@@ -73,5 +66,9 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
         }
       }
     }
+  }
+
+  "File Upload Receipt Page helpline info" must {
+    behave like pageWithoutHeading(view, "helpline", "imports", "imports.tel", "exports", "exports.tel")
   }
 }

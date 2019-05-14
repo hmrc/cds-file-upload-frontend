@@ -31,18 +31,9 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with Propert
 
   val messagePrefix = "fileUploadPage"
 
-  val messageKeys = List(
-                          "p.fileNeedsToBe",
-                          "listItem1",
-                          "listItem2",
-                          "listItem3",
-                          "listItem4",
-                          "listItem5"
-                        )
-
   "Upload your files page" must {
 
-    behave like pageWithoutHeading(view, messagePrefix, messageKeys: _*)
+    behave like pageWithoutHeading(view, messagePrefix, "p.fileNeedsToBe", "listItem1", "listItem2", "listItem3", "listItem4", "listItem5")
 
     "show title" when {
 
