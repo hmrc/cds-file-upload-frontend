@@ -31,6 +31,7 @@ import play.api.libs.json.Json
 import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc.{MaxSizeExceeded, MultipartFormData}
 import play.api.test.Helpers._
+import repositories.NotificationRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -43,9 +44,10 @@ import scala.util.{Failure, Try}
 
 class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
-  private val mockMaterializer: Materializer = mock[Materializer]
-  private val mockUpscanConnector: UpscanS3Connector = mock[UpscanS3Connector]
+  private val mockMaterializer = mock[Materializer]
+  private val mockUpscanConnector  = mock[UpscanS3Connector]
   private val mockAuditConnector = mock[AuditConnector]
+  private val mockNotificationRepository = mock[NotificationRepository]
 
   private val responseGen: Gen[(FileUpload, FileUploadResponse)] =
     for {
@@ -79,6 +81,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
       mockDataCacheConnector,
       mockUpscanConnector,
       mockAuditConnector,
+      mockNotificationRepository,
       appConfig,
       mockMaterializer)
 

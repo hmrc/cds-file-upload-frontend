@@ -16,23 +16,26 @@
 
 package services
 
-import connectors.DataCacheConnector
-import javax.inject.Inject
-import play.api.libs.json.JsString
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.cache.client.CacheMap
+import javax.inject._
+import models.Notification
+import reactivemongo.api.commands.WriteResult
+import repositories.NotificationRepository
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.Elem
 
-class NotificationService @Inject()(cache: DataCacheConnector) {
+@Singleton
+class NotificationService @Inject()(repository: NotificationRepository) {
 
-  def save(notification: Elem)(implicit hc: HeaderCarrier): Future[CacheMap] = {
+  def save(notification: Elem)(implicit ec: ExecutionContext): Future[WriteResult] = {
     val fileReference = (notification \\ "FileReference").text
     val outcome = (notification \\ "Outcome").text
 
     println("&" * 100)
     println("saving notification to cache for file ref: " + fileReference)
     println("&" * 100)
-    cache.save(CacheMap(fileReference, Map("outcome" -> JsString(outcome))))}
+    repository.insert(Notification(fileReference, outcome))
+  }
+
+  def drop(implicit ec: ExecutionContext): Future[Boolean] = repository.drop
 }

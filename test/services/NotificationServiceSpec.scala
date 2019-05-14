@@ -16,26 +16,25 @@
 
 package services
 
-import connectors.MongoCacheConnector
-import org.mockito.ArgumentMatchers._
+import models.Notification
+import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito._
-import org.mockito.invocation.InvocationOnMock
-import org.mockito.stubbing.Answer
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{Matchers, WordSpec}
-import play.api.libs.json.JsString
+import org.scalatestplus.play.PlaySpec
+import play.api.test.Helpers._
+import reactivemongo.api.commands.DefaultWriteResult
+import repositories.NotificationRepository
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.cache.client.CacheMap
 
-import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
-class NotificationServiceSpec extends WordSpec with Matchers with MockitoSugar with ScalaFutures {
+class NotificationServiceSpec extends PlaySpec with MockitoSugar {
 
   implicit val hc = mock[HeaderCarrier]
-  val mockCache = mock[MongoCacheConnector]
+  val mockRepository = mock[NotificationRepository]
 
-  val service = new NotificationService(mockCache)
+  val service = new NotificationService(mockRepository)
 
   val SuccessNotification =
     <Root>
@@ -49,11 +48,10 @@ class NotificationServiceSpec extends WordSpec with Matchers with MockitoSugar w
   "Notification service" should {
 
     "save a success notification" in {
-      when(mockCache.save(any[CacheMap])(any[HeaderCarrier])).thenAnswer(new Answer[Future[CacheMap]]{
-        override def answer(invocation: InvocationOnMock): Future[CacheMap] = Future.successful(invocation.getArgument(0))
-      })
+      when(mockRepository.insert(any[Notification])(any[ExecutionContext])).thenReturn(Future.successful(DefaultWriteResult(ok = true, 1, Seq.empty, None, None, None)))
 
-      service.save(SuccessNotification).futureValue shouldBe CacheMap("e4d94295-52b1-4837-bdc0-7ab8d7b0f1af", Map("outcome" -> JsString("SUCCESS")))
+      await(service.save(SuccessNotification))
+      verify(mockRepository).insert(eqTo(Notification("e4d94295-52b1-4837-bdc0-7ab8d7b0f1af", "SUCCESS")))(any[ExecutionContext])
     }
   }
 }

@@ -29,6 +29,7 @@ import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.Files.TemporaryFile
 import play.api.mvc._
+import repositories.NotificationRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.AuditExtensions._
@@ -49,6 +50,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
                                           dataCacheConnector: DataCacheConnector,
                                           upscanS3Connector: UpscanS3Connector,
                                           auditConnector: AuditConnector,
+                                          notificationRepository: NotificationRepository,
                                           implicit val appConfig: AppConfig,
                                           implicit val mat: Materializer) extends FrontendController with I18nSupport {
 
@@ -146,13 +148,13 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
   }
 
 
-  def failedUpload(cache: CacheMap): Boolean = cache.data("outcome").toString() != "SUCCESS"
+  def failedUpload(notification: Notification): Boolean = notification.outcome != "SUCCESS"
 
   private def allFilesUploaded(implicit req: FileUploadResponseRequest[_]) = {
     val uploads = req.fileUploadResponse.files
 
     def retrieveNotifications(retries: Int = 0): Future[Result] = {
-      val receivedNotifications = Future.sequence(uploads.map(upload => dataCacheConnector.fetch(upload.reference)))
+      val receivedNotifications = Future.sequence(uploads.map(upload => notificationRepository.find("fileReference" -> upload.reference)))
 
       receivedNotifications.flatMap {
         case ns if ns.flatten.exists(failedUpload) =>
@@ -160,11 +162,13 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
           Future.successful(Redirect(routes.ErrorPageController.uploadError()))
 
         case ns if ns.flatten.length == uploads.length =>
+          println("********* All Notifications are SUCCESS : *********")
+          println(s"***** Notifications: ${ns.flatten}")
           auditUploadSuccess()
           Future.successful(Redirect(routes.UploadYourFilesReceiptController.onPageLoad()))
 
         case ns if retries < 10 =>
-          println("************* NOTIFICATIONS: " + ns)
+          println(s"***** Notifications: ${ns.flatten}")
           Thread.sleep(5000)
           retrieveNotifications(retries + 1)
         case _ =>

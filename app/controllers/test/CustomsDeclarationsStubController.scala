@@ -37,6 +37,11 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
   // for now, we will just return some random
   def handleBatchFileUploadRequest: Action[NodeSeq] = Action(parse.xml) { implicit req =>
     fileRef = 1
+
+    //horrible but its just a test thing
+    notificationService.drop
+    Thread.sleep(100)
+
     val fileGroupSize = (scala.xml.XML.loadString(req.body.mkString) \ "FileGroupSize").text.toInt
     val resp = FileUploadResponse((1 to fileGroupSize).map { i =>
       FileUpload(reference = i.toString, Waiting(UploadRequest(
@@ -72,7 +77,7 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
         <FileReference>{fileRef}</FileReference>
         <BatchId>5e634e09-77f6-4ff1-b92a-8a9676c715c4</BatchId>
         <FileName>sample.pdf</FileName>
-        <Outcome>SUCCESS</Outcome>
+        <Outcome>FAIL</Outcome>
         <Details>[detail block]</Details>
       </Root>
 
