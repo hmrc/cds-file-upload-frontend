@@ -31,6 +31,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 @Singleton
 class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
@@ -66,16 +67,16 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
 
         fileUploadCount => {
           uploadContactDetails(req, fileUploadCount) map {
-            case Right(firstFile) =>
-              Redirect(routes.UploadYourFilesController.onPageLoad(firstFile.reference))
-            case Left(_) =>
+            case Right(firstUpload :: _) =>
+              Redirect(routes.UploadYourFilesController.onPageLoad(firstUpload.reference))
+            case _ =>
               Redirect(routes.ErrorPageController.error())
           }
         }
       )
     }
 
-  private def uploadContactDetails(req: MrnRequest[AnyContent], fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier): Future[Either[Throwable, FileUpload]] = {
+  private def uploadContactDetails(req: MrnRequest[AnyContent], fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier): Future[Either[Throwable, List[FileUpload]]] = {
     def saveRemainingFileUploadsToCache(fileUploadResponse: FileUploadResponse): Future[List[FileUpload]] = {
       val remainingFileUploads = fileUploadResponse.files.tail
       val answers = updateUserAnswers(req.userAnswers, fileUploadCount, FileUploadResponse(remainingFileUploads))
@@ -86,8 +87,8 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
       firstUploadFile(fileUploadResponse) match {
         case Right((_, s3UploadRequest)) =>
           uploadContactDetails.upload(req.request.contactDetails, s3UploadRequest) match {
-            case Right(success) => saveRemainingFileUploadsToCache(fileUploadResponse).map(uploads => Right(uploads.head))
-            case Left(e) => Future.successful(Left(e))
+            case Success(_) => saveRemainingFileUploadsToCache(fileUploadResponse).map(uploads => Right(uploads))
+            case Failure(e) => Future.successful(Left(e))
           }
 
         case Left(error) =>

@@ -146,6 +146,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
 
   private def allFilesUploaded(implicit req: FileUploadResponseRequest[_]) = {
     auditUploadSuccess()
+    //TODOcheck cache -> wait until all receipts are processed -> only load page if all good
     routes.UploadYourFilesReceiptController.onPageLoad()
   }
 

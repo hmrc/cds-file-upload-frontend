@@ -25,19 +25,14 @@ import javax.inject.Inject
 import models.{ContactDetails, UploadRequest}
 import play.api.libs.Files.TemporaryFile
 
-import scala.util.{Failure, Success}
+import scala.util.Try
 
 @Singleton
 class UploadContactDetails @Inject()(upscanConnector: UpscanS3Connector) {
 
   def fileName = s"contact_details_${UUID.randomUUID().toString}.txt"
 
-  //TODO Leave as Try
-  def upload(contactDetails: ContactDetails, uploadRequest: UploadRequest): Either[Throwable, Int] =
-    upscanConnector.upload(uploadRequest, toFile(contactDetails), fileName) match {
-      case Success(u) => Right(u)
-      case Failure(e) => Left(e)
-    }
+  def upload(contactDetails: ContactDetails, uploadRequest: UploadRequest): Try[Int] = upscanConnector.upload(uploadRequest, toFile(contactDetails), fileName)
 
   def toFile(contactDetails: ContactDetails): TemporaryFile = {
     val uploadFile = File.createTempFile("cds-file-upload-ui", "")
