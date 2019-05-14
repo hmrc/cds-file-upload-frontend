@@ -26,14 +26,8 @@ class StartSpec extends DomAssertions with ViewBehaviours {
 
   val messageKeyPrefix = "startPage"
 
-  val messageKeys = List("paragraph2", "p.youWillNeed", "listItem1", "listItem2", "listItem3")
-
   "Start Page" must {
-    behave like normalPage(
-      view,
-      messageKeyPrefix,
-      messageKeys: _*)
-
+    behave like normalPage(view, messageKeyPrefix, "paragraph2", "p.youWillNeed", "listItem1", "listItem2", "listItem3")
     "have a start button with correct link" in {
       val doc = asDocument(view())
       val expectedLink = routes.ContactDetailsController.onPageLoad().url

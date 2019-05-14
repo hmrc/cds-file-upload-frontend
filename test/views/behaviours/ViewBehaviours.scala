@@ -21,9 +21,7 @@ import views.DomAssertions
 
 trait ViewBehaviours extends DomAssertions {
 
-  def normalPage(view: () => HtmlFormat.Appendable,
-                 messageKeyPrefix: String,
-                 expectedGuidanceKeys: String*) = {
+  def normalPage(view: () => HtmlFormat.Appendable, messageKeyPrefix: String, expectedGuidanceKeys: String*) = {
 
     "behave like a page with a heading" when {
       "rendered" must {
@@ -48,9 +46,7 @@ trait ViewBehaviours extends DomAssertions {
     behave like pageWithoutHeading(view, messageKeyPrefix, expectedGuidanceKeys:_*)
   }
 
-  def pageWithoutHeading(view: () => HtmlFormat.Appendable,
-                         messageKeyPrefix: String,
-                         expectedGuidanceKeys: String*) = {
+  def pageWithoutHeading(view: () => HtmlFormat.Appendable, messageKeyPrefix: String, expectedGuidanceKeys: String*) = {
 
     "behave like a normal page" when {
       "rendered" must {
