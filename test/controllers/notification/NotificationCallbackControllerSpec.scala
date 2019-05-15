@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.notification
 
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
@@ -27,7 +27,7 @@ class NotificationCallbackControllerSpec extends PlaySpec with GuiceOneServerPer
 
     "return 202 on POST requests" in {
       val wsClient = app.injector.instanceOf[WSClient]
-      val notificationUrl = s"http://localhost:$port/cds-file-upload-service/notification"
+      val notificationUrl = s"http://localhost:$port/internal/notification"
 
       val response = await(wsClient.url(notificationUrl).withHeaders("Content-Type" -> "application/xml").post("<foo/>"))
 

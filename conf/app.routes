@@ -26,5 +26,3 @@ GET         /upload/:ref                        controllers.UploadYourFilesContr
 POST        /upload/:ref                        controllers.UploadYourFilesController.onSubmit(ref: String)
 
 GET         /upload/success/:ref                controllers.UploadYourFilesController.onSuccess(ref: String)
-
-POST        /notification                       controllers.NotificationCallbackController.onNotify

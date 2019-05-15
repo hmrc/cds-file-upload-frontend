@@ -28,10 +28,10 @@ import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.Files.TemporaryFile
+import play.api.libs.json.{JsString, Json}
 import play.api.mvc._
 import repositories.NotificationRepository
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.AuditExtensions._
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{Audit, DataEvent}
@@ -151,10 +151,16 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
   def failedUpload(notification: Notification): Boolean = notification.outcome != "SUCCESS"
 
   private def allFilesUploaded(implicit req: FileUploadResponseRequest[_]) = {
+
+    println("******* ALL FILES UPLOADED *************")
+
+
     val uploads = req.fileUploadResponse.files
 
     def retrieveNotifications(retries: Int = 0): Future[Result] = {
-      val receivedNotifications = Future.sequence(uploads.map(upload => notificationRepository.find("fileReference" -> upload.reference)))
+      val receivedNotifications = Future.sequence(uploads.map { upload =>
+        println("TRying to find notification with ref: ", upload.reference)
+        notificationRepository.find("fileReference" -> JsString(upload.reference))})
 
       receivedNotifications.flatMap {
         case ns if ns.flatten.exists(failedUpload) =>

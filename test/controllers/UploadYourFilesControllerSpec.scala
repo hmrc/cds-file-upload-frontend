@@ -45,7 +45,7 @@ import scala.util.{Failure, Try}
 class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
   private val mockMaterializer = mock[Materializer]
-  private val mockUpscanConnector  = mock[UpscanS3Connector]
+  private val mockUpscanConnector = mock[UpscanS3Connector]
   private val mockAuditConnector = mock[AuditConnector]
   private val mockNotificationRepository = mock[NotificationRepository]
 
@@ -68,7 +68,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
   override def beforeEach = {
     super.beforeEach
-    reset(mockMaterializer, mockUpscanConnector, mockAuditConnector)
+    reset(mockMaterializer, mockUpscanConnector, mockAuditConnector, mockNotificationRepository)
   }
 
   def controller(getData: DataRetrievalAction) =
@@ -115,26 +115,19 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
     "redirect to the next page" when {
 
-      "file has already been uploaded" in {
+      "file upload is in an 'Uploaded' state" in {
+        val fileUpload = FileUpload("ref1", Uploaded)
+        val response = FileUploadResponse(List(fileUpload))
 
-        val fileUploadedGen = responseGen.map {
-          case (file, _) =>
-            val uploadedFile = file.copy(state = Uploaded)
+        forAll { cache: CacheMap =>
 
-            (uploadedFile, FileUploadResponse(List(uploadedFile)))
-        }
+          val updatedCache = combine(response, cache)
 
-        forAll(fileUploadedGen, arbitrary[CacheMap]) {
-          case ((file, response), cache) =>
+          when(mockNotificationRepository.find(any())(any[ExecutionContext])).thenReturn(Future.successful(List(Notification("ref1", "SUCCESS"))))
+          val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad(fileUpload.reference)(fakeRequest)
 
-            val reference = nextRef(file.reference, response.files.map(_.reference))
-            val nextPage = routes.UploadYourFilesController.onPageLoad(reference)
-            val updatedCache = combine(response, cache)
-
-            val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad(file.reference)(fakeRequest)
-
-            status(result) mustBe SEE_OTHER
-            redirectLocation(result) mustBe Some(nextPage.url)
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(routes.UploadYourFilesReceiptController.onPageLoad().url)
         }
       }
     }
@@ -257,29 +250,22 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
     "redirect to the next page" when {
 
-      "file has already been uploaded" in {
+      "file upload is in an 'Uploaded' state" in {
+        val fileUpload1 = FileUpload("ref1", Uploaded)
+        val fileUpload2 = FileUpload("ref2", Waiting(UploadRequest("href", Map.empty)))
+        val response = FileUploadResponse(List(fileUpload1, fileUpload2))
 
-        val fileUploadedGen = responseGen.map {
-          case (file, _) =>
-            val uploadedFile = file.copy(state = Uploaded)
+        forAll { cache: CacheMap =>
 
-            (uploadedFile, FileUploadResponse(List(uploadedFile)))
-        }
+          when(mockNotificationRepository.find(any())(any[ExecutionContext])).thenReturn(Future.successful(List(Notification("ref1", "SUCCESS"))))
+          val updatedCache = combine(response, cache)
+          val filePart = FilePart[TemporaryFile](key = "file", "file.pdf", contentType = Some("application/pdf"), ref = TemporaryFile())
+          val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
 
-        forAll(fileUploadedGen, arbitrary[CacheMap]) {
-          case ((file, response), cache) =>
+          val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit("ref1")(fakeRequest.withBody(Right(form)))
 
-            val reference = nextRef(file.reference, response.files.map(_.reference))
-            val nextPage = routes.UploadYourFilesController.onSubmit(reference)
-            val updatedCache = combine(response, cache)
-
-            val filePart = FilePart[TemporaryFile](key = "file", "file.pdf", contentType = Some("application/pdf"), ref = TemporaryFile())
-            val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
-
-            val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Right(form)))
-
-            status(result) mustBe SEE_OTHER
-            redirectLocation(result) mustBe Some(nextPage.url)
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onSubmit("ref2").url)
         }
       }
     }
@@ -321,32 +307,38 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
     "update file status to Uploaded" in {
 
-      forAll(waitingGen, arbitrary[CacheMap]) {
-        case ((file, _, response), cache) =>
+      val fileUpload = FileUpload("ref", Waiting(UploadRequest("href", Map.empty)))
+      val response = FileUploadResponse(List(fileUpload))
 
-          val updatedCache = combine(response, cache)
-          await(controller(fakeDataRetrievalAction(updatedCache)).onSuccess(file.reference)(fakeRequest))
+      forAll { cache: CacheMap =>
 
-          val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
-          verify(mockDataCacheConnector, atLeastOnce).save(captor.capture())(any[HeaderCarrier])
+        when(mockNotificationRepository.find(any())(any[ExecutionContext])).thenReturn(Future.successful(List(Notification("ref", "SUCCESS"))))
 
-          val Some(updateResponse) = captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response)
-          val Some(updatedFile) = updateResponse.files.find(_.reference == file.reference)
-          updatedFile.state mustBe Uploaded
+        val updatedCache = combine(response, cache)
+        await(controller(fakeDataRetrievalAction(updatedCache)).onSuccess("ref")(fakeRequest))
+
+        val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
+        verify(mockDataCacheConnector, atLeastOnce).save(captor.capture())(any[HeaderCarrier])
+
+        val Some(updateResponse) = captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response)
+        val Some(updatedFile) = updateResponse.files.find(_.reference == "ref")
+        updatedFile.state mustBe Uploaded
       }
     }
 
     "redirect user to the next upload page" in {
 
-      forAll(waitingGen, arbitrary[CacheMap]) {
-        case ((file, _, response), cache: CacheMap) =>
+      val fileUploaded = FileUpload("ref1", Uploaded)
+      val fileUploadWaiting = FileUpload("ref2", Waiting(UploadRequest("href", Map.empty)))
+      val response = FileUploadResponse(List(fileUploaded, fileUploadWaiting))
 
-          val updatedCache = combine(response, cache)
-          val result = controller(fakeDataRetrievalAction(updatedCache)).onSuccess(file.reference)(fakeRequest)
-          val next = nextRef(file.reference, response.files.collect { case FileUpload(reference, Waiting(_), _) => reference })
+      forAll { cache: CacheMap =>
 
-          status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad(next).url)
+        val updatedCache = combine(response, cache)
+        val result = controller(fakeDataRetrievalAction(updatedCache)).onSuccess(fileUploaded.reference)(fakeRequest)
+
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad(fileUploadWaiting.reference).url)
       }
     }
 
@@ -382,6 +374,12 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
         "fileName3" -> "file3.doc"
       )
 
+      when(mockNotificationRepository.find(any())(any[ExecutionContext])).thenReturn(
+        Future.successful(List(Notification("fileRef1", "SUCCESS"))), //first find
+        Future.successful(List(Notification("fileRef2", "SUCCESS"))), //second find
+        Future.successful(List(Notification("fileRef3", "SUCCESS")))  //third find
+      )
+
       val result = controller(fakeDataRetrievalAction(updatedCache)).onSuccess(lastFile.reference)(fakeRequest)
       status(result) mustBe SEE_OTHER
 
@@ -392,6 +390,34 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
       dataEvent.auditType mustBe "UploadSuccess"
       dataEvent.auditSource mustBe "cds-file-upload-frontend"
       dataEvent.detail mustBe expectedDetail
+    }
+
+
+    "load receipt page when all notifications are successful" in {
+
+      val file1 = FileUpload("fileRef1", Waiting(UploadRequest("some href", Map.empty)), "file1.jpeg")
+      val file2 = FileUpload("fileRef2", Waiting(UploadRequest("some other href", Map.empty)), "file2.pdf")
+      val lastFile = FileUpload("fileRef3", Waiting(UploadRequest("another href", Map.empty)), "file3.doc")
+      val response = FileUploadResponse(List(file1, file2, lastFile))
+
+      val Some(mrn) = MRN("34GB1234567ABCDEFG")
+      val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456", "joe@bloggs.com")
+      val cache = CacheMap("someId", Map(
+        MrnEntryPage.toString -> Json.toJson(mrn),
+        HowManyFilesUploadPage.toString -> Json.toJson(FileUploadCount(3)),
+        ContactDetailsPage.toString -> Json.toJson(cd)
+      ))
+      val updatedCache = combine(response, cache)
+
+      when(mockNotificationRepository.find(any())(any[ExecutionContext])).thenReturn(
+        Future.successful(List(Notification("fileRef1", "SUCCESS"))), //first find
+        Future.successful(List(Notification("fileRef2", "SUCCESS"))), //second find
+        Future.successful(List(Notification("fileRef3", "SUCCESS"))) //third find
+      )
+
+      val result = controller(fakeDataRetrievalAction(updatedCache)).onSuccess(lastFile.reference)(fakeRequest)
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(routes.UploadYourFilesReceiptController.onPageLoad().url)
     }
 
     "redirect to error page" when {
@@ -429,8 +455,4 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
   private def combine(response: FileUploadResponse, cache: CacheMap) =
     cache.copy(data = cache.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))
 
-  private def nextRef(ref: String, refs: List[String]) = {
-    val index = refs.sorted.indexOf(ref)
-    refs.sorted.drop(index + 1).headOption.getOrElse("receipt")
-  }
 }

@@ -1,0 +1,3 @@
+#internal routes only accessible from within MDTP (not to be exposed by Nginx to public)
+
+POST        /notification                       controllers.notification.NotificationCallbackController.onNotify

@@ -19,19 +19,10 @@ package repositories
 import javax.inject.{Inject, Singleton}
 import models.Notification
 import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
+import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.mongo.ReactiveRepository
-
-import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class NotificationRepository @Inject()(mongo: ReactiveMongoComponent) extends ReactiveRepository[Notification, BSONObjectID]("notifications", mongo.mongoConnector.db, Notification.jsonFormat) {
 
-//  def save(notification: Notification)(implicit ec: ExecutionContext): Future[Unit] =
-//    collection.findAndUpdate(BSONDocument("_id" -> notification.fileReference), notification, upsert = true) map {
-//      result => {
-//        result.lastError.map(_.err.map(e => logger.error(s"Error saving the notification : $e")))
-//        ()
-//      }
-//    }
 }
