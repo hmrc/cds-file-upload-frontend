@@ -23,6 +23,4 @@ import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.mongo.ReactiveRepository
 
 @Singleton
-class NotificationRepository @Inject()(mongo: ReactiveMongoComponent) extends ReactiveRepository[Notification, BSONObjectID]("notifications", mongo.mongoConnector.db, Notification.jsonFormat) {
-
-}
+class NotificationRepository @Inject()(mongo: ReactiveMongoComponent) extends ReactiveRepository[Notification, BSONObjectID]("notifications", mongo.mongoConnector.db, Notification.jsonFormat)

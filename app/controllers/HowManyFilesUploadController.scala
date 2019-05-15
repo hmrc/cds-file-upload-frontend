@@ -86,10 +86,6 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
     initiateUpload(req, fileUploadCount).flatMap { fileUploadResponse =>
       firstUploadFile(fileUploadResponse) match {
         case Right((x, s3UploadRequest)) =>
-          println("%%" * 100)
-          println(x.reference)
-          println(x.filename)
-          println("%%" * 100)
           uploadContactDetails.upload(req.request.contactDetails, s3UploadRequest) match {
             case Success(_) => saveRemainingFileUploadsToCache(fileUploadResponse).map(uploads => Right(uploads))
             case Failure(e) => Future.successful(Left(e))
@@ -108,5 +104,5 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
     customsDeclarationsService.batchFileUpload(req.eori, req.mrn, fileUploadCount)
 
   private def firstUploadFile(response: FileUploadResponse): Either[Throwable, (FileUpload, UploadRequest)] =
-    response.files.headOption map { case f@FileUpload(_, Waiting(u), _) => Right(f, u) } getOrElse Left(new IllegalStateException("Unable to initiate upload"))
+    response.files.headOption map { case f@FileUpload(_, Waiting(u), _) => Right((f, u)) } getOrElse Left(new IllegalStateException("Unable to initiate upload"))
 }

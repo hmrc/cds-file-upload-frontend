@@ -17,6 +17,7 @@
 package controllers
 
 import akka.stream.Materializer
+import config.Notifications
 import connectors.UpscanS3Connector
 import controllers.actions.{DataRetrievalAction, FileUploadResponseRequiredAction}
 import models._
@@ -82,7 +83,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
       mockUpscanConnector,
       mockAuditConnector,
       mockNotificationRepository,
-      appConfig,
+      appConfig.copy(notifications = Notifications(maxRetries = 3, retryPauseMillis = 500)),
       mockMaterializer)
 
   ".onPageLoad" should {
@@ -418,6 +419,60 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
       val result = controller(fakeDataRetrievalAction(updatedCache)).onSuccess(lastFile.reference)(fakeRequest)
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(routes.UploadYourFilesReceiptController.onPageLoad().url)
+    }
+
+    "load upload error page when we get a fail notification" in {
+
+      val file1 = FileUpload("fileRef1", Waiting(UploadRequest("some href", Map.empty)), "file1.jpeg")
+      val file2 = FileUpload("fileRef2", Waiting(UploadRequest("some other href", Map.empty)), "file2.pdf")
+      val lastFile = FileUpload("fileRef3", Waiting(UploadRequest("another href", Map.empty)), "file3.doc")
+      val response = FileUploadResponse(List(file1, file2, lastFile))
+
+      val Some(mrn) = MRN("34GB1234567ABCDEFG")
+      val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456", "joe@bloggs.com")
+      val cache = CacheMap("someId", Map(
+        MrnEntryPage.toString -> Json.toJson(mrn),
+        HowManyFilesUploadPage.toString -> Json.toJson(FileUploadCount(3)),
+        ContactDetailsPage.toString -> Json.toJson(cd)
+      ))
+      val updatedCache = combine(response, cache)
+
+      when(mockNotificationRepository.find(any())(any[ExecutionContext])).thenReturn(
+        Future.successful(List(Notification("fileRef1", "SUCCESS"))), //first find
+        Future.successful(List(Notification("fileRef2", "FAIL"))), //second find
+        Future.successful(List(Notification("fileRef3", "SUCCESS"))) //third find
+      )
+
+      val result = controller(fakeDataRetrievalAction(updatedCache)).onSuccess(lastFile.reference)(fakeRequest)
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(routes.ErrorPageController.uploadError().url)
+    }
+
+    "load upload error page when notification retries are exceeded" in {
+
+      val file1 = FileUpload("fileRef1", Waiting(UploadRequest("some href", Map.empty)), "file1.jpeg")
+      val file2 = FileUpload("fileRef2", Waiting(UploadRequest("some other href", Map.empty)), "file2.pdf")
+      val lastFile = FileUpload("fileRef3", Waiting(UploadRequest("another href", Map.empty)), "file3.doc")
+      val response = FileUploadResponse(List(file1, file2, lastFile))
+
+      val Some(mrn) = MRN("34GB1234567ABCDEFG")
+      val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456", "joe@bloggs.com")
+      val cache = CacheMap("someId", Map(
+        MrnEntryPage.toString -> Json.toJson(mrn),
+        HowManyFilesUploadPage.toString -> Json.toJson(FileUploadCount(3)),
+        ContactDetailsPage.toString -> Json.toJson(cd)
+      ))
+      val updatedCache = combine(response, cache)
+
+      when(mockNotificationRepository.find(any())(any[ExecutionContext])).thenReturn(
+        Future.successful(List(Notification("fileRef1", "SUCCESS"))), //first find
+        Future.successful(List(Notification("fileRef2", "SUCCESS"))), //second find
+        Future.successful(List.empty) //third find
+      )
+
+      val result = controller(fakeDataRetrievalAction(updatedCache)).onSuccess(lastFile.reference)(fakeRequest)
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(routes.ErrorPageController.uploadError().url)
     }
 
     "redirect to error page" when {

@@ -35,8 +35,6 @@ class UpscanS3Connector() {
   def upload(template: UploadRequest, file: TemporaryFile, fileName: String): Try[Int] = {
     val builder = MultipartEntityBuilder.create
 
-    println("************************UPLOADING FILE REF " + template)
-
     template.fields.foreach {
       case (name, value) => builder.addPart(name, new StringBody(value, ContentType.TEXT_PLAIN))
     }

@@ -30,10 +30,6 @@ class NotificationService @Inject()(repository: NotificationRepository) {
   def save(notification: Elem)(implicit ec: ExecutionContext): Future[WriteResult] = {
     val fileReference = (notification \\ "FileReference").text
     val outcome = (notification \\ "Outcome").text
-
-    println("&" * 100)
-    println("saving notification to cache for file ref: " + fileReference)
-    println("&" * 100)
     repository.insert(Notification(fileReference, outcome))
   }
 

@@ -58,6 +58,8 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
   private val FileTypes = appConfig.fileFormats.approvedFileTypes.split(',').map(_.trim)
   private val AuditSource = appConfig.appName
   private val audit = Audit(AuditSource, auditConnector)
+  private val notificationsMaxRetries = appConfig.notifications.maxRetries
+  private val notificationsRetryPause = appConfig.notifications.retryPauseMillis
 
   def onPageLoad(ref: String): Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
@@ -151,34 +153,24 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
   def failedUpload(notification: Notification): Boolean = notification.outcome != "SUCCESS"
 
   private def allFilesUploaded(implicit req: FileUploadResponseRequest[_]) = {
-
-    println("******* ALL FILES UPLOADED *************")
-
-
     val uploads = req.fileUploadResponse.files
 
     def retrieveNotifications(retries: Int = 0): Future[Result] = {
       val receivedNotifications = Future.sequence(uploads.map { upload =>
-        println("TRying to find notification with ref: ", upload.reference)
         notificationRepository.find("fileReference" -> JsString(upload.reference))})
 
       receivedNotifications.flatMap {
         case ns if ns.flatten.exists(failedUpload) =>
-          println("********* THERE IS A FAILED UPLOAD *********")
           Future.successful(Redirect(routes.ErrorPageController.uploadError()))
 
         case ns if ns.flatten.length == uploads.length =>
-          println("********* All Notifications are SUCCESS : *********")
-          println(s"***** Notifications: ${ns.flatten}")
           auditUploadSuccess()
           Future.successful(Redirect(routes.UploadYourFilesReceiptController.onPageLoad()))
 
-        case ns if retries < 10 =>
-          println(s"***** Notifications: ${ns.flatten}")
-          Thread.sleep(5000)
+        case ns if retries < notificationsMaxRetries =>
+          Thread.sleep(notificationsRetryPause)
           retrieveNotifications(retries + 1)
         case _ =>
-          println("********* MAX RETRIES EXCEEDED *********")
           Future.successful(Redirect(routes.ErrorPageController.uploadError()))
       }
     }
