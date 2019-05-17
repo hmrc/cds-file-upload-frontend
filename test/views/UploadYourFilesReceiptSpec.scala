@@ -32,7 +32,7 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
   val pagePrefix = "fileUploadReceiptPage"
 
   "File Upload Receipt Page" must {
-    behave like pageWithoutHeading(view, pagePrefix, "whatHappensNext", "paragraph1", "paragraph2", "helpline")
+    behave like pageWithoutHeading(view, pagePrefix, "whatHappensNext", "paragraph1", "paragraph2", "listitem1", "listitem2", "listitem3")
 
     "have title" in {
 
@@ -66,9 +66,5 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
         }
       }
     }
-  }
-
-  "File Upload Receipt Page helpline info" must {
-    behave like pageWithoutHeading(view, "helpline", "imports", "imports.tel", "exports", "exports.tel")
   }
 }
