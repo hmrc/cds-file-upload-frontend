@@ -91,10 +91,12 @@ fileUploadReceiptPage.paragraphIntro=Ensure you take a copy or print your receip
 fileUploadReceiptPage.whatHappensNext=What happens next?
 fileUploadReceiptPage.fileName=File name
 fileUploadReceiptPage.receipt=Receipt
-fileUploadReceiptPage.paragraph1=As long as you have provided the documents that HMRC need to clear your goods, they should be cleared within the following times;
-fileUploadReceiptPage.paragraph2=Air freight/RoRo (Roll-on/roll-off ships are vessels that carry wheeled cargo, for example lorries) - within two hours of receipt.
-fileUploadReceiptPage.paragraph3=Maritime freight - within three hours of receipt between 0800 hrs and 1500 hrs.  Declarations received after 1500 will be cleared by 0800 the following day.
-fileUploadReceiptPage.helpline=If clearance has not been granted within these times you can call the relevant helpline listed below;
+fileUploadReceiptPage.paragraph1=Providing you have submitted the correct documentation, HMRC aim to clear your goods within the following times:
+fileUploadReceiptPage.paragraph2=If clearance has not been granted within these times you can call the helpline on: 0300 322 7900.
+fileUploadReceiptPage.listitem1=Air freight/RoRo/exports - within two hours of receipt
+fileUploadReceiptPage.listitem2=Maritime freight – within three hours of receipt between 0800 hrs and 1500 hrs.
+fileUploadReceiptPage.listitem3=Declarations received after 1500 hrs will be cleared by 0800 hrs the following day
+
 
 ## Helpline
 
