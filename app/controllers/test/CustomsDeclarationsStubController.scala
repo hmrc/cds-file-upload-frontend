@@ -27,11 +27,11 @@ import play.api.mvc.{Action, MultipartFormData}
 import services.NotificationService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.xml._
 
 @Singleton
-class CustomsDeclarationsStubController @Inject()(notificationService: NotificationService) extends FrontendController {
+class CustomsDeclarationsStubController @Inject()(notificationService: NotificationService)(implicit ec: ExecutionContext) extends FrontendController {
 
   // for now, we will just return some random
   def handleBatchFileUploadRequest: Action[NodeSeq] = Action(parse.xml) { implicit req =>
