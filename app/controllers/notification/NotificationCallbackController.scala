@@ -22,8 +22,10 @@ import play.api.mvc.Action
 import services.NotificationService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
+import scala.concurrent.ExecutionContext
+
 @Singleton
-class NotificationCallbackController @Inject()(notificationService: NotificationService) extends FrontendController {
+class NotificationCallbackController @Inject()(notificationService: NotificationService)(implicit ec: ExecutionContext) extends FrontendController {
 
   def onNotify = Action.async(parse.xml) { implicit req =>
     val notification = req.body
