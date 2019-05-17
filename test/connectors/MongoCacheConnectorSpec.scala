@@ -16,14 +16,10 @@
 
 package connectors
 
-import generators.Generators
+import base.SpecBase
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito._
 import org.scalacheck.Arbitrary.arbitrary
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.prop.PropertyChecks
-import org.scalatest.{MustMatchers, OptionValues, WordSpec}
 import play.api.libs.json.JsString
 import repositories.CacheMapRepository
 import uk.gov.hmrc.http.HeaderCarrier
@@ -31,9 +27,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
 
-class MongoCacheConnectorSpec extends WordSpec with MustMatchers with PropertyChecks with Generators with MockitoSugar with ScalaFutures with OptionValues {
-
-  implicit val hc = mock[HeaderCarrier]
+class MongoCacheConnectorSpec extends SpecBase {
 
   ".save" must {
 
@@ -42,7 +36,6 @@ class MongoCacheConnectorSpec extends WordSpec with MustMatchers with PropertyCh
       val mockCacheMapRepository = mock[CacheMapRepository]
       val mongoCacheConnector = new MongoCacheConnector(mockCacheMapRepository)
 
-      //TODO REMOVE ARB
       forAll(arbitrary[CacheMap]) { cacheMap =>
         when(mockCacheMapRepository.put(eqTo(cacheMap))(any(), any(), any[HeaderCarrier])) thenReturn Future.successful(cacheMap)
         mongoCacheConnector.save(cacheMap).futureValue mustBe cacheMap
@@ -72,7 +65,6 @@ class MongoCacheConnectorSpec extends WordSpec with MustMatchers with PropertyCh
 
         val mongoCacheConnector = new MongoCacheConnector(mockCacheMapRepository)
 
-        //TODO REMOVE ARB
         forAll(arbitrary[CacheMap]) { cacheMap =>
           when(mockCacheMapRepository.get(eqTo(cacheMap.id))(any(), any[HeaderCarrier])) thenReturn Future.successful(Some(cacheMap))
           mongoCacheConnector.fetch(cacheMap.id).futureValue mustBe Some(cacheMap)

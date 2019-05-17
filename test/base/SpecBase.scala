@@ -31,11 +31,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 trait SpecBase extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar with BeforeAndAfterEach with PropertyChecks with Generators with ScalaFutures {
 
-  lazy val injector: Injector = app.injector
+  implicit lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
 
-  implicit lazy val messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
-
-  lazy val appConfig: AppConfig = injector.instanceOf[AppConfig]
+  lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
 
   lazy val fakeRequest = FakeRequest("", "")
 

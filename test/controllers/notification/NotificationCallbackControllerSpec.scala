@@ -23,13 +23,28 @@ import play.api.test.Helpers._
 
 class NotificationCallbackControllerSpec extends PlaySpec with GuiceOneServerPerSuite {
 
-  "Dummy notification endpoint" should {
+  val wsClient = app.injector.instanceOf[WSClient]
+  val notificationUrl = s"http://localhost:$port/internal/notification"
+  
+  "Notification endpoint" should {
 
-    "return 202 on POST requests" in {
-      val wsClient = app.injector.instanceOf[WSClient]
-      val notificationUrl = s"http://localhost:$port/internal/notification"
+    "return 400 Bad Request on POST requests for invalid xml" in {
+      val response = await(wsClient.url(notificationUrl).withHeaders("Content-Type" -> "application/xml").post(<invalid/>))
 
-      val response = await(wsClient.url(notificationUrl).withHeaders("Content-Type" -> "application/xml").post("<foo/>"))
+      response.status mustBe BAD_REQUEST
+    }
+
+    "return 202 Accepted on POST requests for valid xml" in {
+      val notification =
+            <Root>
+              <FileReference>some-file-ref-123</FileReference>
+              <BatchId>5e634e09-77f6-4ff1-b92a-8a9676c715c4</BatchId>
+              <FileName>sample.pdf</FileName>
+              <Outcome>SUCCESS</Outcome>
+              <Details>[detail block]</Details>
+            </Root>
+      
+      val response = await(wsClient.url(notificationUrl).withHeaders("Content-Type" -> "application/xml").post(notification))
 
       response.status mustBe ACCEPTED
     }

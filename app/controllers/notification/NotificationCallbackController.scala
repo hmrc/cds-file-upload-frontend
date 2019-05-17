@@ -16,14 +16,21 @@
 
 package controllers.notification
 
+import javax.inject.{Inject, Singleton}
 import play.api.mvc.Action
+import services.NotificationService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-class NotificationCallbackController extends FrontendController {
+@Singleton
+class NotificationCallbackController @Inject()(notificationService: NotificationService) extends FrontendController {
 
-  def onNotify = Action { implicit req =>
+  def onNotify = Action.async(parse.xml) { implicit req =>
+    val notification = req.body
 
-//    notificationService.save(notification)
-    Accepted }
-
+    notificationService.save(notification) map {
+      _ => Accepted
+    } recover {
+      case _: Throwable => BadRequest
+    }
+  }
 }

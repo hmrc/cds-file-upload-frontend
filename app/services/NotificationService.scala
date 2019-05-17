@@ -22,15 +22,19 @@ import reactivemongo.api.commands.WriteResult
 import repositories.NotificationRepository
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.xml.Elem
+import scala.xml.NodeSeq
 
 @Singleton
 class NotificationService @Inject()(repository: NotificationRepository) {
 
-  def save(notification: Elem)(implicit ec: ExecutionContext): Future[WriteResult] = {
+  def save(notification: NodeSeq)(implicit ec: ExecutionContext): Future[WriteResult] = {
     val fileReference = (notification \\ "FileReference").text
     val outcome = (notification \\ "Outcome").text
-    repository.insert(Notification(fileReference, outcome))
+    if (fileReference.isEmpty || outcome.isEmpty) {
+      Future.failed(new IllegalArgumentException("File reference and outcome not found in xml"))
+    } else {
+      repository.insert(Notification(fileReference, outcome))
+    }
   }
 
   def drop(implicit ec: ExecutionContext): Future[Boolean] = repository.drop
