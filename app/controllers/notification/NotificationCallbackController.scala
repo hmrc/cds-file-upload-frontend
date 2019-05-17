@@ -17,6 +17,7 @@
 package controllers.notification
 
 import javax.inject.{Inject, Singleton}
+import play.api.Logger
 import play.api.mvc.Action
 import services.NotificationService
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -28,9 +29,14 @@ class NotificationCallbackController @Inject()(notificationService: Notification
     val notification = req.body
 
     notificationService.save(notification) map {
-      _ => Accepted
+      case Right(_) => Accepted
+      case Left(exception) =>
+        Logger.error(s"Failed to save invalid notification: $notification", exception)
+        BadRequest
     } recover {
-      case _: Throwable => BadRequest
+      case exception: Throwable =>
+        Logger.error(s"Failed to save notification: $notification", exception)
+        BadRequest
     }
   }
 }

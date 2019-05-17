@@ -27,13 +27,13 @@ import scala.xml.NodeSeq
 @Singleton
 class NotificationService @Inject()(repository: NotificationRepository) {
 
-  def save(notification: NodeSeq)(implicit ec: ExecutionContext): Future[WriteResult] = {
+  def save(notification: NodeSeq)(implicit ec: ExecutionContext): Future[Either[Throwable, WriteResult]] = {
     val fileReference = (notification \\ "FileReference").text
     val outcome = (notification \\ "Outcome").text
     if (fileReference.isEmpty || outcome.isEmpty) {
-      Future.failed(new IllegalArgumentException("File reference and outcome not found in xml"))
+      Future.successful(Left(new IllegalArgumentException("File reference and outcome not found in xml")))
     } else {
-      repository.insert(Notification(fileReference, outcome))
+      repository.insert(Notification(fileReference, outcome)).map(Right(_))
     }
   }
 
