@@ -20,6 +20,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.mvc.Action
 import services.NotificationService
+import uk.gov.hmrc.http.BadRequestException
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.ExecutionContext
@@ -32,13 +33,12 @@ class NotificationCallbackController @Inject()(notificationService: Notification
 
     notificationService.save(notification) map {
       case Right(_) => Accepted
-      case Left(exception) =>
-        Logger.error(s"Failed to save invalid notification: $notification", exception)
+      case Left(e: BadRequestException) =>
+        Logger.error(s"Failed to save invalid notification: $notification", e)
         BadRequest
-    } recover {
-      case exception: Throwable =>
-        Logger.error(s"Failed to save notification: $notification", exception)
-        BadRequest
+      case Left(e) =>
+        Logger.error(s"Failed to save notification: $notification", e)
+        InternalServerError
     }
   }
 }

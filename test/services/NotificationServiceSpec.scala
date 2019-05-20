@@ -16,6 +16,8 @@
 
 package services
 
+import java.io.IOException
+
 import models.Notification
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito._
@@ -52,6 +54,15 @@ class NotificationServiceSpec extends PlaySpec with MockitoSugar {
 
       await(service.save(SuccessNotification))
       verify(mockRepository).insert(eqTo(Notification("e4d94295-52b1-4837-bdc0-7ab8d7b0f1af", "SUCCESS")))(any[ExecutionContext])
+    }
+    
+    "return an exception when insert fails" in {
+      val exception = new IOException("downstream failure")
+      when(mockRepository.insert(any[Notification])(any[ExecutionContext])).thenReturn(Future.failed(exception))
+      
+      val result = await(service.save(SuccessNotification))
+      
+      result mustBe Left(exception)
     }
   }
 }
