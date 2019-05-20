@@ -20,20 +20,20 @@ import forms.MRNFormProvider
 import models.MRN
 import org.scalatest.prop.PropertyChecks
 import play.api.data.Form
-import play.twirl.api.HtmlFormat
+import play.twirl.api.Html
 import views.behaviours.StringViewBehaviours
 import views.html.mrn_entry
 
 
 class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with PropertyChecks {
 
-  val form = new MRNFormProvider()()
-
-  val view = mrn_entry(form)(fakeRequest, messages, appConfig)
-
   val messagePrefix = "mrnEntryPage"
 
-  def createViewUsingForm: Form[MRN] => HtmlFormat.Appendable = form => mrn_entry(form)(fakeRequest, messages, appConfig)
+  val form = new MRNFormProvider()()
+
+  def view = mrn_entry(form)(fakeRequest, messages, appConfig)
+
+  def createViewUsingForm: Form[MRN] => Html = form => mrn_entry(form)(fakeRequest, messages, appConfig)
 
   "MRN Entry Page" must {
     behave like normalPage(view, messagePrefix)

@@ -26,11 +26,11 @@ import views.html.how_many_files_upload
 
 class HowManyFilesUploadSpec extends DomAssertions with IntViewBehaviours[FileUploadCount] with PropertyChecks {
 
+  val messagePrefix = "howManyFilesUpload"
+
   val form = new FileUploadCountProvider()()
 
-  val view = how_many_files_upload(form)(fakeRequest, messages, appConfig)
-
-  val messagePrefix = "howManyFilesUpload"
+  def view = how_many_files_upload(form)(fakeRequest, messages, appConfig)
 
   def createViewUsingForm: Form[FileUploadCount] => Html = form => how_many_files_upload(form)(fakeRequest, messages, appConfig)
 
