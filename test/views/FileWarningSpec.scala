@@ -27,10 +27,8 @@ class FileWarningSpec extends DomAssertions with ViewBehaviours {
 
   val messageKeyPrefix = "fileWarning"
 
-  val messageKeys = List("paragraph1", "paragraph2", "panel")
-
   "File Warning Page" must {
-    behave like normalPage(view, messageKeyPrefix, messageKeys: _*)
+    behave like normalPage(view, messageKeyPrefix, "paragraph1", "paragraph2", "panel")
 
     "have paragraph3 with bold text" in {
       val paragraph3 = messages("startPage.paragraph3", messages("startPage.paragraph3.bold"))

@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,19 +12,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package repositories
+ 
+@import views.helpers.Utils._
 
-import javax.inject.{Inject, Singleton}
-import models.Notification
-import play.api.Logger
-import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.api.indexes._
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
-import uk.gov.hmrc.mongo.ReactiveRepository
+@()(implicit messages: Messages)
 
-import scala.concurrent.{ExecutionContext, Future}
+<div class="section">
+	<p>@messages("helpline.paragraph1")</p>
 
-@Singleton
-class NotificationRepository @Inject()(mongo: ReactiveMongoComponent)(implicit ec: ExecutionContext) extends ReactiveRepository[Notification, BSONObjectID]("notifications", mongo.mongoConnector.db, Notification.jsonFormat)
+  <p>
+    @messages("helpline.imports")
+    <br>
+    @bold(messages("helpline.imports.tel"))
+  </p>
+
+  <p>
+    @messages("helpline.exports")
+    <br>
+    @bold(messages("helpline.exports.tel"))
+  </p>
+</div>
