@@ -17,12 +17,13 @@
 package views
 
 import controllers.routes
+import play.twirl.api.Html
 import views.behaviours.ViewBehaviours
 import views.html.file_warning
 
 class FileWarningSpec extends DomAssertions with ViewBehaviours {
 
-  val view = file_warning()(fakeRequest, messages, appConfig)
+  val view: () => Html = () => file_warning()(fakeRequest, messages, appConfig)
 
   val messageKeyPrefix = "fileWarning"
 
@@ -31,20 +32,20 @@ class FileWarningSpec extends DomAssertions with ViewBehaviours {
 
     "have paragraph3 with bold text" in {
       val paragraph3 = messages("startPage.paragraph3", messages("startPage.paragraph3.bold"))
-      val doc = asDocument(view)
+      val doc = asDocument(view())
 
       assertContainsText(doc, paragraph3)
     }
 
     "have paragraph4 with bold text" in {
       val paragraph4 = messages("startPage.paragraph4", messages("startPage.paragraph4.bold"))
-      val doc = asDocument(view)
+      val doc = asDocument(view())
 
       assertContainsText(doc, paragraph4)
     }
 
     "have I understand button with correct link" in {
-      val fileWarningView = asDocument(view)
+      val fileWarningView = asDocument(view())
       val expectedLink = routes.HowManyFilesUploadController.onPageLoad().url
 
       assertContainsLink(fileWarningView, messages("fileWarning.button"), expectedLink)

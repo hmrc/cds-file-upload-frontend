@@ -20,19 +20,19 @@ import forms.FileUploadCountProvider
 import models.FileUploadCount
 import org.scalatest.prop.PropertyChecks
 import play.api.data.Form
-import play.twirl.api.Html
-import views.behaviours.IntViewBehaviours
+import play.twirl.api.{Html, HtmlFormat}
+import views.behaviours.{IntViewBehaviours, StringViewBehaviours}
 import views.html.how_many_files_upload
 
 class HowManyFilesUploadSpec extends DomAssertions with IntViewBehaviours[FileUploadCount] with PropertyChecks {
 
   val form = new FileUploadCountProvider()()
 
-  val view = how_many_files_upload(form)(fakeRequest, messages, appConfig)
+  val view: () => Html = () => how_many_files_upload(form)(fakeRequest, messages, appConfig)
 
   val messagePrefix = "howManyFilesUpload"
 
-  def createViewUsingForm: Form[FileUploadCount] => Html = form => how_many_files_upload(form)(fakeRequest, messages, appConfig)
+  def createViewUsingForm: Form[FileUploadCount] => HtmlFormat.Appendable = form => how_many_files_upload(form)(fakeRequest, messages, appConfig)
 
   "How Many Files Upload Page" must {
     behave like normalPage(view, messagePrefix)

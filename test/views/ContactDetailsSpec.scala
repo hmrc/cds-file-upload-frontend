@@ -21,7 +21,8 @@ import generators.Generators
 import models.ContactDetails
 import org.scalatest.prop.PropertyChecks
 import play.api.data.Form
-import views.behaviours.ViewBehaviours
+import play.twirl.api.Html
+import views.behaviours.{StringViewBehaviours, ViewBehaviours}
 import views.html.components.input_text
 import views.html.contact_details
 
@@ -29,7 +30,7 @@ class ContactDetailsSpec extends DomAssertions with ViewBehaviours with Property
 
   val form: Form[ContactDetails] = Form(contactDetailsMapping)
 
-  val simpleView =  contact_details(form)(fakeRequest, messages, appConfig)
+  val simpleView: () => Html = () => contact_details(form)(fakeRequest, messages, appConfig)
 
   def view(form: Form[ContactDetails] = form): String = contact_details(form)(fakeRequest, messages, appConfig).toString()
 
