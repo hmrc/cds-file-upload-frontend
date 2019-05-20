@@ -16,18 +16,18 @@
 
 package views.behaviours
 
-import play.twirl.api.HtmlFormat
+import play.twirl.api.Html
 import views.DomAssertions
 
 trait ViewBehaviours extends DomAssertions {
 
-  def normalPage(view: () => HtmlFormat.Appendable, messageKeyPrefix: String, expectedGuidanceKeys: String*) = {
+  def normalPage(view: Html, messageKeyPrefix: String, expectedGuidanceKeys: String*) = {
 
     "behave like a page with a heading" when {
       "rendered" must {
 
         "display the correct page title" in {
-          val doc = asDocument(view())
+          val doc = asDocument(view)
           assertH1EqualsMessage(doc, s"$messageKeyPrefix.heading")
         }
       }
@@ -37,7 +37,7 @@ trait ViewBehaviours extends DomAssertions {
       "rendered" must {
 
         "display the correct browser title" in {
-          val doc = asDocument(view())
+          val doc = asDocument(view)
           assertEqualsMessage(doc, "title", s"$messageKeyPrefix.title")
         }
       }
@@ -46,30 +46,30 @@ trait ViewBehaviours extends DomAssertions {
     behave like pageWithoutHeading(view, messageKeyPrefix, expectedGuidanceKeys:_*)
   }
 
-  def pageWithoutHeading(view: () => HtmlFormat.Appendable, messageKeyPrefix: String, expectedGuidanceKeys: String*) = {
+  def pageWithoutHeading(view: Html, messageKeyPrefix: String, expectedGuidanceKeys: String*) = {
 
     "behave like a normal page" when {
       "rendered" must {
         "have the correct banner title" in {
-          val doc = asDocument(view())
+          val doc = asDocument(view)
           val nav = doc.getElementById("proposition-menu")
           val span = nav.children.first
           span.text mustBe messagesApi("common.service.name")
         }
 
         "display the correct guidance" in {
-          val doc = asDocument(view())
+          val doc = asDocument(view)
           for (key <- expectedGuidanceKeys) assertContainsText(doc, messages(s"$messageKeyPrefix.$key"))
         }
       }
     }
   }
 
-  def pageWithBackLink(view: () => HtmlFormat.Appendable) = {
+  def pageWithBackLink(view: Html) = {
 
     "behave like a page with a back link" must {
       "have a back link" in {
-        val doc = asDocument(view())
+        val doc = asDocument(view)
         assertRenderedById(doc, "back-link")
       }
     }

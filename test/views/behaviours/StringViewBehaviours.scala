@@ -17,13 +17,13 @@
 package views.behaviours
 
 import play.api.data.{Form, FormError}
-import play.twirl.api.HtmlFormat
+import play.twirl.api.Html
 
 trait StringViewBehaviours[A] extends QuestionViewBehaviours[A] {
 
   val answer = "answer"
 
-  def stringPage(createView: Form[A] => HtmlFormat.Appendable,
+  def stringPage(createView: Form[A] => Html,
                  fieldName: String,
                  messageKeyPrefix: String,
                  expectedHintKey: List[String] = List()) = {

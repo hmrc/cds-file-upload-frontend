@@ -16,14 +16,12 @@
 
 package views.behaviours
 
-import play.api.data.{Form, FormError}
-import play.twirl.api.HtmlFormat
+import play.api.data.Form
+import play.twirl.api.Html
 
 trait IntViewBehaviours[A] extends QuestionViewBehaviours[A] {
 
-  val number = 123
-
-  def intPage(createView: Form[A] => HtmlFormat.Appendable,
+  def intPage(createView: Form[A] => Html,
               fillForm: (Form[A], Int) => Form[A],
               fieldName: String,
               messageKeyPrefix: String) = {
@@ -44,8 +42,8 @@ trait IntViewBehaviours[A] extends QuestionViewBehaviours[A] {
 
       "rendered with a valid form" must {
         "include the form's value in the value input" in {
-          val doc = asDocument(createView(fillForm(form, number)))
-          doc.getElementById("value").attr("value") mustBe number.toString
+          val doc = asDocument(createView(fillForm(form, 123)))
+          doc.getElementById("value").attr("value") mustBe "123"
         }
       }
 

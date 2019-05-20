@@ -18,7 +18,6 @@ package views
 
 import generators.Generators
 import models.FileUpload
-import org.scalacheck.Gen
 import org.scalatest.prop.PropertyChecks
 import play.twirl.api.Html
 import views.behaviours.ViewBehaviours
@@ -27,12 +26,10 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
 
   def view(receipts: List[FileUpload]): Html = views.html.upload_your_files_receipt(receipts)(fakeRequest, messages, appConfig)
 
-  val view: () => Html = () => view(Nil)
-
   val pagePrefix = "fileUploadReceiptPage"
 
   "File Upload Receipt Page" must {
-    behave like pageWithoutHeading(view, pagePrefix, "whatHappensNext", "paragraph1", "paragraph2", "listitem1", "listitem2", "listitem3")
+    behave like pageWithoutHeading(view(Nil), pagePrefix, "whatHappensNext", "paragraph1", "paragraph2", "listitem1", "listitem2", "listitem3")
 
     "have title" in {
 
