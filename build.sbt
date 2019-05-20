@@ -35,7 +35,8 @@ val compileDependencies = Seq(
   "io.megl" %% "play-json-extra" % "2.4.3",
   "uk.gov.hmrc" %% "http-caching-client" % "8.2.0",
   "uk.gov.hmrc" %% "play-whitelist-filter" % "2.0.0",
-  "uk.gov.hmrc" %% "crypto" % "5.3.0"
+  "uk.gov.hmrc" %% "crypto" % "5.3.0",
+  "uk.gov.hmrc"             %% "simple-reactivemongo"     % "7.19.0-play-25"
 )
 
 val testDependencies = Seq(

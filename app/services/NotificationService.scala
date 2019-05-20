@@ -16,12 +16,29 @@
 
 package services
 
-import connectors.MongoCacheConnector
-import javax.inject.Inject
+import javax.inject._
+import models.Notification
+import reactivemongo.api.commands.WriteResult
+import repositories.NotificationRepository
+import uk.gov.hmrc.http.BadRequestException
 
-import scala.concurrent.Future
-import scala.xml.Elem
+import scala.concurrent.{ExecutionContext, Future}
+import scala.xml.NodeSeq
 
-class NotificationService @Inject()(cache: MongoCacheConnector) {
-  def save(notification: Elem): Future[Unit] = Future.successful(())
+@Singleton
+class NotificationService @Inject()(repository: NotificationRepository) {
+
+  def save(notification: NodeSeq)(implicit ec: ExecutionContext): Future[Either[Throwable, WriteResult]] = {
+    val fileReference = (notification \\ "FileReference").text
+    val outcome = (notification \\ "Outcome").text
+    if (fileReference.isEmpty || outcome.isEmpty) {
+      Future.successful(Left(new BadRequestException("File reference and outcome not found in xml")))
+    } else {
+      repository.insert(Notification(fileReference, outcome))
+        .map(Right(_))
+        .recover { case e => Left(e) }
+    }
+  }
+
+  def drop(implicit ec: ExecutionContext): Future[Boolean] = repository.drop
 }

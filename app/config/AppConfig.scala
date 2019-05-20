@@ -26,7 +26,8 @@ case class AppConfig(
   assets: Assets,
   googleAnalytics: GoogleAnalytics,
   microservice: Microservice,
-  fileFormats: FileFormats)
+  fileFormats: FileFormats,
+  notifications: Notifications)
 
 object AppConfig {
   implicit val appNameHint: ProductHint[AppConfig] = ProductHint(new ConfigFieldMapping {
@@ -72,3 +73,5 @@ case class Keystore(protocol: String = "https", host: String, port: Int, default
 }
 
 case class FileFormats(maxFileSizeMb: Int, approvedFileTypes: String)
+
+case class Notifications(maxRetries: Int, retryPauseMillis: Int)

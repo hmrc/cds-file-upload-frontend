@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package controllers
+package models
 
-import play.api.mvc.Action
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import play.api.libs.json.Json
 
-class NotificationCallbackController extends FrontendController {
+case class Notification(fileReference: String, outcome: String)
 
-  def onNotify = Action { implicit req => Accepted }
-
+object Notification {
+  implicit val jsonFormat = Json.format[Notification]
 }

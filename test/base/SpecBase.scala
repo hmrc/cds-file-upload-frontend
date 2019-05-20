@@ -25,17 +25,14 @@ import org.scalatest.prop.PropertyChecks
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice._
 import play.api.i18n.{Messages, MessagesApi}
-import play.api.inject.Injector
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
 trait SpecBase extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar with BeforeAndAfterEach with PropertyChecks with Generators with ScalaFutures {
 
-  lazy val injector: Injector = app.injector
+  implicit lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
 
-  implicit lazy val messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
-
-  lazy val appConfig: AppConfig = injector.instanceOf[AppConfig]
+  lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
 
   lazy val fakeRequest = FakeRequest("", "")
 

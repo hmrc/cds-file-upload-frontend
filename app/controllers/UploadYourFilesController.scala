@@ -28,7 +28,9 @@ import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.Files.TemporaryFile
+import play.api.libs.json.{JsString, Json}
 import play.api.mvc._
+import repositories.NotificationRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -48,6 +50,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
                                           dataCacheConnector: DataCacheConnector,
                                           upscanS3Connector: UpscanS3Connector,
                                           auditConnector: AuditConnector,
+                                          notificationRepository: NotificationRepository,
                                           implicit val appConfig: AppConfig,
                                           implicit val mat: Materializer) extends FrontendController with I18nSupport {
 
@@ -55,9 +58,11 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
   private val FileTypes = appConfig.fileFormats.approvedFileTypes.split(',').map(_.trim)
   private val AuditSource = appConfig.appName
   private val audit = Audit(AuditSource, auditConnector)
+  private val notificationsMaxRetries = appConfig.notifications.maxRetries
+  private val notificationsRetryPause = appConfig.notifications.retryPauseMillis
 
   def onPageLoad(ref: String): Action[AnyContent] =
-    (authenticate andThen requireEori andThen getData andThen requireResponse) { implicit req =>
+    (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
 
       val references = req.fileUploadResponse.files.map(_.reference)
       val filenames = req.fileUploadResponse.files.map(_.filename).filter(_.nonEmpty)
@@ -66,11 +71,11 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
       req.fileUploadResponse.files.find(_.reference == ref) match {
         case Some(file) =>
           file.state match {
-            case Waiting(_) => Ok(views.html.upload_your_files(ref, refPosition, filenames))
-            case _ => Redirect(nextPage(file.reference, req.fileUploadResponse.files))
+            case Waiting(_) => Future.successful(Ok(views.html.upload_your_files(ref, refPosition, filenames)))
+            case _ => nextPage(file.reference, req.fileUploadResponse.files)
           }
 
-        case None => Redirect(routes.ErrorPageController.error())
+        case None => Future.successful(Redirect(routes.ErrorPageController.error()))
       }
     }
 
@@ -105,7 +110,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
                 }
 
               case _ =>
-                Future.successful(Redirect(nextPage(file.reference, req.fileUploadResponse.files)))
+                nextPage(file.reference, req.fileUploadResponse.files)
             }
 
           case None =>
@@ -125,8 +130,8 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
           val updatedFiles = file.copy(state = Uploaded) :: files.filterNot(_.reference == ref)
           val answers: UserAnswers = req.userAnswers.set(HowManyFilesUploadPage.Response, FileUploadResponse(updatedFiles))
 
-          dataCacheConnector.save(answers.cacheMap).map { _ =>
-            Redirect(nextPage(ref, files))
+          dataCacheConnector.save(answers.cacheMap).flatMap { _ =>
+            nextPage(ref, files)
           }
 
         case None => Future.successful(Redirect(routes.ErrorPageController.error()))
@@ -139,15 +144,38 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
     }
 
     nextFileToUpload match {
-      case Some(file) => nextFile(file)
+      case Some(file) => Future.successful(Redirect(nextFile(file)))
       case None => allFilesUploaded
     }
   }
 
+
+  def failedUpload(notification: Notification): Boolean = notification.outcome != "SUCCESS"
+
   private def allFilesUploaded(implicit req: FileUploadResponseRequest[_]) = {
-    auditUploadSuccess()
-    //TODOcheck cache -> wait until all receipts are processed -> only load page if all good
-    routes.UploadYourFilesReceiptController.onPageLoad()
+    val uploads = req.fileUploadResponse.files
+
+    def retrieveNotifications(retries: Int = 0): Future[Result] = {
+      val receivedNotifications = Future.sequence(uploads.map { upload =>
+        notificationRepository.find("fileReference" -> JsString(upload.reference))})
+
+      receivedNotifications.flatMap {
+        case ns if ns.flatten.exists(failedUpload) =>
+          Future.successful(Redirect(routes.ErrorPageController.uploadError()))
+
+        case ns if ns.flatten.length == uploads.length =>
+          auditUploadSuccess()
+          Future.successful(Redirect(routes.UploadYourFilesReceiptController.onPageLoad()))
+
+        case ns if retries < notificationsMaxRetries =>
+          Thread.sleep(notificationsRetryPause)
+          retrieveNotifications(retries + 1)
+        case _ =>
+          Future.successful(Redirect(routes.ErrorPageController.uploadError()))
+      }
+    }
+
+    retrieveNotifications()
   }
 
   private def auditUploadSuccess()(implicit req: FileUploadResponseRequest[_]) = {
@@ -174,7 +202,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
     )
   }
 
-  private def nextFile(file: FileUpload): Call = routes.UploadYourFilesController.onPageLoad(file.reference)
+  private def nextFile(file: FileUpload) = routes.UploadYourFilesController.onPageLoad(file.reference)
 
   private def getPosition(ref: String, refs: List[String]) = refs match {
     case head :: tail if head == ref => First(refs.size)

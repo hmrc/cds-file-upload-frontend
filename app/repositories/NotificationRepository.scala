@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package config
+package repositories
 
-import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
+import javax.inject.{Inject, Singleton}
+import models.Notification
+import play.api.Logger
+import play.modules.reactivemongo.ReactiveMongoComponent
+import reactivemongo.api.indexes._
+import reactivemongo.bson.{BSONDocument, BSONObjectID}
+import uk.gov.hmrc.mongo.ReactiveRepository
 
-class AppConfigSpec extends PlaySpec with OneAppPerSuite {
+import scala.concurrent.{ExecutionContext, Future}
 
-  val cfg = app.injector.instanceOf[AppConfig]
-
-  "app config" should {
-
-    "have test-only batch upload endpoint in packaged configuration" in {
-      cfg.microservice.services.customsDeclarations.batchUploadEndpoint mustBe "http://localhost:6793/cds-file-upload-service/test-only/batch-file-upload"
-    }
-  }
-}
+@Singleton
+class NotificationRepository @Inject()(mongo: ReactiveMongoComponent)(implicit ec: ExecutionContext) extends ReactiveRepository[Notification, BSONObjectID]("notifications", mongo.mongoConnector.db, Notification.jsonFormat)

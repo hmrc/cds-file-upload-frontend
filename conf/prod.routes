@@ -1,5 +1,6 @@
 # Add all the application routes to the app.routes file
 ->         /cds-file-upload-service        app.Routes
+->         /internal                       internal.Routes
 ->         /                               health.Routes
 ->         /template                       template.Routes
 

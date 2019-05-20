@@ -26,7 +26,6 @@ import org.scalatest._
 import org.scalatest.mockito.MockitoSugar
 import play.api.test.Helpers._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class CustomsDeclarationsServiceSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach {
