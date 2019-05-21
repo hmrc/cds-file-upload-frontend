@@ -28,7 +28,7 @@ import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.Files.TemporaryFile
-import play.api.libs.json.{JsString, Json}
+import play.api.libs.json.JsString
 import play.api.mvc._
 import repositories.NotificationRepository
 import uk.gov.hmrc.http.HeaderCarrier
@@ -156,27 +156,41 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
     val uploads = req.fileUploadResponse.files
 
     def retrieveNotifications(retries: Int = 0): Future[Result] = {
-      val receivedNotifications = Future.sequence(uploads.map { upload =>
-        notificationRepository.find("fileReference" -> JsString(upload.reference))})
+      val receivedNotifications = Future.sequence(
+        uploads.map { upload =>
+          notificationRepository.find("fileReference" -> JsString(upload.reference))
+        }
+      )
 
-      receivedNotifications.flatMap {
-        case ns if ns.flatten.exists(failedUpload) =>
-          Future.successful(Redirect(routes.ErrorPageController.uploadError()))
+      receivedNotifications.flatMap { notifications =>
+        notifications.flatten match {
+          case ns if ns.exists(failedUpload) =>
+            Logger.error("Failed notification received for an upload.")
+            Logger.error(s"Notifications: ${prettyPrint(ns)}")
+            Future.successful(Redirect(routes.ErrorPageController.uploadError()))
 
-        case ns if ns.flatten.length == uploads.length =>
-          auditUploadSuccess()
-          Future.successful(Redirect(routes.UploadYourFilesReceiptController.onPageLoad()))
+          case ns if ns.length == uploads.length =>
+            Logger.debug("All notifications successful.")
+            auditUploadSuccess()
+            Future.successful(Redirect(routes.UploadYourFilesReceiptController.onPageLoad()))
 
-        case ns if retries < notificationsMaxRetries =>
-          Thread.sleep(notificationsRetryPause)
-          retrieveNotifications(retries + 1)
-        case _ =>
-          Future.successful(Redirect(routes.ErrorPageController.uploadError()))
+          case ns if retries < notificationsMaxRetries =>
+            Logger.debug(s"Retrieved ${ns.length} of ${uploads.length} notifications. Retrying in $notificationsRetryPause ms ...")
+            Thread.sleep(notificationsRetryPause)
+            retrieveNotifications(retries + 1)
+            
+          case ns =>
+            Logger.error(s"Maximum number of retries exceeded. Retrieved ${ns.length} of ${uploads.length} notifications.")
+            Logger.error(s"Notifications: ${prettyPrint(ns)}")
+            Future.successful(Redirect(routes.ErrorPageController.uploadError()))
+        }
       }
     }
 
     retrieveNotifications()
   }
+
+  private def prettyPrint: List[Notification] => String = _.map(n => s"(${n.fileReference}, ${n.outcome})").mkString(",")
 
   private def auditUploadSuccess()(implicit req: FileUploadResponseRequest[_]) = {
     def auditDetails = {

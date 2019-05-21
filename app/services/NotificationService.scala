@@ -18,7 +18,6 @@ package services
 
 import javax.inject._
 import models.Notification
-import reactivemongo.api.commands.WriteResult
 import repositories.NotificationRepository
 import uk.gov.hmrc.http.BadRequestException
 
@@ -28,14 +27,14 @@ import scala.xml.NodeSeq
 @Singleton
 class NotificationService @Inject()(repository: NotificationRepository) {
 
-  def save(notification: NodeSeq)(implicit ec: ExecutionContext): Future[Either[Throwable, WriteResult]] = {
+  def save(notification: NodeSeq)(implicit ec: ExecutionContext): Future[Either[Throwable, Unit]] = {
     val fileReference = (notification \\ "FileReference").text
     val outcome = (notification \\ "Outcome").text
     if (fileReference.isEmpty || outcome.isEmpty) {
       Future.successful(Left(new BadRequestException("File reference and outcome not found in xml")))
     } else {
       repository.insert(Notification(fileReference, outcome))
-        .map(Right(_))
+        .map(_ => Right(()))
         .recover { case e => Left(e) }
     }
   }

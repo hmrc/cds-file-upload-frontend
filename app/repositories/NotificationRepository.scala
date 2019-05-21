@@ -18,13 +18,11 @@ package repositories
 
 import javax.inject.{Inject, Singleton}
 import models.Notification
-import play.api.Logger
 import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.api.indexes._
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
+import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.mongo.ReactiveRepository
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class NotificationRepository @Inject()(mongo: ReactiveMongoComponent)(implicit ec: ExecutionContext) extends ReactiveRepository[Notification, BSONObjectID]("notifications", mongo.mongoConnector.db, Notification.jsonFormat)
