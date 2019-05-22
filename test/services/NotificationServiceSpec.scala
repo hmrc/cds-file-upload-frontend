@@ -19,6 +19,7 @@ package services
 import java.io.IOException
 
 import models.Notification
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
@@ -27,6 +28,7 @@ import play.api.test.Helpers._
 import reactivemongo.api.commands.DefaultWriteResult
 import repositories.NotificationRepository
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -49,11 +51,17 @@ class NotificationServiceSpec extends PlaySpec with MockitoSugar {
 
   "Notification service" should {
 
-    "save a success notification" in {
+    "save a success notification with timestamp for TTL" in {
       when(mockRepository.insert(any[Notification])(any[ExecutionContext])).thenReturn(Future.successful(DefaultWriteResult(ok = true, 1, Seq.empty, None, None, None)))
 
       await(service.save(SuccessNotification))
-      verify(mockRepository).insert(eqTo(Notification("e4d94295-52b1-4837-bdc0-7ab8d7b0f1af", "SUCCESS")))(any[ExecutionContext])
+      
+      val captor: ArgumentCaptor[Notification] = ArgumentCaptor.forClass(classOf[Notification])
+      verify(mockRepository).insert(captor.capture())(any[ExecutionContext])
+      val notification = captor.getValue
+      notification.fileReference mustBe "e4d94295-52b1-4837-bdc0-7ab8d7b0f1af"
+      notification.outcome mustBe "SUCCESS"
+      notification.createdAt.withTimeAtStartOfDay() mustBe DateTimeUtils.now.withTimeAtStartOfDay()  
     }
     
     "return an exception when insert fails" in {

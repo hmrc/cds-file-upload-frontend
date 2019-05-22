@@ -16,13 +16,49 @@
 
 package repositories
 
+import config.AppConfig
 import javax.inject.{Inject, Singleton}
 import models.Notification
+import play.api.Logger
 import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.bson.BSONObjectID
+import reactivemongo.api.indexes._
+import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import uk.gov.hmrc.mongo.ReactiveRepository
+import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class NotificationRepository @Inject()(mongo: ReactiveMongoComponent)(implicit ec: ExecutionContext) extends ReactiveRepository[Notification, BSONObjectID]("notifications", mongo.mongoConnector.db, Notification.jsonFormat)
+class NotificationRepository @Inject()(mongo: ReactiveMongoComponent, appConfig: AppConfig)(implicit ec: ExecutionContext) extends ReactiveRepository[Notification, BSONObjectID](
+  collectionName = "notifications",
+  mongo = mongo.mongoConnector.db,
+  domainFormat = Notification.notificationFormat,
+  idFormat = ReactiveMongoFormats.objectIdFormats
+) {
+
+  override def indexes: Seq[Index] = {
+
+    Seq(
+      Index(key = Seq(("fileReference", IndexType.Ascending)), name = Some("fileReferenceIndex")),
+      Index(key = Seq(("createdAt", IndexType.Ascending)), name = Some("createdAtIndex"), options = BSONDocument("expireAfterSeconds" -> appConfig.notifications.ttl))
+    )
+  }
+
+  override def ensureIndexes(implicit ec: ExecutionContext): Future[Seq[Boolean]] = Future.successful(Nil)
+
+  def ensureIndex(index: Index)(implicit ec: ExecutionContext): Future[Unit] = {
+    collection.indexesManager
+      .create(index)
+      .map(wr => Logger.warn(s"[GG-3616] ${wr.toString}"))
+      .recover {
+        case t =>
+          Logger.error(s"[GG-3616] $message (${index.eventualName})", t)
+      }
+  }
+
+  //Dropping the index allows us to change the ttl value
+  collection.indexesManager.drop("createdAtIndex").map {
+    indexes.map(ensureIndex)
+  }
+
+}

@@ -16,10 +16,14 @@
 
 package models
 
-import play.api.libs.json.Json
+import org.joda.time.DateTime
+import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
+import uk.gov.hmrc.time.DateTimeUtils
 
-case class Notification(fileReference: String, outcome: String)
+case class Notification(fileReference: String, outcome: String, createdAt: DateTime = DateTimeUtils.now)
 
 object Notification {
-  implicit val jsonFormat = Json.format[Notification]
+  implicit val dateFormat: Format[DateTime] = ReactiveMongoFormats.dateTimeFormats
+  implicit val notificationFormat = Json.format[Notification]
 }

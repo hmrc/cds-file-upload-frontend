@@ -38,6 +38,4 @@ class NotificationService @Inject()(repository: NotificationRepository) {
         .recover { case e => Left(e) }
     }
   }
-
-  def drop(implicit ec: ExecutionContext): Future[Boolean] = repository.drop
 }

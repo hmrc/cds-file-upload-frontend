@@ -38,8 +38,6 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
   def handleBatchFileUploadRequest: Action[NodeSeq] = Action(parse.xml) { implicit req =>
     fileRef = 1
 
-    //horrible but its just a test thing
-    notificationService.drop
     Thread.sleep(100)
 
     val fileGroupSize = (scala.xml.XML.loadString(req.body.mkString) \ "FileGroupSize").text.toInt
@@ -60,10 +58,7 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
   }
 
   def handleS3FileUploadRequest: Action[MultipartFormData[Files.TemporaryFile]] = Action(parse.multipartFormData) { implicit req =>
-
-    Future {
-      callBack()
-    }
+    callBack()
     NoContent
   }
 
