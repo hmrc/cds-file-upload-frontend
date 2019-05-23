@@ -49,16 +49,16 @@ class NotificationRepository @Inject()(mongo: ReactiveMongoComponent, appConfig:
   def ensureIndex(index: Index)(implicit ec: ExecutionContext): Future[Unit] = {
     collection.indexesManager
       .create(index)
-      .map(wr => Logger.warn(s"[GG-3616] ${wr.toString}"))
+      .map(wr => Logger.warn(wr.toString))
       .recover {
         case t =>
-          Logger.error(s"[GG-3616] $message (${index.eventualName})", t)
+          Logger.error(s"$message (${index.eventualName})", t)
       }
   }
 
   //Dropping the index allows us to change the ttl value
-  collection.indexesManager.drop("createdAtIndex").map {
+//  collection.indexesManager.drop("createdAtIndex").map {
     indexes.map(ensureIndex)
-  }
+//  }
 
 }
