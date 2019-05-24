@@ -19,5 +19,7 @@
 @()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @main_template(title = messages("unauthorised.title"), bodyClasses = None) {
-    <h1 class="heading-xlarge">@messages("unauthorised.heading")</h1>
+ <h1 class="heading-xlarge">@messages("unauthorised.heading")</h1>
+ <p>@messages("unauthorised.guidance")</p>
+ @components.helpline_information()
 }
