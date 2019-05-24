@@ -18,9 +18,7 @@ package controllers.notification
 
 import java.io.IOException
 
-import base.SpecBase
 import config.{AppConfig, Notifications}
-import models.{FileUploadResponse, Notification}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
@@ -48,7 +46,6 @@ class NotificationCallbackControllerSpec extends PlaySpec with MockitoSugar with
     when(mockAppConfig.notifications).thenReturn(Notifications("authToken", 5, 300))
   }
 
-  
   "NotificationCallbackController" should {
     "return internal server error when there is a downstream failure" in {
       
