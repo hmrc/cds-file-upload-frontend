@@ -16,6 +16,7 @@
 
 package controllers.notification
 
+import config.AppConfig
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.mvc.Action
@@ -23,13 +24,27 @@ import services.NotificationService
 import uk.gov.hmrc.http.BadRequestException
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
+import scala.xml.NodeSeq
 
 @Singleton
-class NotificationCallbackController @Inject()(notificationService: NotificationService)(implicit ec: ExecutionContext) extends FrontendController {
+class NotificationCallbackController @Inject()(notificationService: NotificationService, val appConfig: AppConfig)(implicit ec: ExecutionContext) extends FrontendController {
 
   def onNotify = Action.async(parse.xml) { implicit req =>
-    val notification = req.body
+    val authHeader = req.headers.toSimpleMap.get("Authorization")
+    val authToken = appConfig.notifications.authToken
+
+    authHeader match {
+      case Some(a) if a.contains(s"Basic: $authToken") =>
+        saveNotification(req.body)
+      case _ =>
+        Future.successful(Unauthorized)
+    }
+  }
+
+
+  def saveNotification(notification: NodeSeq) = {
+
 
     notificationService.save(notification) map {
       case Right(_) => Accepted

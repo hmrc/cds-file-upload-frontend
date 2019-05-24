@@ -38,7 +38,8 @@ class CustomsDeclarationsConnector @Inject()(config: AppConfig, httpClient: Http
   def requestFileUpload(eori: String, request: FileUploadRequest)(implicit hc: HeaderCarrier): Future[FileUploadResponse] = {
     httpClient.POSTString[HttpResponse](fileUploadUrl, request.toXml.mkString, headers(eori)).map(r =>
       Try(XML.loadString(r.body)) match {
-        case Success(value) => FileUploadResponse.fromXml(value)
+        case Success(value) =>
+          FileUploadResponse.fromXml(value)
         case Failure(exception) =>
           Logger.error("Failed to load XML")
           throw exception

@@ -83,7 +83,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
       mockUpscanConnector,
       mockAuditConnector,
       mockNotificationRepository,
-      appConfig.copy(notifications = Notifications(maxRetries = 3, retryPauseMillis = 500)),
+      appConfig.copy(notifications = Notifications(appConfig.notifications.authToken, maxRetries = 3, retryPauseMillis = 500)),
       mockMaterializer)
 
   ".onPageLoad" should {
