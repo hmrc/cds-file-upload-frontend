@@ -63,25 +63,25 @@ class NotificationCallbackControllerIntegrationSpec extends PlaySpec with GuiceO
   "Notification endpoint" should {
 
     "return 400 Bad Request on POST request for invalid xml" in {
-      val response = await(wsClient.url(notificationUrl).withHeaders("Content-Type" -> "application/xml", "Authorization" -> s"Basic: $authToken").post(invalidNotification))
+      val response = await(wsClient.url(notificationUrl).withHeaders("Content-Type" -> "application/xml", "Authorization" -> authToken).post(invalidNotification))
 
       response.status mustBe BAD_REQUEST
     }
 
     "return 400 Bad Request on POST request for xml with empty File Reference" in {
-      val response = await(wsClient.url(notificationUrl).withHeaders("Content-Type" -> "application/xml", "Authorization" -> s"Basic: $authToken").post(notificationWithEmptyFileReference))
+      val response = await(wsClient.url(notificationUrl).withHeaders("Content-Type" -> "application/xml", "Authorization" -> authToken).post(notificationWithEmptyFileReference))
 
       response.status mustBe BAD_REQUEST
     }
 
     "return 400 Bad Request on POST request for xml with empty Outcome" in {
-      val response = await(wsClient.url(notificationUrl).withHeaders("Content-Type" -> "application/xml", "Authorization" -> s"Basic: $authToken").post(notificationWithEmptyOutcome))
+      val response = await(wsClient.url(notificationUrl).withHeaders("Content-Type" -> "application/xml", "Authorization" -> authToken).post(notificationWithEmptyOutcome))
 
       response.status mustBe BAD_REQUEST
     }
 
     "return 202 Accepted on POST request for valid xml" in {
-      val response = await(wsClient.url(notificationUrl).withHeaders("Content-Type" -> "application/xml", "Authorization" -> s"Basic: $authToken").post(validNotification))
+      val response = await(wsClient.url(notificationUrl).withHeaders("Content-Type" -> "application/xml", "Authorization" -> authToken).post(validNotification))
 
       response.status mustBe ACCEPTED
     }

@@ -51,7 +51,7 @@ class NotificationCallbackControllerSpec extends PlaySpec with MockitoSugar with
       
       when(mockNotificationService.save(any[NodeSeq])(any[ExecutionContext])).thenReturn(Future.successful(Left(new IOException("Server error"))))
       
-      val result = controller.onNotify()(FakeRequest("", "").withBody(<notification/>).withHeaders("Authorization" -> s"Basic: $expectedAuthToken"))
+      val result = controller.onNotify()(FakeRequest("", "").withBody(<notification/>).withHeaders("Authorization" -> expectedAuthToken))
       
       status(result) mustBe INTERNAL_SERVER_ERROR
     }

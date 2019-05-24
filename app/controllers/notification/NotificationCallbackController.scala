@@ -35,15 +35,15 @@ class NotificationCallbackController @Inject()(notificationService: Notification
     val authToken = appConfig.notifications.authToken
 
     authHeader match {
-      case Some(a) if a.contains(s"Basic: $authToken") =>
+      case Some(ah) if ah == authToken =>
         saveNotification(req.body)
       case _ =>
+        Logger.warn(s"Failed to auth: $authHeader")
         Future.successful(Unauthorized)
     }
   }
 
-
-  def saveNotification(notification: NodeSeq) = {
+  private def saveNotification(notification: NodeSeq) = {
 
 
     notificationService.save(notification) map {
