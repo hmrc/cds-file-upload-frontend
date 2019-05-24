@@ -19,9 +19,11 @@ package controllers.notification
 import java.io.IOException
 
 import base.SpecBase
-import config.AppConfig
+import config.{AppConfig, Notifications}
+import models.{FileUploadResponse, Notification}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
@@ -34,18 +36,25 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.NodeSeq
 
 
-class NotificationCallbackControllerSpec extends PlaySpec with MockitoSugar with ScalaFutures with SpecBase {
+class NotificationCallbackControllerSpec extends PlaySpec with MockitoSugar with ScalaFutures with BeforeAndAfterEach {
 
   val mockNotificationService = mock[NotificationService]
-  val controller = new NotificationCallbackController(mockNotificationService, appConfig)
-  val authToken = appConfig.notifications.authToken
+  val mockAppConfig = mock[AppConfig]
+  val controller = new NotificationCallbackController(mockNotificationService, mockAppConfig)
+  val expectedAuthToken = "authToken"
+
+  override def beforeEach = {
+    reset(mockNotificationService, mockAppConfig)
+    when(mockAppConfig.notifications).thenReturn(Notifications("authToken", 5, 300))
+  }
+
   
   "NotificationCallbackController" should {
     "return internal server error when there is a downstream failure" in {
       
       when(mockNotificationService.save(any[NodeSeq])(any[ExecutionContext])).thenReturn(Future.successful(Left(new IOException("Server error"))))
       
-      val result = controller.onNotify()(FakeRequest("", "").withBody(<notification/>).withHeaders("Authorization" -> s"Basic: $authToken"))
+      val result = controller.onNotify()(FakeRequest("", "").withBody(<notification/>).withHeaders("Authorization" -> s"Basic: $expectedAuthToken"))
       
       status(result) mustBe INTERNAL_SERVER_ERROR
     }
@@ -63,7 +72,7 @@ class NotificationCallbackControllerSpec extends PlaySpec with MockitoSugar with
 
       when(mockNotificationService.save(any[NodeSeq])(any[ExecutionContext])).thenReturn(Future.successful(Left(new IOException("Server error"))))
 
-      val result = controller.onNotify()(FakeRequest("", "").withBody(<notification/>).withHeaders("Authorization" -> "Basic: some valid token"))
+      val result = controller.onNotify()(FakeRequest("", "").withBody(<notification/>).withHeaders("Authorization" -> "Basic: some invalid token"))
 
       status(result) mustBe UNAUTHORIZED
     }

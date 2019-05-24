@@ -28,14 +28,14 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.NodeSeq
 
 @Singleton
-class NotificationCallbackController @Inject()(notificationService: NotificationService,implicit val appConfig: AppConfig)(implicit ec: ExecutionContext) extends FrontendController {
+class NotificationCallbackController @Inject()(notificationService: NotificationService, val appConfig: AppConfig)(implicit ec: ExecutionContext) extends FrontendController {
 
   def onNotify = Action.async(parse.xml) { implicit req =>
     val authHeader = req.headers.toSimpleMap.get("Authorization")
-    val authBasic = appConfig.notifications.authToken
+    val authToken = appConfig.notifications.authToken
 
     authHeader match {
-      case Some(a) if a.contains(s"Basic: $authBasic") =>
+      case Some(a) if a.contains(s"Basic: $authToken") =>
         saveNotification(req.body)
       case _ =>
         Future.successful(Unauthorized)
