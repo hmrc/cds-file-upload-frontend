@@ -19,13 +19,14 @@ package repositories
 import config.AppConfig
 import javax.inject.{Inject, Singleton}
 import models.Notification
+import play.api.Logger
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes._
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class NotificationRepository @Inject()(mongo: ReactiveMongoComponent, appConfig: AppConfig)(implicit ec: ExecutionContext) extends ReactiveRepository[Notification, BSONObjectID](
@@ -39,4 +40,19 @@ class NotificationRepository @Inject()(mongo: ReactiveMongoComponent, appConfig:
     Index(key = Seq(("fileReference", IndexType.Ascending)), name = Some("fileReferenceIndex")),
     Index(key = Seq(("createdAt", IndexType.Ascending)), name = Some("createdAtIndex"), options = BSONDocument("expireAfterSeconds" -> appConfig.notifications.ttl))
   )
+
+
+  override def ensureIndexes(implicit ec: ExecutionContext): Future[Seq[Boolean]] = Future.successful(Seq.empty)
+  
+  def ensureIndex(index: Index)(implicit ec: ExecutionContext): Future[Unit] = {
+    collection.indexesManager
+      .create(index)
+      .map(wr => Logger.warn(wr.toString))
+      .recover {
+        case t =>
+          Logger.error(s"$message (${index.eventualName})", t)
+      }
+  }
+
+  Future.sequence(indexes.map(ensureIndex))
 }
