@@ -18,8 +18,10 @@ package controllers.notification
 
 import java.io.IOException
 
+import config.{AppConfig, Notifications}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
@@ -32,19 +34,44 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.NodeSeq
 
 
-class NotificationCallbackControllerSpec extends PlaySpec with MockitoSugar with ScalaFutures {
-  
+class NotificationCallbackControllerSpec extends PlaySpec with MockitoSugar with ScalaFutures with BeforeAndAfterEach {
+
   val mockNotificationService = mock[NotificationService]
-  val controller = new NotificationCallbackController(mockNotificationService)
-  
+  val mockAppConfig = mock[AppConfig]
+  val controller = new NotificationCallbackController(mockNotificationService, mockAppConfig)
+  val expectedAuthToken = "authToken"
+
+  override def beforeEach = {
+    reset(mockNotificationService, mockAppConfig)
+    when(mockAppConfig.notifications).thenReturn(Notifications("authToken", 5, 300))
+  }
+
   "NotificationCallbackController" should {
     "return internal server error when there is a downstream failure" in {
       
       when(mockNotificationService.save(any[NodeSeq])(any[ExecutionContext])).thenReturn(Future.successful(Left(new IOException("Server error"))))
       
-      val result = controller.onNotify()(FakeRequest("", "").withBody(<notification/>))
+      val result = controller.onNotify()(FakeRequest("", "").withBody(<notification/>).withHeaders("Authorization" -> expectedAuthToken))
       
       status(result) mustBe INTERNAL_SERVER_ERROR
+    }
+
+    "return unauthorized when there is no auth token" in {
+
+      when(mockNotificationService.save(any[NodeSeq])(any[ExecutionContext])).thenReturn(Future.successful(Left(new IOException("Server error"))))
+
+      val result = controller.onNotify()(FakeRequest("", "").withBody(<notification/>))
+
+      status(result) mustBe UNAUTHORIZED
+    }
+
+    "return unauthorized when auth token is invalid" in {
+
+      when(mockNotificationService.save(any[NodeSeq])(any[ExecutionContext])).thenReturn(Future.successful(Left(new IOException("Server error"))))
+
+      val result = controller.onNotify()(FakeRequest("", "").withBody(<notification/>).withHeaders("Authorization" -> "Basic: some invalid token"))
+
+      status(result) mustBe UNAUTHORIZED
     }
   }
 }

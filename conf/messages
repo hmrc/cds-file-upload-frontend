@@ -109,6 +109,7 @@ helpline.paragraph1=If you have any problems call the helpline.
 ## Errors
 unauthorised.title=You can’t access this service with this account
 unauthorised.heading=You can’t access this service with this account
+unauthorised.guidance=You need to use the account associated with your EORI to access this service.
 
 uploadError.title=An error occurred during upload
 uploadError.heading=An error occurred during upload
