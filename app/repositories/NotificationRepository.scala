@@ -47,10 +47,10 @@ class NotificationRepository @Inject()(mongo: ReactiveMongoComponent, appConfig:
   def ensureIndex(index: Index)(implicit ec: ExecutionContext): Future[Unit] = {
     collection.indexesManager
       .create(index)
-      .map(wr => Logger.warn(wr.toString))
+      .map(wr => Logger.info(wr.toString))
       .recover {
         case t =>
-          Logger.error(s"$message (${index.eventualName})", t)
+          Logger.warn(s"$message (${index.eventualName})", t)
       }
   }
 
