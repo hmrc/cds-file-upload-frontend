@@ -38,7 +38,7 @@ class NotificationRepository @Inject()(mongo: ReactiveMongoComponent, appConfig:
 
   override def indexes: Seq[Index] = Seq(
     Index(key = Seq(("fileReference", IndexType.Ascending)), name = Some("fileReferenceIndex")),
-    Index(key = Seq(("createdAt", IndexType.Ascending)), name = Some("createdAtIndex"), options = BSONDocument("expireAfterSeconds" -> appConfig.notifications.ttl))
+    Index(key = Seq(("createdAt", IndexType.Ascending)), name = Some("createdAtIndex"), options = BSONDocument("expireAfterSeconds" -> appConfig.notifications.ttlSeconds))
   )
 
 

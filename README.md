@@ -1,23 +1,44 @@
 
 # CDS File Upload Frontend
 
-This is a placeholder README.md for a new repository
+This app allows users to upload files to support their import or export declaration. Once a file is submitted it will be scanned. 
+The [Notification Service](https://github.com/hmrc/customs-notification) will send a notification about the result of this scan via a callback URL. This is persisted by the app. After all files are submitted, the app will check that all files have success notifications before proceeding to the final File Receipt page.
 
-## Setup
+See [here](https://confluence.tools.tax.service.gov.uk/display/CD/Secure+File+Upload+UI+Service+-+Solution+Design) for more details.
+ 
 
-In order to run CDS file upload frontend locally you will need to be running service manager and run the command
+## Running the app locally
 
-```bash
-sm --start CDS_FUF_ALL -f
+The app simulates the Upscan service locally using a stub.
+
+
+In order to run CDS File Upload Frontend with the stubbed endpoints you will need to be running service manager and run the following commands
+
+```
+./run-services.sh
+
+./run-with-stubs.sh
 ```
 
-#### Seeding Data in `api-subscription-fields`
 
-`cds-file-upload-frontend` requires data to be seeded in `api-subscription-fields` before a full journey can
-be completed. The following command will seed the correct information
+### Config settings
 
-```bash
-curl -v -X PUT "http://localhost:9650/field/application/cds-file-upload-frontend/context/customs%2Fdeclarations/version/3.0" -H "Cache-Control: no-cache" -H "Content-Type: application/json" -d '{ "fields" : { "callbackUrl" : "https://postman-echo.com/post", "securityToken" : "securityToken" } }'
+The following settings are used to configure the notifications persistance and retrieval.
+
+max-retries: After an initial attempt to retrieve all notifications, this is the maximum number of retries to attempt before failing with an error.
+
+retry-pause-millis: This is the number of milliseconds to wait between retries.
+
+auth-token: This is the Authorisation Token we expect from the Notification Service.
+
+ttl-seconds: This is the Time To Live for the notification.  This is a value in seconds that determines how long the notification will be persisted before automatic deletion.
+```
+notifications {
+  max-retries = 10
+  retry-pause-millis = 500
+  auth-token = "Basic NDg5MDc0YjAtOWZmZi00NjY5LTk0NTktNGE0YjM5YTk3NDU5IDpCcSVTOjZKQktTS1Y2UGI"
+  ttl-seconds = 3600
+}
 ```
 
 

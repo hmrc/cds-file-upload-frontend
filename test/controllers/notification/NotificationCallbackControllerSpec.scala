@@ -43,7 +43,7 @@ class NotificationCallbackControllerSpec extends PlaySpec with MockitoSugar with
 
   override def beforeEach = {
     reset(mockNotificationService, mockAppConfig)
-    when(mockAppConfig.notifications).thenReturn(Notifications("authToken", 5, 300))
+    when(mockAppConfig.notifications).thenReturn(Notifications("authToken", 5, 300, 120))
   }
 
   "NotificationCallbackController" should {
