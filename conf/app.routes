@@ -4,6 +4,8 @@ GET         /assets/*file                       controllers.Assets.versioned(pat
 
 GET         /start                              controllers.StartController.displayStartPage
 
+GET         /sign-out                           controllers.SignOutController.signOut
+
 GET         /error                              controllers.ErrorPageController.error
 GET         /upload-error                       controllers.ErrorPageController.uploadError
 

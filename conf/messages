@@ -5,6 +5,7 @@ common.feedbackFirst=This is a new service - your
 common.feedbackSecond=feedback
 common.feedbackThird=will help us to improve it.
 common.continue=Continue
+cds.sign.out=Sign out
 
 ## errors
 error.browser.title.prefix=Error:

@@ -20,7 +20,7 @@
 
 @(form: Form[FileUploadCount])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = s"${errorPrefix(form)} ${messages("howManyFilesUpload.title")}", bodyClasses = None) {
+@main_template(title = s"${errorPrefix(form)} ${messages("howManyFilesUpload.title")}") {
 
 <div class="form-group">
     <h1 class="heading-large">@messages("howManyFilesUpload.heading")</h1>

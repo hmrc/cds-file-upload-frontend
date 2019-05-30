@@ -20,7 +20,7 @@
 
 @(files: List[FileUpload])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = messages("fileUploadReceiptPage.title"), bodyClasses = None) {
+@main_template(title = messages("fileUploadReceiptPage.title")) {
 
 <div class="form-group">
     <h1 class="heading-large">@messages("fileUploadReceiptPage.heading", files.length)</h1>

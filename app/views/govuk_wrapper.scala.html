@@ -20,78 +20,89 @@
 @import uk.gov.hmrc.play.views.html.{helpers => uiHelpers}
 
 @(appConfig: AppConfig,
-  title: String,
-  mainClass: Option[String] = None,
-  mainDataAttributes: Option[Html] = None,
-  bodyClasses: Option[String] = None,
-  sidebar: Html = HtmlFormat.empty,
-  contentHeader: Option[Html] = None,
-  mainContent: Html = HtmlFormat.empty,
-  serviceInfoContent: Html = HtmlFormat.empty,
-  scriptElem: Option[Html] = None)(implicit request: Request[_], messages: Messages)
+        title: String,
+        mainClass: Option[String] = None,
+        mainDataAttributes: Option[Html] = None,
+        bodyClasses: Option[String] = None,
+        sidebar: Html = HtmlFormat.empty,
+        contentHeader: Option[Html] = None,
+        mainContent: Html = HtmlFormat.empty,
+        serviceInfoContent: Html = HtmlFormat.empty,
+        scriptElem: Option[Html] = None)(implicit request: Request[_], messages: Messages)
 
-@head = {
+    @head = {
     @uiLayouts.head(
-      linkElem = None,
-      headScripts = None)
-    <meta name="format-detection" content="telephone=no" />
-    <script src='@routes.Assets.versioned("javascripts/analytics.js")'> </script>
-}
+        linkElem = None,
+        headScripts = None)
+        <meta name="format-detection" content="telephone=no" />
+        <script src='@routes.Assets.versioned("javascripts/analytics.js")'> </script>
+    }
 
-@headerNavLinks = {}
+    @headerNavLinks = {
+        @if(request.cookies.get("mdtp").fold(false)(cookie => cookie.value.contains("authToken=Bearer+"))) {
+            <li>
+                <a id="signOut" href="@controllers.routes.SignOutController.signOut.url" data-journey-click="primary-navigation:Click:Sign out">@messages("cds.sign.out")</a>
+            </li>
+        }
+    }
 
-@insideHeader = {
+    @insideHeader = {
     @uiLayouts.header_nav(
-      navTitle = Some(messages("common.service.name")),
-      navTitleLink = None,
-      showBetaLink = false,
-      navLinks = Some(headerNavLinks))
-}
+        navTitle = Some(messages("common.service.name")),
+        navTitleLink = None,
+        showBetaLink = false,
+        navLinks = Some(headerNavLinks))
+    }
 
-@afterHeader = {}
+    @afterHeader = {}
 
-@bodyEnd = {
+    @bodyEnd = {
     @uiLayouts.footer(
-      analyticsToken = Some(appConfig.googleAnalytics.token),
-      analyticsHost = appConfig.googleAnalytics.host,
-      ssoUrl = None,
-      scriptElem = scriptElem,
-      gaCalls = None)
+        analyticsToken = Some(appConfig.googleAnalytics.token),
+        analyticsHost = appConfig.googleAnalytics.host,
+        ssoUrl = None,
+        scriptElem = scriptElem,
+        gaCalls = None)
 
-}
+    }
 
-@footerTop = {}
-@footerLinks = {}
+    @footerTop = {}
 
-@serviceInfo = {}
+    @footerLinks = {}
 
-@mainContentHeader = {
-    <div id="global-header-bar"></div>
-    <div class="phase-banner">
-      <p>
-        <strong class="phase-tag">@Messages("common.phase")</strong>
-        <span>@messages("common.feedbackFirst") <a href="#">@messages("common.feedbackSecond")</a> @messages("common.feedbackThird")</span>
-      </p>
-    </div>
+    @serviceInfo = {}
+
+    @mainContentHeader = {
+        <div id="global-header-bar"></div>
+        <div class="phase-banner">
+            <p>
+                <strong class="phase-tag">@Messages("common.phase")</strong>
+                <span>@messages("common.feedbackFirst") <a href="#">@messages("common.feedbackSecond")</a>
+                    @messages("common.feedbackThird")</span>
+            </p>
+        </div>
     @if(contentHeader.isDefined) {
         @uiLayouts.main_content_header(contentHeader = contentHeader.get)
     }
-}
+    }
 
-@getHelpForm = @{uiHelpers.reportAProblemLink(appConfig.contactFrontend.reportAProblemPartialUrl, appConfig.contactFrontend.reportAProblemNonJSUrl)}
+    @getHelpForm = @{
+        uiHelpers.reportAProblemLink(appConfig.contactFrontend.reportAProblemPartialUrl, appConfig.contactFrontend.reportAProblemNonJSUrl)
+    }
 
-@content = {
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NDJKHWK" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
+    @content = {
+            <!-- Google Tag Manager (noscript) -->
+        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NDJKHWK" height="0" width="0" style="display: none;
+            visibility: hidden"></iframe></noscript>
+            <!-- End Google Tag Manager (noscript) -->
 
     @uiLayouts.main_content(
-      article = mainContent,
-      mainClass = mainClass,
-      mainDataAttributes = mainDataAttributes,
-      mainContentHeader = mainContentHeader,
-      serviceInfo = serviceInfo,
-      sidebar = sidebar)
-}
+        article = mainContent,
+        mainClass = mainClass,
+        mainDataAttributes = mainDataAttributes,
+        mainContentHeader = mainContentHeader,
+        serviceInfo = serviceInfo,
+        sidebar = sidebar)
+    }
 
-@hmrcGovUkTemplate(Some(title), bodyClasses)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(uiLayouts.footer_links()), true)(content)
+    @hmrcGovUkTemplate(Some(title), bodyClasses)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(uiLayouts.footer_links()), true)(content)

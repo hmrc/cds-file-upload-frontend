@@ -139,6 +139,8 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
     }
 
   private def nextPage(ref: String, files: List[FileUpload])(implicit req: FileUploadResponseRequest[_]) = {
+    def nextFile(file: FileUpload) = routes.UploadYourFilesController.onPageLoad(file.reference)
+    
     val nextFileToUpload = files.collectFirst {
       case file@FileUpload(reference, Waiting(_), _) if reference > ref => file
     }
@@ -215,8 +217,6 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
       detail = hc.toAuditDetails(detail.toSeq: _*))
     )
   }
-
-  private def nextFile(file: FileUpload) = routes.UploadYourFilesController.onPageLoad(file.reference)
 
   private def getPosition(ref: String, refs: List[String]) = refs match {
     case head :: tail if head == ref => First(refs.size)
