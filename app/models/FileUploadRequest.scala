@@ -16,6 +16,8 @@
 
 package models
 
+import java.util.UUID
+
 import scala.xml.Elem
 
 final case class FileUploadRequest(
@@ -30,14 +32,15 @@ final case class FileUploadRequest(
     </FileUploadRequest>
 }
 
-sealed abstract case class FileUploadFile(
-  fileSequenceNo: Int,
-  documentType: String) {
+sealed abstract case class FileUploadFile(fileSequenceNo: Int, documentType: String) {
+  private val uuid = UUID.randomUUID()
 
   def toXml: Elem =
     <File>
       <FileSequenceNo>{fileSequenceNo}</FileSequenceNo>
       <DocumentType>{documentType}</DocumentType>
+      <SuccessRedirect>{uuid}</SuccessRedirect>
+      <ErrorRedirect>{uuid}</ErrorRedirect>
     </File>
 }
 
