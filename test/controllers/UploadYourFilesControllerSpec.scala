@@ -53,15 +53,15 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
   private val responseGen: Gen[(FileUpload, FileUploadResponse)] =
     for {
       response <- arbitrary[FileUploadResponse]
-      index <- Gen.choose(0, response.files.length - 1)
-      file = response.files(index)
+      index <- Gen.choose(0, response.uploads.length - 1)
+      file = response.uploads(index)
     } yield (file, response)
 
   private val waitingGen: Gen[(FileUpload, UploadRequest, FileUploadResponse)] = responseGen.flatMap {
     case (file, response) =>
       arbitrary[Waiting].map { waiting =>
         val uploadedFile = file.copy(state = waiting)
-        val updatedFiles = uploadedFile :: response.files.filterNot(_ == file)
+        val updatedFiles = uploadedFile :: response.uploads.filterNot(_ == file)
 
         (uploadedFile, waiting.uploadRequest, FileUploadResponse(updatedFiles))
       }
@@ -103,7 +103,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
         forAll(waitingGen, arbitrary[CacheMap]) {
           case ((file, _, response), cacheMap) =>
 
-            val refPosition: Position = nextPosition(file.reference, response.files.map(_.reference))
+            val refPosition: Position = nextPosition(file.reference, response.uploads.map(_.reference))
 
             val updatedCache = combine(response, cacheMap)
             val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad(file.reference)(fakeRequest)
@@ -150,7 +150,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
         forAll { (ref: String, response: FileUploadResponse, cache: CacheMap) =>
 
-          whenever(!response.files.exists(_.reference == ref)) {
+          whenever(!response.uploads.exists(_.reference == ref)) {
 
             val updatedCache = combine(response, cache)
             val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad(ref)(fakeRequest)
@@ -200,7 +200,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
           val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
           verify(mockDataCacheConnector).save(captor.capture())(any[HeaderCarrier])
           val answers = captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response)
-          answers.get.files.head.filename mustBe fileName
+          answers.get.uploads.head.filename mustBe fileName
       }
     }
 
@@ -288,7 +288,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
         forAll { (ref: String, response: FileUploadResponse, cache: CacheMap) =>
 
-          whenever(!response.files.exists(_.reference == ref)) {
+          whenever(!response.uploads.exists(_.reference == ref)) {
 
             val filePart = FilePart[TemporaryFile](key = "file", "file.jpeg", contentType = Some("image/jpeg"), ref = TemporaryFile())
             val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
@@ -322,7 +322,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
         verify(mockDataCacheConnector, atLeastOnce).save(captor.capture())(any[HeaderCarrier])
 
         val Some(updateResponse) = captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response)
-        val Some(updatedFile) = updateResponse.files.find(_.reference == "ref")
+        val Some(updatedFile) = updateResponse.uploads.find(_.reference == "ref")
         updatedFile.state mustBe Uploaded
       }
     }
@@ -492,7 +492,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
         forAll { (ref: String, response: FileUploadResponse, cache: CacheMap) =>
 
-          whenever(!response.files.exists(_.reference == ref)) {
+          whenever(!response.uploads.exists(_.reference == ref)) {
 
             val updatedCache = combine(response, cache)
             val result = controller(fakeDataRetrievalAction(updatedCache)).onSuccess(ref)(fakeRequest)

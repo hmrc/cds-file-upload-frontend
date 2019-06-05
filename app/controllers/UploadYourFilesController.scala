@@ -64,15 +64,15 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
   def onPageLoad(ref: String): Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
 
-      val references = req.fileUploadResponse.files.map(_.reference)
-      val filenames = req.fileUploadResponse.files.map(_.filename).filter(_.nonEmpty)
+      val references = req.fileUploadResponse.uploads.map(_.reference)
+      val filenames = req.fileUploadResponse.uploads.map(_.filename).filter(_.nonEmpty)
       val refPosition = getPosition(ref, references)
 
-      req.fileUploadResponse.files.find(_.reference == ref) match {
+      req.fileUploadResponse.uploads.find(_.reference == ref) match {
         case Some(file) =>
           file.state match {
             case Waiting(_) => Future.successful(Ok(views.html.upload_your_files(ref, refPosition, filenames)))
-            case _ => nextPage(file.reference, req.fileUploadResponse.files)
+            case _ => nextPage(file.reference, req.fileUploadResponse.uploads)
           }
 
         case None => Future.successful(Redirect(routes.ErrorPageController.error()))
@@ -83,7 +83,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
     (authenticate andThen requireEori andThen getData andThen requireResponse)
       .async(parse.maxLength(MaxFileSizeInMB * 1024 * 1024, parse.multipartFormData)) { implicit req =>
 
-        val files = req.fileUploadResponse.files
+        val files = req.fileUploadResponse.uploads
 
         files.find(_.reference == ref) match {
           case Some(file) =>
@@ -110,7 +110,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
                 }
 
               case _ =>
-                nextPage(file.reference, req.fileUploadResponse.files)
+                nextPage(file.reference, req.fileUploadResponse.uploads)
             }
 
           case None =>
@@ -123,7 +123,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
   def onSuccess(ref: String): Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
 
-      val files = req.fileUploadResponse.files
+      val files = req.fileUploadResponse.uploads
 
       files.find(_.reference == ref) match {
         case Some(file) =>
@@ -142,7 +142,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
     def nextFile(file: FileUpload) = routes.UploadYourFilesController.onPageLoad(file.reference)
     
     val nextFileToUpload = files.collectFirst {
-      case file@FileUpload(reference, Waiting(_), _) if reference > ref => file
+      case file@FileUpload(reference, Waiting(_), _, _, _) if reference > ref => file
     }
 
     nextFileToUpload match {
@@ -155,7 +155,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
   def failedUpload(notification: Notification): Boolean = notification.outcome != "SUCCESS"
 
   private def allFilesUploaded(implicit req: FileUploadResponseRequest[_]) = {
-    val uploads = req.fileUploadResponse.files
+    val uploads = req.fileUploadResponse.uploads
 
     def retrieveNotifications(retries: Int = 0): Future[Result] = {
       val receivedNotifications = Future.sequence(
@@ -200,7 +200,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
       val eori = Map("eori" -> req.request.eori)
       val mrn = req.userAnswers.get(MrnEntryPage).fold(Map.empty[String, String])(m => Map("mrn" -> m.value))
       val numberOfFiles = req.userAnswers.get(HowManyFilesUploadPage).fold(Map.empty[String, String])(n => Map("numberOfFiles" -> s"${n.value}"))
-      val files = req.fileUploadResponse.files
+      val files = req.fileUploadResponse.uploads
       val fileReferences = (1 to files.size).map(i => s"fileReference$i").zip(files.map(_.reference)).toMap
       val fileNames = (1 to files.size).map(i => s"fileName$i").zip(files.map(_.filename)).toMap
       contactDetails ++ eori ++ mrn ++ numberOfFiles ++ fileReferences ++ fileNames

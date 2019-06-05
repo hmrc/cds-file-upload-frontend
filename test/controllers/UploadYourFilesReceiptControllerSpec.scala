@@ -41,7 +41,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase {
           val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad()(fakeRequest)
 
           status(result) mustBe OK
-          contentAsString(result) mustBe viewAsString(response.files.sortBy(_.reference))
+          contentAsString(result) mustBe viewAsString(response.uploads.sortBy(_.reference))
         }
       }
     }

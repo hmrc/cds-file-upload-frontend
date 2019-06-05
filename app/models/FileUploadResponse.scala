@@ -17,37 +17,40 @@
 package models
 
 import play.api.libs.json._
-import play.json.extra.Variants
 
 import scala.xml.Elem
 
 case class UploadRequest(href: String, fields: Map[String, String])
 
 object UploadRequest {
-
   implicit val format = Json.format[UploadRequest]
 }
 
-case class FileUpload(reference: String, state: FileState, filename: String = "")
+case class RedirectUrl(url: String)
+
+object RedirectUrl {
+  implicit val format = Json.format[RedirectUrl]
+}
+
+case class FileUpload(reference: String, state: FileState, filename: String = "", successUrl: RedirectUrl = RedirectUrl("success"), errorUrl: RedirectUrl = RedirectUrl("error"))
 
 object FileUpload {
-
   implicit val format = Json.format[FileUpload]
 }
 
-sealed abstract case class FileUploadResponse(files: List[FileUpload])
+sealed abstract case class FileUploadResponse(uploads: List[FileUpload])
 
 object FileUploadResponse {
-
-  def apply(files: List[FileUpload]): FileUploadResponse =
-    new FileUploadResponse(files.sortBy(_.reference)) {}
-
   implicit val format = Json.format[FileUploadResponse]
 
+  def apply(files: List[FileUpload]): FileUploadResponse = new FileUploadResponse(files.sortBy(_.reference)) {}
+  
   def fromXml(xml: Elem): FileUploadResponse = {
     val files: List[FileUpload] = (xml \ "Files" \ "_").theSeq.collect {
       case file =>
         val reference = (file \ "Reference").text.trim
+        val successUrl = (file \ "SuccessRedirect").text.trim
+        val errorUrl = (file \ "ErrorRedirect").text.trim
         val href = (file \ "UploadRequest" \ "Href").text.trim
         val fields: Map[String, String] =
           (file \ "UploadRequest" \ "Fields" \ "_")
@@ -55,7 +58,7 @@ object FileUploadResponse {
             .map(field => field.label -> field.text.trim)
             .toMap
 
-        FileUpload(reference, Waiting(UploadRequest(href, fields)))
+        FileUpload(reference, Waiting(UploadRequest(href, fields)), successUrl = RedirectUrl(successUrl), errorUrl = RedirectUrl(errorUrl))
     }.toList
 
     FileUploadResponse(files)
@@ -67,7 +70,6 @@ abstract class Field(value: String) {
 }
 
 object Field {
-
   final case object ContentType extends Field("Content-Type")
   final case object ACL         extends Field("acl")
   final case object Key         extends Field("key")

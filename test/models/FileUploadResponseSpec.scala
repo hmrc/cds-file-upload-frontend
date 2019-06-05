@@ -27,8 +27,7 @@ import org.scalatest.prop.PropertyChecks
 class FileUploadResponseSpec extends SpecBase with XmlBehaviours {
 
   private val fileGen: Gen[FileUpload] = arbitrary[FileUpload].flatMap(file => arbitrary[Waiting].map(waiting => file.copy(state = waiting)))
-  private val responseGen: Gen[FileUploadResponse] =
-    listOfN(10, fileGen).map(files => FileUploadResponse(files))
+  private val responseGen: Gen[FileUploadResponse] = listOfN(10, fileGen).map(files => FileUploadResponse(files))
 
   ".fromXml" should {
 

@@ -18,7 +18,7 @@ package controllers.test
 
 import javax.inject.{Inject, Singleton}
 import models.Field._
-import models.{FileUpload, FileUploadResponse, UploadRequest, Waiting}
+import models.{FileUpload, FileUploadResponse, RedirectUrl, UploadRequest, Waiting}
 import play.api.http.ContentTypes
 import play.api.libs.Files
 import play.api.mvc.{Action, MultipartFormData}
@@ -33,6 +33,17 @@ import scala.xml._
 class CustomsDeclarationsStubController @Inject()(notificationService: NotificationService)(implicit ec: ExecutionContext) extends FrontendController {
 
   var fileRef = 1
+  val waiting = Waiting(UploadRequest(
+       href = "http://localhost:6793/cds-file-upload-service/test-only/s3-bucket",
+       fields = Map(
+         Algorithm.toString -> "AWS4-HMAC-SHA256",
+         Signature.toString -> "xxxx",
+         Key.toString -> "xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+         ACL.toString -> "private",
+         Credentials.toString -> "ASIAxxxxxxxxx/20180202/eu-west-2/s3/aws4_request",
+         Policy.toString -> "xxxxxxxx=="
+       )
+     ))
 
   // for now, we will just return some random
   def handleBatchFileUploadRequest: Action[NodeSeq] = Action(parse.xml) { implicit req =>
@@ -41,19 +52,11 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
     Thread.sleep(100)
 
     val fileGroupSize = (scala.xml.XML.loadString(req.body.mkString) \ "FileGroupSize").text.toInt
+   
     val resp = FileUploadResponse((1 to fileGroupSize).map { i =>
-      FileUpload(reference = i.toString, Waiting(UploadRequest(
-        href = "http://localhost:6793/cds-file-upload-service/test-only/s3-bucket",
-        fields = Map(
-          Algorithm.toString -> "AWS4-HMAC-SHA256",
-          Signature.toString -> "xxxx",
-          Key.toString -> "xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-          ACL.toString -> "private",
-          Credentials.toString -> "ASIAxxxxxxxxx/20180202/eu-west-2/s3/aws4_request",
-          Policy.toString -> "xxxxxxxx=="
-        )
-      )))
+      FileUpload(i.toString, waiting, successUrl = RedirectUrl(s"http://success/$i"), errorUrl = RedirectUrl(s"http://error/$i"))
     }.toList)
+    
     Ok(XmlHelper.toXml(resp)).as(ContentTypes.XML)
   }
 
@@ -63,13 +66,15 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
   }
 
 
-  def callBack()(implicit hc:HeaderCarrier) = {
+  def callBack()(implicit hc: HeaderCarrier) = {
 
     Thread.sleep(1000)
 
     val notification =
       <Root>
-        <FileReference>{fileRef}</FileReference>
+        <FileReference>
+          {fileRef}
+        </FileReference>
         <BatchId>5e634e09-77f6-4ff1-b92a-8a9676c715c4</BatchId>
         <FileName>sample.pdf</FileName>
         <Outcome>SUCCESS</Outcome>
@@ -96,20 +101,23 @@ object XmlHelper {
       </Fields>
     </UploadRequest>
 
-  def toXml(file: FileUpload): Elem =
-    <File>
-      <Reference>
-        {file.reference}
-      </Reference>{file.state match {
-      case Waiting(request) => toXml(request)
+  def toXml(upload: FileUpload): Elem = {
+    val request = upload.state match {
+      case Waiting(req) => toXml(req)
       case _ => NodeSeq.Empty
-    }}
+    }
+    <File>
+      <Reference>{upload.reference}</Reference>
+      <SuccessRedirect>{upload.successUrl.url}</SuccessRedirect>
+      <ErrorRedirect>{upload.errorUrl.url}</ErrorRedirect>
+      {request}
     </File>
+  }
 
   def toXml(response: FileUploadResponse): Elem = {
     <FileUploadResponse xmlns="hmrc:fileupload">
       <Files>
-        {response.files.map(toXml)}
+        {response.uploads.map(toXml)}
       </Files>
     </FileUploadResponse>
   }

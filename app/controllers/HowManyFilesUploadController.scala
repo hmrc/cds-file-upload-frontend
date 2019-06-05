@@ -78,7 +78,7 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
 
   private def uploadContactDetails(req: MrnRequest[AnyContent], fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier): Future[Either[Throwable, List[FileUpload]]] = {
     def saveRemainingFileUploadsToCache(fileUploadResponse: FileUploadResponse): Future[List[FileUpload]] = {
-      val remainingFileUploads = fileUploadResponse.files.tail
+      val remainingFileUploads = fileUploadResponse.uploads.tail
       val answers = updateUserAnswers(req.userAnswers, fileUploadCount, FileUploadResponse(remainingFileUploads))
       dataCacheConnector.save(answers.cacheMap).map { _ => remainingFileUploads }
     }
@@ -104,5 +104,5 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
     customsDeclarationsService.batchFileUpload(req.eori, req.mrn, fileUploadCount)
 
   private def firstUploadFile(response: FileUploadResponse): Either[Throwable, (FileUpload, UploadRequest)] =
-    response.files.headOption map { case f@FileUpload(_, Waiting(u), _) => Right((f, u)) } getOrElse Left(new IllegalStateException("Unable to initiate upload"))
+    response.uploads.headOption map { case f@FileUpload(_, Waiting(u), _, _, _) => Right((f, u)) } getOrElse Left(new IllegalStateException("Unable to initiate upload"))
 }

@@ -152,7 +152,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
         FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> "")))),
         FileUpload("someFileRef3", Waiting(UploadRequest("http://s3bucket/myfile3", Map("" -> ""))))
       ))
-      val fileUploadsAfterContactDetails = fileUploadResponse.files.tail
+      val fileUploadsAfterContactDetails = fileUploadResponse.uploads.tail
 
       when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
       when(mockUploadContactDetails.upload(any(), any())).thenReturn(Success(202))
@@ -168,7 +168,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       verify(mockDataCacheConnector).save(captor.capture())(any[HeaderCarrier])
       val Some(fileUploadCount) = FileUploadCount(2)
       captor.getValue.getEntry[FileUploadCount](HowManyFilesUploadPage) mustBe Some(fileUploadCount)
-      captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response) mustBe Some(FileUploadResponse(fileUploadResponse.files.tail))
+      captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response) mustBe Some(FileUploadResponse(fileUploadResponse.uploads.tail))
     }
 
     "redirect to error page when contact details upload fails" in {
