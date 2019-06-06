@@ -71,7 +71,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
       req.fileUploadResponse.uploads.find(_.reference == ref) match {
         case Some(file) =>
           file.state match {
-            case Waiting(_) => Future.successful(Ok(views.html.upload_your_files(ref, refPosition, filenames)))
+            case Waiting(ur) => Future.successful(Ok(views.html.upload_your_files(ur, refPosition, file.successUrl, file.errorUrl, filenames)))
             case _ => nextPage(file.reference, req.fileUploadResponse.uploads)
           }
 

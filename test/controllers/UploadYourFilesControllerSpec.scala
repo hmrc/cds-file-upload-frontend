@@ -101,7 +101,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
       "request file exists in response" in {
 
         forAll(waitingGen, arbitrary[CacheMap]) {
-          case ((file, _, response), cacheMap) =>
+          case ((file, uploadReq, response), cacheMap) =>
 
             val refPosition: Position = nextPosition(file.reference, response.uploads.map(_.reference))
 
@@ -109,7 +109,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
             val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad(file.reference)(fakeRequest)
 
             status(result) mustBe OK
-            contentAsString(result) mustBe viewAsString(file.reference, refPosition, List.empty)
+            contentAsString(result) mustBe viewAsString(uploadReq, refPosition,RedirectUrl("success"), RedirectUrl("error"), List.empty)
         }
       }
     }
@@ -505,7 +505,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
     }
   }
 
-  private def viewAsString(reference: String, refPosition: Position, filenames: List[String]) = upload_your_files(reference, refPosition, filenames)(fakeRequest, messages, appConfig, fakeRequest.flash).toString
+  private def viewAsString(uploadRequest: UploadRequest, refPosition: Position, successRedirect: RedirectUrl, errorRedirect: RedirectUrl, filenames: List[String]) = upload_your_files(uploadRequest, refPosition, successRedirect, errorRedirect, filenames)(fakeRequest, messages, appConfig, fakeRequest.flash).toString
 
   private def combine(response: FileUploadResponse, cache: CacheMap) =
     cache.copy(data = cache.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))

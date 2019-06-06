@@ -29,4 +29,4 @@ POST        /upload/:ref                        controllers.UploadYourFilesContr
 
 GET         /upload/success/:ref                controllers.UploadYourFilesController.onSuccess(ref: String)
 
-GET         /upload/upscan-success/:id          controllers.UpscanStatusController.error(id: String)
+GET         /upload/upscan-error/:id            controllers.UpscanStatusController.error(id: String)
