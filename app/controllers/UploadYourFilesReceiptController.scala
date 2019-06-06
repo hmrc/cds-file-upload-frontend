@@ -28,7 +28,7 @@ import views.html.upload_your_files_receipt
 @Singleton
 class UploadYourFilesReceiptController @Inject()(val messagesApi: MessagesApi,
                                                  authenticate: AuthAction,
-                                                 requireEori: EORIRequiredActionImpl,
+                                                 requireEori: EORIRequiredAction,
                                                  getData: DataRetrievalAction,
                                                  requireResponse: FileUploadResponseRequiredAction,
                                                  implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {

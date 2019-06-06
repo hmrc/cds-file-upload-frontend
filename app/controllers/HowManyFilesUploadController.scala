@@ -36,7 +36,7 @@ import scala.util.{Failure, Success}
 @Singleton
 class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
                                              authenticate: AuthAction,
-                                             requireEori: EORIRequiredActionImpl,
+                                             requireEori: EORIRequiredAction,
                                              getData: DataRetrievalAction,
                                              requireMrn: MrnRequiredAction,
                                              requireContactDetails: ContactDetailsRequiredAction,

@@ -44,7 +44,7 @@ import scala.util.{Failure, Success}
 @Singleton
 class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
                                           authenticate: AuthAction,
-                                          requireEori: EORIRequiredActionImpl,
+                                          requireEori: EORIRequiredAction,
                                           getData: DataRetrievalAction,
                                           requireResponse: FileUploadResponseRequiredAction,
                                           dataCacheConnector: DataCacheConnector,

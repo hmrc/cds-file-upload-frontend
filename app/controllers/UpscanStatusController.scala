@@ -16,21 +16,23 @@
 
 package controllers
 
-import com.google.inject.{Inject, Singleton}
 import config.AppConfig
-import controllers.actions._
+import controllers.actions.{AuthAction, DataRetrievalAction, EORIRequiredAction, FileUploadResponseRequiredAction}
+import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import views.html.upload_error
 
-
-@Singleton
-class FileWarningController @Inject()(val messagesApi: MessagesApi,
+class UpscanStatusController @Inject()(val messagesApi: MessagesApi,
                                        authenticate: AuthAction,
                                        requireEori: EORIRequiredAction,
+                                       getData: DataRetrievalAction,
+                                       requireResponse: FileUploadResponseRequiredAction,
                                        implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori) { implicit req =>
-    Ok(views.html.file_warning())
-  }
+  def error(id: String): Action[AnyContent] =
+    (authenticate andThen requireEori) { implicit req =>
+      Ok(upload_error())
+    }
 }

@@ -19,7 +19,7 @@ package controllers
 import com.google.inject.Singleton
 import config.AppConfig
 import connectors.DataCacheConnector
-import controllers.actions.{AuthAction, ContactDetailsRequiredAction, DataRetrievalAction, EORIRequiredActionImpl}
+import controllers.actions._
 import forms.MRNFormProvider
 import javax.inject.Inject
 import pages.MrnEntryPage
@@ -33,7 +33,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class MrnEntryController @Inject()(val messagesApi: MessagesApi,
                                     authenticate: AuthAction,
-                                    requireEori: EORIRequiredActionImpl,
+                                    requireEori: EORIRequiredAction,
                                     requireContactDetails: ContactDetailsRequiredAction,
                                     getData: DataRetrievalAction,
                                     formProvider: MRNFormProvider,

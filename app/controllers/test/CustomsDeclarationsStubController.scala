@@ -18,7 +18,7 @@ package controllers.test
 
 import javax.inject.{Inject, Singleton}
 import models.Field._
-import models.{FileUpload, FileUploadResponse, RedirectUrl, UploadRequest, Waiting}
+import models._
 import play.api.http.ContentTypes
 import play.api.libs.Files
 import play.api.mvc.{Action, MultipartFormData}
@@ -26,7 +26,7 @@ import services.NotificationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.xml._
 
 @Singleton
@@ -54,7 +54,7 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
     val fileGroupSize = (scala.xml.XML.loadString(req.body.mkString) \ "FileGroupSize").text.toInt
    
     val resp = FileUploadResponse((1 to fileGroupSize).map { i =>
-      FileUpload(i.toString, waiting, successUrl = RedirectUrl(s"http://success/$i"), errorUrl = RedirectUrl(s"http://error/$i"))
+      FileUpload(i.toString, waiting, successUrl = RedirectUrl(s"http://localhost:6793/cds-file-upload-service/upload/upscan-success/$i"), errorUrl = RedirectUrl(s"http://error/$i"))
     }.toList)
     
     Ok(XmlHelper.toXml(resp)).as(ContentTypes.XML)

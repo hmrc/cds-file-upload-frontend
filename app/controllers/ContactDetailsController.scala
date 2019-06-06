@@ -34,7 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class ContactDetailsController @Inject()(val messagesApi: MessagesApi,
                                          authenticate: AuthAction,
-                                         requireEori: EORIRequiredActionImpl,
+                                         requireEori: EORIRequiredAction,
                                          getData: DataRetrievalAction,
                                          dataCacheConnector: DataCacheConnector,
                                          implicit val appConfig: AppConfig)(implicit ec: ExecutionContext)

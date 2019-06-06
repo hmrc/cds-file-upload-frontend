@@ -19,8 +19,8 @@ package controllers.actions
 import generators.Generators
 import models.requests._
 import models.{ContactDetails, UserAnswers}
-import play.api.mvc.{Request, Result}
 import org.scalacheck.Arbitrary._
+import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
@@ -33,7 +33,7 @@ trait FakeActions extends Generators {
     }
   }
 
-  class FakeEORIAction(eori: String = arbitrary[String].sample.get) extends EORIRequiredActionImpl {
+  class FakeEORIAction(eori: String = arbitrary[String].sample.get) extends EORIRequiredAction {
     override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, EORIRequest[A]]] =
       Future.successful(Right(EORIRequest[A](request, eori)))
   }
