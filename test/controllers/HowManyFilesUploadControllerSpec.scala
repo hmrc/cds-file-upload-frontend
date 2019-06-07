@@ -163,7 +163,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
 
       status(result) mustBe SEE_OTHER
       val nextRef = fileUploadsAfterContactDetails.map(_.reference).min
-      redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad(nextRef).url)
+      redirectLocation(result) mustBe Some(routes.UpscanStatusController.onPageLoad(nextRef).url)
       val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
       verify(mockDataCacheConnector).save(captor.capture())(any[HeaderCarrier])
       val Some(fileUploadCount) = FileUploadCount(2)

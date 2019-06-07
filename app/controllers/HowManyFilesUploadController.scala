@@ -68,7 +68,7 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
         fileUploadCount => {
           uploadContactDetails(req, fileUploadCount) map {
             case Right(firstUpload :: _) =>
-              Redirect(routes.UploadYourFilesController.onPageLoad(firstUpload.reference))
+              Redirect(routes.UpscanStatusController.onPageLoad(firstUpload.reference))
             case _ =>
               Redirect(routes.ErrorPageController.error())
           }

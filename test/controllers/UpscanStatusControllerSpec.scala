@@ -22,7 +22,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import connectors.Cache
 import repositories.NotificationRepository
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 class UpscanStatusControllerSpec extends ControllerSpecBase {
 

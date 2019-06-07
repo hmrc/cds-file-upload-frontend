@@ -51,7 +51,9 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
       Key.toString -> "xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
       ACL.toString -> "private",
       Credentials.toString -> "ASIAxxxxxxxxx/20180202/eu-west-2/s3/aws4_request",
-      Policy.toString -> "xxxxxxxx=="
+      Policy.toString -> "xxxxxxxx==",
+      SuccessRedirect.toString -> s"http://localhost:6793/cds-file-upload-service/upload/upscan-success/${fileRef+1}",
+      ErrorRedirect.toString -> s"http://localhost:6793/cds-file-upload-service/upload/upscan-error/${fileRef+1}"
     )
   ))
 
@@ -64,22 +66,22 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
     val fileGroupSize = (scala.xml.XML.loadString(req.body.mkString) \ "FileGroupSize").text.toInt
 
     val resp = FileUploadResponse((1 to fileGroupSize).map { i =>
-      FileUpload(i.toString, waiting, successUrl = RedirectUrl(s"http://localhost:6793/cds-file-upload-service/upload/upscan-success/$i"), errorUrl = RedirectUrl(s"http://localhost:6793/cds-file-upload-service/upload/upscan-error/$i"))
+      FileUpload(i.toString, waiting, successUrl = RedirectUrl(s"http://localhost:6793/cds-file-upload-service/upload/upscan-success/${i+1}"), errorUrl = RedirectUrl(s"http://localhost:6793/cds-file-upload-service/upload/upscan-error/${i+1}"))
     }.toList)
 
     Ok(XmlHelper.toXml(resp)).as(ContentTypes.XML)
   }
 
   def handleS3FileUploadRequest: Action[AnyContent] = Action { implicit req =>
-    //    form.bindFromRequest().fold(
-    //      _ => BadRequest("THIS DIDNT WORK"),
-    //      stuff => {
-    //        callBack()
-    //        SeeOther(stuff.successActionRedirect)
-    //      }
-    //    )
-    callBack()
-    SeeOther(s"http://localhost:6793/cds-file-upload-service/upload/upscan-error/$fileRef")
+    println("****************** REQ: " +  req.queryString)
+    
+        form.bindFromRequest().fold(
+          _ => SeeOther("just to keep contact details upload happy"),
+          stuff => {
+            callBack()
+            SeeOther(stuff.successActionRedirect)
+          }
+        )
   }
 
   def callBack()(implicit hc: HeaderCarrier) = {
@@ -126,12 +128,7 @@ object XmlHelper {
       <Reference>
         {upload.reference}
       </Reference>
-      <SuccessRedirect>
-        {upload.successUrl.url}
-      </SuccessRedirect>
-      <ErrorRedirect>
-        {upload.errorUrl.url}
-      </ErrorRedirect>{request}
+        {request}
     </File>
   }
 

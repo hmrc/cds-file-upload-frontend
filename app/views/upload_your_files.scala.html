@@ -57,6 +57,7 @@
 
         @paragraph(bold(multiline(filenames: _*)))
 
+        <div>SUCCESS : @successRedirect.url</div>
 
         @hmrcHelpers.form(Call("POST", uploadRequest.href), ('enctype, "multipart/form-data"), ('class, "js-form")) {
 
@@ -67,8 +68,8 @@
                     errorMessage = flash.get("fileUploadError").getOrElse(""),
                     classes = List("error-message")
                 )
-                <input type="hidden" name="success_action_redirect" value="@successRedirect">
-                <input type="hidden" name="error_action_redirect" value="@errorRedirect">
+                <input type="hidden" name="success_action_redirect" value="@successRedirect.url">
+                <input type="hidden" name="error_action_redirect" value="@errorRedirect.url">
                 @uploadRequest.fields.map { case (key, value) =>
                     <input type="hidden" name="@key" value="@value"/>
                 }

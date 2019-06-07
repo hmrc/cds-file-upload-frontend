@@ -35,7 +35,7 @@ import uk.gov.hmrc.play.audit.model.{Audit, DataEvent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.upload_error
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class UpscanStatusController @Inject()(val messagesApi: MessagesApi,
                                        authenticate: AuthAction,
@@ -45,15 +45,35 @@ class UpscanStatusController @Inject()(val messagesApi: MessagesApi,
                                        cache: Cache,
                                        notificationRepository: NotificationRepository,
                                        auditConnector: AuditConnector,
-                                       implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
-  
-  private val MaxFileSizeInMB = appConfig.fileFormats.maxFileSizeMb
-  private val FileTypes = appConfig.fileFormats.approvedFileTypes.split(',').map(_.trim)
+                                       implicit val appConfig: AppConfig)(implicit ec: ExecutionContext) extends FrontendController with I18nSupport {
+
   private val AuditSource = appConfig.appName
   private val audit = Audit(AuditSource, auditConnector)
   private val notificationsMaxRetries = appConfig.notifications.maxRetries
   private val notificationsRetryPause = appConfig.notifications.retryPauseMillis
 
+  def onPageLoad(ref: String): Action[AnyContent] =
+    (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
+
+      val references = req.fileUploadResponse.uploads.map(_.reference)
+      val filenames = req.fileUploadResponse.uploads.map(_.filename).filter(_.nonEmpty)
+      val refPosition = getPosition(ref, references)
+
+      req.fileUploadResponse.uploads.find(_.reference == ref) match {
+        case Some(upload) =>
+          upload.state match {
+            case Waiting(ur) =>
+
+              println(s"UPLOAD: $upload")
+
+              Future.successful(Ok(views.html.upload_your_files(ur, refPosition, upload.successUrl, upload.errorUrl, filenames)))
+            case _ => nextPage(upload.reference, req.fileUploadResponse.uploads)
+          }
+
+        case None => Future.successful(Redirect(routes.ErrorPageController.error()))
+      }
+    }
+  
   def error(id: String): Action[AnyContent] =
     (authenticate andThen requireEori) { implicit req =>
       Ok(upload_error())
@@ -78,7 +98,7 @@ class UpscanStatusController @Inject()(val messagesApi: MessagesApi,
     }
 
   private def nextPage(ref: String, files: List[FileUpload])(implicit req: FileUploadResponseRequest[_]) = {
-    def nextFile(file: FileUpload) = routes.UploadYourFilesController.onPageLoad(file.reference)
+    def nextFile(file: FileUpload) = routes.UpscanStatusController.onPageLoad(file.reference)
 
     val nextFileToUpload = files.collectFirst {
       case file@FileUpload(reference, Waiting(_), _, _, _, _) if reference > ref => file
@@ -92,8 +112,9 @@ class UpscanStatusController @Inject()(val messagesApi: MessagesApi,
 
   private def allFilesUploaded(implicit req: FileUploadResponseRequest[_]) = {
     def failedUpload(notification: Notification): Boolean = notification.outcome != "SUCCESS"
+
     def prettyPrint: List[Notification] => String = _.map(n => s"(${n.fileReference}, ${n.outcome})").mkString(",")
-    
+
     val uploads = req.fileUploadResponse.uploads
 
     def retrieveNotifications(retries: Int = 0): Future[Result] = {
@@ -130,28 +151,34 @@ class UpscanStatusController @Inject()(val messagesApi: MessagesApi,
 
     retrieveNotifications()
   }
+
+  private def auditUploadSuccess()(implicit req: FileUploadResponseRequest[_]) = {
+    def auditDetails = {
+      val contactDetails = req.userAnswers.get(ContactDetailsPage).fold(Map.empty[String, String])(cd => Map("fullName" -> cd.name, "companyName" -> cd.companyName, "emailAddress" -> cd.email, "telephoneNumber" -> cd.phoneNumber))
+      val eori = Map("eori" -> req.request.eori)
+      val mrn = req.userAnswers.get(MrnEntryPage).fold(Map.empty[String, String])(m => Map("mrn" -> m.value))
+      val numberOfFiles = req.userAnswers.get(HowManyFilesUploadPage).fold(Map.empty[String, String])(n => Map("numberOfFiles" -> s"${n.value}"))
+      val files = req.fileUploadResponse.uploads
+      val fileReferences = (1 to files.size).map(i => s"fileReference$i").zip(files.map(_.reference)).toMap
+      val fileNames = (1 to files.size).map(i => s"fileName$i").zip(files.map(_.filename)).toMap
+      contactDetails ++ eori ++ mrn ++ numberOfFiles ++ fileReferences ++ fileNames
+    }
+
+    sendDataEvent(transactionName = "trader-submission", detail = auditDetails, auditType = "UploadSuccess")
+  }
+
+  private def sendDataEvent(transactionName: String, path: String = "N/A", tags: Map[String, String] = Map.empty, detail: Map[String, String], auditType: String)(implicit hc: HeaderCarrier): Unit = {
+    audit.sendDataEvent(DataEvent(
+      AuditSource,
+      auditType,
+      tags = hc.toAuditTags(transactionName, path) ++ tags,
+      detail = hc.toAuditDetails(detail.toSeq: _*))
+    )
+  }
   
-   private def auditUploadSuccess()(implicit req: FileUploadResponseRequest[_]) = {
-     def auditDetails = {
-       val contactDetails = req.userAnswers.get(ContactDetailsPage).fold(Map.empty[String, String])(cd => Map("fullName" -> cd.name, "companyName" -> cd.companyName, "emailAddress" -> cd.email, "telephoneNumber" -> cd.phoneNumber))
-       val eori = Map("eori" -> req.request.eori)
-       val mrn = req.userAnswers.get(MrnEntryPage).fold(Map.empty[String, String])(m => Map("mrn" -> m.value))
-       val numberOfFiles = req.userAnswers.get(HowManyFilesUploadPage).fold(Map.empty[String, String])(n => Map("numberOfFiles" -> s"${n.value}"))
-       val files = req.fileUploadResponse.uploads
-       val fileReferences = (1 to files.size).map(i => s"fileReference$i").zip(files.map(_.reference)).toMap
-       val fileNames = (1 to files.size).map(i => s"fileName$i").zip(files.map(_.filename)).toMap
-       contactDetails ++ eori ++ mrn ++ numberOfFiles ++ fileReferences ++ fileNames
-     }
- 
-     sendDataEvent(transactionName = "trader-submission", detail = auditDetails, auditType = "UploadSuccess")
-   }
- 
-   private def sendDataEvent(transactionName: String, path: String = "N/A", tags: Map[String, String] = Map.empty, detail: Map[String, String], auditType: String)(implicit hc: HeaderCarrier): Unit = {
-     audit.sendDataEvent(DataEvent(
-       AuditSource,
-       auditType,
-       tags = hc.toAuditTags(transactionName, path) ++ tags,
-       detail = hc.toAuditDetails(detail.toSeq: _*))
-     )
-   }
+  private def getPosition(ref: String, refs: List[String]) = refs match {
+    case head :: tail if head == ref => First(refs.size)
+    case init :+ last if last == ref => Last(refs.size)
+    case _ => Middle(refs.indexOf(ref) + 1, refs.size)
+  }
 }

@@ -81,6 +81,8 @@ object Field {
   final case object Date        extends Field("x-amz-date")
   final case object Callback    extends Field("x-amz-meta-callback-url")
   final case object Signature   extends Field("x-amz-signature")
+  final case object SuccessRedirect   extends Field("success-action-redirect")
+  final case object ErrorRedirect   extends Field("error-action-redirect")
 
   val values: Set[Field] = Set(
     ContentType, ACL, Key, Policy, Algorithm, Credentials, Date, Signature, Callback
