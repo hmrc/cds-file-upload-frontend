@@ -49,13 +49,15 @@ object FileUploadResponse {
     val files: List[FileUpload] = (xml \ "Files" \ "_").theSeq.collect {
       case file =>
         val reference = (file \ "Reference").text.trim
-        val successUrl = (file \ "SuccessRedirect").text.trim
-        val errorUrl = (file \ "ErrorRedirect").text.trim
         val href = (file \ "UploadRequest" \ "Href").text.trim
+        val successUrl = (file \ "UploadRequest" \ "Fields" \ "success-action-redirect").text.trim
+        val errorUrl = (file \ "UploadRequest" \ "Fields" \ "error-action-redirect").text.trim
         val fields: Map[String, String] =
           (file \ "UploadRequest" \ "Fields" \ "_")
             .theSeq
-            .map(field => field.label -> field.text.trim)
+            .collect{
+              case field if field.label != "success-action-redirect" && field.label != "error-action-redirect" => field.label -> field.text.trim
+            }
             .toMap
 
         FileUpload(reference, Waiting(UploadRequest(href, fields)), successUrl = RedirectUrl(successUrl), errorUrl = RedirectUrl(errorUrl))
