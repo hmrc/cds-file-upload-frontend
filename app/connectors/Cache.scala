@@ -25,7 +25,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class MongoCacheConnector @Inject()(val repository: CacheMapRepository) extends DataCacheConnector {
+class MongoCacheConnector @Inject()(val repository: CacheMapRepository) extends Cache {
 
   def save[A](cacheMap: CacheMap)(implicit hc: HeaderCarrier): Future[CacheMap] = repository.put(cacheMap).map { _ => cacheMap }
 
@@ -34,7 +34,7 @@ class MongoCacheConnector @Inject()(val repository: CacheMapRepository) extends 
   def getEntry[A](cacheId: String, key: String)(implicit hc: HeaderCarrier, fmt: Format[A]): Future[Option[A]] = fetch(cacheId).map(_.flatMap(_.getEntry(key)))
 }
 
-trait DataCacheConnector {
+trait Cache {
 
   def save[A](cacheMap: CacheMap)(implicit hc: HeaderCarrier): Future[CacheMap]
 

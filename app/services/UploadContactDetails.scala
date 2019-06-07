@@ -20,7 +20,7 @@ import java.io.{File, PrintWriter}
 import java.util.UUID
 
 import com.google.inject.Singleton
-import connectors.UpscanS3Connector
+import connectors.UpscanConnector
 import javax.inject.Inject
 import models.{ContactDetails, UploadRequest}
 import play.api.libs.Files.TemporaryFile
@@ -28,7 +28,7 @@ import play.api.libs.Files.TemporaryFile
 import scala.util.Try
 
 @Singleton
-class UploadContactDetails @Inject()(upscanConnector: UpscanS3Connector) {
+class UploadContactDetails @Inject()(upscanConnector: UpscanConnector) {
 
   def fileName = s"contact_details_${UUID.randomUUID().toString}.txt"
 

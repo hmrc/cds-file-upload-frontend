@@ -19,18 +19,35 @@ package controllers
 import controllers.actions.FileUploadResponseRequiredAction
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
+import connectors.Cache
+import repositories.NotificationRepository
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+
 
 class UpscanStatusControllerSpec extends ControllerSpecBase {
 
-  val controller = new UpscanStatusController(messagesApi, new FakeAuthAction(), new FakeEORIAction(), fakeDataRetrievalAction(CacheMap("",Map.empty)), new FileUploadResponseRequiredAction(), appConfig)
-  
+  val cache = mock[Cache]
+  val notificationRepository = mock[NotificationRepository]
+  val auditConnector = mock[AuditConnector]
+
+  val controller = new UpscanStatusController(
+    messagesApi,
+    new FakeAuthAction(),
+    new FakeEORIAction(),
+    fakeDataRetrievalAction(CacheMap("", Map.empty)),
+    new FileUploadResponseRequiredAction(),
+    cache,
+    notificationRepository,
+    auditConnector,
+    appConfig)
+
   "Upscan Status error" should {
-    
+
     "return error page" in {
       val result = controller.error("someId")(fakeRequest)
 
       status(result) mustBe OK
-      contentAsString(result) must include ("An error occurred during upload")
+      contentAsString(result) must include("An error occurred during upload")
     }
   }
 

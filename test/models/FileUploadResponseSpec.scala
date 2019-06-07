@@ -17,14 +17,8 @@
 package models
 
 import base.SpecBase
-import org.scalacheck.Arbitrary.arbitrary
-import org.scalacheck.Gen
-import org.scalacheck.Gen._
 
 class FileUploadResponseSpec extends SpecBase with XmlBehaviours {
-
-  private val fileGen: Gen[FileUpload] = arbitrary[FileUpload].flatMap(file => arbitrary[Waiting].map(waiting => file.copy(state = waiting)))
-  private val responseGen: Gen[FileUploadResponse] = listOfN(10, fileGen).map(files => FileUploadResponse(files))
 
   "File Upload Response" should {
 
@@ -40,8 +34,8 @@ class FileUploadResponseSpec extends SpecBase with XmlBehaviours {
                 <Content-Type>application/xml</Content-Type>
                 <x-amz-meta-callback-url>https://some-callback-url</x-amz-meta-callback-url>
                 <x-amz-date>2019-03-05T11:56:34Z</x-amz-date>
-                <success-action-redirect>https://success-redirect.com</success-action-redirect>
-                <error-action-redirect>https://error-redirect.com</error-action-redirect>
+                <success-action-redirect>https://success-redirect/abc-211</success-action-redirect>
+                <error-action-redirect>https://error-redirect/abc-211</error-action-redirect>
               </Fields>
             </UploadRequest>
           </File>
@@ -53,8 +47,8 @@ class FileUploadResponseSpec extends SpecBase with XmlBehaviours {
                 <Content-Type>application/xml</Content-Type>
                 <x-amz-meta-callback-url>https://some-callback-url2</x-amz-meta-callback-url>
                 <x-amz-date>2019-03-05T11:57:11Z</x-amz-date>
-                <success-action-redirect>https://success-redirect2.com</success-action-redirect>
-                <error-action-redirect>https://error-redirect2.com</error-action-redirect>
+                <success-action-redirect>https://success-redirect2/fyr-993</success-action-redirect>
+                <error-action-redirect>https://error-redirect2/fyr-993</error-action-redirect>
               </Fields>
             </UploadRequest>
           </File>
@@ -72,8 +66,9 @@ class FileUploadResponseSpec extends SpecBase with XmlBehaviours {
               "x-amz-date" -> "2019-03-05T11:56:34Z"
             )
           )),
-          successUrl = RedirectUrl("https://success-redirect.com"),
-          errorUrl = RedirectUrl("https://error-redirect.com")
+          successUrl = RedirectUrl("https://success-redirect/abc-211"),
+          errorUrl = RedirectUrl("https://error-redirect/abc-211"),
+          id = "abc-211"
         ),
         FileUpload(
           "32400000-8cf0-11bd-b23e-10b96e4ef00f",
@@ -85,8 +80,10 @@ class FileUploadResponseSpec extends SpecBase with XmlBehaviours {
               "x-amz-date" -> "2019-03-05T11:57:11Z"
             )
           )),
-          successUrl = RedirectUrl("https://success-redirect2.com"),
-          errorUrl = RedirectUrl("https://error-redirect2.com")
+          successUrl = RedirectUrl("https://success-redirect2/fyr-993"),
+          errorUrl = RedirectUrl("https://error-redirect2/fyr-993"),
+          id = "fyr-993"
+          
         )
       ))
       

@@ -18,7 +18,7 @@ package controllers
 
 import com.google.inject.Singleton
 import config.AppConfig
-import connectors.DataCacheConnector
+import connectors.Cache
 import controllers.actions._
 import forms.mappings.ContactDetailsMapping._
 import javax.inject.Inject
@@ -36,7 +36,7 @@ class ContactDetailsController @Inject()(val messagesApi: MessagesApi,
                                          authenticate: AuthAction,
                                          requireEori: EORIRequiredAction,
                                          getData: DataRetrievalAction,
-                                         dataCacheConnector: DataCacheConnector,
+                                         dataCacheConnector: Cache,
                                          implicit val appConfig: AppConfig)(implicit ec: ExecutionContext)
                                           extends FrontendController with I18nSupport {
 

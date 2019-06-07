@@ -25,7 +25,7 @@ import play.api.libs.Files.TemporaryFile
 
 class UpscanS3ConnectorTest extends WordSpec with WiremockTestServer with MustMatchers {
 
-  private val connector = new UpscanS3Connector()
+  private val connector = new UpscanConnector()
 
 
   "Upload" should {

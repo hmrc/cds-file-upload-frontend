@@ -18,7 +18,7 @@ package controllers
 
 import com.google.inject.Singleton
 import config.AppConfig
-import connectors.DataCacheConnector
+import connectors.Cache
 import controllers.actions._
 import forms.MRNFormProvider
 import javax.inject.Inject
@@ -32,13 +32,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class MrnEntryController @Inject()(val messagesApi: MessagesApi,
-                                    authenticate: AuthAction,
-                                    requireEori: EORIRequiredAction,
-                                    requireContactDetails: ContactDetailsRequiredAction,
-                                    getData: DataRetrievalAction,
-                                    formProvider: MRNFormProvider,
-                                    dataCacheConnector: DataCacheConnector,
-                                    implicit val appConfig: AppConfig)(implicit ec: ExecutionContext) extends FrontendController with I18nSupport {
+                                   authenticate: AuthAction,
+                                   requireEori: EORIRequiredAction,
+                                   requireContactDetails: ContactDetailsRequiredAction,
+                                   getData: DataRetrievalAction,
+                                   formProvider: MRNFormProvider,
+                                   dataCacheConnector: Cache,
+                                   implicit val appConfig: AppConfig)(implicit ec: ExecutionContext) extends FrontendController with I18nSupport {
 
   val form = formProvider()
 

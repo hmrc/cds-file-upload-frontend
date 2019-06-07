@@ -19,7 +19,7 @@ package controllers
 import akka.stream.Materializer
 import com.google.inject.Singleton
 import config.AppConfig
-import connectors.{DataCacheConnector, UpscanS3Connector}
+import connectors.{Cache, UpscanConnector}
 import controllers.actions._
 import javax.inject.Inject
 import models._
@@ -47,8 +47,8 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
                                           requireEori: EORIRequiredAction,
                                           getData: DataRetrievalAction,
                                           requireResponse: FileUploadResponseRequiredAction,
-                                          dataCacheConnector: DataCacheConnector,
-                                          upscanS3Connector: UpscanS3Connector,
+                                          dataCacheConnector: Cache,
+                                          upscanS3Connector: UpscanConnector,
                                           auditConnector: AuditConnector,
                                           notificationRepository: NotificationRepository,
                                           implicit val appConfig: AppConfig,
@@ -142,7 +142,7 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
     def nextFile(file: FileUpload) = routes.UploadYourFilesController.onPageLoad(file.reference)
     
     val nextFileToUpload = files.collectFirst {
-      case file@FileUpload(reference, Waiting(_), _, _, _) if reference > ref => file
+      case file@FileUpload(reference, Waiting(_), _, _, _, _) if reference > ref => file
     }
 
     nextFileToUpload match {
@@ -150,7 +150,6 @@ class UploadYourFilesController @Inject()(val messagesApi: MessagesApi,
       case None => allFilesUploaded
     }
   }
-
 
   def failedUpload(notification: Notification): Boolean = notification.outcome != "SUCCESS"
 

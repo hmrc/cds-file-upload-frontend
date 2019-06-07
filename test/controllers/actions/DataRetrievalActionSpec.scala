@@ -17,7 +17,7 @@
 package controllers.actions
 
 import base.SpecBase
-import connectors.DataCacheConnector
+import connectors.Cache
 import generators.SignedInUserGen
 import models.requests.{AuthenticatedRequest, EORIRequest, OptionalDataRequest, SignedInUser}
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}
@@ -32,7 +32,7 @@ import scala.concurrent.Future
 
 class DataRetrievalActionSpec extends SpecBase with SignedInUserGen {
 
-  class Harness(dataCacheConnector: DataCacheConnector) extends DataRetrievalActionImpl(dataCacheConnector) {
+  class Harness(dataCacheConnector: Cache) extends DataRetrievalActionImpl(dataCacheConnector) {
     def callTransform[A](request: EORIRequest[A]): Future[OptionalDataRequest[A]] = transform(request)
   }
 
@@ -42,7 +42,7 @@ class DataRetrievalActionSpec extends SpecBase with SignedInUserGen {
 
         forAll { (user: SignedInUser, eori: String) =>
 
-          val dataCacheConnector = mock[DataCacheConnector]
+          val dataCacheConnector = mock[Cache]
           when(dataCacheConnector.fetch(eqTo(user.internalId))(any[HeaderCarrier])) thenReturn Future.successful(None)
           val action  = new Harness(dataCacheConnector)
           val request = EORIRequest(AuthenticatedRequest(fakeRequest, user), eori)
@@ -62,7 +62,7 @@ class DataRetrievalActionSpec extends SpecBase with SignedInUserGen {
         forAll { (user: SignedInUser, eori: String) =>
 
           val id = user.internalId
-          val dataCacheConnector = mock[DataCacheConnector]
+          val dataCacheConnector = mock[Cache]
           when(dataCacheConnector.fetch(eqTo(id))(any[HeaderCarrier])) thenReturn Future.successful(Some(new CacheMap(id, Map())))
           val action = new Harness(dataCacheConnector)
           val request = EORIRequest(AuthenticatedRequest(fakeRequest, user), eori)

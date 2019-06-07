@@ -18,7 +18,7 @@ package controllers
 
 import akka.stream.Materializer
 import config.Notifications
-import connectors.UpscanS3Connector
+import connectors.UpscanConnector
 import controllers.actions.{DataRetrievalAction, FileUploadResponseRequiredAction}
 import models._
 import org.mockito.ArgumentCaptor
@@ -46,7 +46,7 @@ import scala.util.{Failure, Try}
 class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
   private val mockMaterializer = mock[Materializer]
-  private val mockUpscanConnector = mock[UpscanS3Connector]
+  private val mockUpscanConnector = mock[UpscanConnector]
   private val mockAuditConnector = mock[AuditConnector]
   private val mockNotificationRepository = mock[NotificationRepository]
 

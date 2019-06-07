@@ -17,7 +17,7 @@
 package services
 
 import base.SpecBase
-import connectors.UpscanS3Connector
+import connectors.UpscanConnector
 import models.{ContactDetails, UploadRequest}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => meq}
@@ -30,7 +30,7 @@ import scala.util.Try
 
 class UploadContactDetailsSpec extends SpecBase with MockitoSugar {
 
-  val mockS3Connector = mock[UpscanS3Connector]
+  val mockS3Connector = mock[UpscanConnector]
 
   val uploadContactDetails = new UploadContactDetails(mockS3Connector)
 

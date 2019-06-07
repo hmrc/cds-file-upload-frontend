@@ -17,7 +17,7 @@
 package controllers.actions
 
 import com.google.inject.Inject
-import connectors.DataCacheConnector
+import connectors.Cache
 import controllers.routes
 import models.requests.{ContactDetailsRequest, OptionalDataRequest}
 import pages.ContactDetailsPage
@@ -26,7 +26,7 @@ import play.api.mvc.{ActionRefiner, Result}
 
 import scala.concurrent.Future
 
-class ContactDetailsRequiredActionImpl @Inject()(val dataCacheConnector: DataCacheConnector) extends ContactDetailsRequiredAction {
+class ContactDetailsRequiredActionImpl @Inject()(val dataCacheConnector: Cache) extends ContactDetailsRequiredAction {
 
   private val onError = Redirect(routes.ErrorPageController.error())
 

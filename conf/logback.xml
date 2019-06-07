@@ -44,6 +44,8 @@
     </logger>
 
     <logger name="com.google.inject" level="ERROR"/>
+    
+    <logger name="reactivemongo.core.errors.GenericDriverException" level="OFF"/>
 
     <logger name="application" level="ERROR"/>
 

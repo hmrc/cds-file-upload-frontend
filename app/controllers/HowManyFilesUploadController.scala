@@ -17,7 +17,7 @@
 package controllers
 
 import config.AppConfig
-import connectors.DataCacheConnector
+import connectors.Cache
 import controllers.actions._
 import forms.FileUploadCountProvider
 import javax.inject.{Inject, Singleton}
@@ -41,7 +41,7 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
                                              requireMrn: MrnRequiredAction,
                                              requireContactDetails: ContactDetailsRequiredAction,
                                              formProvider: FileUploadCountProvider,
-                                             dataCacheConnector: DataCacheConnector,
+                                             dataCacheConnector: Cache,
                                              uploadContactDetails: UploadContactDetails,
                                              customsDeclarationsService: CustomsDeclarationsService,
                                              implicit val appConfig: AppConfig)(implicit ec: ExecutionContext) extends FrontendController with I18nSupport {
@@ -85,10 +85,11 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
 
     initiateUpload(req, fileUploadCount).flatMap { fileUploadResponse =>
       firstUploadFile(fileUploadResponse) match {
-        case Right((x, s3UploadRequest)) =>
+        case Right((_, s3UploadRequest)) =>
           uploadContactDetails.upload(req.request.contactDetails, s3UploadRequest) match {
             case Success(_) => saveRemainingFileUploadsToCache(fileUploadResponse).map(uploads => Right(uploads))
-            case Failure(e) => Future.successful(Left(e))
+            case Failure(e) =>
+              Future.successful(Left(e))
           }
 
         case Left(error) =>
@@ -104,5 +105,5 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
     customsDeclarationsService.batchFileUpload(req.eori, req.mrn, fileUploadCount)
 
   private def firstUploadFile(response: FileUploadResponse): Either[Throwable, (FileUpload, UploadRequest)] =
-    response.uploads.headOption map { case f@FileUpload(_, Waiting(u), _, _, _) => Right((f, u)) } getOrElse Left(new IllegalStateException("Unable to initiate upload"))
+    response.uploads.headOption map { case f@FileUpload(_, Waiting(u), _, _, _, _) => Right((f, u)) } getOrElse Left(new IllegalStateException("Unable to initiate upload"))
 }
