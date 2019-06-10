@@ -28,14 +28,12 @@
     <table>
         <thead>
         <tr>
-            <th scope="col">@messages("fileUploadReceiptPage.fileName")</th>
             <th scope="col">@messages("fileUploadReceiptPage.receipt")</th>
         </tr>
         </thead>
         <tbody>
         @files.map { f =>
             <tr>
-                <td class="row">@f.filename</td>
                 <td class="row">@f.reference</td>
             </tr>
         }

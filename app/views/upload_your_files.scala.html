@@ -19,7 +19,7 @@
 @import uk.gov.hmrc.play.views.html.{helpers => hmrcHelpers}
 @import views.helpers.Utils._
 
-@(uploadRequest: UploadRequest, refPosition: Position, successRedirect: RedirectUrl, errorRedirect: RedirectUrl, filenames: List[String])(implicit request: Request[_], messages: Messages, appConfig: AppConfig, flash: Flash)
+@(uploadRequest: UploadRequest, refPosition: Position, successRedirect: RedirectUrl, errorRedirect: RedirectUrl)(implicit request: Request[_], messages: Messages, appConfig: AppConfig, flash: Flash)
 
 @positionModifier = @{
     refPosition match {
@@ -54,8 +54,6 @@
                 case Last(total) => messages("fileUploadPage.filesUploaded", total - 1, total)
             }.map(msg => paragraph(bold(msg)))
         }
-
-        @paragraph(bold(multiline(filenames: _*)))
 
         <div>SUCCESS : @successRedirect.url</div>
 

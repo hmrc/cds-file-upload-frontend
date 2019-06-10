@@ -25,7 +25,7 @@ import views.html.upload_your_files
 
 class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with PropertyChecks with Generators {
 
-  def view(pos: Position): Html = upload_your_files(UploadRequest("", Map.empty), pos, RedirectUrl(""), RedirectUrl(""), List.empty)(fakeRequest, messages, appConfig, fakeRequest.flash)
+  def view(pos: Position): Html = upload_your_files(UploadRequest("", Map.empty), pos, RedirectUrl(""), RedirectUrl(""))(fakeRequest, messages, appConfig, fakeRequest.flash)
 
   val view: () => Html = () => view(First(3))
 

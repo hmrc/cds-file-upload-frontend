@@ -36,6 +36,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.upload_error
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 class UpscanStatusController @Inject()(val messagesApi: MessagesApi,
                                        authenticate: AuthAction,
@@ -56,21 +57,17 @@ class UpscanStatusController @Inject()(val messagesApi: MessagesApi,
     (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
 
       val references = req.fileUploadResponse.uploads.map(_.reference)
-      val filenames = req.fileUploadResponse.uploads.map(_.filename).filter(_.nonEmpty)
       val refPosition = getPosition(ref, references)
 
       req.fileUploadResponse.uploads.find(_.reference == ref) match {
         case Some(upload) =>
           upload.state match {
-            case Waiting(ur) =>
-
-              println(s"UPLOAD: $upload")
-
-              Future.successful(Ok(views.html.upload_your_files(ur, refPosition, upload.successUrl, upload.errorUrl, filenames)))
+            case Waiting(ur) => Future.successful(Ok(views.html.upload_your_files(ur, refPosition, upload.successUrl, upload.errorUrl)))
             case _ => nextPage(upload.reference, req.fileUploadResponse.uploads)
           }
 
-        case None => Future.successful(Redirect(routes.ErrorPageController.error()))
+        case None => 
+          Future.successful(Redirect(routes.ErrorPageController.error()))
       }
     }
   
@@ -81,7 +78,6 @@ class UpscanStatusController @Inject()(val messagesApi: MessagesApi,
 
   def success(id: String): Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
-
       val uploads = req.fileUploadResponse.uploads
 
       uploads.find(_.id == id) match {
@@ -93,7 +89,8 @@ class UpscanStatusController @Inject()(val messagesApi: MessagesApi,
             nextPage(upload.reference, uploads)
           }
 
-        case None => Future.successful(Redirect(routes.ErrorPageController.error()))
+        case None =>
+          Future.successful(Redirect(routes.ErrorPageController.error()))
       }
     }
 
@@ -101,12 +98,14 @@ class UpscanStatusController @Inject()(val messagesApi: MessagesApi,
     def nextFile(file: FileUpload) = routes.UpscanStatusController.onPageLoad(file.reference)
 
     val nextFileToUpload = files.collectFirst {
-      case file@FileUpload(reference, Waiting(_), _, _, _, _) if reference > ref => file
+      case file@FileUpload(reference, Waiting(_), _, _, _) if reference > ref => file
     }
 
     nextFileToUpload match {
-      case Some(file) => Future.successful(Redirect(nextFile(file)))
-      case None => allFilesUploaded
+      case Some(file) =>
+        Future.successful(Redirect(nextFile(file)))
+      case None =>
+        allFilesUploaded
     }
   }
 
@@ -160,8 +159,7 @@ class UpscanStatusController @Inject()(val messagesApi: MessagesApi,
       val numberOfFiles = req.userAnswers.get(HowManyFilesUploadPage).fold(Map.empty[String, String])(n => Map("numberOfFiles" -> s"${n.value}"))
       val files = req.fileUploadResponse.uploads
       val fileReferences = (1 to files.size).map(i => s"fileReference$i").zip(files.map(_.reference)).toMap
-      val fileNames = (1 to files.size).map(i => s"fileName$i").zip(files.map(_.filename)).toMap
-      contactDetails ++ eori ++ mrn ++ numberOfFiles ++ fileReferences ++ fileNames
+      contactDetails ++ eori ++ mrn ++ numberOfFiles ++ fileReferences
     }
 
     sendDataEvent(transactionName = "trader-submission", detail = auditDetails, auditType = "UploadSuccess")

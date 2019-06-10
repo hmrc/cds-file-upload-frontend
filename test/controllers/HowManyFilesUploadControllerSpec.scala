@@ -148,9 +148,9 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
 
     "return an ok and save to the data cache when valid data is submitted" in {
       val fileUploadResponse = FileUploadResponse(List(
-        FileUpload("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> "")))),
-        FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> "")))),
-        FileUpload("someFileRef3", Waiting(UploadRequest("http://s3bucket/myfile3", Map("" -> ""))))
+        FileUpload("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> ""))), id = "id1"),
+        FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> ""))), id = "id2"),
+        FileUpload("someFileRef3", Waiting(UploadRequest("http://s3bucket/myfile3", Map("" -> ""))), id = "id3")
       ))
       val fileUploadsAfterContactDetails = fileUploadResponse.uploads.tail
 
@@ -173,8 +173,8 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
 
     "redirect to error page when contact details upload fails" in {
       val fileUploadResponse = FileUploadResponse(List(
-        FileUpload("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> "")))),
-        FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> ""))))
+        FileUpload("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> ""))), id = "id1"),
+        FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> ""))), id = "id2")
       ))
       reset(mockUploadContactDetails)
       when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))

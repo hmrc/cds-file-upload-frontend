@@ -73,8 +73,9 @@ trait ModelGenerators extends SignedInUserGen with OptionValues {
       for {
         ref       <- saneString
         fileState <- arbitrary[FileState]
+        id <- arbitrary[Int]
       } yield {
-        FileUpload(ref, fileState)
+        FileUpload(ref, fileState, id = id.toString)
       }
     }
 

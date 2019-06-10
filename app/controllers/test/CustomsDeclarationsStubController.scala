@@ -43,7 +43,7 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
   )
 
   var fileRef = 1
-  val waiting = Waiting(UploadRequest(
+  def waiting(ref: String) = Waiting(UploadRequest(
     href = "http://localhost:6793/cds-file-upload-service/test-only/s3-bucket",
     fields = Map(
       Algorithm.toString -> "AWS4-HMAC-SHA256",
@@ -52,8 +52,8 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
       ACL.toString -> "private",
       Credentials.toString -> "ASIAxxxxxxxxx/20180202/eu-west-2/s3/aws4_request",
       Policy.toString -> "xxxxxxxx==",
-      SuccessRedirect.toString -> s"http://localhost:6793/cds-file-upload-service/upload/upscan-success/${fileRef+1}",
-      ErrorRedirect.toString -> s"http://localhost:6793/cds-file-upload-service/upload/upscan-error/${fileRef+1}"
+      SuccessRedirect.toString -> s"http://localhost:6793/cds-file-upload-service/upload/upscan-success/${ref}",
+      ErrorRedirect.toString -> s"http://localhost:6793/cds-file-upload-service/upload/upscan-error/${ref}"
     )
   ))
 
@@ -66,33 +66,29 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
     val fileGroupSize = (scala.xml.XML.loadString(req.body.mkString) \ "FileGroupSize").text.toInt
 
     val resp = FileUploadResponse((1 to fileGroupSize).map { i =>
-      FileUpload(i.toString, waiting, successUrl = RedirectUrl(s"http://localhost:6793/cds-file-upload-service/upload/upscan-success/${i+1}"), errorUrl = RedirectUrl(s"http://localhost:6793/cds-file-upload-service/upload/upscan-error/${i+1}"))
+      FileUpload(i.toString, waiting(i.toString), successUrl = RedirectUrl(s"http://localhost:6793/cds-file-upload-service/upload/upscan-success/$i"), errorUrl = RedirectUrl(s"http://localhost:6793/cds-file-upload-service/upload/upscan-error/$i"), id = s"$i")
     }.toList)
 
     Ok(XmlHelper.toXml(resp)).as(ContentTypes.XML)
   }
 
   def handleS3FileUploadRequest: Action[AnyContent] = Action { implicit req =>
-    println("****************** REQ: " +  req.queryString)
-    
-        form.bindFromRequest().fold(
-          _ => SeeOther("just to keep contact details upload happy"),
-          stuff => {
-            callBack()
-            SeeOther(stuff.successActionRedirect)
-          }
-        )
+    form.bindFromRequest().fold(
+      _ =>
+        SeeOther("just to keep contact details upload happy"),
+      stuff => {
+        callBack(stuff.successActionRedirect.split("/").last)
+        SeeOther(stuff.successActionRedirect)
+      }
+    )
   }
 
-  def callBack()(implicit hc: HeaderCarrier) = {
-
+  def callBack(ref: String)(implicit hc: HeaderCarrier) = {
     Thread.sleep(1000)
 
     val notification =
-      <Root>
-        <FileReference>
-          {fileRef}
-        </FileReference>
+    <Root>
+        <FileReference>{ref}</FileReference>
         <BatchId>5e634e09-77f6-4ff1-b92a-8a9676c715c4</BatchId>
         <FileName>sample.pdf</FileName>
         <Outcome>SUCCESS</Outcome>
@@ -127,8 +123,7 @@ object XmlHelper {
     <File>
       <Reference>
         {upload.reference}
-      </Reference>
-        {request}
+      </Reference>{request}
     </File>
   }
 
