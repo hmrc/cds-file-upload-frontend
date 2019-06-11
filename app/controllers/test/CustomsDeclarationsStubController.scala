@@ -90,7 +90,7 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
     <Root>
         <FileReference>{ref}</FileReference>
         <BatchId>5e634e09-77f6-4ff1-b92a-8a9676c715c4</BatchId>
-        <FileName>sample.pdf</FileName>
+        <FileName>File{fileRef}.pdf</FileName>
         <Outcome>SUCCESS</Outcome>
         <Details>[detail block]</Details>
       </Root>

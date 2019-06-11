@@ -20,10 +20,15 @@ import com.google.inject.Singleton
 import config.AppConfig
 import controllers.actions._
 import javax.inject.Inject
+import models.FileUpload
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.libs.json.JsString
 import play.api.mvc.{Action, AnyContent}
+import repositories.NotificationRepository
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.upload_your_files_receipt
+
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class UploadYourFilesReceiptController @Inject()(val messagesApi: MessagesApi,
@@ -31,9 +36,19 @@ class UploadYourFilesReceiptController @Inject()(val messagesApi: MessagesApi,
                                                  requireEori: EORIRequiredAction,
                                                  getData: DataRetrievalAction,
                                                  requireResponse: FileUploadResponseRequiredAction,
-                                                 implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
+                                                 notificationRepository: NotificationRepository)
+                                                (implicit val appConfig: AppConfig, ec: ExecutionContext) extends FrontendController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireResponse) { implicit req =>
-    Ok(upload_your_files_receipt(req.fileUploadResponse.uploads))
+  def onPageLoad(): Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
+    addFilenames(req.fileUploadResponse.uploads).map { uploads =>
+      Ok(upload_your_files_receipt(uploads))
+    }
   }
+
+  private def addFilenames(uploads: List[FileUpload]): Future[List[FileUpload]] = Future.sequence(
+    uploads.map { u =>
+      val filenameF = notificationRepository.find("fileReference" -> JsString(u.reference)).map(_.headOption.fold("")(_.filename))
+      filenameF.map(f => u.copy(filename = f))
+    }
+  )
 }

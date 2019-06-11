@@ -98,7 +98,7 @@ class UpscanStatusController @Inject()(val messagesApi: MessagesApi,
     def nextFile(file: FileUpload) = routes.UpscanStatusController.onPageLoad(file.reference)
 
     val nextFileToUpload = files.collectFirst {
-      case file@FileUpload(reference, Waiting(_), _, _, _) if reference > ref => file
+      case file@FileUpload(reference, Waiting(_), _,  _, _, _) if reference > ref => file
     }
 
     nextFileToUpload match {

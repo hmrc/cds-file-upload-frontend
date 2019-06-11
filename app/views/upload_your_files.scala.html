@@ -55,8 +55,6 @@
             }.map(msg => paragraph(bold(msg)))
         }
 
-        <div>SUCCESS : @successRedirect.url</div>
-
         @hmrcHelpers.form(Call("POST", uploadRequest.href), ('enctype, "multipart/form-data"), ('class, "js-form")) {
 
 

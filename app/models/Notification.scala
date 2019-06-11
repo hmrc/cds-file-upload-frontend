@@ -21,7 +21,7 @@ import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import uk.gov.hmrc.time.DateTimeUtils
 
-case class Notification(fileReference: String, outcome: String, createdAt: DateTime = DateTimeUtils.now)
+case class Notification(fileReference: String, outcome: String, filename: String, createdAt: DateTime = DateTimeUtils.now)
 
 object Notification {
   implicit val dateFormat: Format[DateTime] = ReactiveMongoFormats.dateTimeFormats

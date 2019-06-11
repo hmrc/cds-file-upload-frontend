@@ -30,10 +30,11 @@ class NotificationService @Inject()(repository: NotificationRepository) {
   def save(notification: NodeSeq)(implicit ec: ExecutionContext): Future[Either[Throwable, Unit]] = {
     val fileReference = (notification \\ "FileReference").text
     val outcome = (notification \\ "Outcome").text
-    if (fileReference.isEmpty || outcome.isEmpty) {
-      Future.successful(Left(new BadRequestException("File reference and outcome not found in xml")))
+    val filename = (notification \\ "FileName").text
+    if (fileReference.isEmpty || outcome.isEmpty || filename.isEmpty) {
+      Future.successful(Left(new BadRequestException("File reference, file name and outcome not found in xml")))
     } else {
-      repository.insert(Notification(fileReference, outcome))
+      repository.insert(Notification(fileReference, outcome, filename))
         .map(_ => Right(()))
         .recover { case e => Left(e) }
     }

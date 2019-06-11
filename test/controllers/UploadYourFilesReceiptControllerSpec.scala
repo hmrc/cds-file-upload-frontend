@@ -17,17 +17,28 @@
 package controllers
 
 import controllers.actions.{DataRetrievalAction, FileUploadResponseRequiredAction}
-import models.{FileUpload, FileUploadResponse}
+import models.{FileUpload, FileUploadResponse, Notification}
 import pages.HowManyFilesUploadPage
-import play.api.libs.json.Json
+import play.api.libs.json.{JsString, Json}
+import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import repositories.NotificationRepository
+
+import scala.concurrent.{ExecutionContext, Future}
 
 class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase {
-
-  def controller(getData: DataRetrievalAction) = new UploadYourFilesReceiptController(messagesApi, new FakeAuthAction(), new FakeEORIAction(), getData, new FileUploadResponseRequiredAction(), appConfig)
+  
+  implicit val ac = appConfig
+  val mockNotificationRepository = mock[NotificationRepository]
+  
+  def controller(getData: DataRetrievalAction) = new UploadYourFilesReceiptController(messagesApi, new FakeAuthAction(), new FakeEORIAction(), getData, new FileUploadResponseRequiredAction(), mockNotificationRepository)
 
   def viewAsString(receipts: List[FileUpload]): String = views.html.upload_your_files_receipt(receipts)(fakeRequest, messages, appConfig).toString
+
+  def addFilenames(uploads: List[FileUpload]): List[FileUpload] = uploads.map(u => u.copy(filename = "someFile.pdf"))
 
   "onPageLoad" should {
 
@@ -36,12 +47,15 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase {
       "request file exists in response" in {
 
         forAll { (response: FileUploadResponse, cache: CacheMap) =>
+          response.uploads.foreach { u =>
+            when(mockNotificationRepository.find(any())(any[ExecutionContext])).thenReturn(Future.successful(List(Notification(u.reference, "SUCCESS", "someFile.pdf"))))
+          }
 
           val updatedCache = cache.copy(data = cache.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))
           val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad()(fakeRequest)
 
           status(result) mustBe OK
-          contentAsString(result) mustBe viewAsString(response.uploads.sortBy(_.reference))
+          contentAsString(result) mustBe viewAsString(addFilenames(response.uploads.sortBy(_.reference)))
         }
       }
     }

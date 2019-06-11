@@ -32,7 +32,7 @@ object RedirectUrl {
   implicit val format = Json.format[RedirectUrl]
 }
 
-case class FileUpload(reference: String, state: FileState, successUrl: RedirectUrl = RedirectUrl("success"), errorUrl: RedirectUrl = RedirectUrl("error"), id: String)
+case class FileUpload(reference: String, state: FileState, filename: String = "", successUrl: RedirectUrl = RedirectUrl("success"), errorUrl: RedirectUrl = RedirectUrl("error"), id: String)
 
 object FileUpload {
   implicit val format = Json.format[FileUpload]
