@@ -98,14 +98,8 @@ fileUploadReceiptPage.listitem1=Air freight/RoRo/exports - within two hours of r
 fileUploadReceiptPage.listitem2=Maritime freight – within three hours of receipt between 0800 hrs and 1500 hrs.
 fileUploadReceiptPage.listitem3=Declarations received after 1500 hrs will be cleared by 0800 hrs the following day
 
-
 ## Helpline
-
-helpline.imports=Imports helpline:
-helpline.imports.tel=03000 588 454
-helpline.exports=Exports helpline:
-helpline.exports.tel=03000 588 401
-helpline.paragraph1=If you have any problems call the helpline.
+helpline.paragraph1=If you have any problems contact us on: 0300 322 7900.
 
 ## Errors
 unauthorised.title=You can’t access this service with this account
@@ -114,7 +108,7 @@ unauthorised.guidance=You need to use the account associated with your EORI to a
 
 uploadError.title=An error occurred during upload
 uploadError.heading=An error occurred during upload
-uploadError.guidance=An error has prevented your documents from being accepted. Please follow the guidance on gov.uk and submit your documents by an alternative method. You can contact us on the numbers below:
+uploadError.guidance=An error has prevented your documents from being accepted. Please follow the guidance on gov.uk and submit your documents by an alternative method.
 
 cds.error.title=Sorry, there is a problem with the service
 cds.error.heading=Sorry, there is a problem with the service
