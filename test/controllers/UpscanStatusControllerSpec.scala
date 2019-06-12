@@ -18,19 +18,19 @@ package controllers
 
 import akka.stream.Materializer
 import config.Notifications
-import connectors.UpscanS3Connector
+import connectors.Cache
 import controllers.actions.{DataRetrievalAction, FileUploadResponseRequiredAction}
 import models._
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{eq => eqTo, _}
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen
 import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
 import play.api.libs.Files.TemporaryFile
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
 import play.api.mvc.MultipartFormData.FilePart
-import play.api.mvc.{MaxSizeExceeded, MultipartFormData}
 import play.api.test.Helpers._
 import repositories.NotificationRepository
 import uk.gov.hmrc.http.HeaderCarrier
@@ -40,28 +40,51 @@ import uk.gov.hmrc.play.audit.model.DataEvent
 import views.html.upload_your_files
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Try}
 
+class UpscanStatusControllerSpec extends ControllerSpecBase {
 
-class UploadYourFilesControllerSpec extends ControllerSpecBase {
+  val cache = mock[Cache]
+  val notificationRepository = mock[NotificationRepository]
+  val auditConnector = mock[AuditConnector]
+
+  val controller = new UpscanStatusController(
+    messagesApi,
+    new FakeAuthAction(),
+    new FakeEORIAction("GB987654321012"),
+    fakeDataRetrievalAction(CacheMap("", Map.empty)),
+    new FileUploadResponseRequiredAction(),
+    cache,
+    notificationRepository,
+    auditConnector,
+    appConfig)
+
+  "Upscan Status error" should {
+
+    "return error page" in {
+      val result = controller.error("someId")(fakeRequest)
+
+      status(result) mustBe OK
+      contentAsString(result) must include("An error occurred during upload")
+    }
+  }
+
 
   private val mockMaterializer = mock[Materializer]
-  private val mockUpscanConnector = mock[UpscanS3Connector]
   private val mockAuditConnector = mock[AuditConnector]
   private val mockNotificationRepository = mock[NotificationRepository]
 
   private val responseGen: Gen[(FileUpload, FileUploadResponse)] =
     for {
       response <- arbitrary[FileUploadResponse]
-      index <- Gen.choose(0, response.files.length - 1)
-      file = response.files(index)
-    } yield (file, response)
+      index <- Gen.choose(0, response.uploads.length -1)
+      upload = response.uploads(index)
+    } yield (upload, response)
 
   private val waitingGen: Gen[(FileUpload, UploadRequest, FileUploadResponse)] = responseGen.flatMap {
     case (file, response) =>
       arbitrary[Waiting].map { waiting =>
         val uploadedFile = file.copy(state = waiting)
-        val updatedFiles = uploadedFile :: response.files.filterNot(_ == file)
+        val updatedFiles = uploadedFile :: response.uploads.filterNot(_ == file)
 
         (uploadedFile, waiting.uploadRequest, FileUploadResponse(updatedFiles))
       }
@@ -69,22 +92,21 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
   override def beforeEach = {
     super.beforeEach
-    reset(mockMaterializer, mockUpscanConnector, mockAuditConnector, mockNotificationRepository)
+    reset(mockMaterializer, mockAuditConnector, mockNotificationRepository)
   }
 
   def controller(getData: DataRetrievalAction) =
-    new UploadYourFilesController(
+    new UpscanStatusController(
       messagesApi,
       new FakeAuthAction(),
       new FakeEORIAction("GB987654321012"),
       getData,
       new FileUploadResponseRequiredAction(),
       mockDataCacheConnector,
-      mockUpscanConnector,
-      mockAuditConnector,
       mockNotificationRepository,
-      appConfig.copy(notifications = Notifications(appConfig.notifications.authToken, maxRetries = 3, retryPauseMillis = 500, ttlSeconds = 60)),
-      mockMaterializer)
+      mockAuditConnector,
+      appConfig.copy(notifications = Notifications(appConfig.notifications.authToken, maxRetries = 3, retryPauseMillis = 500, ttlSeconds = 60))
+      )
 
   ".onPageLoad" should {
 
@@ -101,15 +123,14 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
       "request file exists in response" in {
 
         forAll(waitingGen, arbitrary[CacheMap]) {
-          case ((file, _, response), cacheMap) =>
-
-            val refPosition: Position = nextPosition(file.reference, response.files.map(_.reference))
+          case ((file, ur, response), cacheMap) =>
+            val refPosition: Position = nextPosition(file.reference, response.uploads.map(_.reference))
 
             val updatedCache = combine(response, cacheMap)
             val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad(file.reference)(fakeRequest)
 
             status(result) mustBe OK
-            contentAsString(result) mustBe viewAsString(file.reference, refPosition, List.empty)
+            contentAsString(result) mustBe viewAsString(ur, refPosition, RedirectUrl("success"), RedirectUrl("error"))
         }
       }
     }
@@ -117,7 +138,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
     "redirect to the next page" when {
 
       "file upload is in an 'Uploaded' state" in {
-        val fileUpload = FileUpload("ref1", Uploaded)
+        val fileUpload = FileUpload("ref1", Uploaded, id = "ref1")
         val response = FileUploadResponse(List(fileUpload))
 
         forAll { cache: CacheMap =>
@@ -132,141 +153,44 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
         }
       }
     }
-
-    "redirect to error page" when {
-
-      "no responses are in the cache" in {
-
-        forAll { ref: String =>
-
-          val result = controller(new FakeDataRetrievalAction(None)).onPageLoad(ref)(fakeRequest)
-
-          status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(routes.ErrorPageController.error().url)
-        }
-      }
-
-      "file reference is not in response" in {
-
-        forAll { (ref: String, response: FileUploadResponse, cache: CacheMap) =>
-
-          whenever(!response.files.exists(_.reference == ref)) {
-
-            val updatedCache = combine(response, cache)
-            val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad(ref)(fakeRequest)
-
-            status(result) mustBe SEE_OTHER
-            redirectLocation(result) mustBe Some(routes.ErrorPageController.error().url)
-          }
-        }
-      }
-    }
   }
 
-  ".onSubmit" should {
-    val upscanRequest = UploadRequest("href", Map())
-    val fileUploadedGen = responseGen.map {
-      case (file, _) =>
-        val uploadedFile = file.copy(state = Waiting(upscanRequest))
-        (uploadedFile, FileUploadResponse(List(uploadedFile)))
-    }
+  ".success" should {
+    val fileUpload1 = FileUpload("ref1", Uploaded, id = "ref1")
+    val fileUpload2 = FileUpload("ref2", Waiting(UploadRequest("href", Map.empty)), id = "ref2")
+    val response = FileUploadResponse(List(fileUpload1, fileUpload2))
 
-    "upload to upscan, save the filename and redirect to next page when file is valid" in {
+    "redirect to next page when file is valid" in {
 
 
-      forAll(fileUploadedGen, arbitrary[CacheMap]) {
-        case ((file, response), cache) =>
-          reset(mockUpscanConnector)
+      forAll { cache: CacheMap =>
           reset(mockDataCacheConnector)
           when(mockDataCacheConnector.save(any[CacheMap])(any[HeaderCarrier])).thenReturn(Future.successful(CacheMap("", Map())))
-          when(mockUpscanConnector.upload(any[UploadRequest], any[TemporaryFile], any[String])).thenReturn(Try(200))
 
-          val nextPage = routes.UploadYourFilesController.onSuccess(file.reference)
+
           val updatedCache = combine(response, cache)
 
-          val fileName = "file.doc"
-          val tempFile = TemporaryFile(fileName)
-
-          val filePart = FilePart[TemporaryFile](key = "file", fileName, contentType = Some("application/msword"), ref = tempFile)
-          val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
-
-          val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Right(form)))
+          val result = controller(fakeDataRetrievalAction(updatedCache)).success(fileUpload1.id)(fakeRequest)
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(nextPage.url)
-
-          verify(mockUpscanConnector).upload(refEq(upscanRequest), refEq(tempFile), eqTo(fileName))
-
-          val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
-          verify(mockDataCacheConnector).save(captor.capture())(any[HeaderCarrier])
-          val answers = captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response)
-          answers.get.files.head.filename mustBe fileName
+          redirectLocation(result) mustBe Some(routes.UpscanStatusController.onPageLoad(fileUpload2.id).url)
       }
     }
-
-    "redirect to the previous page" when {
-
-      "file is incorrect type" in {
-        forAll(fileUploadedGen, arbitrary[CacheMap]) {
-          case ((file, response), cache) =>
-            val updatedCache = combine(response, cache)
-
-            val filePart = FilePart[TemporaryFile](key = "file", "foo.txt", contentType = Some("text/plain"), ref = TemporaryFile())
-            val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
-
-            val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Right(form)))
-
-            status(result) mustBe SEE_OTHER
-            redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad(file.reference).url)
-        }
-      }
-
-      "file is too large" in {
-        forAll(fileUploadedGen, arbitrary[CacheMap]) {
-          case ((file, response), cache) =>
-            val updatedCache = combine(response, cache)
-
-            val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Left(MaxSizeExceeded(11 * 1024 * 1024))))
-
-            status(result) mustBe SEE_OTHER
-            redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad(file.reference).url)
-        }
-      }
-    }
-
-    "redirect to the error page when Upscan connector fails" in {
-      forAll(fileUploadedGen, arbitrary[CacheMap]) {
-        case ((file, response), cache) =>
-          val updatedCache = combine(response, cache)
-          val filePart = FilePart[TemporaryFile](key = "file", "foo.pdf", contentType = Some("application/pdf"), ref = TemporaryFile())
-          val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
-          when(mockUpscanConnector.upload(any[UploadRequest], any[TemporaryFile], any[String])).thenReturn(Failure(new RuntimeException()))
-
-          val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(file.reference)(fakeRequest.withBody(Right(form)))
-
-          status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(routes.ErrorPageController.uploadError().url)
-      }
-    }
-
-    "redirect to the next page" when {
 
       "file upload is in an 'Uploaded' state" in {
-        val fileUpload1 = FileUpload("ref1", Uploaded)
-        val fileUpload2 = FileUpload("ref2", Waiting(UploadRequest("href", Map.empty)))
+        val fileUpload1 = FileUpload("ref1", Uploaded, id =  "ref1")
+        val fileUpload2 = FileUpload("ref2", Waiting(UploadRequest("href", Map.empty)), id = "ref2")
         val response = FileUploadResponse(List(fileUpload1, fileUpload2))
 
         forAll { cache: CacheMap =>
 
           when(mockNotificationRepository.find(any())(any[ExecutionContext])).thenReturn(Future.successful(List(Notification("ref1", "SUCCESS"))))
           val updatedCache = combine(response, cache)
-          val filePart = FilePart[TemporaryFile](key = "file", "file.pdf", contentType = Some("application/pdf"), ref = TemporaryFile())
-          val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
 
-          val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit("ref1")(fakeRequest.withBody(Right(form)))
+          val result = controller(fakeDataRetrievalAction(updatedCache)).success("ref1")(fakeRequest)
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onSubmit("ref2").url)
+          redirectLocation(result) mustBe Some(routes.UpscanStatusController.onPageLoad("ref2").url)
         }
       }
     }
@@ -276,9 +200,8 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
       "no responses are in the cache" in {
 
         val filePart = FilePart[TemporaryFile](key = "file", "file.pdf", contentType = Some("application/pdf"), ref = TemporaryFile())
-        val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
 
-        val result = controller(new FakeDataRetrievalAction(None)).onSubmit("someRef")(fakeRequest.withBody(Right(form)))
+        val result = controller(new FakeDataRetrievalAction(None)).success("someRef")(fakeRequest)
 
         status(result) mustBe SEE_OTHER
         redirectLocation(result) mustBe Some(routes.ErrorPageController.error().url)
@@ -288,13 +211,10 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
         forAll { (ref: String, response: FileUploadResponse, cache: CacheMap) =>
 
-          whenever(!response.files.exists(_.reference == ref)) {
-
-            val filePart = FilePart[TemporaryFile](key = "file", "file.jpeg", contentType = Some("image/jpeg"), ref = TemporaryFile())
-            val form = MultipartFormData[TemporaryFile](dataParts = Map(), files = Seq(filePart), badParts = Seq.empty)
+          whenever(!response.uploads.exists(_.reference == ref)) {
 
             val updatedCache = combine(response, cache)
-            val result = controller(fakeDataRetrievalAction(updatedCache)).onSubmit(ref)(fakeRequest.withBody(Right(form)))
+            val result = controller(fakeDataRetrievalAction(updatedCache)).success(ref)(fakeRequest)
 
             status(result) mustBe SEE_OTHER
             redirectLocation(result) mustBe Some(routes.ErrorPageController.error().url)
@@ -302,13 +222,12 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
         }
       }
     }
-  }
 
-  ".onSuccess" should {
+  ".success" should {
 
     "update file status to Uploaded" in {
 
-      val fileUpload = FileUpload("ref", Waiting(UploadRequest("href", Map.empty)))
+      val fileUpload = FileUpload("ref", Waiting(UploadRequest("href", Map.empty)), id = "ref")
       val response = FileUploadResponse(List(fileUpload))
 
       forAll { cache: CacheMap =>
@@ -316,38 +235,38 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
         when(mockNotificationRepository.find(any())(any[ExecutionContext])).thenReturn(Future.successful(List(Notification("ref", "SUCCESS"))))
 
         val updatedCache = combine(response, cache)
-        await(controller(fakeDataRetrievalAction(updatedCache)).onSuccess("ref")(fakeRequest))
+        await(controller(fakeDataRetrievalAction(updatedCache)).success("ref")(fakeRequest))
 
         val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
         verify(mockDataCacheConnector, atLeastOnce).save(captor.capture())(any[HeaderCarrier])
 
         val Some(updateResponse) = captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response)
-        val Some(updatedFile) = updateResponse.files.find(_.reference == "ref")
+        val Some(updatedFile) = updateResponse.uploads.find(_.id== "ref")
         updatedFile.state mustBe Uploaded
       }
     }
 
     "redirect user to the next upload page" in {
 
-      val fileUploaded = FileUpload("ref1", Uploaded)
-      val fileUploadWaiting = FileUpload("ref2", Waiting(UploadRequest("href", Map.empty)))
+      val fileUploaded = FileUpload("ref1", Uploaded, id = "ref1")
+      val fileUploadWaiting = FileUpload("ref2", Waiting(UploadRequest("href", Map.empty)), id = "ref2")
       val response = FileUploadResponse(List(fileUploaded, fileUploadWaiting))
 
       forAll { cache: CacheMap =>
 
         val updatedCache = combine(response, cache)
-        val result = controller(fakeDataRetrievalAction(updatedCache)).onSuccess(fileUploaded.reference)(fakeRequest)
+        val result = controller(fakeDataRetrievalAction(updatedCache)).success(fileUploaded.reference)(fakeRequest)
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.UploadYourFilesController.onPageLoad(fileUploadWaiting.reference).url)
+        redirectLocation(result) mustBe Some(routes.UpscanStatusController.onPageLoad(fileUploadWaiting.reference).url)
       }
     }
 
     "audit upload success" in {
 
-      val file1 = FileUpload("fileRef1", Waiting(UploadRequest("some href", Map.empty)), "file1.jpeg")
-      val file2 = FileUpload("fileRef2", Waiting(UploadRequest("some other href", Map.empty)), "file2.pdf")
-      val lastFile = FileUpload("fileRef3", Waiting(UploadRequest("another href", Map.empty)), "file3.doc")
+      val file1 = FileUpload("fileRef1", Waiting(UploadRequest("some href", Map.empty)), id = "fileRef1")
+      val file2 = FileUpload("fileRef2", Waiting(UploadRequest("some other href", Map.empty)), id = "fileRef2")
+      val lastFile = FileUpload("fileRef3", Waiting(UploadRequest("another href", Map.empty)), id = "fileRef3")
       val response = FileUploadResponse(List(file1, file2, lastFile))
 
       val Some(mrn) = MRN("34GB1234567ABCDEFG")
@@ -369,10 +288,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
         "numberOfFiles" -> "3",
         "fileReference1" -> "fileRef1",
         "fileReference2" -> "fileRef2",
-        "fileReference3" -> "fileRef3",
-        "fileName1" -> "file1.jpeg",
-        "fileName2" -> "file2.pdf",
-        "fileName3" -> "file3.doc"
+        "fileReference3" -> "fileRef3"
       )
 
       when(mockNotificationRepository.find(any())(any[ExecutionContext])).thenReturn(
@@ -381,7 +297,7 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
         Future.successful(List(Notification("fileRef3", "SUCCESS")))  //third find
       )
 
-      val result = controller(fakeDataRetrievalAction(updatedCache)).onSuccess(lastFile.reference)(fakeRequest)
+      val result = controller(fakeDataRetrievalAction(updatedCache)).success(lastFile.reference)(fakeRequest)
       status(result) mustBe SEE_OTHER
 
       val captor: ArgumentCaptor[DataEvent] = ArgumentCaptor.forClass(classOf[DataEvent])
@@ -396,9 +312,9 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
 
     "load receipt page when all notifications are successful" in {
 
-      val file1 = FileUpload("fileRef1", Waiting(UploadRequest("some href", Map.empty)), "file1.jpeg")
-      val file2 = FileUpload("fileRef2", Waiting(UploadRequest("some other href", Map.empty)), "file2.pdf")
-      val lastFile = FileUpload("fileRef3", Waiting(UploadRequest("another href", Map.empty)), "file3.doc")
+      val file1 = FileUpload("fileRef1", Waiting(UploadRequest("some href", Map.empty)), id =  "fileRef1")
+      val file2 = FileUpload("fileRef2", Waiting(UploadRequest("some other href", Map.empty)), id =  "fileRef2")
+      val lastFile = FileUpload("fileRef3", Waiting(UploadRequest("another href", Map.empty)), id =  "fileRef3")
       val response = FileUploadResponse(List(file1, file2, lastFile))
 
       val Some(mrn) = MRN("34GB1234567ABCDEFG")
@@ -416,16 +332,16 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
         Future.successful(List(Notification("fileRef3", "SUCCESS"))) //third find
       )
 
-      val result = controller(fakeDataRetrievalAction(updatedCache)).onSuccess(lastFile.reference)(fakeRequest)
+      val result = controller(fakeDataRetrievalAction(updatedCache)).success(lastFile.reference)(fakeRequest)
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(routes.UploadYourFilesReceiptController.onPageLoad().url)
     }
 
     "load upload error page when we get a fail notification" in {
 
-      val file1 = FileUpload("fileRef1", Waiting(UploadRequest("some href", Map.empty)), "file1.jpeg")
-      val file2 = FileUpload("fileRef2", Waiting(UploadRequest("some other href", Map.empty)), "file2.pdf")
-      val lastFile = FileUpload("fileRef3", Waiting(UploadRequest("another href", Map.empty)), "file3.doc")
+      val file1 = FileUpload("fileRef1", Waiting(UploadRequest("some href", Map.empty)), id =  "fileRef1")
+      val file2 = FileUpload("fileRef2", Waiting(UploadRequest("some other href", Map.empty)), id =  "fileRef2")
+      val lastFile = FileUpload("fileRef3", Waiting(UploadRequest("another href", Map.empty)), id =  "fileRef3")
       val response = FileUploadResponse(List(file1, file2, lastFile))
 
       val Some(mrn) = MRN("34GB1234567ABCDEFG")
@@ -443,16 +359,16 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
         Future.successful(List(Notification("fileRef3", "SUCCESS"))) //third find
       )
 
-      val result = controller(fakeDataRetrievalAction(updatedCache)).onSuccess(lastFile.reference)(fakeRequest)
+      val result = controller(fakeDataRetrievalAction(updatedCache)).success(lastFile.reference)(fakeRequest)
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(routes.ErrorPageController.uploadError().url)
     }
 
     "load upload error page when notification retries are exceeded" in {
 
-      val file1 = FileUpload("fileRef1", Waiting(UploadRequest("some href", Map.empty)), "file1.jpeg")
-      val file2 = FileUpload("fileRef2", Waiting(UploadRequest("some other href", Map.empty)), "file2.pdf")
-      val lastFile = FileUpload("fileRef3", Waiting(UploadRequest("another href", Map.empty)), "file3.doc")
+      val file1 = FileUpload("fileRef1", Waiting(UploadRequest("some href", Map.empty)), id =  "fileRef1")
+      val file2 = FileUpload("fileRef2", Waiting(UploadRequest("some other href", Map.empty)), id =  "fileRef2")
+      val lastFile = FileUpload("fileRef3", Waiting(UploadRequest("another href", Map.empty)), id =  "fileRef3")
       val response = FileUploadResponse(List(file1, file2, lastFile))
 
       val Some(mrn) = MRN("34GB1234567ABCDEFG")
@@ -470,44 +386,17 @@ class UploadYourFilesControllerSpec extends ControllerSpecBase {
         Future.successful(List.empty) //third find
       )
 
-      val result = controller(fakeDataRetrievalAction(updatedCache)).onSuccess(lastFile.reference)(fakeRequest)
+      val result = controller(fakeDataRetrievalAction(updatedCache)).success(lastFile.reference)(fakeRequest)
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(routes.ErrorPageController.uploadError().url)
     }
 
-    "redirect to error page" when {
 
-      "no responses are in the cache" in {
-
-        forAll { ref: String =>
-
-          val result = controller(new FakeDataRetrievalAction(None)).onSuccess(ref)(fakeRequest)
-
-          status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(routes.ErrorPageController.error().url)
-        }
-      }
-
-      "file reference is not in response" in {
-
-        forAll { (ref: String, response: FileUploadResponse, cache: CacheMap) =>
-
-          whenever(!response.files.exists(_.reference == ref)) {
-
-            val updatedCache = combine(response, cache)
-            val result = controller(fakeDataRetrievalAction(updatedCache)).onSuccess(ref)(fakeRequest)
-
-            status(result) mustBe SEE_OTHER
-            redirectLocation(result) mustBe Some(routes.ErrorPageController.error().url)
-          }
-        }
-      }
-    }
   }
 
-  private def viewAsString(reference: String, refPosition: Position, filenames: List[String]) = upload_your_files(reference, refPosition, filenames)(fakeRequest, messages, appConfig, fakeRequest.flash).toString
+  private def viewAsString(uploadRequest: UploadRequest, refPosition: Position, successRedirect: RedirectUrl, errorRedirect: RedirectUrl) =
+    upload_your_files(uploadRequest, refPosition, successRedirect, errorRedirect)(fakeRequest, messages, appConfig, fakeRequest.flash).toString
 
   private def combine(response: FileUploadResponse, cache: CacheMap) =
     cache.copy(data = cache.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))
-
 }

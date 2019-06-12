@@ -17,19 +17,17 @@
 package controllers.actions
 
 import controllers.ControllerSpecBase
-import models.requests.SignedInUser
 import generators.SignedInUserGen
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.prop.PropertyChecks
-import play.api.{Configuration, Environment}
+import models.requests.SignedInUser
 import play.api.mvc.{Action, AnyContent}
 import play.api.test.Helpers._
 import play.api.test._
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class EORIActionSpec extends ControllerSpecBase with SignedInUserGen {
 
@@ -80,7 +78,7 @@ class EORIActionSpec extends ControllerSpecBase with SignedInUserGen {
     }
   }
 
-  class TestController(auth: AuthAction, eori: EORIRequiredActionImpl) extends BaseController {
+  class TestController(auth: AuthAction, eori: EORIRequiredAction) extends BaseController {
 
     def action: Action[AnyContent] = (auth andThen eori).async { request =>
       Future.successful(Ok(request.eori))

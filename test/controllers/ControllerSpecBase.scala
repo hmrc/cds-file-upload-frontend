@@ -19,7 +19,7 @@ package controllers
 import java.net.URLEncoder
 
 import base.SpecBase
-import connectors.DataCacheConnector
+import connectors.Cache
 import controllers.actions.{ContactDetailsRequiredAction, DataRetrievalAction, FakeActions}
 import models.ContactDetails
 import models.requests.SignedInUser
@@ -37,7 +37,7 @@ import scala.concurrent.Future
 abstract class ControllerSpecBase extends SpecBase with FakeActions {
 
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
-  val mockDataCacheConnector: DataCacheConnector = mock[DataCacheConnector]
+  val mockDataCacheConnector: Cache = mock[Cache]
   val mockUploadContactDetails: UploadContactDetails = mock[UploadContactDetails]
 
   def withSignedInUser(user: SignedInUser)(test: => Unit): Unit = {

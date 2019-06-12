@@ -24,7 +24,7 @@ GET         /upload/warning                     controllers.FileWarningControlle
 
 GET         /upload/receipt                     controllers.UploadYourFilesReceiptController.onPageLoad
 
-GET         /upload/:ref                        controllers.UploadYourFilesController.onPageLoad(ref: String)
-POST        /upload/:ref                        controllers.UploadYourFilesController.onSubmit(ref: String)
+GET         /upload/:ref                        controllers.UpscanStatusController.onPageLoad(ref: String)
 
-GET         /upload/success/:ref                controllers.UploadYourFilesController.onSuccess(ref: String)
+GET         /upload/upscan-error/:id            controllers.UpscanStatusController.error(id: String)
+GET         /upload/upscan-success/:id          controllers.UpscanStatusController.success(id: String)

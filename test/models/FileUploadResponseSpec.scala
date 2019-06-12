@@ -17,28 +17,77 @@
 package models
 
 import base.SpecBase
-import controllers.test.XmlHelper
-import generators.Generators
-import org.scalacheck.Arbitrary.arbitrary
-import org.scalacheck.Gen
-import org.scalacheck.Gen._
-import org.scalatest.prop.PropertyChecks
 
 class FileUploadResponseSpec extends SpecBase with XmlBehaviours {
 
-  private val fileGen: Gen[FileUpload] = arbitrary[FileUpload].flatMap(file => arbitrary[Waiting].map(waiting => file.copy(state = waiting)))
-  private val responseGen: Gen[FileUploadResponse] =
-    listOfN(10, fileGen).map(files => FileUploadResponse(files))
+  "File Upload Response" should {
 
-  ".fromXml" should {
+    "parse xml" in {
 
-    "parse all fields" in {
+      val xml = <FileUploadResponse xmlns="hmrc:fileupload">
+        <Files>
+          <File>
+            <Reference>31400000-8ce0-11bd-b23e-10b96e4ef00f</Reference>
+            <UploadRequest>
+              <Href>https://a.b.com</Href>
+              <Fields>
+                <Content-Type>application/xml</Content-Type>
+                <x-amz-meta-callback-url>https://some-callback-url</x-amz-meta-callback-url>
+                <x-amz-date>2019-03-05T11:56:34Z</x-amz-date>
+                <success-action-redirect>https://success-redirect/abc-211</success-action-redirect>
+                <error-action-redirect>https://error-redirect/abc-211</error-action-redirect>
+              </Fields>
+            </UploadRequest>
+          </File>
+          <File>
+            <Reference>32400000-8cf0-11bd-b23e-10b96e4ef00f</Reference>
+            <UploadRequest>
+              <Href>https://x.y.com</Href>
+              <Fields>
+                <Content-Type>application/xml</Content-Type>
+                <x-amz-meta-callback-url>https://some-callback-url2</x-amz-meta-callback-url>
+                <x-amz-date>2019-03-05T11:57:11Z</x-amz-date>
+                <success-action-redirect>https://success-redirect2/fyr-993</success-action-redirect>
+                <error-action-redirect>https://error-redirect2/fyr-993</error-action-redirect>
+              </Fields>
+            </UploadRequest>
+          </File>
+        </Files>
+      </FileUploadResponse>
 
-      forAll(responseGen) { response =>
-
-        val xml = XmlHelper.toXml(response)
-        FileUploadResponse.fromXml(xml) mustBe response
-      }
+      val expectedResponse = FileUploadResponse(List(
+        FileUpload(
+          "31400000-8ce0-11bd-b23e-10b96e4ef00f",
+          Waiting(UploadRequest(
+            "https://a.b.com",
+            Map(
+              "Content-Type" -> "application/xml",
+              "x-amz-meta-callback-url" -> "https://some-callback-url",
+              "x-amz-date" -> "2019-03-05T11:56:34Z"
+            )
+          )),
+          successUrl = RedirectUrl("https://success-redirect/abc-211"),
+          errorUrl = RedirectUrl("https://error-redirect/abc-211"),
+          id = "abc-211"
+        ),
+        FileUpload(
+          "32400000-8cf0-11bd-b23e-10b96e4ef00f",
+          Waiting(UploadRequest(
+            "https://x.y.com",
+            Map(
+              "Content-Type" -> "application/xml",
+              "x-amz-meta-callback-url" -> "https://some-callback-url2",
+              "x-amz-date" -> "2019-03-05T11:57:11Z"
+            )
+          )),
+          successUrl = RedirectUrl("https://success-redirect2/fyr-993"),
+          errorUrl = RedirectUrl("https://error-redirect2/fyr-993"),
+          id = "fyr-993"
+          
+        )
+      ))
+      
+      FileUploadResponse.fromXml(xml) mustBe expectedResponse
     }
   }
 }

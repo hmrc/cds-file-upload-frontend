@@ -61,7 +61,6 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
         val doc = asDocument(view(fileUploads))
 
         fileUploads.foreach { fu =>
-          assertContainsText(doc, fu.filename)
           assertContainsText(doc, fu.reference)
         }
       }

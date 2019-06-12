@@ -17,7 +17,7 @@
 package controllers.actions
 
 import com.google.inject.Inject
-import connectors.DataCacheConnector
+import connectors.Cache
 import models.UserAnswers
 import models.requests.{EORIRequest, OptionalDataRequest}
 import play.api.mvc.ActionTransformer
@@ -27,7 +27,7 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class DataRetrievalActionImpl @Inject()(val dataCacheConnector: DataCacheConnector) extends DataRetrievalAction {
+class DataRetrievalActionImpl @Inject()(val dataCacheConnector: Cache) extends DataRetrievalAction {
 
   override protected def transform[A](request: EORIRequest[A]): Future[OptionalDataRequest[A]] = {
     val id = request.user.internalId

@@ -26,30 +26,31 @@ import org.apache.http.entity.mime.content.{FileBody, StringBody}
 import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.util.EntityUtils
 import play.api.libs.Files.TemporaryFile
+import play.api.http.Status._
 
 import scala.util.Try
 
 @Singleton
-class UpscanS3Connector() {
+class UpscanConnector() {
 
-  def upload(template: UploadRequest, file: TemporaryFile, fileName: String): Try[Int] = {
+  def upload(upload: UploadRequest, file: TemporaryFile, fileName: String): Try[Int] = {
     val builder = MultipartEntityBuilder.create
-
-    template.fields.foreach {
+    
+    upload.fields.foreach {
       case (name, value) => builder.addPart(name, new StringBody(value, ContentType.TEXT_PLAIN))
     }
 
     builder.addPart("file", new FileBody(file.file, ContentType.DEFAULT_BINARY, fileName))
-
-    val request = new HttpPost(template.href)
+    
+    val request = new HttpPost(upload.href)
     request.setEntity(builder.build())
 
-    val client = HttpClientBuilder.create.build
+    val client = HttpClientBuilder.create.disableRedirectHandling().build
 
     val attempt = Try(client.execute(request)) map { response: HttpResponse =>
       val code = response.getStatusLine.getStatusCode
 
-      if (code >= 200 && code < 300) {
+      if (code == SEE_OTHER) {
         code
       } else {
         throw new RuntimeException(s"Bad AWS response with status [$code] body [${EntityUtils.toString(response.getEntity)}]")

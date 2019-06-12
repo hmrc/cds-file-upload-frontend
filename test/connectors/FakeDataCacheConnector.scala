@@ -22,7 +22,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
 
-object FakeDataCacheConnector extends DataCacheConnector {
+object FakeDataCacheConnector extends Cache {
 
   def save[A](cacheMap: CacheMap)(implicit hc: HeaderCarrier): Future[CacheMap] =  Future.successful(cacheMap)
 

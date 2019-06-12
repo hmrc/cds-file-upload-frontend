@@ -17,7 +17,7 @@
 package controllers
 
 import config.AppConfig
-import connectors.DataCacheConnector
+import connectors.Cache
 import controllers.actions._
 import forms.FileUploadCountProvider
 import javax.inject.{Inject, Singleton}
@@ -36,12 +36,12 @@ import scala.util.{Failure, Success}
 @Singleton
 class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
                                              authenticate: AuthAction,
-                                             requireEori: EORIRequiredActionImpl,
+                                             requireEori: EORIRequiredAction,
                                              getData: DataRetrievalAction,
                                              requireMrn: MrnRequiredAction,
                                              requireContactDetails: ContactDetailsRequiredAction,
                                              formProvider: FileUploadCountProvider,
-                                             dataCacheConnector: DataCacheConnector,
+                                             dataCacheConnector: Cache,
                                              uploadContactDetails: UploadContactDetails,
                                              customsDeclarationsService: CustomsDeclarationsService,
                                              implicit val appConfig: AppConfig)(implicit ec: ExecutionContext) extends FrontendController with I18nSupport {
@@ -68,7 +68,7 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
         fileUploadCount => {
           uploadContactDetails(req, fileUploadCount) map {
             case Right(firstUpload :: _) =>
-              Redirect(routes.UploadYourFilesController.onPageLoad(firstUpload.reference))
+              Redirect(routes.UpscanStatusController.onPageLoad(firstUpload.reference))
             case _ =>
               Redirect(routes.ErrorPageController.error())
           }
@@ -78,17 +78,18 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
 
   private def uploadContactDetails(req: MrnRequest[AnyContent], fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier): Future[Either[Throwable, List[FileUpload]]] = {
     def saveRemainingFileUploadsToCache(fileUploadResponse: FileUploadResponse): Future[List[FileUpload]] = {
-      val remainingFileUploads = fileUploadResponse.files.tail
+      val remainingFileUploads = fileUploadResponse.uploads.tail
       val answers = updateUserAnswers(req.userAnswers, fileUploadCount, FileUploadResponse(remainingFileUploads))
       dataCacheConnector.save(answers.cacheMap).map { _ => remainingFileUploads }
     }
 
     initiateUpload(req, fileUploadCount).flatMap { fileUploadResponse =>
       firstUploadFile(fileUploadResponse) match {
-        case Right((x, s3UploadRequest)) =>
+        case Right((_, s3UploadRequest)) =>
           uploadContactDetails.upload(req.request.contactDetails, s3UploadRequest) match {
             case Success(_) => saveRemainingFileUploadsToCache(fileUploadResponse).map(uploads => Right(uploads))
-            case Failure(e) => Future.successful(Left(e))
+            case Failure(e) =>
+              Future.successful(Left(e))
           }
 
         case Left(error) =>
@@ -104,5 +105,5 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
     customsDeclarationsService.batchFileUpload(req.eori, req.mrn, fileUploadCount)
 
   private def firstUploadFile(response: FileUploadResponse): Either[Throwable, (FileUpload, UploadRequest)] =
-    response.files.headOption map { case f@FileUpload(_, Waiting(u), _) => Right((f, u)) } getOrElse Left(new IllegalStateException("Unable to initiate upload"))
+    response.uploads.headOption map { case f@FileUpload(_, Waiting(u), _, _, _, _) => Right((f, u)) } getOrElse Left(new IllegalStateException("Unable to initiate upload"))
 }
