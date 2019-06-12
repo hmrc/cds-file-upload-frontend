@@ -20,8 +20,8 @@ import config.AppConfig
 import connectors.Cache
 import controllers.actions.{AuthAction, DataRetrievalAction, EORIRequiredAction, FileUploadResponseRequiredAction}
 import javax.inject.Inject
-import models.requests.FileUploadResponseRequest
 import models._
+import models.requests.FileUploadResponseRequest
 import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -36,7 +36,6 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.upload_error
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 class UpscanStatusController @Inject()(val messagesApi: MessagesApi,
                                        authenticate: AuthAction,
@@ -78,6 +77,7 @@ class UpscanStatusController @Inject()(val messagesApi: MessagesApi,
 
   def success(id: String): Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
+
       val uploads = req.fileUploadResponse.uploads
 
       uploads.find(_.id == id) match {
