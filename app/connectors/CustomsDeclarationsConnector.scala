@@ -36,9 +36,12 @@ class CustomsDeclarationsConnector @Inject()(config: AppConfig, httpClient: Http
   private val clientId = config.developerHubClientId
 
   def requestFileUpload(eori: String, request: FileUploadRequest)(implicit hc: HeaderCarrier): Future[FileUploadResponse] = {
+    Logger.warn(s"REQUEST TO INITIATE ${request}")
+    Logger.warn(s"REQUEST TO INITIATE ${request.toXml}")
     httpClient.POSTString[HttpResponse](fileUploadUrl, request.toXml.mkString, headers(eori)).map(r =>
       Try(XML.loadString(r.body)) match {
         case Success(value) =>
+          Logger.warn(s"Got initiate response ${FileUploadResponse}")
           FileUploadResponse.fromXml(value)
         case Failure(exception) =>
           Logger.error("Failed to load XML")

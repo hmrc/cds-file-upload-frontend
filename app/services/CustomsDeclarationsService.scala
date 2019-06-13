@@ -19,6 +19,7 @@ package services
 import com.google.inject.Inject
 import connectors.CustomsDeclarationsConnector
 import models._
+import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -35,7 +36,8 @@ class CustomsDeclarationsServiceImpl @Inject()(customsDeclarationsConnector: Cus
                               (implicit hc: HeaderCarrier): Future[FileUploadResponse] = {
 
     val files = for(i <- 1 to fileUploadCount.value + 1) yield FileUploadFile(i, "")
-    val fileSeq = files.collect { case Some(v) => v }
+    Logger.warn(s"Files $files")
+    val fileSeq = files.flatten
 
     val request = FileUploadRequest(mrn, fileSeq)
 

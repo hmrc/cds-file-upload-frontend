@@ -25,6 +25,7 @@ import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.{FileBody, StringBody}
 import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.util.EntityUtils
+import play.api.Logger
 import play.api.libs.Files.TemporaryFile
 import play.api.http.Status._
 
@@ -49,6 +50,7 @@ class UpscanConnector() {
 
     val attempt = Try(client.execute(request)) map { response: HttpResponse =>
       val code = response.getStatusLine.getStatusCode
+      Logger.warn(s"uploading contact details got response TO INITIATE ${code}")
 
       if (code == SEE_OTHER) {
         code

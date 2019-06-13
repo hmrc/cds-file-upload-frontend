@@ -16,6 +16,7 @@
 
 package models
 
+import play.api.Logger
 import play.api.libs.json._
 
 import scala.xml.Elem
@@ -46,6 +47,7 @@ object FileUploadResponse {
   def apply(files: List[FileUpload]): FileUploadResponse = new FileUploadResponse(files.sortBy(_.reference)) {}
   
   def fromXml(xml: Elem): FileUploadResponse = {
+    Logger.warn("File Upload Response " + xml)
     val files: List[FileUpload] = (xml \ "Files" \ "_").theSeq.collect {
       case file =>
         val reference = (file \ "Reference").text.trim
