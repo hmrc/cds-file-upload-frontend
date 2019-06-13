@@ -46,7 +46,7 @@ trait ModelGenerators extends SignedInUserGen with OptionValues {
       seqNo   <- intsAboveValue(0)
       doctype <- arbitrary[String]
     } yield {
-      FileUploadFile(seqNo, doctype).value
+      FileUploadFile(seqNo, doctype, "").value
     }
 
   implicit val arbitraryFileUploadFile: Arbitrary[FileUploadFile] = Arbitrary(fileUploadFileGen)

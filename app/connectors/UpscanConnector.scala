@@ -48,6 +48,8 @@ class UpscanConnector() {
 
     val client = HttpClientBuilder.create.disableRedirectHandling().build
 
+    Try(client.execute(request)).recover{case e:Exception => e}.map(a => a)
+
     val attempt = Try(client.execute(request)) match {
       case Success(response) =>
         val code = response.getStatusLine.getStatusCode

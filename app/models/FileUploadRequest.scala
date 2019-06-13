@@ -18,6 +18,9 @@ package models
 
 import java.util.UUID
 
+import config.CDSFileUploadFrontend
+import play.api.Logger
+
 import scala.xml.Elem
 
 final case class FileUploadRequest(
@@ -32,21 +35,24 @@ final case class FileUploadRequest(
     </FileUploadRequest>
 }
 
-sealed abstract case class FileUploadFile(fileSequenceNo: Int, documentType: String) {
+sealed abstract case class FileUploadFile(fileSequenceNo: Int, documentType: String, serviceUrl: String) {
   private val uuid = UUID.randomUUID()
+  val successRedirect = serviceUrl + "/upload/upscan-success/" + uuid
+  val errorRedirect = serviceUrl + "/upload/upscan-error/" + uuid
+  Logger.warn(s"successRedirect: $successRedirect, errorRedirect: $errorRedirect")
 
   def toXml: Elem =
     <File>
       <FileSequenceNo>{fileSequenceNo}</FileSequenceNo>
       <DocumentType>{documentType}</DocumentType>
-      <SuccessRedirect>{uuid}</SuccessRedirect>
-      <ErrorRedirect>{uuid}</ErrorRedirect>
+      <SuccessRedirect>{successRedirect}</SuccessRedirect>
+      <ErrorRedirect>{errorRedirect}</ErrorRedirect>
     </File>
 }
 
 object FileUploadFile {
 
-  def apply(fileSequenceNo: Int, documentType: String): Option[FileUploadFile] =
-    if (fileSequenceNo > 0) Some(new FileUploadFile(fileSequenceNo, documentType) {})
+  def apply(fileSequenceNo: Int, documentType: String, serviceUrl: String ): Option[FileUploadFile] =
+    if (fileSequenceNo > 0) Some(new FileUploadFile(fileSequenceNo, documentType, serviceUrl) {})
     else None
 }

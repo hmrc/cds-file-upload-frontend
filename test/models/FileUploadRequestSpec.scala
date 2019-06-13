@@ -37,14 +37,14 @@ class FileUploadRequestSpec extends SpecBase with XmlBehaviours {
     "return Some" when {
 
       "all arguments are valid" in {
-        FileUploadFile(2, "my doc type") mustBe defined
+        FileUploadFile(2, "my doc type", "") mustBe defined
       }
     }
 
     "return None" when {
 
       "sequence number is less than 1" in {
-        FileUploadFile(0, "some doc type") mustBe empty
+        FileUploadFile(0, "some doc type", "") mustBe empty
       }
     }
   }

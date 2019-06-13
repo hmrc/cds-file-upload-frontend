@@ -17,6 +17,7 @@
 package services
 
 import base.SpecBase
+import config.AppConfig
 import connectors.CustomsDeclarationsConnector
 import models._
 import org.mockito.ArgumentCaptor
@@ -25,13 +26,14 @@ import org.mockito.Mockito._
 import org.scalatest._
 import org.scalatest.mockito.MockitoSugar
 import play.api.test.Helpers._
-
+import play.api.{Configuration, Environment}
 import scala.concurrent.Future
+import config.AppConfig
 
 class CustomsDeclarationsServiceSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach {
 
   lazy val mockConnector = mock[CustomsDeclarationsConnector]
-  lazy val service = new CustomsDeclarationsServiceImpl(mockConnector)
+  lazy val service = new CustomsDeclarationsServiceImpl(mockConnector, appConfig)
 
   override def beforeEach = {
     reset(mockConnector)
@@ -81,5 +83,5 @@ class CustomsDeclarationsServiceSpec extends SpecBase with MockitoSugar with Bef
     captor.getValue.files.size mustBe userUploadedFiles + 1
   }
 
-  private def expectedUploadFiles(n: Int) = (1 to n).map(FileUploadFile(_, "").get)
+  private def expectedUploadFiles(n: Int) = (1 to n).map(FileUploadFile(_, "", "http://localhost:6793").get)
 }

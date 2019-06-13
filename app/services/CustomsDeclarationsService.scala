@@ -17,6 +17,7 @@
 package services
 
 import com.google.inject.Inject
+import config.AppConfig
 import connectors.CustomsDeclarationsConnector
 import models._
 import play.api.Logger
@@ -30,12 +31,13 @@ trait CustomsDeclarationsService {
 
 }
 
-class CustomsDeclarationsServiceImpl @Inject()(customsDeclarationsConnector: CustomsDeclarationsConnector) extends CustomsDeclarationsService {
+class CustomsDeclarationsServiceImpl @Inject()(customsDeclarationsConnector: CustomsDeclarationsConnector, appConfig:AppConfig) extends CustomsDeclarationsService {
 
   override def batchFileUpload(eori: String, mrn: MRN, fileUploadCount: FileUploadCount)
                               (implicit hc: HeaderCarrier): Future[FileUploadResponse] = {
 
-    val files = for(i <- 1 to fileUploadCount.value + 1) yield FileUploadFile(i, "")
+    val uploadUrl = appConfig.microservice.services.cdsFileUploadFrontend.uri
+    val files = for(i <- 1 to fileUploadCount.value + 1) yield FileUploadFile(i, "", uploadUrl)
     Logger.warn(s"Files $files")
     val fileSeq = files.flatten
 
