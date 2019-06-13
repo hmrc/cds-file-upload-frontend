@@ -71,7 +71,7 @@ class UpscanS3ConnectorTest extends WordSpec with WiremockTestServer with MustMa
       )
 
       val result = connector.upload(templateUploading, TemporaryFile("example-file.json"), "exampleFileName")
-      result.failure.exception must have message "Bad AWS response with status [502] body [content]"
+      result.failure.exception must have message "Response code was not 303 but: 502"
 
       verify(
         postRequestedFor(urlEqualTo("/path"))

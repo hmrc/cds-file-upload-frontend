@@ -29,34 +29,33 @@ import play.api.Logger
 import play.api.libs.Files.TemporaryFile
 import play.api.http.Status._
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class UpscanConnector() {
 
   def upload(upload: UploadRequest, file: TemporaryFile, fileName: String): Try[Int] = {
     val builder = MultipartEntityBuilder.create
-    
+
     upload.fields.foreach {
       case (name, value) => builder.addPart(name, new StringBody(value, ContentType.TEXT_PLAIN))
     }
 
     builder.addPart("file", new FileBody(file.file, ContentType.DEFAULT_BINARY, fileName))
-    
+
     val request = new HttpPost(upload.href)
     request.setEntity(builder.build())
 
     val client = HttpClientBuilder.create.disableRedirectHandling().build
 
-    val attempt = Try(client.execute(request)) map { response: HttpResponse =>
-      val code = response.getStatusLine.getStatusCode
-      Logger.warn(s"uploading contact details got response TO INITIATE ${code}")
-
-      if (code == SEE_OTHER) {
-        code
-      } else {
-        throw new RuntimeException(s"Bad AWS response with status [$code] body [${EntityUtils.toString(response.getEntity)}]")
-      }
+    val attempt = Try(client.execute(request)) match {
+      case Success(response) =>
+        val code = response.getStatusLine.getStatusCode
+        Logger.warn(s"uploading contact details got response TO INITIATE ${code}")
+        if (code == SEE_OTHER) Success(code) else Failure(new Exception(s"Response code was not 303 but: $code"))
+      case Failure(ex) =>
+        Logger.error(ex.getMessage, ex)
+        Failure(ex)
     }
 
     client.close()
