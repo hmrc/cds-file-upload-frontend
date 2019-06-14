@@ -42,7 +42,6 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
   (UploadStuff.apply)(UploadStuff.unapply)
   )
 
-  var fileRef = 1
   def waiting(ref: String) = Waiting(UploadRequest(
     href = "http://localhost:6793/cds-file-upload-service/test-only/s3-bucket",
     fields = Map(
@@ -59,7 +58,6 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
 
   // for now, we will just return some random
   def handleBatchFileUploadRequest: Action[NodeSeq] = Action(parse.xml) { implicit req =>
-    fileRef = 1
 
     Thread.sleep(100)
 
@@ -90,12 +88,11 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
     <Root>
         <FileReference>{ref}</FileReference>
         <BatchId>5e634e09-77f6-4ff1-b92a-8a9676c715c4</BatchId>
-        <FileName>File{fileRef}.pdf</FileName>
+        <FileName>File_{ref}.pdf</FileName>
         <Outcome>SUCCESS</Outcome>
         <Details>[detail block]</Details>
       </Root>
 
-    fileRef += 1
     notificationService.save(notification)
   }
 }
