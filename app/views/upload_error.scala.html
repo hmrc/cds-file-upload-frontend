@@ -25,15 +25,6 @@
     <h1 class="heading-xlarge">@messages("uploadError.heading")</h1>
 
     <p>@messages("uploadError.guidance")</p>
-    <p>
-        @messages("helpline.imports")
-        <br>
-        @bold(messages("helpline.imports.tel"))
-    </p>
 
-    <p>
-        @messages("helpline.exports")
-        <br>
-        @bold(messages("helpline.exports.tel"))
-    </p>
+    @components.helpline_information()
 }
