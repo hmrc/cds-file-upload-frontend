@@ -23,7 +23,7 @@ import org.scalatest.{MustMatchers, WordSpec}
 import play.api.http.Status
 import play.api.libs.Files.TemporaryFile
 
-class UpscanS3ConnectorTest extends WordSpec with WiremockTestServer with MustMatchers {
+class UpscanConnectorTest extends WordSpec with WiremockTestServer with MustMatchers {
 
   private val connector = new UpscanConnector()
 
