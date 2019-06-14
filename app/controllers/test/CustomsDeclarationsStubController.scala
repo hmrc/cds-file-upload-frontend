@@ -74,8 +74,8 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
 
   def handleS3FileUploadRequest: Action[AnyContent] = Action { implicit req =>
     form.bindFromRequest().fold(
-      _ =>
-        SeeOther("just to keep contact details upload happy"),
+        _ =>
+        SeeOther("/upscan-success").withHeaders("Location" -> "upscan-success"),
       stuff => {
         callBack(stuff.successActionRedirect.split("/").last)
         SeeOther(stuff.successActionRedirect)

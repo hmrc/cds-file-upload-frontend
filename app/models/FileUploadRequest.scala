@@ -18,9 +18,6 @@ package models
 
 import java.util.UUID
 
-import config.CDSFileUploadFrontend
-import play.api.Logger
-
 import scala.xml.Elem
 
 final case class FileUploadRequest(
