@@ -51,7 +51,7 @@ class UpscanConnector() {
     val attempt = Try(client.execute(request)) match {
       case Success(response) =>
         val code = response.getStatusLine.getStatusCode
-        Logger.warn(s"uploading contact details got response TO INITIATE ${code}")
+        Logger.info(s"Upscan upload contact details responsed with: ${code}")
         if (code == SEE_OTHER) Success(code) else Failure(new Exception(s"Response code was not 303 but: $code"))
       case Failure(ex) =>
         Logger.error(ex.getMessage, ex)

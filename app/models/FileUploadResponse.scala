@@ -47,7 +47,7 @@ object FileUploadResponse {
   def apply(files: List[FileUpload]): FileUploadResponse = new FileUploadResponse(files.sortBy(_.reference)) {}
   
   def fromXml(xml: Elem): FileUploadResponse = {
-    Logger.warn("File Upload Response " + xml)
+    Logger.info("File Upload Response " + xml)
     val files: List[FileUpload] = (xml \ "Files" \ "_").theSeq.collect {
       case file =>
         val reference = (file \ "Reference").text.trim

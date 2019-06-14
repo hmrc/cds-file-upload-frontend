@@ -39,7 +39,6 @@ sealed abstract case class FileUploadFile(fileSequenceNo: Int, documentType: Str
   private val uuid = UUID.randomUUID()
   val successRedirect = serviceUrl + "/upload/upscan-success/" + uuid
   val errorRedirect = serviceUrl + "/upload/upscan-error/" + uuid
-  Logger.warn(s"successRedirect: $successRedirect, errorRedirect: $errorRedirect")
 
   def toXml: Elem =
     <File>
