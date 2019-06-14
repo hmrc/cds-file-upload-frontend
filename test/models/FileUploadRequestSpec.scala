@@ -38,7 +38,14 @@ class FileUploadRequestSpec extends SpecBase with XmlBehaviours {
 
       "all arguments are valid" in {
         FileUploadFile(2, "my doc type", "") mustBe defined
+
       }
+    }
+
+    "contain the redirect endpoints" in {
+      FileUploadFile(2, "my doc type", "").get.successRedirect.contains("/cds-file-upload-service/upload/upscan-success/") mustBe true
+      FileUploadFile(2, "my doc type", "").get.errorRedirect.contains("/cds-file-upload-service/upload/upscan-error/") mustBe true
+
     }
 
     "return None" when {
