@@ -51,8 +51,12 @@ class UpscanConnector() {
     val attempt = Try(client.execute(request)) match {
       case Success(response) =>
         val code = response.getStatusLine.getStatusCode
-        Logger.info(s"Upscan upload contact details responsed with: ${code}")
-        if (code == SEE_OTHER) Success(code) else Failure(new Exception(s"Response code was not 303 but: $code"))
+        val isSuccessRedirect = response.getHeaders("Location").headOption.exists(_.getValue.contains("upscan-success"))
+        Logger.info(s"Upscan upload contact details responded with: ${code}")
+        if (isSuccessRedirect)
+          Success(code)
+        else
+          Failure(new Exception(s"Uploading contact details to s3 failed"))
       case Failure(ex) =>
         Logger.error(ex.getMessage, ex)
         Failure(ex)

@@ -30,12 +30,13 @@ class UpscanConnectorTest extends WordSpec with WiremockTestServer with MustMatc
 
   "Upload" should {
 
-    "POST to AWS" in {
+    "POST to Upscan" in {
       stubFor(
         post("/path")
           .willReturn(
             aResponse()
-              .withStatus(Status.NO_CONTENT)
+              .withStatus(Status.SEE_OTHER)
+              .withHeader("Location", "upscan-success")
           )
       )
 
@@ -45,8 +46,32 @@ class UpscanConnectorTest extends WordSpec with WiremockTestServer with MustMatc
           "key" -> "value"
         )
       )
+      val res = connector.upload(templateUploading, TemporaryFile("example-file.json"), "exampleFilename")
+      res.get mustBe Status.SEE_OTHER
 
-      connector.upload(templateUploading, TemporaryFile("example-file.json"), "exampleFilename")
+      verify(
+        postRequestedFor(urlEqualTo("/path"))
+      )
+    }
+
+    "Fail for error redirect" in {
+      stubFor(
+        post("/path")
+          .willReturn(
+            aResponse()
+              .withStatus(Status.SEE_OTHER)
+              .withHeader("Location", "error")
+          )
+      )
+
+      val templateUploading = UploadRequest(
+        href = s"$wireMockUrl/path",
+        fields = Map(
+          "key" -> "value"
+        )
+      )
+      val res = connector.upload(templateUploading, TemporaryFile("example-file.json"), "exampleFilename")
+      res.failure.exception must have message "Uploading contact details to s3 failed"
 
       verify(
         postRequestedFor(urlEqualTo("/path"))
@@ -71,7 +96,7 @@ class UpscanConnectorTest extends WordSpec with WiremockTestServer with MustMatc
       )
 
       val result = connector.upload(templateUploading, TemporaryFile("example-file.json"), "exampleFileName")
-      result.failure.exception must have message "Response code was not 303 but: 502"
+      result.failure.exception must have message "Uploading contact details to s3 failed"
 
       verify(
         postRequestedFor(urlEqualTo("/path"))
