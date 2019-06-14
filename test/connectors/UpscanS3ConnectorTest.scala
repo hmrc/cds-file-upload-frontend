@@ -17,7 +17,7 @@
 package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import models.UploadRequest
+import models.{ContactDetails, UploadRequest}
 import org.scalatest.TryValues._
 import org.scalatest.{MustMatchers, WordSpec}
 import play.api.http.Status
@@ -26,6 +26,7 @@ import play.api.libs.Files.TemporaryFile
 class UpscanS3ConnectorTest extends WordSpec with WiremockTestServer with MustMatchers {
 
   private val connector = new UpscanConnector()
+  val contactDetails = ContactDetails("a","b","c","d")
 
 
   "Upload" should {
@@ -45,8 +46,7 @@ class UpscanS3ConnectorTest extends WordSpec with WiremockTestServer with MustMa
           "key" -> "value"
         )
       )
-
-      connector.upload(templateUploading, TemporaryFile("example-file.json"), "exampleFilename")
+      connector.upload(templateUploading, contactDetails, "exampleFilename")
 
       verify(
         postRequestedFor(urlEqualTo("/path"))
@@ -70,7 +70,7 @@ class UpscanS3ConnectorTest extends WordSpec with WiremockTestServer with MustMa
         )
       )
 
-      val result = connector.upload(templateUploading, TemporaryFile("example-file.json"), "exampleFileName")
+      val result = connector.upload(templateUploading, contactDetails, "exampleFileName")
       result.failure.exception must have message "Response code was not 303 but: 502"
 
       verify(

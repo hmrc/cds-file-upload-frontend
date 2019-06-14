@@ -32,19 +32,6 @@ class UploadContactDetails @Inject()(upscanConnector: UpscanConnector) {
 
   def fileName = s"contact_details_${UUID.randomUUID().toString}.txt"
 
-  def upload(contactDetails: ContactDetails, uploadRequest: UploadRequest): Try[Int] = upscanConnector.upload(uploadRequest, toFile(contactDetails), fileName)
+  def upload(contactDetails: ContactDetails, uploadRequest: UploadRequest): Try[Int] = upscanConnector.upload(uploadRequest, contactDetails, fileName)
 
-  def toFile(contactDetails: ContactDetails): TemporaryFile = {
-    val uploadFile = File.createTempFile("cds-file-upload-ui", "")
-
-    new PrintWriter(uploadFile) {
-      try {
-        write(contactDetails.toString())
-      } finally {
-        close()
-      }
-    }
-
-    TemporaryFile(uploadFile)
-  }
 }

@@ -17,7 +17,7 @@
 package connectors
 
 import javax.inject.Singleton
-import models.UploadRequest
+import models.{ContactDetails, UploadRequest}
 import org.apache.http.HttpResponse
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.ContentType
@@ -34,21 +34,19 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class UpscanConnector() {
 
-  def upload(upload: UploadRequest, file: TemporaryFile, fileName: String): Try[Int] = {
+  def upload(upload: UploadRequest, file: ContactDetails, fileName: String): Try[Int] = {
     val builder = MultipartEntityBuilder.create
 
     upload.fields.foreach {
       case (name, value) => builder.addPart(name, new StringBody(value, ContentType.TEXT_PLAIN))
     }
 
-    builder.addPart("file", new FileBody(file.file, ContentType.DEFAULT_BINARY, fileName))
+    builder.addBinaryBody("file", file.toString.getBytes("UTF-8") , ContentType.DEFAULT_BINARY, fileName)
 
     val request = new HttpPost(upload.href)
     request.setEntity(builder.build())
 
     val client = HttpClientBuilder.create.disableRedirectHandling().build
-
-    Try(client.execute(request)).recover{case e:Exception => e}.map(a => a)
 
     val attempt = Try(client.execute(request)) match {
       case Success(response) =>

@@ -41,22 +41,16 @@ class UploadContactDetailsSpec extends SpecBase with MockitoSugar {
       val contactDetails = ContactDetails("name", "companyName", "phoneNumber", "email")
       val uploadRequest = UploadRequest("someUrl", Map("k" -> "v"))
 
-      when(mockS3Connector.upload(any[UploadRequest], any[TemporaryFile], any[String])).thenReturn(Try(202))
+      when(mockS3Connector.upload(any[UploadRequest], any[ContactDetails], any[String])).thenReturn(Try(202))
 
       uploadContactDetails.upload(contactDetails, uploadRequest)
 
-      val fileCaptor: ArgumentCaptor[TemporaryFile] = ArgumentCaptor.forClass(classOf[TemporaryFile])
+      val fileCaptor: ArgumentCaptor[ContactDetails] = ArgumentCaptor.forClass(classOf[ContactDetails])
       val fileNameCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
       verify(mockS3Connector).upload(meq(uploadRequest), fileCaptor.capture(), fileNameCaptor.capture())
 
-      val file = fileCaptor.getValue.file
-      val source = Source.fromFile(file)
-      try {
-        source.mkString mustEqual contactDetails.toString
-      } finally {
-        source.close()
-      }
-
+      val source = fileCaptor.getValue.toString
+      source mustEqual contactDetails.toString
       val fileName = fileNameCaptor.getValue
 
       fileName must startWith("contact_details")
