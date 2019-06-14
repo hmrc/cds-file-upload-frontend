@@ -38,7 +38,6 @@ class CustomsDeclarationsServiceImpl @Inject()(customsDeclarationsConnector: Cus
 
     val uploadUrl = appConfig.microservice.services.cdsFileUploadFrontend.uri
     val files = for(i <- 1 to fileUploadCount.value + 1) yield FileUploadFile(i, "", uploadUrl)
-    Logger.warn(s"Files $files")
     val fileSeq = files.flatten
 
     val request = FileUploadRequest(mrn, fileSeq)
