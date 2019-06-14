@@ -37,8 +37,8 @@ final case class FileUploadRequest(
 
 sealed abstract case class FileUploadFile(fileSequenceNo: Int, documentType: String, serviceUrl: String) {
   private val uuid = UUID.randomUUID()
-  val successRedirect = serviceUrl + "/upload/upscan-success/" + uuid
-  val errorRedirect = serviceUrl + "/upload/upscan-error/" + uuid
+  val successRedirect = serviceUrl + "/cds-file-upload-service/upload/upscan-success/" + uuid
+  val errorRedirect = serviceUrl + "/cds-file-upload-service/upload/upscan-error/" + uuid
 
   def toXml: Elem =
     <File>
