@@ -17,7 +17,7 @@
 package controllers
 
 import config.AppConfig
-import connectors.Cache
+import connectors.{Cache, UpscanConnector}
 import controllers.actions._
 import forms.FileUploadCountProvider
 import javax.inject.{Inject, Singleton}
@@ -26,7 +26,7 @@ import models.requests.MrnRequest
 import pages.HowManyFilesUploadPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
-import services.{CustomsDeclarationsService, UploadContactDetails}
+import services.CustomsDeclarationsService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -42,7 +42,7 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
                                              requireContactDetails: ContactDetailsRequiredAction,
                                              formProvider: FileUploadCountProvider,
                                              dataCacheConnector: Cache,
-                                             uploadContactDetails: UploadContactDetails,
+                                             uploadContactDetails: UpscanConnector,
                                              customsDeclarationsService: CustomsDeclarationsService,
                                              implicit val appConfig: AppConfig)(implicit ec: ExecutionContext) extends FrontendController with I18nSupport {
 
@@ -85,8 +85,8 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
 
     initiateUpload(req, fileUploadCount).flatMap { fileUploadResponse =>
       firstUploadFile(fileUploadResponse) match {
-        case Right((_, s3UploadRequest)) =>
-          uploadContactDetails.upload(req.request.contactDetails, s3UploadRequest) match {
+        case Right((_, uploadRequest)) =>
+          uploadContactDetails.upload(uploadRequest, req.request.contactDetails) match {
             case Success(_) => saveRemainingFileUploadsToCache(fileUploadResponse).map(uploads => Right(uploads))
             case Failure(e) =>
               Future.successful(Left(e))

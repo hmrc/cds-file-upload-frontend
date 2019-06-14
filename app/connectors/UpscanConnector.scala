@@ -16,17 +16,16 @@
 
 package connectors
 
+import java.util.UUID
+
 import javax.inject.Singleton
 import models.{ContactDetails, UploadRequest}
-import org.apache.http.HttpResponse
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.MultipartEntityBuilder
-import org.apache.http.entity.mime.content.{FileBody, StringBody}
+import org.apache.http.entity.mime.content.StringBody
 import org.apache.http.impl.client.HttpClientBuilder
-import org.apache.http.util.EntityUtils
 import play.api.Logger
-import play.api.libs.Files.TemporaryFile
 import play.api.http.Status._
 
 import scala.util.{Failure, Success, Try}
@@ -34,14 +33,14 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class UpscanConnector() {
 
-  def upload(upload: UploadRequest, file: ContactDetails, fileName: String): Try[Int] = {
+  def upload(upload: UploadRequest, contactDetails: ContactDetails): Try[Int] = {
     val builder = MultipartEntityBuilder.create
 
     upload.fields.foreach {
       case (name, value) => builder.addPart(name, new StringBody(value, ContentType.TEXT_PLAIN))
     }
 
-    builder.addBinaryBody("file", file.toString.getBytes("UTF-8") , ContentType.DEFAULT_BINARY, fileName)
+    builder.addBinaryBody("file", contactDetails.toString.getBytes("UTF-8") , ContentType.DEFAULT_BINARY, fileName)
 
     val request = new HttpPost(upload.href)
     request.setEntity(builder.build())
@@ -51,7 +50,7 @@ class UpscanConnector() {
     val attempt = Try(client.execute(request)) match {
       case Success(response) =>
         val code = response.getStatusLine.getStatusCode
-        Logger.info(s"Upscan upload contact details responsed with: ${code}")
+        Logger.info(s"Upscan upload contact details responded with: ${code}")
         if (code == SEE_OTHER) Success(code) else Failure(new Exception(s"Response code was not 303 but: $code"))
       case Failure(ex) =>
         Logger.error(ex.getMessage, ex)
@@ -62,4 +61,7 @@ class UpscanConnector() {
 
     attempt
   }
+
+  private def fileName = s"contact_details_${UUID.randomUUID().toString}.txt"
+
 }

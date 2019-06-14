@@ -46,7 +46,7 @@ class UpscanS3ConnectorTest extends WordSpec with WiremockTestServer with MustMa
           "key" -> "value"
         )
       )
-      connector.upload(templateUploading, contactDetails, "exampleFilename")
+      connector.upload(templateUploading, contactDetails)
 
       verify(
         postRequestedFor(urlEqualTo("/path"))
@@ -70,7 +70,7 @@ class UpscanS3ConnectorTest extends WordSpec with WiremockTestServer with MustMa
         )
       )
 
-      val result = connector.upload(templateUploading, contactDetails, "exampleFileName")
+      val result = connector.upload(templateUploading, contactDetails)
       result.failure.exception must have message "Response code was not 303 but: 502"
 
       verify(
