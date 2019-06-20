@@ -17,7 +17,7 @@
 package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import models.UploadRequest
+import models.{ContactDetails, UploadRequest}
 import org.scalatest.TryValues._
 import org.scalatest.{MustMatchers, WordSpec}
 import play.api.http.Status
@@ -26,6 +26,7 @@ import play.api.libs.Files.TemporaryFile
 class UpscanConnectorTest extends WordSpec with WiremockTestServer with MustMatchers {
 
   private val connector = new UpscanConnector()
+  val contactDetails = ContactDetails("a","b","c","d")
 
 
   "Upload" should {
@@ -46,7 +47,7 @@ class UpscanConnectorTest extends WordSpec with WiremockTestServer with MustMatc
           "key" -> "value"
         )
       )
-      val res = connector.upload(templateUploading, TemporaryFile("example-file.json"), "exampleFilename")
+      val res = connector.upload(templateUploading, contactDetails)
       res.get mustBe Status.SEE_OTHER
 
       verify(
@@ -70,7 +71,7 @@ class UpscanConnectorTest extends WordSpec with WiremockTestServer with MustMatc
           "key" -> "value"
         )
       )
-      val res = connector.upload(templateUploading, TemporaryFile("example-file.json"), "exampleFilename")
+      val res = connector.upload(templateUploading, contactDetails)
       res.failure.exception must have message "Uploading contact details to s3 failed"
 
       verify(
@@ -95,7 +96,7 @@ class UpscanConnectorTest extends WordSpec with WiremockTestServer with MustMatc
         )
       )
 
-      val result = connector.upload(templateUploading, TemporaryFile("example-file.json"), "exampleFileName")
+      val result = connector.upload(templateUploading, contactDetails)
       result.failure.exception must have message "Uploading contact details to s3 failed"
 
       verify(

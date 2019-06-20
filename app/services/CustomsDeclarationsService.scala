@@ -20,7 +20,6 @@ import com.google.inject.Inject
 import config.AppConfig
 import connectors.CustomsDeclarationsConnector
 import models._
-import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future

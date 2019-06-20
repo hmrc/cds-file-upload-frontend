@@ -16,6 +16,7 @@
 
 package controllers
 
+import connectors.UpscanConnector
 import controllers.actions._
 import forms.FileUploadCountProvider
 import models._
@@ -71,10 +72,11 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
   private val fakeContactDetailsRequiredAction = arbitraryFakeContactDetailsActions.arbitrary.retryUntil(_ => true).sample.get
   private val mockCustomsDeclarationsService = mock[CustomsDeclarationsService]
   private val mockWSResponse = mock[WSResponse]
+  private val mockUpscanConnector = mock[UpscanConnector]
 
   override def beforeEach: Unit = {
     super.beforeEach
-    reset(mockCustomsDeclarationsService, mockWSResponse)
+    reset(mockCustomsDeclarationsService, mockWSResponse, mockUpscanConnector)
     when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(FileUploadResponse(List())))
   }
 
@@ -88,7 +90,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       contactDetailsRequiredAction,
       new FileUploadCountProvider,
       mockDataCacheConnector,
-      mockUploadContactDetails,
+      mockUpscanConnector,
       mockCustomsDeclarationsService,
       appConfig)
 
@@ -155,7 +157,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       val fileUploadsAfterContactDetails = fileUploadResponse.uploads.tail
 
       when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
-      when(mockUploadContactDetails.upload(any(), any())).thenReturn(Success(202))
+      when(mockUpscanConnector.upload(any(), any())).thenReturn(Success(202))
       when(mockDataCacheConnector.save(any())(any[HeaderCarrier])).thenReturn(Future.successful(CacheMap("", Map.empty)))
       val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2")
 
@@ -176,9 +178,9 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
         FileUpload("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> ""))), id = "id1"),
         FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> ""))), id = "id2")
       ))
-      reset(mockUploadContactDetails)
+      reset(mockUpscanConnector)
       when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
-      when(mockUploadContactDetails.upload(any(), any())).thenReturn(Failure(new IllegalStateException()))
+      when(mockUpscanConnector.upload(any(), any())).thenReturn(Failure(new IllegalStateException()))
 
       val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2")
 

@@ -25,7 +25,6 @@ import models.ContactDetails
 import models.requests.SignedInUser
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, when}
-import services.UploadContactDetails
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
@@ -38,7 +37,6 @@ abstract class ControllerSpecBase extends SpecBase with FakeActions {
 
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
   val mockDataCacheConnector: Cache = mock[Cache]
-  val mockUploadContactDetails: UploadContactDetails = mock[UploadContactDetails]
 
   def withSignedInUser(user: SignedInUser)(test: => Unit): Unit = {
     when(
@@ -61,7 +59,7 @@ abstract class ControllerSpecBase extends SpecBase with FakeActions {
   }
 
   override def beforeEach = {
-    reset(mockDataCacheConnector, mockAuthConnector, mockUploadContactDetails)
+    reset(mockDataCacheConnector, mockAuthConnector)
     when(mockDataCacheConnector.save(any[CacheMap])(any[HeaderCarrier])).thenReturn(Future.successful(CacheMap("", Map())))
   }
 
