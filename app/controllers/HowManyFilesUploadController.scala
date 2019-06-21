@@ -86,12 +86,15 @@ class HowManyFilesUploadController @Inject()(authenticate: AuthAction,
     initiateUpload(req, fileUploadCount).flatMap { fileUploadResponse =>
       firstUploadFile(fileUploadResponse) match {
         case Right((_, uploadRequest)) =>
-          uploadContactDetails.upload(uploadRequest, req.request.contactDetails) match {
-            case Success(_) => saveRemainingFileUploadsToCache(fileUploadResponse).map(uploads => Right(uploads))
-            case Failure(e) =>
-              Future.successful(Left(e))
+          uploadContactDetails.upload(uploadRequest, req.request.contactDetails).flatMap { res =>
+            val isSuccessRedirect = res.header("Location").exists(_.contains("upscan-success"))
+            if (res.status == SEE_OTHER  && isSuccessRedirect) {
+              saveRemainingFileUploadsToCache(fileUploadResponse).map(uploads => Right(uploads))
+            }
+            else {
+              Future.successful(Left(new IllegalStateException("Unable to initiate upload")))
+            }
           }
-
         case Left(error) =>
           Future.successful(Left(error))
       }
