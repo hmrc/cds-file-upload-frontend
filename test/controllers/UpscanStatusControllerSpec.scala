@@ -48,7 +48,6 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
   val auditConnector = mock[AuditConnector]
 
   val controller = new UpscanStatusController(
-    messagesApi,
     new FakeAuthAction(),
     new FakeEORIAction("GB987654321012"),
     fakeDataRetrievalAction(CacheMap("", Map.empty)),
@@ -56,7 +55,8 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
     cache,
     notificationRepository,
     auditConnector,
-    appConfig)
+    appConfig,
+    mcc)(executionContext)
 
   "Upscan Status error" should {
 
@@ -97,7 +97,6 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
 
   def controller(getData: DataRetrievalAction) =
     new UpscanStatusController(
-      messagesApi,
       new FakeAuthAction(),
       new FakeEORIAction("GB987654321012"),
       getData,
@@ -105,8 +104,9 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
       mockDataCacheConnector,
       mockNotificationRepository,
       mockAuditConnector,
-      appConfig.copy(notifications = Notifications(appConfig.notifications.authToken, maxRetries = 3, retryPauseMillis = 500, ttlSeconds = 60))
-    )
+      appConfig.copy(notifications = Notifications(appConfig.notifications.authToken, maxRetries = 3, retryPauseMillis = 500, ttlSeconds = 60)),
+      mcc
+    )(executionContext)
 
   ".onPageLoad" should {
 
@@ -198,8 +198,6 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
   "redirect to error page" when {
 
     "no responses are in the cache" in {
-
-      val filePart = FilePart[TemporaryFile](key = "file", "file.pdf", contentType = Some("application/pdf"), ref = TemporaryFile())
 
       val result = controller(new FakeDataRetrievalAction(None)).success("someRef")(fakeRequest)
 

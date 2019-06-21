@@ -31,7 +31,7 @@ object MRN {
 
   implicit val reads: Reads[MRN] =
     __.read[String].map(MRN(_))
-      .collect(ValidationError("MRN did not pass validation")) {
+      .collect(JsonValidationError("MRN did not pass validation")) {
         case Some(mrn) => mrn
       }
 

@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.data.validation.ValidationError
+//import play.api.libs.json.JsonValidationError
 import play.api.libs.json._
 
 sealed abstract case class FileUploadCount(value: Int)
@@ -31,7 +31,7 @@ object FileUploadCount {
 
   implicit val reads: Reads[FileUploadCount] =
     __.read[Int].map(FileUploadCount(_))
-      .collect(ValidationError("FileUploadCount did not pass validation")) {
+      .collect(JsonValidationError("FileUploadCount did not pass validation")) {
         case Some(count) => count
       }
 

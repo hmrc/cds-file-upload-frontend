@@ -82,17 +82,17 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
 
   private def controller(contactDetailsRequiredAction: ContactDetailsRequiredAction) =
     new HowManyFilesUploadController(
-      messagesApi,
       new FakeAuthAction(),
       new FakeEORIAction(),
       new FakeDataRetrievalAction(None),
-      new MrnRequiredAction,
+      new MrnRequiredAction(mcc),
       contactDetailsRequiredAction,
       new FileUploadCountProvider,
       mockDataCacheConnector,
       mockUpscanConnector,
       mockCustomsDeclarationsService,
-      appConfig)
+      appConfig,
+      mcc)(executionContext)
 
   "How Many Files Upload Page" must {
 

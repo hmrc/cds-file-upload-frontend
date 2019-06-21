@@ -34,7 +34,10 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase {
   implicit val ac = appConfig
   val mockNotificationRepository = mock[NotificationRepository]
   
-  def controller(getData: DataRetrievalAction) = new UploadYourFilesReceiptController(messagesApi, new FakeAuthAction(), new FakeEORIAction(), getData, new FileUploadResponseRequiredAction(), mockNotificationRepository)
+  def controller(getData: DataRetrievalAction) = new UploadYourFilesReceiptController(
+    new FakeAuthAction(), new FakeEORIAction(), getData, new FileUploadResponseRequiredAction(), mockNotificationRepository)(
+    appConfig,mcc,executionContext)
+
 
   def viewAsString(receipts: List[FileUpload]): String = views.html.upload_your_files_receipt(receipts)(fakeRequest, messages, appConfig).toString
 

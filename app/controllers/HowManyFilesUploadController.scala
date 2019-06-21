@@ -25,7 +25,7 @@ import models._
 import models.requests.MrnRequest
 import pages.HowManyFilesUploadPage
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.CustomsDeclarationsService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -34,8 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 @Singleton
-class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
-                                             authenticate: AuthAction,
+class HowManyFilesUploadController @Inject()(authenticate: AuthAction,
                                              requireEori: EORIRequiredAction,
                                              getData: DataRetrievalAction,
                                              requireMrn: MrnRequiredAction,
@@ -44,7 +43,8 @@ class HowManyFilesUploadController @Inject()(val messagesApi: MessagesApi,
                                              dataCacheConnector: Cache,
                                              uploadContactDetails: UpscanConnector,
                                              customsDeclarationsService: CustomsDeclarationsService,
-                                             implicit val appConfig: AppConfig)(implicit ec: ExecutionContext) extends FrontendController with I18nSupport {
+                                             implicit val appConfig: AppConfig,
+                                             mcc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
 
   val form = formProvider()
 

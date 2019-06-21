@@ -22,12 +22,13 @@ import controllers.routes
 import models.requests.{ContactDetailsRequest, OptionalDataRequest}
 import pages.ContactDetailsPage
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{ActionRefiner, Result}
+import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Result}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class ContactDetailsRequiredActionImpl @Inject()(val dataCacheConnector: Cache) extends ContactDetailsRequiredAction {
+class ContactDetailsRequiredActionImpl @Inject()(val dataCacheConnector: Cache,mcc: MessagesControllerComponents) extends ContactDetailsRequiredAction {
 
+  implicit val executionContext: ExecutionContext = mcc.executionContext
   private val onError = Redirect(routes.ErrorPageController.error())
 
   override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] = {

@@ -20,7 +20,7 @@ import com.google.inject.Inject
 import controllers.routes
 import models.requests.{AuthenticatedRequest, SignedInUser}
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{ActionBuilder, ActionRefiner, Request, Result}
+import play.api.mvc._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
@@ -31,8 +31,11 @@ import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuthActionImpl @Inject()(val authConnector: AuthConnector, val config: Configuration, val env: Environment)(implicit ec: ExecutionContext)
+class AuthActionImpl @Inject()(val authConnector: AuthConnector, val config: Configuration, val env: Environment, mcc: MessagesControllerComponents)
   extends AuthAction with AuthorisedFunctions with AuthRedirects {
+
+  implicit override val executionContext: ExecutionContext = mcc.executionContext
+  override val parser: BodyParser[AnyContent] = mcc.parsers.defaultBodyParser
 
   override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
@@ -62,4 +65,4 @@ class AuthActionImpl @Inject()(val authConnector: AuthConnector, val config: Con
   }
 }
 
-trait AuthAction extends ActionBuilder[AuthenticatedRequest] with ActionRefiner[Request, AuthenticatedRequest]
+trait AuthAction extends ActionBuilder[AuthenticatedRequest, AnyContent] with ActionRefiner[Request, AuthenticatedRequest]

@@ -40,13 +40,13 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
 
   def controller(signedInUser: SignedInUser, eori: String, dataRetrieval: DataRetrievalAction = new FakeDataRetrievalAction(None)) =
     new ContactDetailsController(
-      messagesApi,
       new FakeAuthAction(signedInUser),
       new FakeEORIAction(eori),
       dataRetrieval,
       mockDataCacheConnector,
-      appConfig
-    )
+      appConfig,
+      mcc
+    )(mcc.executionContext)
 
   "Contact details page" should {
 

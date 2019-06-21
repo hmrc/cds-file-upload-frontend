@@ -47,14 +47,14 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
                  eori: String,
                  requireContactDetails: ContactDetailsRequiredAction) =
     new MrnEntryController(
-      messagesApi,
       new FakeAuthAction(signedInUser),
       new FakeEORIAction(eori),
       requireContactDetails,
       new FakeDataRetrievalAction(None),
       new MRNFormProvider,
       mockDataCacheConnector,
-      appConfig)
+      appConfig,
+      mcc)(executionContext)
 
   def viewAsString(form: Form[MRN] = form) = views.html.mrn_entry(form)(fakeRequest, messages, appConfig).toString
 

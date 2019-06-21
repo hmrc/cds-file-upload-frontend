@@ -20,30 +20,39 @@ import generators.Generators
 import models.requests._
 import models.{ContactDetails, UserAnswers}
 import org.scalacheck.Arbitrary._
-import play.api.mvc.{Request, Result}
+import play.api.mvc.{AnyContent, BodyParsers, Request, Result}
 import uk.gov.hmrc.http.cache.client.CacheMap
 
-import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.global
+import scala.concurrent.{ExecutionContext, Future}
 
 trait FakeActions extends Generators {
 
   class FakeAuthAction(user: SignedInUser = arbitrary[SignedInUser].sample.get) extends AuthAction {
+    protected def executionContext = ExecutionContext.global
+    def parser = BodyParsers.parse.anyContent
     override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
       Future.successful(Right(AuthenticatedRequest(request, user)))
     }
   }
 
   class FakeEORIAction(eori: String = arbitrary[String].sample.get) extends EORIRequiredAction {
+    protected def executionContext = ExecutionContext.global
+    def parser = BodyParsers.parse.anyContent
     override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, EORIRequest[A]]] =
       Future.successful(Right(EORIRequest[A](request, eori)))
   }
 
   class FakeDataRetrievalAction(cacheMap: Option[CacheMap]) extends DataRetrievalAction {
+    protected def executionContext = ExecutionContext.global
+    def parser = BodyParsers.parse.anyContent
     override protected def transform[A](request: EORIRequest[A]): Future[OptionalDataRequest[A]] =
       Future.successful(OptionalDataRequest(request, cacheMap.map(UserAnswers(_))))
   }
 
   class FakeContactDetailsRequiredAction(val cacheMap: CacheMap = arbitraryCacheMap.arbitrary.sample.get, val contactDetails: ContactDetails = arbitraryContactDetails.arbitrary.sample.get) extends ContactDetailsRequiredAction {
+    protected def executionContext = ExecutionContext.global
+    def parser = BodyParsers.parse.anyContent
     override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] =
       Future.successful(Right(ContactDetailsRequest(request.request, UserAnswers(cacheMap), contactDetails)))
   }

@@ -16,7 +16,7 @@
 
 package base
 
-import config.AppConfig
+import config.{AppConfig, Assets, ContactFrontend}
 import generators.Generators
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
@@ -24,21 +24,51 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.PropertyChecks
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice._
-import play.api.i18n.{Messages, MessagesApi}
-import play.api.test.FakeRequest
+import play.api.{Configuration, Environment}
+import play.api.http.{DefaultFileMimeTypes, FileMimeTypesConfiguration}
+import play.api.i18n.{DefaultLangs, DefaultMessagesApi, Messages, MessagesApi}
+import play.api.mvc.{DefaultActionBuilder, DefaultMessagesActionBuilderImpl, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.test.{FakeRequest, NoMaterializer}
+import play.api.test.Helpers.{stubBodyParser, stubLangs, stubPlayBodyParsers}
 import uk.gov.hmrc.http.HeaderCarrier
 
-trait SpecBase extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar with BeforeAndAfterEach with PropertyChecks with Generators with ScalaFutures {
+import scala.concurrent.ExecutionContext
+
+trait SpecBase extends PlaySpec with MockitoSugar with BeforeAndAfterEach with PropertyChecks with Generators with ScalaFutures with GuiceOneServerPerSuite {
 
   implicit lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
+  implicit lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
+  implicit val mcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
 
-  lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
+
+    //TODO remove GuiceOneServerPerSuite to speed up the tests
+  //Gabor
+//  val env = Environment.simple()
+//  val configuration = Configuration.load(env)
+//  //implicit val messagesApi = new DefaultMessagesApi(env, configuration, new DefaultLangs(configuration))
+//  implicit val messagesApi = new DefaultMessagesApi(Map("en" ->
+//    Map("error.min" -> "minimum!")
+//  ))
+//  implicit val appConfig = pureconfig.loadConfigOrThrow[AppConfig]
 
   lazy val fakeRequest = FakeRequest("", "")
 
   implicit lazy val messages: Messages = messagesApi.preferred(fakeRequest)
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
+
+  implicit val executionContext = ExecutionContext.global
+//Gabor
+  //  implicit val mcc: MessagesControllerComponents =  DefaultMessagesControllerComponents(
+//    messagesActionBuilder = new DefaultMessagesActionBuilderImpl(stubBodyParser(),  messagesApi)(executionContext),
+//    actionBuilder = DefaultActionBuilder(stubBodyParser())(ExecutionContext.global),
+//    parsers = stubPlayBodyParsers(NoMaterializer),
+//    messagesApi = messagesApi,
+//    langs = stubLangs(),
+//    fileMimeTypes = new DefaultFileMimeTypes(FileMimeTypesConfiguration(Map.empty)),
+//    executionContext = executionContext
+//  )
+
 
   // toJson strips out Some and None and replaces them with string values
   def asFormParams(cc: Product): List[(String, String)] =

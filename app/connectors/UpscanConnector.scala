@@ -26,12 +26,13 @@ import play.api.libs.ws.{DefaultWSProxyServer, WSClient, WSResponse}
 import play.api.mvc.MultipartFormData.{DataPart, FilePart}
 
 import scala.concurrent.Future
+import scala.util.{Success, Try}
 
 @Singleton
 class UpscanConnector @Inject()(conf:AppConfig, wsClient: WSClient) {
 
-  def upload(upload: UploadRequest, contactDetails: ContactDetails): Future[WSResponse] = {
-    val settings = conf.prodProxy.proxy
+  def upload(upload: UploadRequest, contactDetails: ContactDetails): Try[Int] = {
+    val settings = conf.proxy
     val proxy = DefaultWSProxyServer(settings.host, settings.port, Some(settings.protocol), Some(settings.username), Some(settings.password))
 
     val preparedRequest = wsClient.url(upload.href).withFollowRedirects(false)
@@ -42,10 +43,10 @@ class UpscanConnector @Inject()(conf:AppConfig, wsClient: WSClient) {
       case (name, value) => DataPart(name, value)
     }
     val filePart = FilePart("file", fileName, Some("text/plain") , contactDetails.toString.getBytes("UTF-8"))
-    import play.api.libs.ws.DefaultBodyReadables._
-    import play.api.libs.ws.DefaultBodyWritables._
-    req.post(Source(filePart :: dataparts :: Nil))
-
+//    import play.api.libs.ws.DefaultBodyReadables._
+//    import play.api.libs.ws.DefaultBodyWritables._
+//    req.post(Source(filePart :: dataparts :: Nil))
+    Success(1)
   }
 
   private def fileName = s"contact_details_${UUID.randomUUID().toString}.txt"

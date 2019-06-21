@@ -20,16 +20,16 @@ import models.EORI
 import pureconfig.{CamelCase, ConfigFieldMapping, KebabCase, ProductHint}
 
 case class AppConfig(
-  appName: String,
-  developerHubClientId: String,
-  contactFrontend: ContactFrontend,
-  assets: Assets,
-  googleAnalytics: GoogleAnalytics,
-  microservice: Microservice,
-  fileFormats: FileFormats,
-  notifications: Notifications,
-  feedback: Feedback,
-  prodProxy: Prod)
+                      appName: String,
+                      developerHubClientId: String,
+                      contactFrontend: ContactFrontend,
+                      assets: Assets,
+                      googleAnalytics: GoogleAnalytics,
+                      microservice: Microservice,
+                      fileFormats: FileFormats,
+                      notifications: Notifications,
+                      feedback: Feedback,
+                      proxy: Proxy)
 
 object AppConfig {
   implicit val appNameHint: ProductHint[AppConfig] = ProductHint(new ConfigFieldMapping {
@@ -75,4 +75,4 @@ case class Notifications(authToken: String, maxRetries: Int, retryPauseMillis: I
 case class Feedback(url: String)
 
 case class Proxy(protocol:String, host:String, port:Int,username:String,password:String,proxyRequiredForThisEnvironment:Boolean)
-case class Prod(proxy:Proxy)
+//case class Prod(proxy:Proxy)
