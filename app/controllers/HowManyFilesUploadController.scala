@@ -88,18 +88,20 @@ class HowManyFilesUploadController @Inject()(authenticate: AuthAction,
       firstUploadFile(fileUploadResponse) match {
         case Right((_, uploadRequest)) =>
           uploadContactDetails.upload(uploadRequest, req.request.contactDetails).flatMap { res =>
-            Logger.warn(s"Upload contact details successful: ${res.status}")
-            Logger.warn(s"Upload contact details successful: ${res.cookies}")
+            Logger.warn(s"Upload contact details cookies: ${res.cookies}")
             Logger.warn(s"Upload contact details successful: ${res}")
+            Logger.warn(s"Upload contact details headers: ${res.header("Location")}")
             val isSuccessRedirect = res.header("Location").exists(_.contains("upscan-success"))
             if (res.status == SEE_OTHER  && isSuccessRedirect) {
               saveRemainingFileUploadsToCache(fileUploadResponse).map(uploads => Right(uploads))
             }
             else {
-              Future.successful(Left(new IllegalStateException("Unable to initiate upload")))
+              Logger.warn(s"Left: error: illegal state")
+              Future.successful(Left(new IllegalStateException("Contact details was not uploaded successfully")))
             }
           }
         case Left(error) =>
+          Logger.warn(s"Left: error: $error")
           Future.successful(Left(error))
       }
     }
