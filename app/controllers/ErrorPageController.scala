@@ -19,11 +19,11 @@ package controllers
 import config.AppConfig
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html._
 
-class ErrorPageController @Inject()(val messagesApi: MessagesApi, implicit val appConfig: AppConfig) extends FrontendController with I18nSupport {
+class ErrorPageController @Inject()(implicit val appConfig: AppConfig, mcc: MessagesControllerComponents) extends FrontendController(mcc) with I18nSupport {
 
   def uploadError: Action[AnyContent]= Action { implicit request =>
     Ok(upload_error())

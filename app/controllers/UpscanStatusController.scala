@@ -26,7 +26,7 @@ import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.JsString
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.NotificationRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
@@ -37,15 +37,15 @@ import views.html.upload_error
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class UpscanStatusController @Inject()(val messagesApi: MessagesApi,
-                                       authenticate: AuthAction,
+class UpscanStatusController @Inject()(authenticate: AuthAction,
                                        requireEori: EORIRequiredAction,
                                        getData: DataRetrievalAction,
                                        requireResponse: FileUploadResponseRequiredAction,
                                        cache: Cache,
                                        notificationRepository: NotificationRepository,
                                        auditConnector: AuditConnector,
-                                       implicit val appConfig: AppConfig)(implicit ec: ExecutionContext) extends FrontendController with I18nSupport {
+                                       implicit val appConfig: AppConfig,
+                                       mcc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
 
   private val AuditSource = appConfig.appName
   private val audit = Audit(AuditSource, auditConnector)

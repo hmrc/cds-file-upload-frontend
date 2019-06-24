@@ -43,12 +43,13 @@ trait JsonGenerators {
 
   implicit val arbitraryJsonArray: Arbitrary[JsArray] =
     Arbitrary {
-      val valuesGen: Gen[JsValue] =
-        Gen.oneOf(
+      val valuesGen: Gen[JsValue] = Gen.oneOf(
           arbitraryJsonString.arbitrary,
           arbitraryJsonNumber.arbitrary,
-          arbitraryJsonBoolean.arbitrary)
+          arbitraryJsonBoolean.arbitrary
+      )
 
-      Gen.listOf(valuesGen).map(JsArray)
+      val f :List[JsValue] => JsArray = in => JsArray(in)
+      Gen.listOf(valuesGen).map(f)
     }
 }

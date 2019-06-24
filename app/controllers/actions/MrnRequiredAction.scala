@@ -17,15 +17,18 @@
 package controllers.actions
 
 import controllers.routes
+import javax.inject.{Inject, Singleton}
 import models.requests.{ContactDetailsRequest, MrnRequest}
 import pages.MrnEntryPage
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{ActionRefiner, Result}
+import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Result}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class MrnRequiredAction extends ActionRefiner[ContactDetailsRequest, MrnRequest] {
+@Singleton
+class MrnRequiredAction @Inject()(mcc: MessagesControllerComponents) extends ActionRefiner[ContactDetailsRequest, MrnRequest] {
 
+  implicit val executionContext: ExecutionContext = mcc.executionContext
   private val onError = Redirect(routes.ErrorPageController.error())
 
   override protected def refine[A](request: ContactDetailsRequest[A]): Future[Either[Result, MrnRequest[A]]] = {

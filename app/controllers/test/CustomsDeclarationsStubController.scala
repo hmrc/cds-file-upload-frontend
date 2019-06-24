@@ -24,7 +24,7 @@ import play.api.data.Forms._
 import play.api.data.validation._
 import play.api.http.ContentTypes
 import play.api.libs.Files
-import play.api.mvc.{Action, AnyContent, MultipartFormData}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, MultipartFormData}
 import services.NotificationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -33,7 +33,7 @@ import scala.concurrent.ExecutionContext
 import scala.xml._
 
 @Singleton
-class CustomsDeclarationsStubController @Inject()(notificationService: NotificationService)(implicit ec: ExecutionContext) extends FrontendController {
+class CustomsDeclarationsStubController @Inject()(notificationService: NotificationService,mcc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends FrontendController(mcc) {
 
   case class UploadStuff(successActionRedirect: String)
 

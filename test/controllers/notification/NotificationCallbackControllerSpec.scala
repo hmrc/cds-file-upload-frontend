@@ -19,6 +19,7 @@ package controllers.notification
 import java.io.IOException
 
 import config.{AppConfig, Notifications}
+import controllers.ControllerSpecBase
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
@@ -34,11 +35,11 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.NodeSeq
 
 
-class NotificationCallbackControllerSpec extends PlaySpec with MockitoSugar with ScalaFutures with BeforeAndAfterEach {
+class NotificationCallbackControllerSpec extends ControllerSpecBase with MockitoSugar with ScalaFutures with BeforeAndAfterEach {
 
   val mockNotificationService = mock[NotificationService]
   val mockAppConfig = mock[AppConfig]
-  val controller = new NotificationCallbackController(mockNotificationService, mockAppConfig)
+  val controller = new NotificationCallbackController(mockNotificationService, mockAppConfig,mcc)(executionContext)
   val expectedAuthToken = "authToken"
 
   override def beforeEach = {

@@ -17,14 +17,17 @@
 package controllers.actions
 
 import controllers.routes
+import javax.inject.{Inject, Singleton}
 import models.requests.{AuthenticatedRequest, EORIRequest, SignedInUser}
 import play.api.mvc.Results.Redirect
 import play.api.mvc._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class EORIRequiredActionImpl extends EORIRequiredAction {
+@Singleton
+class EORIRequiredActionImpl @Inject()(mcc: MessagesControllerComponents) extends EORIRequiredAction {
 
+  implicit val executionContext: ExecutionContext = mcc.executionContext
   private val onError = Redirect(routes.UnauthorisedController.onPageLoad())
 
   override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, EORIRequest[A]]] = {

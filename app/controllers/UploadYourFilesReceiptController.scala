@@ -23,7 +23,7 @@ import javax.inject.Inject
 import models.FileUpload
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.JsString
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.NotificationRepository
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.upload_your_files_receipt
@@ -31,13 +31,12 @@ import views.html.upload_your_files_receipt
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class UploadYourFilesReceiptController @Inject()(val messagesApi: MessagesApi,
-                                                 authenticate: AuthAction,
+class UploadYourFilesReceiptController @Inject()(authenticate: AuthAction,
                                                  requireEori: EORIRequiredAction,
                                                  getData: DataRetrievalAction,
                                                  requireResponse: FileUploadResponseRequiredAction,
                                                  notificationRepository: NotificationRepository)
-                                                (implicit val appConfig: AppConfig, ec: ExecutionContext) extends FrontendController with I18nSupport {
+                                                (implicit val appConfig: AppConfig,mcc: MessagesControllerComponents, ec: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
     addFilenames(req.fileUploadResponse.uploads).map { uploads =>

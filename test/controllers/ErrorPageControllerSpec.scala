@@ -24,13 +24,13 @@ class ErrorPageControllerSpec extends ControllerSpecBase {
   "Error Controller" must {
 
     "return the correct view for upload error" in {
-      val result = new ErrorPageController(messagesApi, appConfig).uploadError()(fakeRequest)
+      val result = new ErrorPageController().uploadError()(fakeRequest)
       status(result) mustBe OK
       contentAsString(result) mustBe upload_error()(fakeRequest, messages, appConfig).toString
     }
 
     "return the correct view for generic error" in {
-      val result = new ErrorPageController(messagesApi, appConfig).error()(fakeRequest)
+      val result = new ErrorPageController().error()(fakeRequest)
       status(result) mustBe OK
       contentAsString(result) mustBe generic_error()(fakeRequest, messages, appConfig).toString
     }

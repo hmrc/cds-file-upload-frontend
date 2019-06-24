@@ -24,21 +24,21 @@ import forms.MRNFormProvider
 import javax.inject.Inject
 import pages.MrnEntryPage
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
 
 @Singleton
-class MrnEntryController @Inject()(val messagesApi: MessagesApi,
-                                   authenticate: AuthAction,
+class MrnEntryController @Inject()(authenticate: AuthAction,
                                    requireEori: EORIRequiredAction,
                                    requireContactDetails: ContactDetailsRequiredAction,
                                    getData: DataRetrievalAction,
                                    formProvider: MRNFormProvider,
                                    dataCacheConnector: Cache,
-                                   implicit val appConfig: AppConfig)(implicit ec: ExecutionContext) extends FrontendController with I18nSupport {
+                                   implicit val appConfig: AppConfig,
+                                   mcc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
 
   val form = formProvider()
 

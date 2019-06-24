@@ -16,11 +16,12 @@
 
 package config
 
-import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
+import org.scalatestplus.play.{PlaySpec}
 
-class AppConfigSpec extends PlaySpec with OneAppPerSuite {
+class AppConfigSpec extends PlaySpec {
 
-  val cfg = app.injector.instanceOf[AppConfig]
+  //val cfg = app.injector.instanceOf[AppConfig]
+  val cfg = pureconfig.loadConfigOrThrow[AppConfig]
 
   "app config" should {
 

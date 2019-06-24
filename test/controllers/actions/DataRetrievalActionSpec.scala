@@ -18,6 +18,7 @@ package controllers.actions
 
 import base.SpecBase
 import connectors.Cache
+import controllers.ControllerSpecBase
 import generators.SignedInUserGen
 import models.requests.{AuthenticatedRequest, EORIRequest, OptionalDataRequest, SignedInUser}
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}
@@ -30,9 +31,9 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
 
-class DataRetrievalActionSpec extends SpecBase with SignedInUserGen {
+class DataRetrievalActionSpec extends ControllerSpecBase with SignedInUserGen {
 
-  class Harness(dataCacheConnector: Cache) extends DataRetrievalActionImpl(dataCacheConnector) {
+  class Harness(dataCacheConnector: Cache) extends DataRetrievalActionImpl(dataCacheConnector,mcc) {
     def callTransform[A](request: EORIRequest[A]): Future[OptionalDataRequest[A]] = transform(request)
   }
 

@@ -39,7 +39,7 @@ object FileUpload {
   implicit val format = Json.format[FileUpload]
 }
 
-sealed abstract case class FileUploadResponse(uploads: List[FileUpload])
+abstract case class FileUploadResponse(uploads: List[FileUpload])
 
 object FileUploadResponse {
   implicit val format = Json.format[FileUploadResponse]

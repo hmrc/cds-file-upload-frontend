@@ -22,7 +22,7 @@ import views.html.unauthorised
 class UnauthorisedControllerSpec extends ControllerSpecBase {
 
   lazy val view = unauthorised()(fakeRequest, messages, appConfig)
-  def controller = new UnauthorisedController(messagesApi, appConfig)
+  def controller = new UnauthorisedController()
 
   "controller.onPageLoad" should {
 

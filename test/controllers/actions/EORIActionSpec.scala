@@ -24,7 +24,7 @@ import play.api.test.Helpers._
 import play.api.test._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.play.bootstrap.controller.BaseController
+import uk.gov.hmrc.play.bootstrap.controller.{BackendController, BaseController}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -34,8 +34,8 @@ class EORIActionSpec extends ControllerSpecBase with SignedInUserGen {
   lazy val conf = app.injector.instanceOf[Configuration]
   lazy val env  = app.injector.instanceOf[Environment]
 
-  def authAction = new AuthActionImpl(mockAuthConnector, conf, env)
-  def eoriAction = new EORIRequiredActionImpl()
+  def authAction = new AuthActionImpl(mockAuthConnector, conf, env,mcc)
+  def eoriAction = new EORIRequiredActionImpl(mcc)
 
   def eoriController = new TestController(authAction, eoriAction)
 
@@ -78,7 +78,7 @@ class EORIActionSpec extends ControllerSpecBase with SignedInUserGen {
     }
   }
 
-  class TestController(auth: AuthAction, eori: EORIRequiredAction) extends BaseController {
+  class TestController(auth: AuthAction, eori: EORIRequiredAction) extends BackendController(mcc) {
 
     def action: Action[AnyContent] = (auth andThen eori).async { request =>
       Future.successful(Ok(request.eori))

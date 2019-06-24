@@ -21,13 +21,14 @@ import controllers.routes
 import models.requests.{FileUploadResponseRequest, OptionalDataRequest}
 import pages.HowManyFilesUploadPage
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{ActionRefiner, Result}
+import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Result}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 
-class FileUploadResponseRequiredAction @Inject() extends ActionRefiner[OptionalDataRequest, FileUploadResponseRequest] {
+class FileUploadResponseRequiredAction @Inject()(implicit mcc: MessagesControllerComponents) extends ActionRefiner[OptionalDataRequest, FileUploadResponseRequest] {
 
+  implicit override val executionContext: ExecutionContext = mcc.executionContext
   private val onError = Redirect(routes.ErrorPageController.error())
 
   override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, FileUploadResponseRequest[A]]] = {

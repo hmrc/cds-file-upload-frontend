@@ -16,6 +16,8 @@
 
 package views.behaviours
 
+import play.api.test.Helpers.stubLangs
+import play.i18n.Lang
 import play.twirl.api.HtmlFormat
 import views.DomAssertions
 
@@ -54,7 +56,7 @@ trait ViewBehaviours extends DomAssertions {
           val doc = asDocument(view())
           val nav = doc.getElementById("proposition-menu")
           val span = nav.children.first
-          span.text mustBe messagesApi("common.service.name")
+          span.text mustBe messagesApi("common.service.name")(Lang.forCode("en-uk"))
         }
 
         "display the correct guidance" in {

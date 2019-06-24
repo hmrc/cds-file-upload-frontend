@@ -16,9 +16,11 @@
 
 package pages
 
-import models.UserAnswers
+import models.{FileUploadCount, UserAnswers}
+import play.api.libs.json.Json
 
 trait QuestionPage[A] extends Page {
 
   def cleanup(value: Option[A], userAnswers: UserAnswers): UserAnswers = userAnswers
 }
+

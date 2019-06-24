@@ -16,55 +16,54 @@
 
 package connectors
 
+import java.io.{File, PrintWriter}
 import java.util.UUID
 
-import javax.inject.Singleton
+import akka.stream.scaladsl.{FileIO, Source}
+import config.AppConfig
+import javax.inject.{Inject, Singleton}
 import models.{ContactDetails, UploadRequest}
-import org.apache.http.client.methods.HttpPost
-import org.apache.http.entity.ContentType
-import org.apache.http.entity.mime.MultipartEntityBuilder
-import org.apache.http.entity.mime.content.StringBody
-import org.apache.http.impl.client.HttpClientBuilder
-import play.api.Logger
+import play.api.libs.ws.{DefaultWSProxyServer, WSClient}
+import play.api.mvc.MultipartFormData.{DataPart, FilePart}
+import play.api.libs.ws.JsonBodyReadables._
+import play.api.libs.ws.JsonBodyWritables._
 
-import scala.util.{Failure, Success, Try}
+import scala.concurrent.ExecutionContext
 
 @Singleton
-class UpscanConnector() {
+class UpscanConnector @Inject()(conf:AppConfig, wsClient: WSClient)(implicit ec: ExecutionContext) {
 
-  def upload(upload: UploadRequest, contactDetails: ContactDetails): Try[Int] = {
-    val builder = MultipartEntityBuilder.create
+  def upload(upload: UploadRequest, contactDetails: ContactDetails)= {
+    val settings = conf.proxy
+    val proxy = DefaultWSProxyServer(settings.host, settings.port, Some(settings.protocol), Some(settings.username), Some(settings.password))
 
-    upload.fields.foreach {
-      case (name, value) => builder.addPart(name, new StringBody(value, ContentType.TEXT_PLAIN))
+    val preparedRequest = wsClient.url(upload.href).withFollowRedirects(false)
+
+    val req = if (settings.proxyRequiredForThisEnvironment) preparedRequest.withProxyServer(proxy) else preparedRequest
+
+    val dataparts = upload.fields.map {
+      case (name, value) => DataPart(name, value)
     }
 
-    builder.addBinaryBody("file", contactDetails.toString.getBytes("UTF-8") , ContentType.DEFAULT_BINARY, fileName)
+    val filePart = FilePart("file", fileName, Some("text/plain"), FileIO.fromPath(toFile(contactDetails).toPath))
 
-    val request = new HttpPost(upload.href)
-    request.setEntity(builder.build())
+    req.post(Source(dataparts ++ List(filePart)))
 
-    val client = HttpClientBuilder.create.disableRedirectHandling().build
-
-    val attempt = Try(client.execute(request)) match {
-      case Success(response) =>
-        val code = response.getStatusLine.getStatusCode
-        val isSuccessRedirect = response.getHeaders("Location").headOption.exists(_.getValue.contains("upscan-success"))
-        Logger.info(s"Upscan upload contact details responded with: ${code}")
-        if (isSuccessRedirect)
-          Success(code)
-        else
-          Failure(new Exception(s"Uploading contact details to s3 failed"))
-      case Failure(ex) =>
-        Logger.error(ex.getMessage, ex)
-        Failure(ex)
-    }
-
-    client.close()
-
-    attempt
   }
 
   private def fileName = s"contact_details_${UUID.randomUUID().toString}.txt"
 
+  def toFile(contactDetails: ContactDetails) = {
+    val uploadFile = File.createTempFile("cds-file-upload-ui", "")
+
+    new PrintWriter(uploadFile) {
+      try {
+        write(contactDetails.toString())
+      } finally {
+        close()
+      }
+    }
+
+    uploadFile
+  }
 }
