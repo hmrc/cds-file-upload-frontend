@@ -69,8 +69,10 @@ class HowManyFilesUploadController @Inject()(authenticate: AuthAction,
         fileUploadCount => {
           uploadContactDetails(req, fileUploadCount) map {
             case Right(firstUpload :: _) =>
+              Logger.warn("uploadContactDetails success: " + firstUpload)
               Redirect(routes.UpscanStatusController.onPageLoad(firstUpload.reference))
-            case _ =>
+            case err =>
+              Logger.warn("uploadContactDetails error: " + err)
               Redirect(routes.ErrorPageController.error())
           }
         }
@@ -79,6 +81,7 @@ class HowManyFilesUploadController @Inject()(authenticate: AuthAction,
 
   private def uploadContactDetails(req: MrnRequest[AnyContent], fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier): Future[Either[Throwable, List[FileUpload]]] = {
     def saveRemainingFileUploadsToCache(fileUploadResponse: FileUploadResponse): Future[List[FileUpload]] = {
+
       val remainingFileUploads = fileUploadResponse.uploads.tail
       val answers = updateUserAnswers(req.userAnswers, fileUploadCount, FileUploadResponse(remainingFileUploads))
       dataCacheConnector.save(answers.cacheMap).map { _ => remainingFileUploads }
