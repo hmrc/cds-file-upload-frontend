@@ -52,12 +52,14 @@ class UpscanConnector @Inject()(conf:AppConfig, wsClient: WSClient)(implicit ec:
     val filePart = FilePart("file", fileName, Some("text/plain"), FileIO.fromPath(toFile(contactDetails).toPath))
 
     Logger.warn(s"Upload url: ${req.url}")
-    Logger.warn(s"Upload URI: ${req.uri}")
-    Logger.warn(s"Upload Headers: ${req.headers}")
-    Logger.warn(s"Upload Body: ${req.body}")
     val body = Source(dataparts ++ List(filePart))
 
-    req.withHttpHeaders("Content-Length" -> "2000").post(body)
+    val res = req.withHttpHeaders("Content-Length" -> "2000").post(body)
+    res.map{a =>
+      Logger.warn("Upload Headers" + a.headers)
+      Logger.warn("Upload Body: " + a.body)
+      a
+    }
   }
 
   private def fileName = s"contact_details_${UUID.randomUUID().toString}.txt"
