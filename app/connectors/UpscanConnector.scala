@@ -23,7 +23,7 @@ import akka.stream.scaladsl.{FileIO, Source}
 import config.AppConfig
 import javax.inject.{Inject, Singleton}
 import models.{ContactDetails, UploadRequest}
-import play.api.libs.ws.{DefaultBodyWritables, DefaultWSProxyServer, WSClient}
+import play.api.libs.ws.{DefaultWSProxyServer, WSClient}
 import play.api.mvc.MultipartFormData.{DataPart, FilePart}
 import play.api.libs.ws.JsonBodyReadables._
 import play.api.libs.ws.JsonBodyWritables._
@@ -31,7 +31,7 @@ import play.api.libs.ws.JsonBodyWritables._
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class UpscanConnector @Inject()(conf:AppConfig, wsClient: WSClient)(implicit ec: ExecutionContext) extends DefaultBodyWritables {
+class UpscanConnector @Inject()(conf:AppConfig, wsClient: WSClient)(implicit ec: ExecutionContext) {
 
   def upload(upload: UploadRequest, contactDetails: ContactDetails)= {
     val settings = conf.proxy
