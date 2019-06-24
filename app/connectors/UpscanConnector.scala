@@ -23,6 +23,7 @@ import akka.stream.scaladsl.{FileIO, Source}
 import config.AppConfig
 import javax.inject.{Inject, Singleton}
 import models.{ContactDetails, UploadRequest}
+import play.api.Logger
 import play.api.libs.ws.{DefaultWSProxyServer, WSClient}
 import play.api.mvc.MultipartFormData.{DataPart, FilePart}
 import play.api.libs.ws.JsonBodyReadables._
@@ -35,6 +36,9 @@ class UpscanConnector @Inject()(conf:AppConfig, wsClient: WSClient)(implicit ec:
 
   def upload(upload: UploadRequest, contactDetails: ContactDetails)= {
     val settings = conf.proxy
+
+    Logger.warn(s"Connecting to proxy = ${settings.proxyRequiredForThisEnvironment}")
+    Logger.warn(s" Proxy settings: ${settings.host} ${settings.port} ${settings.protocol} ${settings.username} ${settings.password.take(5)}")
     val proxy = DefaultWSProxyServer(settings.host, settings.port, Some(settings.protocol), Some(settings.username), Some(settings.password))
 
     val preparedRequest = wsClient.url(upload.href).withFollowRedirects(false)
