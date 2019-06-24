@@ -89,6 +89,8 @@ class HowManyFilesUploadController @Inject()(authenticate: AuthAction,
         case Right((_, uploadRequest)) =>
           uploadContactDetails.upload(uploadRequest, req.request.contactDetails).flatMap { res =>
             Logger.warn(s"Upload contact details successful: ${res.status}")
+            Logger.warn(s"Upload contact details successful: ${res.cookies}")
+            Logger.warn(s"Upload contact details successful: ${res}")
             val isSuccessRedirect = res.header("Location").exists(_.contains("upscan-success"))
             if (res.status == SEE_OTHER  && isSuccessRedirect) {
               saveRemainingFileUploadsToCache(fileUploadResponse).map(uploads => Right(uploads))
