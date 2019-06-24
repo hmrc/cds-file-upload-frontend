@@ -19,7 +19,7 @@ package connectors
 import java.io.{File, PrintWriter}
 import java.util.UUID
 
-import akka.stream.scaladsl.{FileIO, Source}
+import akka.stream.scaladsl.{FileIO, Sink, Source}
 import config.AppConfig
 import javax.inject.{Inject, Singleton}
 import models.{ContactDetails, UploadRequest}
@@ -55,8 +55,9 @@ class UpscanConnector @Inject()(conf:AppConfig, wsClient: WSClient)(implicit ec:
     Logger.warn(s"Upload URI: ${req.uri}")
     Logger.warn(s"Upload Headers: ${req.headers}")
     Logger.warn(s"Upload Body: ${req.body}")
+    val body = Source(dataparts ++ List(filePart))
 
-    req.post(Source(dataparts ++ List(filePart)))
+    req.withHttpHeaders("Content-Length" -> "2000").post(body)
   }
 
   private def fileName = s"contact_details_${UUID.randomUUID().toString}.txt"
