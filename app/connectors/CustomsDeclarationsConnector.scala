@@ -37,6 +37,7 @@ class CustomsDeclarationsConnector @Inject()(config: AppConfig, httpClient: Http
 
   def requestFileUpload(eori: String, request: FileUploadRequest)(implicit hc: HeaderCarrier): Future[FileUploadResponse] = {
     Logger.info(s"Request to initiate ${request.toXml}")
+    Logger.info(s"fileUploadUrl: $fileUploadUrl")
     httpClient.POSTString[HttpResponse](fileUploadUrl, request.toXml.mkString, headers(eori)).map(r =>
       Try(XML.loadString(r.body)) match {
         case Success(value) =>
