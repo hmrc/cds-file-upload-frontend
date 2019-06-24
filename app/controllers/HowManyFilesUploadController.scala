@@ -24,12 +24,12 @@ import javax.inject.{Inject, Singleton}
 import models._
 import models.requests.MrnRequest
 import pages.HowManyFilesUploadPage
+import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.CustomsDeclarationsService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -88,6 +88,7 @@ class HowManyFilesUploadController @Inject()(authenticate: AuthAction,
       firstUploadFile(fileUploadResponse) match {
         case Right((_, uploadRequest)) =>
           uploadContactDetails.upload(uploadRequest, req.request.contactDetails).flatMap { res =>
+            Logger.warn(s"Upload contact details successful: ${res.status}")
             val isSuccessRedirect = res.header("Location").exists(_.contains("upscan-success"))
             if (res.status == SEE_OTHER  && isSuccessRedirect) {
               saveRemainingFileUploadsToCache(fileUploadResponse).map(uploads => Right(uploads))
