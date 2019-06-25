@@ -57,8 +57,10 @@ object FileUploadResponse {
         val fields: Map[String, String] =
           (file \ "UploadRequest" \ "Fields" \ "_")
             .theSeq
-            .collect{
-              case field if field.label != "success-action-redirect" && field.label != "error-action-redirect" => field.label -> field.text.trim
+            .collect {
+              case field if field.label == "success-action-redirect" => "success_action_redirect" -> field.text.trim
+              case field if field.label == "error-action-redirect" => "error_action_redirect" -> field.text.trim
+              case field => field.label -> field.text.trim
             }
             .toMap
 

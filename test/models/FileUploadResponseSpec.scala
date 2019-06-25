@@ -77,7 +77,9 @@ class FileUploadResponseSpec extends SpecBase with XmlBehaviours {
             Map(
               "Content-Type" -> "application/xml",
               "x-amz-meta-callback-url" -> "https://some-callback-url2",
-              "x-amz-date" -> "2019-03-05T11:57:11Z"
+              "x-amz-date" -> "2019-03-05T11:57:11Z",
+              "success_action_redirect" -> "2https://success-redirect2/fyr-993",
+              "error_action_redirect" -> "https://error-redirect2/fyr-993"
             )
           )),
           successUrl = RedirectUrl("https://success-redirect2/fyr-993"),
