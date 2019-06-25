@@ -34,8 +34,8 @@ class FileUploadResponseSpec extends SpecBase with XmlBehaviours {
                 <Content-Type>application/xml</Content-Type>
                 <x-amz-meta-callback-url>https://some-callback-url</x-amz-meta-callback-url>
                 <x-amz-date>2019-03-05T11:56:34Z</x-amz-date>
-                <success-action-redirect>https://success-redirect/abc-211</success-action-redirect>
-                <error-action-redirect>https://error-redirect/abc-211</error-action-redirect>
+                <success_action_redirect>https://success-redirect/abc-211</success_action_redirect>
+                <error_action_redirect>https://error-redirect/abc-211</error_action_redirect>
               </Fields>
             </UploadRequest>
           </File>
@@ -47,8 +47,8 @@ class FileUploadResponseSpec extends SpecBase with XmlBehaviours {
                 <Content-Type>application/xml</Content-Type>
                 <x-amz-meta-callback-url>https://some-callback-url2</x-amz-meta-callback-url>
                 <x-amz-date>2019-03-05T11:57:11Z</x-amz-date>
-                <success-action-redirect>https://success-redirect2/fyr-993</success-action-redirect>
-                <error-action-redirect>https://error-redirect2/fyr-993</error-action-redirect>
+                <success_action_redirect>https://success-redirect2/fyr-993</success_action_redirect>
+                <error_action_redirect>https://error-redirect2/fyr-993</error_action_redirect>
               </Fields>
             </UploadRequest>
           </File>

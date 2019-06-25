@@ -64,8 +64,7 @@
                     errorMessage = flash.get("fileUploadError").getOrElse(""),
                     classes = List("error-message")
                 )
-                <input type="hidden" name="success_action_redirect" value="@successRedirect.url">
-                <input type="hidden" name="error_action_redirect" value="@errorRedirect.url">
+                
                 @uploadRequest.fields.map { case (key, value) =>
                     <input type="hidden" name="@key" value="@value"/>
                 }

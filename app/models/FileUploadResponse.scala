@@ -52,8 +52,8 @@ object FileUploadResponse {
       case file =>
         val reference = (file \ "Reference").text.trim
         val href = (file \ "UploadRequest" \ "Href").text.trim
-        val successUrl = (file \ "UploadRequest" \ "Fields" \ "success-action-redirect").text.trim
-        val errorUrl = (file \ "UploadRequest" \ "Fields" \ "error-action-redirect").text.trim
+        val successUrl = (file \ "UploadRequest" \ "Fields" \ "success_action_redirect").text.trim
+        val errorUrl = (file \ "UploadRequest" \ "Fields" \ "error_action_redirect").text.trim
         val fields: Map[String, String] =
           (file \ "UploadRequest" \ "Fields" \ "_")
             .theSeq
