@@ -27,7 +27,7 @@ import org.apache.http.auth.{AuthScope, NTCredentials}
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.MultipartEntityBuilder
-import org.apache.http.entity.mime.content.StringBody
+import org.apache.http.entity.mime.content.{FileBody, StringBody}
 import org.apache.http.impl.client.{BasicCredentialsProvider, HttpClientBuilder, ProxyAuthenticationStrategy}
 import play.api.Logger
 import play.api.libs.ws.WSClient
@@ -54,7 +54,7 @@ class UpscanConnector @Inject()(conf:AppConfig, wsClient: WSClient)(implicit ec:
     }
 
 
-    builder.addBinaryBody("file", contactDetails.toString.getBytes("UTF-8"), ContentType.DEFAULT_BINARY, fileName)
+    builder.addPart("file", new FileBody(toFile(contactDetails), ContentType.DEFAULT_BINARY, fileName))
 
     val request = new HttpPost(upload.href)
     request.setEntity(builder.build())
