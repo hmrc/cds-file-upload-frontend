@@ -27,8 +27,10 @@ import org.mockito.Mockito._
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen
 import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
+import play.api.libs.Files.TemporaryFile
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
-import play.api.test.CSRFTokenHelper._
+import play.api.mvc.MultipartFormData.FilePart
 import play.api.test.Helpers._
 import repositories.NotificationRepository
 import uk.gov.hmrc.http.HeaderCarrier
@@ -67,7 +69,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
   }
 
 
-  implicit private val mockMaterializer = mock[Materializer]
+  private val mockMaterializer = mock[Materializer]
   private val mockAuditConnector = mock[AuditConnector]
   private val mockNotificationRepository = mock[NotificationRepository]
 
@@ -118,19 +120,19 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
         }
       }
 
-//      "request file exists in response" in {
-//
-//        forAll(waitingGen, arbitrary[CacheMap]) {
-//          case ((file, ur, response), cacheMap) =>
-//            val refPosition: Position = nextPosition(file.reference, response.uploads.map(_.reference))
-//
-//            val updatedCache = combine(response, cacheMap)
-//            val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad(file.reference)(fakeRequest.withCSRFToken)
-//
-//            status(result) mustBe OK
-//            contentAsString(result) mustBe viewAsString(ur, refPosition, RedirectUrl("success"), RedirectUrl("error"))
-//        }
-//      }
+      "request file exists in response" in {
+
+        forAll(waitingGen, arbitrary[CacheMap]) {
+          case ((file, ur, response), cacheMap) =>
+            val refPosition: Position = nextPosition(file.reference, response.uploads.map(_.reference))
+
+            val updatedCache = combine(response, cacheMap)
+            val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad(file.reference)(fakeRequest)
+
+            status(result) mustBe OK
+            contentAsString(result) mustBe viewAsString(ur, refPosition, RedirectUrl("success"), RedirectUrl("error"))
+        }
+      }
     }
 
     "redirect to the next page" when {

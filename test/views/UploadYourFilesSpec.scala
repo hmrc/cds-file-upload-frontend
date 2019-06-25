@@ -19,19 +19,13 @@ package views
 import generators.Generators
 import models._
 import org.scalatest.prop.PropertyChecks
-import play.api.mvc.{AnyContentAsEmpty, RequestHeader}
 import play.twirl.api.Html
 import views.behaviours.ViewBehaviours
-import play.api.test.CSRFTokenHelper._
-import play.api.test.FakeRequest
 import views.html.upload_your_files
 
 class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with PropertyChecks with Generators {
 
-
-  val fakeRequest2 = FakeRequest("","").withCSRFToken
-
-  def view(pos: Position): Html = upload_your_files(UploadRequest("", Map.empty), pos, RedirectUrl(""), RedirectUrl(""))(fakeRequest2, messages, appConfig, fakeRequest.flash)
+  def view(pos: Position): Html = upload_your_files(UploadRequest("", Map.empty), pos, RedirectUrl(""), RedirectUrl(""))(fakeRequest, messages, appConfig, fakeRequest.flash)
 
   val view: () => Html = () => view(First(3))
 
