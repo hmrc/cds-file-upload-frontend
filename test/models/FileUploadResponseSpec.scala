@@ -63,7 +63,9 @@ class FileUploadResponseSpec extends SpecBase with XmlBehaviours {
             Map(
               "Content-Type" -> "application/xml",
               "x-amz-meta-callback-url" -> "https://some-callback-url",
-              "x-amz-date" -> "2019-03-05T11:56:34Z"
+              "x-amz-date" -> "2019-03-05T11:56:34Z",
+              "success_action_redirect" -> "https://success-redirect/abc-211",
+              "error_action_redirect" -> "https://error-redirect/abc-211"
             )
           )),
           successUrl = RedirectUrl("https://success-redirect/abc-211"),
@@ -78,7 +80,7 @@ class FileUploadResponseSpec extends SpecBase with XmlBehaviours {
               "Content-Type" -> "application/xml",
               "x-amz-meta-callback-url" -> "https://some-callback-url2",
               "x-amz-date" -> "2019-03-05T11:57:11Z",
-              "success_action_redirect" -> "2https://success-redirect2/fyr-993",
+              "success_action_redirect" -> "https://success-redirect2/fyr-993",
               "error_action_redirect" -> "https://error-redirect2/fyr-993"
             )
           )),
@@ -88,7 +90,8 @@ class FileUploadResponseSpec extends SpecBase with XmlBehaviours {
           
         )
       ))
-      
+
+
       FileUploadResponse.fromXml(xml) mustBe expectedResponse
     }
   }
