@@ -19,65 +19,61 @@ package connectors
 import java.io.{File, PrintWriter}
 import java.util.UUID
 
+import akka.stream.scaladsl.{FileIO, Source}
+import akka.util.ByteString
 import config.AppConfig
 import javax.inject.{Inject, Singleton}
 import models.{ContactDetails, UploadRequest}
-import org.apache.http.HttpHost
-import org.apache.http.auth.{AuthScope, NTCredentials}
-import org.apache.http.client.methods.HttpPost
-import org.apache.http.entity.ContentType
-import org.apache.http.entity.mime.MultipartEntityBuilder
-import org.apache.http.entity.mime.content.{FileBody, StringBody}
-import org.apache.http.impl.client.{BasicCredentialsProvider, HttpClientBuilder, ProxyAuthenticationStrategy}
 import play.api.Logger
-import play.api.libs.ws.WSClient
+import play.api.libs.ws.{BodyWritable, DefaultWSProxyServer, InMemoryBody, WSClient}
+import play.api.mvc.MultipartFormData
+import play.api.mvc.MultipartFormData._
+import play.core.formatters.Multipart
+import akka.stream.Materializer
 
-import scala.concurrent.ExecutionContext
-import scala.util.{Failure, Success, Try}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext}
 
 @Singleton
-class UpscanConnector @Inject()(conf:AppConfig, wsClient: WSClient)(implicit ec: ExecutionContext) {
+class UpscanConnector @Inject()(conf:AppConfig, wsClient: WSClient)(implicit ec: ExecutionContext, materializer: Materializer) {
 
+  def upload(upload: UploadRequest, contactDetails: ContactDetails)= {
+    val settings = conf.proxy
 
-  val proxySettings = conf.proxy
+    Logger.warn(s"Connecting to proxy = ${settings.proxyRequiredForThisEnvironment}")
+    Logger.warn(s" Proxy settings: ${settings.host} ${settings.port} ${settings.protocol} ${settings.username} ${settings.password.take(5)}")
+    val proxy = DefaultWSProxyServer(settings.host, settings.port, Some(settings.protocol), Some(settings.username), Some(settings.password))
 
-  val ntCreds = new NTCredentials(proxySettings.username, proxySettings.password, "cds-file-upload-frontend", "mdtp")
-  val credsProvider = new BasicCredentialsProvider()
-  credsProvider.setCredentials(new AuthScope(proxySettings.host, proxySettings.port), ntCreds)
+    val preparedRequest = wsClient.url(upload.href).withFollowRedirects(false)
 
-  def upload(upload: UploadRequest, contactDetails: ContactDetails): Try[Int] = {
+    val req = if (settings.proxyRequiredForThisEnvironment) preparedRequest.withProxyServer(proxy) else preparedRequest
 
-    val builder = MultipartEntityBuilder.create
+    val dataparts = upload.fields.map {
+      case (name, value) => DataPart(name, value)
+    }
 
-    upload.fields.foreach {
-      case (name, value) => builder.addPart(name, new StringBody(value, ContentType.TEXT_PLAIN))
+    implicit val multipartBodyWriter: BodyWritable[Source[MultipartFormData.Part[Source[ByteString, _]], _]] = {
+      val boundary = Multipart.randomBoundary()
+      val contentType = s"multipart/form-data; boundary=$boundary"
+      BodyWritable(
+        body => {
+          val byteString = Multipart.transform(body, boundary).runFold(ByteString.empty)(_ ++ _)
+          InMemoryBody(Await.result(byteString, Duration.Inf))// <- //use something sensible as a timeout
+        },
+        contentType
+      )
     }
 
 
-    builder.addPart("file", new FileBody(toFile(contactDetails), ContentType.DEFAULT_BINARY, fileName))
+    val filePart = FilePart("file", fileName, Some("text/plain"), FileIO.fromPath(toFile(contactDetails).toPath))
 
-    val request = new HttpPost(upload.href)
-    request.setEntity(builder.build())
+    Logger.warn(s"Upload url: ${req.url}")
+    Logger.warn(s"Upload URI: ${req.uri}")
+    Logger.warn(s"Upload Headers: ${req.headers}")
+    Logger.warn(s"Upload Body: ${req.body}")
 
-    val attempt = Try(client.execute(request)) match {
-      case Success(response) =>
-        val code = response.getStatusLine.getStatusCode
-        val isSuccessRedirect = response.getHeaders("Location").headOption.exists(_.getValue.contains("upscan-success"))
-        Logger.info(s"Upscan upload contact details responded with: ${code}")
-        if (isSuccessRedirect)
-          Success(code)
-        else
-          Failure(new Exception(s"Uploading contact details to s3 failed"))
-      case Failure(ex) =>
-        Logger.error(ex.getMessage, ex)
-        Failure(ex)
-    }
-
-    client.close()
-
-    attempt
+    req.post[Source[MultipartFormData.Part[Source[ByteString, _]], _]](Source(dataparts ++ List(filePart)))(multipartBodyWriter)
   }
-
 
   private def fileName = s"contact_details_${UUID.randomUUID().toString}.txt"
 
@@ -94,19 +90,4 @@ class UpscanConnector @Inject()(conf:AppConfig, wsClient: WSClient)(implicit ec:
 
     uploadFile
   }
-
-  private def client = proxySettings.proxyRequiredForThisEnvironment match {
-    case true =>
-      HttpClientBuilder.create
-        .disableRedirectHandling()
-        .setProxy(new HttpHost(proxySettings.host, proxySettings.port))
-        .setDefaultCredentialsProvider(credsProvider)
-        .setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy())
-        .build()
-    case _ =>
-      HttpClientBuilder.create
-        .disableRedirectHandling()
-        .build()
-  }
-
 }
