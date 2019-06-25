@@ -15,7 +15,6 @@
  *@
 
 @import config.AppConfig
-@import helper._
 @import uk.gov.hmrc.play.views.html.helpers._
 @import uk.gov.hmrc.play.views.html.{helpers => hmrcHelpers}
 @import views.helpers.Utils._
@@ -67,7 +66,6 @@
                 )
                 <input type="hidden" name="success_action_redirect" value="@successRedirect.url">
                 <input type="hidden" name="error_action_redirect" value="@errorRedirect.url">
-                @CSRF.formField
                 @uploadRequest.fields.map { case (key, value) =>
                     <input type="hidden" name="@key" value="@value"/>
                 }
