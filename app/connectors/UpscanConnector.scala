@@ -19,47 +19,65 @@ package connectors
 import java.io.{File, PrintWriter}
 import java.util.UUID
 
-import akka.stream.scaladsl.{FileIO, Sink, Source}
 import config.AppConfig
 import javax.inject.{Inject, Singleton}
 import models.{ContactDetails, UploadRequest}
+import org.apache.http.HttpHost
+import org.apache.http.auth.{AuthScope, NTCredentials}
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.entity.ContentType
+import org.apache.http.entity.mime.MultipartEntityBuilder
+import org.apache.http.entity.mime.content.StringBody
+import org.apache.http.impl.client.{BasicCredentialsProvider, HttpClientBuilder, ProxyAuthenticationStrategy}
 import play.api.Logger
-import play.api.libs.ws.{DefaultWSProxyServer, WSClient}
-import play.api.mvc.MultipartFormData.{DataPart, FilePart}
-import play.api.libs.ws.JsonBodyReadables._
-import play.api.libs.ws.JsonBodyWritables._
-import play.api.libs.ws.ahc.AhcCurlRequestLogger
+import play.api.libs.ws.WSClient
 
 import scala.concurrent.ExecutionContext
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class UpscanConnector @Inject()(conf:AppConfig, wsClient: WSClient)(implicit ec: ExecutionContext) {
 
-  def upload(upload: UploadRequest, contactDetails: ContactDetails)= {
-    val settings = conf.proxy
 
-    Logger.warn(s"Connecting to proxy = ${settings.proxyRequiredForThisEnvironment}")
-    Logger.warn(s" Proxy settings: ${settings.host} ${settings.port} ${settings.protocol} ${settings.username} ${settings.password.take(5)}")
-    val proxy = DefaultWSProxyServer(settings.host, settings.port, Some(settings.protocol), Some(settings.username), Some(settings.password))
+  val proxySettings = conf.proxy
 
-    val preparedRequest = wsClient.url(upload.href).withFollowRedirects(false)
+  val ntCreds = new NTCredentials(proxySettings.username, proxySettings.password, "cds-file-upload-frontend", "mdtp")
+  val credsProvider = new BasicCredentialsProvider()
+  credsProvider.setCredentials(new AuthScope(proxySettings.host, proxySettings.port), ntCreds)
 
-    val req = if (settings.proxyRequiredForThisEnvironment) preparedRequest.withProxyServer(proxy) else preparedRequest
+  def upload(upload: UploadRequest, contactDetails: ContactDetails): Try[Int] = {
 
-    val dataparts = upload.fields.map {
-      case (name, value) => DataPart(name, value)
+    val builder = MultipartEntityBuilder.create
+
+    upload.fields.foreach {
+      case (name, value) => builder.addPart(name, new StringBody(value, ContentType.TEXT_PLAIN))
     }
 
-    val filePart = FilePart("file", fileName, Some("text/plain"), FileIO.fromPath(toFile(contactDetails).toPath))
 
-    Logger.warn(s"Upload url: ${req.url}")
-    val body = Source(dataparts ++ List(filePart))
+    builder.addBinaryBody("file", contactDetails.toString.getBytes("UTF-8"), ContentType.DEFAULT_BINARY, fileName)
 
-    req
-      .withRequestFilter(AhcCurlRequestLogger())
-      .withHttpHeaders("Content-Length" -> "0")
-      .post(body)
+    val request = new HttpPost(upload.href)
+    request.setEntity(builder.build())
+
+    val attempt = Try(client.execute(request)) match {
+      case Success(response) =>
+        val code = response.getStatusLine.getStatusCode
+        val isSuccessRedirect = response.getHeaders("Location").headOption.exists(_.getValue.contains("upscan-success"))
+        Logger.info(s"Upscan upload contact details responded with: ${code}")
+        if (isSuccessRedirect)
+          Success(code)
+        else
+          Failure(new Exception(s"Uploading contact details to s3 failed"))
+      case Failure(ex) =>
+        Logger.error(ex.getMessage, ex)
+        Failure(ex)
+    }
+
+    client.close()
+
+    attempt
   }
+
 
   private def fileName = s"contact_details_${UUID.randomUUID().toString}.txt"
 
@@ -76,4 +94,19 @@ class UpscanConnector @Inject()(conf:AppConfig, wsClient: WSClient)(implicit ec:
 
     uploadFile
   }
+
+  private def client = proxySettings.proxyRequiredForThisEnvironment match {
+    case true =>
+      HttpClientBuilder.create
+        .disableRedirectHandling()
+        .setProxy(new HttpHost(proxySettings.host, proxySettings.port))
+        .setDefaultCredentialsProvider(credsProvider)
+        .setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy())
+        .build()
+    case _ =>
+      HttpClientBuilder.create
+        .disableRedirectHandling()
+        .build()
+  }
+
 }

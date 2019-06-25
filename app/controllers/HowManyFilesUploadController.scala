@@ -79,40 +79,27 @@ class HowManyFilesUploadController @Inject()(authenticate: AuthAction,
       )
     }
 
-  private def uploadContactDetails(req: MrnRequest[AnyContent], fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier): Future[Either[Throwable, List[FileUpload]]] = {
-    def saveRemainingFileUploadsToCache(fileUploadResponse: FileUploadResponse): Future[List[FileUpload]] = {
+    private def uploadContactDetails(req: MrnRequest[AnyContent], fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier): Future[Either[Throwable, List[FileUpload]]] = {
+      def saveRemainingFileUploadsToCache(fileUploadResponse: FileUploadResponse): Future[List[FileUpload]] = {
+        val remainingFileUploads = fileUploadResponse.uploads.tail
+        val answers = updateUserAnswers(req.userAnswers, fileUploadCount, FileUploadResponse(remainingFileUploads))
+        dataCacheConnector.save(answers.cacheMap).map { _ => remainingFileUploads }
+      }
 
-      val remainingFileUploads = fileUploadResponse.uploads.tail
-      Logger.warn("remainingFileUploads " + remainingFileUploads)
-      val answers = updateUserAnswers(req.userAnswers, fileUploadCount, FileUploadResponse(remainingFileUploads))
-      dataCacheConnector.save(answers.cacheMap).map { _ =>
-        Logger.warn("saving remaining uploads")
-
-        remainingFileUploads }
-    }
-
-    initiateUpload(req, fileUploadCount).flatMap { fileUploadResponse =>
-      firstUploadFile(fileUploadResponse) match {
-        case Right((_, uploadRequest)) =>
-          uploadContactDetails.upload(uploadRequest, req.request.contactDetails).flatMap { res =>
-            Logger.warn(s"Upload contact details cookies: ${res.cookies}")
-            Logger.warn(s"Upload contact details successful: ${res}")
-            Logger.warn(s"Upload contact details headers: ${res.header("Location")}")
-            val isSuccessRedirect = res.header("Location").exists(_.contains("upscan-success"))
-            if (res.status == SEE_OTHER  && isSuccessRedirect) {
-              saveRemainingFileUploadsToCache(fileUploadResponse).map(uploads => Right(uploads))
+      initiateUpload(req, fileUploadCount).flatMap { fileUploadResponse =>
+        firstUploadFile(fileUploadResponse) match {
+          case Right((_, uploadRequest)) =>
+            uploadContactDetails.upload(uploadRequest, req.request.contactDetails) match {
+              case Success(_) => saveRemainingFileUploadsToCache(fileUploadResponse).map(uploads => Right(uploads))
+              case Failure(e) =>
+                Future.successful(Left(e))
             }
-            else {
-              Logger.warn(s"Left: error: illegal state")
-              Future.successful(Left(new IllegalStateException("Contact details was not uploaded successfully")))
-            }
-          }
-        case Left(error) =>
-          Logger.warn(s"Left: error: $error")
-          Future.successful(Left(error))
+
+          case Left(error) =>
+            Future.successful(Left(error))
+        }
       }
     }
-  }
 
   private def updateUserAnswers(userAnswers: UserAnswers, fileUploadCount: FileUploadCount, fileUploadResponse: FileUploadResponse) =
     userAnswers.set(HowManyFilesUploadPage, fileUploadCount).set(HowManyFilesUploadPage.Response, fileUploadResponse)
