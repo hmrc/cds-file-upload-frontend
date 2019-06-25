@@ -16,30 +16,33 @@
 
 package controllers
 
+import akka.stream.Materializer
 import connectors.UpscanConnector
 import controllers.actions._
 import forms.FileUploadCountProvider
 import models._
 import models.requests.SignedInUser
-import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito._
 import org.scalacheck.Arbitrary._
 import org.scalacheck.{Arbitrary, Gen}
 import pages.{HowManyFilesUploadPage, MrnEntryPage}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.{JsNumber, JsString}
 import play.api.libs.ws.WSResponse
+import play.api.test.CSRFTokenHelper._
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.CustomsDeclarationsService
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import views.DomAssertions
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
 
 class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssertions {
+
+  implicit val mockMaterializer = mock[Materializer]
+
+  val fr = FakeRequest("", "").withCSRFToken
 
   type UserInfo = (SignedInUser, String)
 
@@ -100,7 +103,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
 
       forAll { action: ContactDetailsRequiredAction =>
 
-        val result = controller(action).onPageLoad(fakeRequest)
+        val result = controller(action).onPageLoad(fr)
 
         status(result) mustBe OK
         val doc = asDocument(contentAsString(result))
@@ -112,7 +115,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       val updatedCacheMap = fakeContactDetailsRequiredAction.cacheMap.copy(data = fakeContactDetailsRequiredAction.cacheMap.data + (HowManyFilesUploadPage.toString -> JsNumber(7)))
       val updatedAction = new FakeContactDetailsRequiredAction(updatedCacheMap, fakeContactDetailsRequiredAction.contactDetails)
 
-      val result = controller(updatedAction).onPageLoad(fakeRequest)
+      val result = controller(updatedAction).onPageLoad(fr)
 
       val doc = asDocument(contentAsString(result))
       doc.select("#value").`val` mustEqual "7"
@@ -123,7 +126,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       forAll { contactDetails: ContactDetails =>
 
         val action = new FakeContactDetailsRequiredAction(CacheMap("", Map()), contactDetails)
-        val result = controller(action).onPageLoad(fakeRequest)
+        val result = controller(action).onPageLoad(fr)
 
         status(result) mustBe SEE_OTHER
         redirectLocation(result) mustBe Some("/cds-file-upload-service/error")
@@ -135,7 +138,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       forAll { contactDetails: ContactDetails =>
 
         val action = new FakeContactDetailsRequiredAction(CacheMap("", Map()), contactDetails)
-        val result = controller(action).onSubmit(fakeRequest)
+        val result = controller(action).onSubmit(fr)
 
         status(result) mustBe SEE_OTHER
         redirectLocation(result) mustBe Some("/cds-file-upload-service/error")
@@ -143,7 +146,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
     }
 
     "return a bad request when empty data is submitted" in {
-      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "")
+      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "").withCSRFToken
       val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
       status(result) mustBe BAD_REQUEST
     }
@@ -159,7 +162,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
 //      when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
 //      when(mockUpscanConnector.upload(any(), any())).thenReturn(Future.successful(RedirectUrl("success")))
 //      when(mockDataCacheConnector.save(any())(any[HeaderCarrier])).thenReturn(Future.successful(CacheMap("", Map.empty)))
-//      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2")
+//      val postRequest = fr.withFormUrlEncodedBody("value" -> "2")
 //
 //      val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
 //
@@ -182,7 +185,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
 //      when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
 //      when(mockUpscanConnector.upload(any(), any())).thenReturn(Failure(new IllegalStateException()))
 //
-//      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2")
+//      val postRequest = fr.withFormUrlEncodedBody("value" -> "2")
 //
 //      val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
 //
@@ -191,7 +194,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
 //    }
 
     "make a request to customs declarations" in {
-      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2")
+      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2").withCSRFToken
       await(controller(fakeContactDetailsRequiredAction).onSubmit(postRequest))
 
       val Some(fileUploadCount) = FileUploadCount(2)

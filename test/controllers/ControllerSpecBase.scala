@@ -19,26 +19,19 @@ package controllers
 import java.net.URLEncoder
 
 import base.SpecBase
-import config.AppConfig
 import connectors.Cache
 import controllers.actions.{ContactDetailsRequiredAction, DataRetrievalAction, FakeActions}
 import models.ContactDetails
 import models.requests.SignedInUser
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, when}
-import play.api.{Configuration, Environment}
-import play.api.http.{DefaultFileMimeTypes, FileMimeTypesConfiguration}
-import play.api.mvc.{DefaultActionBuilder, DefaultMessagesActionBuilderImpl, DefaultMessagesControllerComponents, MessagesControllerComponents}
-import play.api.test.NoMaterializer
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
-import play.api.test.Helpers.{stubBodyParser, stubLangs, stubMessagesApi, stubPlayBodyParsers}
 
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext
 
 abstract class ControllerSpecBase extends SpecBase with FakeActions {
 
