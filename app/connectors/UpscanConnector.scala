@@ -28,6 +28,7 @@ import play.api.libs.ws.{DefaultWSProxyServer, WSClient}
 import play.api.mvc.MultipartFormData.{DataPart, FilePart}
 import play.api.libs.ws.JsonBodyReadables._
 import play.api.libs.ws.JsonBodyWritables._
+import play.api.libs.ws.ahc.AhcCurlRequestLogger
 
 import scala.concurrent.ExecutionContext
 
@@ -54,12 +55,10 @@ class UpscanConnector @Inject()(conf:AppConfig, wsClient: WSClient)(implicit ec:
     Logger.warn(s"Upload url: ${req.url}")
     val body = Source(dataparts ++ List(filePart))
 
-    val res = req.withHttpHeaders("Content-Length" -> "2000").post(body)
-    res.map{a =>
-      Logger.warn("Upload Headers" + a.headers)
-      Logger.warn("Upload Body: " + a.body)
-      a
-    }
+    req
+      .withRequestFilter(AhcCurlRequestLogger())
+      .withHttpHeaders("Content-Length" -> "0")
+      .post(body)
   }
 
   private def fileName = s"contact_details_${UUID.randomUUID().toString}.txt"
