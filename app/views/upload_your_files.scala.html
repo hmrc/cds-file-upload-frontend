@@ -31,58 +31,51 @@
 
 @main_template(title = messages(s"fileUploadPage.title.$positionModifier")) {
 
-    <div class="form-group">
 
-        <h1 class="heading-large">
+    <h1 class="heading-large">
         @messages(s"fileUploadPage.heading.$positionModifier")
-        </h1>
+    </h1>
 
-        <p>@messages("fileUploadPage.paragraph1")</p>
-        <p>@messages("fileUploadPage.p.fileNeedsToBe")</p>
+            <p>@messages("fileUploadPage.paragraph1")</p>
+            <p>@messages("fileUploadPage.p.fileNeedsToBe")</p>
 
-        <ul class="list list-bullet">
-            <li>@messages("fileUploadPage.listItem1")</li>
-            <li>@messages("fileUploadPage.listItem2")</li>
-            <li>@messages("fileUploadPage.listItem3")</li>
-            <li>@messages("fileUploadPage.listItem4")</li>
-            <li>@messages("fileUploadPage.listItem5")</li>
-        </ul>
+            <ul class="list list-bullet">
+                <li>@messages("fileUploadPage.listItem1")</li>
+                <li>@messages("fileUploadPage.listItem2")</li>
+                <li>@messages("fileUploadPage.listItem3")</li>
+                <li>@messages("fileUploadPage.listItem4")</li>
+                <li>@messages("fileUploadPage.listItem5")</li>
+            </ul>
 
-        @{
-            Some(refPosition).collect {
-                case Middle(index, total) => messages("fileUploadPage.filesUploaded", index - 1, total)
-                case Last(total) => messages("fileUploadPage.filesUploaded", total - 1, total)
-            }.map(msg => paragraph(bold(msg)))
-        }
-
-        @hmrcHelpers.form(Call("POST", uploadRequest.href), ('enctype, "multipart/form-data"), ('class, "js-form")) {
+    @{
+        Some(refPosition).collect {
+            case Middle(index, total) => messages("fileUploadPage.filesUploaded", index - 1, total)
+            case Last(total) => messages("fileUploadPage.filesUploaded", total - 1, total)
+        }.map(msg => paragraph(bold(msg)))
+    }
 
 
-            <div class="form-group">
-                @errorInline(
-                    errorKey = "upload-file",
-                    errorMessage = flash.get("fileUploadError").getOrElse(""),
-                    classes = List("error-message")
-                )
-                
-                @uploadRequest.fields.map { case (key, value) =>
-                    <input type="hidden" name="@key" value="@value"/>
-                }
-                <label class="form-label" for="upload-file">Upload a file</label>
-                <input
-                id="upload-file"
-                type="file"
-                name="file"
-                required
-                accept="@appConfig.fileFormats.approvedFileTypes"
-                data-msg-required="@messages("fileUploadPage.validation.required")"
-                data-msg-accept="@messages("fileUploadPage.validation.accept")"
-                data-msg-filesize="@messages("fileUploadPage.validation.filesize")" />
-            </div>
-            <button id="submit" class="button">@messages("fileUploadPage.button")</button>
-        }
+
+    <form action="@uploadRequest.href" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            @uploadRequest.fields.map { case (key, value) =>
+            <input type="hidden" name="@key" value="@value"/>
+    }
+    <label class="form-label" for="upload-file">Upload a file</label>
+            <input
+            id="upload-file"
+            type="file"
+            name="file"
+            required
+            accept="@appConfig.fileFormats.approvedFileTypes"
+            data-msg-required="@messages("fileUploadPage.validation.required")"
+    data-msg-accept="@messages("fileUploadPage.validation.accept")"
+    data-msg-filesize="@messages("fileUploadPage.validation.filesize")" />
+    <button id="submit" class="button">@messages("fileUploadPage.button")</button>
 
     </div>
+    </form>
+
 
     @components.helpline_information()
 
