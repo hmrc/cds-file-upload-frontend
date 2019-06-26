@@ -31,8 +31,8 @@ class NotificationService @Inject()(repository: NotificationRepository) {
     val fileReference = (notification \\ "FileReference").text
     val outcome = (notification \\ "Outcome").text
     val filename = (notification \\ "FileName").text
-    if (fileReference.isEmpty || outcome.isEmpty || filename.isEmpty) {
-      Future.successful(Left(new BadRequestException("File reference, file name and outcome not found in xml")))
+    if (fileReference.isEmpty || outcome.isEmpty) {
+      Future.successful(Left(new BadRequestException("File reference or outcome not found in xml")))
     } else {
       repository.insert(Notification(fileReference, outcome, filename))
         .map(_ => Right(()))
