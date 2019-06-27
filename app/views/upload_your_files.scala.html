@@ -76,6 +76,7 @@
             type="file"
             name="file"
             required
+            file-extensions="@appConfig.fileFormats.approvedFileExtensions"
             filesize="@appConfig.fileFormats.maxFileSizeMb"
             accept="@appConfig.fileFormats.approvedFileTypes"
             data-msg-required="@messages("fileUploadPage.validation.required")"
