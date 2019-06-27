@@ -56,7 +56,7 @@
 
 
 
-    <form action="@uploadRequest.href" method="POST" enctype="multipart/form-data">
+    <form action="@uploadRequest.href" method="POST" enctype="multipart/form-data" class="js-form">
         <div class="form-group">
             @uploadRequest.fields.map { case (key, value) =>
             <input type="hidden" name="@key" value="@value"/>
@@ -68,6 +68,7 @@
             type="file"
             name="file"
             required
+            filesize="@appConfig.fileFormats.maxFileSizeMb"
             accept="@appConfig.fileFormats.approvedFileTypes"
             data-msg-required="@messages("fileUploadPage.validation.required")"
     data-msg-accept="@messages("fileUploadPage.validation.accept")"
@@ -79,5 +80,6 @@
 
 
     @components.helpline_information()
+
 
 }
