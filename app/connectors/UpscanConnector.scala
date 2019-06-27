@@ -19,6 +19,7 @@ package connectors
 import java.io.{File, PrintWriter}
 import java.util.UUID
 
+import akka.stream.Materializer
 import akka.stream.scaladsl.{FileIO, Source}
 import akka.util.ByteString
 import config.AppConfig
@@ -29,9 +30,8 @@ import play.api.libs.ws.{BodyWritable, DefaultWSProxyServer, InMemoryBody, WSCli
 import play.api.mvc.MultipartFormData
 import play.api.mvc.MultipartFormData._
 import play.core.formatters.Multipart
-import akka.stream.Materializer
 
-import scala.concurrent.duration.Duration
+import scala.concurrent.duration.{Duration, SECONDS}
 import scala.concurrent.{Await, ExecutionContext}
 
 @Singleton
@@ -58,7 +58,7 @@ class UpscanConnector @Inject()(conf:AppConfig, wsClient: WSClient)(implicit ec:
       BodyWritable(
         body => {
           val byteString = Multipart.transform(body, boundary).runFold(ByteString.empty)(_ ++ _)
-          InMemoryBody(Await.result(byteString, Duration.Inf))// <- //use something sensible as a timeout
+          InMemoryBody(Await.result(byteString, Duration(90, SECONDS)))
         },
         contentType
       )
@@ -70,7 +70,6 @@ class UpscanConnector @Inject()(conf:AppConfig, wsClient: WSClient)(implicit ec:
     Logger.warn(s"Upload url: ${req.url}")
     Logger.warn(s"Upload URI: ${req.uri}")
     Logger.warn(s"Upload Headers: ${req.headers}")
-    Logger.warn(s"Upload Body: ${req.body}")
 
     req.post[Source[MultipartFormData.Part[Source[ByteString, _]], _]](Source(dataparts ++ List(filePart)))(multipartBodyWriter)
   }
