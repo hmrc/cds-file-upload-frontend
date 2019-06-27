@@ -37,7 +37,7 @@
     </h1>
 
             <p>@messages("fileUploadPage.paragraph1")</p>
-            <p>@messages("fileUploadPage.p.fileNeedsToBe")</p>
+            <p>@messages("fileUploadPage.p.fileNeedsToBe", appConfig.fileFormats.maxFileSizeMb)</p>
 
             <ul class="list list-bullet">
                 <li>@messages("fileUploadPage.listItem1")</li>
@@ -62,6 +62,13 @@
             <input type="hidden" name="@key" value="@value"/>
     }
 
+        <div class="form-field-group">
+            @errorInline(
+            errorKey = "upload-file",
+            errorMessage = "",
+            classes = List("error-message")
+            )
+
     <label class="form-label" for="upload-file">Upload a file</label>
             <input
             id="upload-file"
@@ -71,8 +78,10 @@
             filesize="@appConfig.fileFormats.maxFileSizeMb"
             accept="@appConfig.fileFormats.approvedFileTypes"
             data-msg-required="@messages("fileUploadPage.validation.required")"
+    data-msg-filesize="@messages("fileUploadPage.validation.filesize")"
     data-msg-accept="@messages("fileUploadPage.validation.accept")"
-    data-msg-filesize="@messages("fileUploadPage.validation.filesize")" />
+  />
+        </div>
     <button id="submit" class="button">@messages("fileUploadPage.button")</button>
 
     </div>
