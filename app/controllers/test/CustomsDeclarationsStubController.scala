@@ -19,12 +19,8 @@ package controllers.test
 import javax.inject.{Inject, Singleton}
 import models.Field._
 import models._
-import play.api.data.Form
-import play.api.data.Forms._
-import play.api.data.validation._
 import play.api.http.ContentTypes
-import play.api.libs.Files
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, MultipartFormData}
+import play.api.mvc.{Action, MessagesControllerComponents}
 import services.NotificationService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -35,12 +31,6 @@ import scala.xml._
 @Singleton
 class CustomsDeclarationsStubController @Inject()(notificationService: NotificationService,mcc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends FrontendController(mcc) {
 
-  case class UploadStuff(successActionRedirect: String)
-
-  val form = Form(mapping(
-    "success_action_redirect" -> nonEmptyText)
-  (UploadStuff.apply)(UploadStuff.unapply)
-  )
 
   def waiting(ref: String) = Waiting(UploadRequest(
     href = "http://localhost:6793/cds-file-upload-service/test-only/s3-bucket",
@@ -70,15 +60,11 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
     Ok(XmlHelper.toXml(resp)).as(ContentTypes.XML)
   }
 
-  def handleS3FileUploadRequest: Action[AnyContent] = Action { implicit req =>
-    form.bindFromRequest().fold(
-        _ =>
-        SeeOther("/upscan-success").withHeaders("Location" -> "upscan-success"),
-      stuff => {
-        callBack(stuff.successActionRedirect.split("/").last)
-        SeeOther(stuff.successActionRedirect)
-      }
-    )
+  def handleS3FileUploadRequest = Action(parse.multipartFormData) { implicit req =>
+    val redirectLocation = req.body.dataParts("success_action_redirect").head
+    val reference = redirectLocation.split("/").last
+    callBack(reference)
+    SeeOther(redirectLocation).withHeaders("Location" -> redirectLocation)
   }
 
   def callBack(ref: String)(implicit hc: HeaderCarrier) = {

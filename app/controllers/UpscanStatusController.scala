@@ -24,7 +24,7 @@ import models._
 import models.requests.FileUploadResponseRequest
 import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
 import play.api.Logger
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.I18nSupport
 import play.api.libs.json.JsString
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.NotificationRepository
@@ -79,16 +79,13 @@ class UpscanStatusController @Inject()(authenticate: AuthAction,
     (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
 
       val uploads = req.fileUploadResponse.uploads
-
       uploads.find(_.id == id) match {
         case Some(upload) =>
           val updatedFiles = upload.copy(state = Uploaded) :: uploads.filterNot(_.id == id)
           val answers = req.userAnswers.set(HowManyFilesUploadPage.Response, FileUploadResponse(updatedFiles))
-
           cache.save(answers.cacheMap).flatMap { _ =>
             nextPage(upload.reference, uploads)
           }
-
         case None =>
           Future.successful(Redirect(routes.ErrorPageController.error()))
       }
