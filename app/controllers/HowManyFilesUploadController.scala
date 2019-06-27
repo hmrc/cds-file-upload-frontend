@@ -95,7 +95,6 @@ class HowManyFilesUploadController @Inject()(authenticate: AuthAction,
       firstUploadFile(fileUploadResponse) match {
         case Right((_, uploadRequest)) =>
           uploadContactDetails.upload(uploadRequest, req.request.contactDetails).flatMap { res =>
-            Logger.warn(s"Upload contact details cookies: ${res.cookies}")
             Logger.warn(s"Upload contact details successful: ${res}")
             Logger.warn(s"Upload contact details headers: ${res.header("Location")}")
             val isSuccessRedirect = res.header("Location").exists(_.contains("upscan-success"))

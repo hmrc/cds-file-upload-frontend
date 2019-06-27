@@ -27,7 +27,6 @@ import org.mockito.Mockito._
 import org.scalacheck.Arbitrary._
 import org.scalacheck.{Arbitrary, Gen}
 import pages.{HowManyFilesUploadPage, MrnEntryPage}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.{JsNumber, JsString}
 import play.api.libs.ws.WSResponse
 import play.api.test.Helpers._
@@ -37,7 +36,6 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import views.DomAssertions
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
 
 class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssertions {
 
@@ -71,12 +69,11 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
 
   private val fakeContactDetailsRequiredAction = arbitraryFakeContactDetailsActions.arbitrary.retryUntil(_ => true).sample.get
   private val mockCustomsDeclarationsService = mock[CustomsDeclarationsService]
-  private val mockWSResponse = mock[WSResponse]
   private val mockUpscanConnector = mock[UpscanConnector]
 
   override def beforeEach: Unit = {
     super.beforeEach
-    reset(mockCustomsDeclarationsService, mockWSResponse, mockUpscanConnector)
+    reset(mockCustomsDeclarationsService, mockUpscanConnector)
     when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(FileUploadResponse(List())))
   }
 
@@ -147,48 +144,84 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
       status(result) mustBe BAD_REQUEST
     }
-//
-//    "return an ok and save to the data cache when valid data is submitted" in {
-//      val fileUploadResponse = FileUploadResponse(List(
-//        FileUpload("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> ""))), id = "id1"),
-//        FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> ""))), id = "id2"),
-//        FileUpload("someFileRef3", Waiting(UploadRequest("http://s3bucket/myfile3", Map("" -> ""))), id = "id3")
-//      ))
-//      val fileUploadsAfterContactDetails = fileUploadResponse.uploads.tail
-//
-//      when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
-//      when(mockUpscanConnector.upload(any(), any())).thenReturn(Future.successful(RedirectUrl("success")))
-//      when(mockDataCacheConnector.save(any())(any[HeaderCarrier])).thenReturn(Future.successful(CacheMap("", Map.empty)))
-//      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2")
-//
-//      val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
-//
-//      status(result) mustBe SEE_OTHER
-//      val nextRef = fileUploadsAfterContactDetails.map(_.reference).min
-//      redirectLocation(result) mustBe Some(routes.UpscanStatusController.onPageLoad(nextRef).url)
-//      val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
-//      verify(mockDataCacheConnector).save(captor.capture())(any[HeaderCarrier])
-//      val Some(fileUploadCount) = FileUploadCount(2)
-//      captor.getValue.getEntry[FileUploadCount](HowManyFilesUploadPage) mustBe Some(fileUploadCount)
-//      captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response) mustBe Some(FileUploadResponse(fileUploadResponse.uploads.tail))
-//    }
-//
-//    "redirect to error page when contact details upload fails" in {
-//      val fileUploadResponse = FileUploadResponse(List(
-//        FileUpload("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> ""))), id = "id1"),
-//        FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> ""))), id = "id2")
-//      ))
-//      reset(mockUpscanConnector)
-//      when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
-//      when(mockUpscanConnector.upload(any(), any())).thenReturn(Failure(new IllegalStateException()))
-//
-//      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2")
-//
-//      val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
-//
-//      status(result) mustBe SEE_OTHER
-//      redirectLocation(result) mustBe Some("/cds-file-upload-service/error")
-//    }
+
+    "return an ok and save to the data cache when valid data is submitted" in {
+
+      val wsResponse = mock[WSResponse]
+      when(wsResponse.header("Location")).thenReturn(Some("upscan-success"))
+      when(wsResponse.status).thenReturn(303)
+
+      val fileUploadResponse = FileUploadResponse(List(
+        FileUpload("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> ""))), id = "id1"),
+        FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> ""))), id = "id2"),
+        FileUpload("someFileRef3", Waiting(UploadRequest("http://s3bucket/myfile3", Map("" -> ""))), id = "id3")
+      ))
+      val fileUploadsAfterContactDetails = fileUploadResponse.uploads.tail
+
+      when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
+      when(mockUpscanConnector.upload(any(), any())).thenReturn(Future.successful(wsResponse))
+      when(mockDataCacheConnector.save(any())(any[HeaderCarrier])).thenReturn(Future.successful(CacheMap("", Map.empty)))
+      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2")
+
+      val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
+
+      status(result) mustBe SEE_OTHER
+      val nextRef = fileUploadsAfterContactDetails.map(_.reference).min
+      redirectLocation(result) mustBe Some(routes.UpscanStatusController.onPageLoad(nextRef).url)
+      val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
+      verify(mockDataCacheConnector).save(captor.capture())(any[HeaderCarrier])
+      val Some(fileUploadCount) = FileUploadCount(2)
+      captor.getValue.getEntry[FileUploadCount](HowManyFilesUploadPage) mustBe Some(fileUploadCount)
+      captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response) mustBe Some(FileUploadResponse(fileUploadResponse.uploads.tail))
+    }
+
+    "redirect to error page when contact details upload fails" in {
+
+      val wsResponse = mock[WSResponse]
+      when(wsResponse.header("Location")).thenReturn(Some("upscan-error"))
+      when(wsResponse.status).thenReturn(303)
+
+
+      val fileUploadResponse = FileUploadResponse(List(
+        FileUpload("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> ""))), id = "id1"),
+        FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> ""))), id = "id2")
+      ))
+      reset(mockUpscanConnector)
+      when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
+      val f = new RuntimeException("something went wrong")
+      when(mockUpscanConnector.upload(any(), any())).thenReturn(Future.successful(wsResponse))
+
+      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2")
+
+      val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
+
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some("/cds-file-upload-service/error")
+    }
+
+    "redirect to error page when contact details upscan responds 400" in {
+
+      val wsResponse = mock[WSResponse]
+      when(wsResponse.header("Location")).thenReturn(Some("upscan-error"))
+      when(wsResponse.status).thenReturn(400)
+
+
+      val fileUploadResponse = FileUploadResponse(List(
+        FileUpload("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> ""))), id = "id1"),
+        FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> ""))), id = "id2")
+      ))
+      reset(mockUpscanConnector)
+      when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
+      val f = new RuntimeException("something went wrong")
+      when(mockUpscanConnector.upload(any(), any())).thenReturn(Future.successful(wsResponse))
+
+      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2")
+
+      val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
+
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some("/cds-file-upload-service/error")
+    }
 
     "make a request to customs declarations" in {
       val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2")
