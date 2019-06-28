@@ -16,11 +16,10 @@
 
 package connectors
 
-import java.io.{File, PrintWriter}
 import java.util.UUID
 
 import akka.stream.Materializer
-import akka.stream.scaladsl.{FileIO, Source}
+import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import config.AppConfig
 import javax.inject.{Inject, Singleton}
@@ -28,7 +27,7 @@ import models.{ContactDetails, UploadRequest}
 import play.api.Logger
 import play.api.libs.ws.{BodyWritable, DefaultWSProxyServer, InMemoryBody, WSClient}
 import play.api.mvc.MultipartFormData
-import play.api.mvc.MultipartFormData._
+import play.api.mvc.MultipartFormData.{DataPart, FilePart}
 import play.core.formatters.Multipart
 
 import scala.concurrent.duration.{Duration, SECONDS}
@@ -37,7 +36,7 @@ import scala.concurrent.{Await, ExecutionContext}
 @Singleton
 class UpscanConnector @Inject()(conf:AppConfig, wsClient: WSClient)(implicit ec: ExecutionContext, materializer: Materializer) {
 
-  def upload(upload: UploadRequest, contactDetails: ContactDetails)= {
+  def upload(upload: UploadRequest, contactDetails: ContactDetails) = {
     val settings = conf.proxy
 
     Logger.warn(s"Connecting to proxy = ${settings.proxyRequiredForThisEnvironment}")
@@ -64,29 +63,16 @@ class UpscanConnector @Inject()(conf:AppConfig, wsClient: WSClient)(implicit ec:
       )
     }
 
-
-    val filePart = FilePart("file", fileName, Some("text/plain"), FileIO.fromPath(toFile(contactDetails).toPath))
+    val filePart = FilePart("file", fileName, Some("text/plain"), Source.single(ByteString(contactDetails.toString)))
 
     Logger.warn(s"Upload url: ${req.url}")
     Logger.warn(s"Upload URI: ${req.uri}")
     Logger.warn(s"Upload Headers: ${req.headers}")
 
-    req.post[Source[MultipartFormData.Part[Source[ByteString, _]], _]](Source(dataparts ++ List(filePart)))(multipartBodyWriter)
+    val body = dataparts ++ List(filePart)
+
+    req.post[Source[MultipartFormData.Part[Source[ByteString, _]], _]](Source(body))(multipartBodyWriter)
   }
 
   private def fileName = s"contact_details_${UUID.randomUUID().toString}.txt"
-
-  def toFile(contactDetails: ContactDetails) = {
-    val uploadFile = File.createTempFile("cds-file-upload-ui", "")
-
-    new PrintWriter(uploadFile) {
-      try {
-        write(contactDetails.toString())
-      } finally {
-        close()
-      }
-    }
-
-    uploadFile
-  }
 }
