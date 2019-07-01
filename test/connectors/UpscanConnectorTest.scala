@@ -14,98 +14,56 @@
  * limitations under the License.
  */
 
-//package connectors
-//
-//import base.SpecBase
-//import com.github.tomakehurst.wiremock.client.WireMock._
-//import models.{ContactDetails, UploadRequest}
-//import play.api.http.Status
-//import play.api.libs.ws.WSClient
-//
-//class UpscanConnectorTest extends WiremockTestServer  with SpecBase {
-//
-//  val wsClient = mock[WSClient]
-//
-//  private val connector = new UpscanConnector(appConfig, wsClient)
-//  val contactDetails = ContactDetails("a","b","c","d")
-//
-//
-//  "Upload" should {
-//
-//    "POST to Upscan" in {
-//      stubFor(
-//        post("/path")
-//          .willReturn(
-//            aResponse()
-//              .withStatus(Status.SEE_OTHER)
-//              .withHeader("Location", "upscan-success")
-//          )
-//      )
-//
-//      val templateUploading = UploadRequest(
-//        href = s"$wireMockUrl/path",
-//        fields = Map(
-//          "key" -> "value"
-//        )
-//      )
-//      val res = connector.upload(templateUploading, contactDetails)
-//      res.futureValue mustBe Status.SEE_OTHER
-//
-//      verify(
-//        postRequestedFor(urlEqualTo("/path"))
-//      )
-//    }
-//
-////    "Fail for error redirect" in {
-////      stubFor(
-////        post("/path")
-////          .willReturn(
-////            aResponse()
-////              .withStatus(Status.SEE_OTHER)
-////              .withHeader("Location", "error")
-////          )
-////      )
-////
-////      val templateUploading = UploadRequest(
-////        href = s"$wireMockUrl/path",
-////        fields = Map(
-////          "key" -> "value"
-////        )
-////      )
-////      val res = connector.upload(templateUploading, contactDetails)
-////      res..failure.exception must have message "Uploading contact details to s3 failed"
-////
-////      verify(
-////        postRequestedFor(urlEqualTo("/path"))
-////      )
-////    }
-////
-////    "Handle Bad Responses" in {
-////      stubFor(
-////        post("/path")
-////          .willReturn(
-////            aResponse()
-////              .withStatus(Status.BAD_GATEWAY)
-////              .withBody("content")
-////          )
-////      )
-////
-////      val templateUploading = UploadRequest(
-////        href = s"$wireMockUrl/path",
-////        fields = Map(
-////          "key" -> "value"
-////        )
-////      )
-////
-////      val result = connector.upload(templateUploading, contactDetails)
-////      result.failure.exception must have message "Uploading contact details to s3 failed"
-////
-////      verify(
-////        postRequestedFor(urlEqualTo("/path"))
-////      )
-////    }
-//
-//  }
-//
-//}
-//
+package connectors
+
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.Source
+import akka.util.ByteString
+import base.SpecBase
+import models.{ContactDetails, UploadRequest}
+import org.mockito.ArgumentMatchers.{eq => eqTo, _}
+import org.mockito.Mockito._
+import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.PlaySpec
+import play.api.http.Status
+import play.api.libs.ws.ahc.AhcWSResponse
+import play.api.libs.ws.ahc.cache.CacheableHttpResponseStatus
+import play.api.libs.ws.{WSClient, WSRequest}
+import play.api.mvc.MultipartFormData
+import play.shaded.ahc.org.asynchttpclient.uri.Uri;
+import scala.concurrent.Future
+import play.shaded.ahc.org.asynchttpclient.Response
+
+
+class UpscanConnectorTest extends PlaySpec with MockitoSugar with SpecBase {
+
+  val uploadUrl = "http://localhost/theUploadUrl"
+  val as = ActorSystem("test-system")
+  implicit val materializer = ActorMaterializer()(as)
+  val contactDetails = ContactDetails("a", "b", "c", "d")
+
+
+  "Upload" should {
+
+    "POST to Upscan" in {
+      val wsClient = mock[WSClient]
+      val wsRequest = mock[WSRequest]
+      val connector = new UpscanConnector(appConfig, wsClient)
+      when(wsRequest.withFollowRedirects(any())).thenReturn(wsRequest)
+      when(wsClient.url(eqTo(uploadUrl))).thenReturn(wsRequest)
+      val response = new AhcWSResponse(new Response.ResponseBuilder()
+        .accumulate(new CacheableHttpResponseStatus(Uri.create(uploadUrl), 303, "Everything is fine", "protocols"))
+        .build())
+      when(wsRequest.post[Source[MultipartFormData.Part[Source[ByteString, _]], _]](any())(any())).thenReturn(Future.successful(response))
+
+      val uploadRequest = UploadRequest(href = uploadUrl, fields = Map("key" -> "value"))
+      val res = connector.upload(uploadRequest, contactDetails)
+      res.futureValue.status mustBe Status.SEE_OTHER
+
+    }
+
+  }
+
+}
+
