@@ -27,10 +27,7 @@ import org.mockito.Mockito._
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen
 import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
-import play.api.libs.Files.TemporaryFile
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
-import play.api.mvc.MultipartFormData.FilePart
 import play.api.test.Helpers._
 import repositories.NotificationRepository
 import uk.gov.hmrc.http.HeaderCarrier

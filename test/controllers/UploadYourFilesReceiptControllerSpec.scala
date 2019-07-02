@@ -18,14 +18,13 @@ package controllers
 
 import controllers.actions.{DataRetrievalAction, FileUploadResponseRequiredAction}
 import models.{FileUpload, FileUploadResponse, Notification}
-import pages.HowManyFilesUploadPage
-import play.api.libs.json.{JsString, Json}
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.mockito.ArgumentMatchers.{eq => eqTo, _}
+import pages.HowManyFilesUploadPage
+import play.api.libs.json.Json
 import play.api.test.Helpers._
-import uk.gov.hmrc.http.cache.client.CacheMap
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import repositories.NotificationRepository
+import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.{ExecutionContext, Future}
 

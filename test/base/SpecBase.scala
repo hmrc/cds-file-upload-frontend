@@ -16,7 +16,7 @@
 
 package base
 
-import config.{AppConfig, Assets, ContactFrontend}
+import config.AppConfig
 import generators.Generators
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
@@ -24,12 +24,9 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.PropertyChecks
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice._
-import play.api.{Configuration, Environment}
-import play.api.http.{DefaultFileMimeTypes, FileMimeTypesConfiguration}
-import play.api.i18n.{DefaultLangs, DefaultMessagesApi, Messages, MessagesApi}
-import play.api.mvc.{DefaultActionBuilder, DefaultMessagesActionBuilderImpl, DefaultMessagesControllerComponents, MessagesControllerComponents}
-import play.api.test.{FakeRequest, NoMaterializer}
-import play.api.test.Helpers.{stubBodyParser, stubLangs, stubPlayBodyParsers}
+import play.api.i18n.{Messages, MessagesApi}
+import play.api.mvc.MessagesControllerComponents
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext
@@ -40,17 +37,6 @@ trait SpecBase extends PlaySpec with MockitoSugar with BeforeAndAfterEach with P
   implicit lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
   implicit val mcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
 
-
-    //TODO remove GuiceOneServerPerSuite to speed up the tests
-  //Gabor
-//  val env = Environment.simple()
-//  val configuration = Configuration.load(env)
-//  //implicit val messagesApi = new DefaultMessagesApi(env, configuration, new DefaultLangs(configuration))
-//  implicit val messagesApi = new DefaultMessagesApi(Map("en" ->
-//    Map("error.min" -> "minimum!")
-//  ))
-//  implicit val appConfig = pureconfig.loadConfigOrThrow[AppConfig]
-
   lazy val fakeRequest = FakeRequest("", "")
 
   implicit lazy val messages: Messages = messagesApi.preferred(fakeRequest)
@@ -58,16 +44,6 @@ trait SpecBase extends PlaySpec with MockitoSugar with BeforeAndAfterEach with P
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
   implicit val executionContext = ExecutionContext.global
-//Gabor
-  //  implicit val mcc: MessagesControllerComponents =  DefaultMessagesControllerComponents(
-//    messagesActionBuilder = new DefaultMessagesActionBuilderImpl(stubBodyParser(),  messagesApi)(executionContext),
-//    actionBuilder = DefaultActionBuilder(stubBodyParser())(ExecutionContext.global),
-//    parsers = stubPlayBodyParsers(NoMaterializer),
-//    messagesApi = messagesApi,
-//    langs = stubLangs(),
-//    fileMimeTypes = new DefaultFileMimeTypes(FileMimeTypesConfiguration(Map.empty)),
-//    executionContext = executionContext
-//  )
 
 
   // toJson strips out Some and None and replaces them with string values

@@ -25,7 +25,6 @@ import org.mockito.Mockito.{times, verify}
 import org.scalacheck.Arbitrary._
 import pages.ContactDetailsPage
 import play.api.data.Form
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier

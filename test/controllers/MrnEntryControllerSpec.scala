@@ -25,7 +25,6 @@ import org.mockito.Mockito._
 import org.scalacheck.Arbitrary._
 import pages.MrnEntryPage
 import play.api.data.Form
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.JsString
 import play.api.test.Helpers.{status, _}
 import uk.gov.hmrc.http.HeaderCarrier

@@ -19,7 +19,7 @@ package controllers.notification
 import config.AppConfig
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.mvc.{Action, MessagesControllerComponents}
+import play.api.mvc.MessagesControllerComponents
 import services.NotificationService
 import uk.gov.hmrc.http.BadRequestException
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController

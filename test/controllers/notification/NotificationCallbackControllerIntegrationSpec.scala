@@ -20,20 +20,13 @@ import config.AppConfig
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.ws.WSClient
-import play.api.test.Helpers
 import play.api.test.Helpers._
-import play.test.WSTestClient
 
 class NotificationCallbackControllerIntegrationSpec extends PlaySpec with GuiceOneServerPerSuite {
 
 
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
   val wsClient = app.injector.instanceOf[WSClient]
-
-    //Gabor
-//    lazy val appConfig = pureconfig.loadConfigOrThrow[AppConfig]
-//    val wsClient = WSTestClient.newClient(Helpers.testServerPort)
-
 
   val notificationUrl = s"http://localhost:$port/internal/notification"
 
