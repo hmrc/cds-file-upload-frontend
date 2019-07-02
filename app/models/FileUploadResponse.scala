@@ -27,13 +27,8 @@ object UploadRequest {
   implicit val format = Json.format[UploadRequest]
 }
 
-case class RedirectUrl(url: String)
 
-object RedirectUrl {
-  implicit val format = Json.format[RedirectUrl]
-}
-
-case class FileUpload(reference: String, state: FileState, filename: String = "", successUrl: RedirectUrl = RedirectUrl("success"), errorUrl: RedirectUrl = RedirectUrl("error"), id: String)
+case class FileUpload(reference: String, state: FileState, filename: String = "", id: String)
 
 object FileUpload {
   implicit val format = Json.format[FileUpload]
@@ -53,7 +48,6 @@ object FileUploadResponse {
         val reference = (file \ "Reference").text.trim
         val href = (file \ "UploadRequest" \ "Href").text.trim
         val successUrl = (file \ "UploadRequest" \ "Fields" \ "success_action_redirect").text.trim
-        val errorUrl = (file \ "UploadRequest" \ "Fields" \ "error_action_redirect").text.trim
         val fields: Map[String, String] =
           (file \ "UploadRequest" \ "Fields" \ "_")
             .theSeq
@@ -64,7 +58,7 @@ object FileUploadResponse {
             }
             .toMap
 
-        FileUpload(reference, Waiting(UploadRequest(href, fields)), successUrl = RedirectUrl(successUrl), errorUrl = RedirectUrl(errorUrl), id = successUrl.split('/').last)
+        FileUpload(reference, Waiting(UploadRequest(href, fields)), id = successUrl.split('/').last)
     }.toList
 
     FileUploadResponse(files)

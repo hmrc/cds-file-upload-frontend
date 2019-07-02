@@ -61,7 +61,7 @@ class UpscanStatusController @Inject()(authenticate: AuthAction,
       req.fileUploadResponse.uploads.find(_.reference == ref) match {
         case Some(upload) =>
           upload.state match {
-            case Waiting(ur) => Future.successful(Ok(views.html.upload_your_files(ur, refPosition, upload.successUrl, upload.errorUrl)))
+            case Waiting(ur) => Future.successful(Ok(views.html.upload_your_files(ur, refPosition)))
             case _ => nextPage(upload.reference, req.fileUploadResponse.uploads)
           }
 
@@ -95,7 +95,7 @@ class UpscanStatusController @Inject()(authenticate: AuthAction,
     def nextFile(file: FileUpload) = routes.UpscanStatusController.onPageLoad(file.reference)
 
     val nextFileToUpload = files.collectFirst {
-      case file@FileUpload(reference, Waiting(_), _,  _, _, _) if reference > ref => file
+      case file@FileUpload(reference, Waiting(_),  _, _) if reference > ref => file
     }
 
     nextFileToUpload match {

@@ -68,8 +68,6 @@ class FileUploadResponseSpec extends SpecBase with XmlBehaviours {
               "error_action_redirect" -> "https://error-redirect/abc-211"
             )
           )),
-          successUrl = RedirectUrl("https://success-redirect/abc-211"),
-          errorUrl = RedirectUrl("https://error-redirect/abc-211"),
           id = "abc-211"
         ),
         FileUpload(
@@ -84,8 +82,6 @@ class FileUploadResponseSpec extends SpecBase with XmlBehaviours {
               "error_action_redirect" -> "https://error-redirect2/fyr-993"
             )
           )),
-          successUrl = RedirectUrl("https://success-redirect2/fyr-993"),
-          errorUrl = RedirectUrl("https://error-redirect2/fyr-993"),
           id = "fyr-993"
           
         )
