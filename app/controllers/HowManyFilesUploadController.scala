@@ -25,14 +25,13 @@ import models._
 import models.requests.MrnRequest
 import pages.HowManyFilesUploadPage
 import play.api.Logger
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.CustomsDeclarationsService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 @Singleton
 class HowManyFilesUploadController @Inject()(authenticate: AuthAction,
@@ -120,5 +119,5 @@ class HowManyFilesUploadController @Inject()(authenticate: AuthAction,
     customsDeclarationsService.batchFileUpload(req.eori, req.mrn, fileUploadCount)
 
   private def firstUploadFile(response: FileUploadResponse): Either[Throwable, (FileUpload, UploadRequest)] =
-    response.uploads.headOption map { case f@FileUpload(_, Waiting(u), _, _, _, _) => Right((f, u)) } getOrElse Left(new IllegalStateException("Unable to initiate upload"))
+    response.uploads.headOption map { case f@FileUpload(_, Waiting(u), _, _) => Right((f, u)) } getOrElse Left(new IllegalStateException("Unable to initiate upload"))
 }

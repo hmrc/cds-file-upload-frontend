@@ -54,7 +54,7 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
     val fileGroupSize = (scala.xml.XML.loadString(req.body.mkString) \ "FileGroupSize").text.toInt
 
     val resp = FileUploadResponse((1 to fileGroupSize).map { i =>
-      FileUpload(i.toString, waiting(i.toString), successUrl = RedirectUrl(s"http://localhost:6793/cds-file-upload-service/upload/upscan-success/$i"), errorUrl = RedirectUrl(s"http://localhost:6793/cds-file-upload-service/upload/upscan-error/$i"), id = s"$i")
+      FileUpload(i.toString, waiting(i.toString), id = s"$i")
     }.toList)
 
     Ok(XmlHelper.toXml(resp)).as(ContentTypes.XML)

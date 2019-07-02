@@ -130,7 +130,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
             val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad(file.reference)(fakeRequest)
 
             status(result) mustBe OK
-            contentAsString(result) mustBe viewAsString(ur, refPosition, RedirectUrl("success"), RedirectUrl("error"))
+            contentAsString(result) mustBe viewAsString(ur, refPosition)
         }
       }
     }
@@ -392,8 +392,8 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
 
   }
 
-  private def viewAsString(uploadRequest: UploadRequest, refPosition: Position, successRedirect: RedirectUrl, errorRedirect: RedirectUrl) =
-    upload_your_files(uploadRequest, refPosition, successRedirect, errorRedirect)(fakeRequest, messages, appConfig, fakeRequest.flash).toString
+  private def viewAsString(uploadRequest: UploadRequest, refPosition: Position) =
+    upload_your_files(uploadRequest, refPosition)(fakeRequest, messages, appConfig, fakeRequest.flash).toString
 
   private def combine(response: FileUploadResponse, cache: CacheMap) =
     cache.copy(data = cache.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))

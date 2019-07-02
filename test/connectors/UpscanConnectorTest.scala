@@ -62,8 +62,6 @@ class UpscanConnectorTest extends PlaySpec with MockitoSugar with SpecBase {
       res.futureValue.status mustBe Status.SEE_OTHER
 
     }
-
   }
-
 }
 
