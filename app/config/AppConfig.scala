@@ -75,4 +75,3 @@ case class Notifications(authToken: String, maxRetries: Int, retryPauseMillis: I
 case class Feedback(url: String)
 
 case class Proxy(protocol:String, host:String, port:Int,username:String,password:String,proxyRequiredForThisEnvironment:Boolean)
-//case class Prod(proxy:Proxy)
