@@ -47,7 +47,7 @@ val compileDependencies = Seq(
   "com.typesafe.play" %% "play-json" % "2.6.0",
   "uk.gov.hmrc" %% "play-whitelist-filter" % "2.0.0",
   "uk.gov.hmrc" %% "crypto" % "5.3.0",
-  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.19.0-play-26"
+  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.20.0-play-26"
 )
 
 val testDependencies = Seq(
