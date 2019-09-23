@@ -37,7 +37,7 @@ val httpComponentsVersion = "4.5.8"
 
 val compileDependencies = Seq(
   "uk.gov.hmrc" %% "govuk-template" % "5.35.0-play-26",
-  "uk.gov.hmrc" %% "play-ui" % "7.40.0-play-26",
+  "uk.gov.hmrc" %% "play-ui" % "8.2.0-play-26",
   "uk.gov.hmrc" %% "bootstrap-play-26" % "0.34.0",
   "uk.gov.hmrc" %% "auth-client" % "2.22.0-play-26",
   "com.github.pureconfig" %% "pureconfig" % "0.9.2",

@@ -29,7 +29,8 @@ case class AppConfig(
                       fileFormats: FileFormats,
                       notifications: Notifications,
                       feedback: Feedback,
-                      proxy: Proxy)
+                      proxy: Proxy,
+                      accessibilityLinkUrl: String)
 
 object AppConfig {
   implicit val appNameHint: ProductHint[AppConfig] = ProductHint(new ConfigFieldMapping {
