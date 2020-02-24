@@ -20,8 +20,10 @@ import org.scalatestplus.play.{PlaySpec}
 
 class AppConfigSpec extends PlaySpec {
 
-  //val cfg = app.injector.instanceOf[AppConfig]
-  val cfg = pureconfig.loadConfigOrThrow[AppConfig]
+  import pureconfig.ConfigSource
+  import pureconfig.generic.auto._
+
+  val cfg = ConfigSource.default.loadOrThrow[AppConfig]
 
   "app config" should {
 

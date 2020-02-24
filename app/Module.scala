@@ -24,7 +24,10 @@ import services.{CustomsDeclarationsService, CustomsDeclarationsServiceImpl}
 
 class Module extends AbstractModule {
 
-  val cfg = pureconfig.loadConfigOrThrow[AppConfig]
+  import pureconfig.ConfigSource
+  import pureconfig.generic.auto._
+
+  val cfg = ConfigSource.default.loadOrThrow[AppConfig]
 
   val csrfConfig = CSRFConfig(
     shouldProtect = !_.uri.matches("*test-only*")

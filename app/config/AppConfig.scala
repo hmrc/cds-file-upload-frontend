@@ -16,8 +16,8 @@
 
 package config
 
-import models.EORI
-import pureconfig.{CamelCase, ConfigFieldMapping, KebabCase, ProductHint}
+import pureconfig.{CamelCase, ConfigFieldMapping, KebabCase}
+import pureconfig.generic.ProductHint
 
 case class AppConfig(
                       appName: String,
