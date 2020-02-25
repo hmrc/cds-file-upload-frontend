@@ -29,14 +29,18 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import scala.concurrent.{ExecutionContext, Future}
 
 class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase {
-  
+
   implicit val ac = appConfig
   val mockNotificationRepository = mock[NotificationRepository]
-  
-  def controller(getData: DataRetrievalAction) = new UploadYourFilesReceiptController(
-    new FakeAuthAction(), new FakeEORIAction(), getData, new FileUploadResponseRequiredAction(), mockNotificationRepository)(
-    appConfig,mcc,executionContext)
 
+  def controller(getData: DataRetrievalAction) =
+    new UploadYourFilesReceiptController(
+      new FakeAuthAction(),
+      new FakeEORIAction(),
+      getData,
+      new FileUploadResponseRequiredAction(),
+      mockNotificationRepository
+    )(appConfig, mcc, executionContext)
 
   def viewAsString(receipts: List[FileUpload]): String = views.html.upload_your_files_receipt(receipts)(fakeRequest, messages, appConfig).toString
 
@@ -50,7 +54,8 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase {
 
         forAll { (response: FileUploadResponse, cache: CacheMap) =>
           response.uploads.foreach { u =>
-            when(mockNotificationRepository.find(any())(any[ExecutionContext])).thenReturn(Future.successful(List(Notification(u.reference, "SUCCESS", "someFile.pdf"))))
+            when(mockNotificationRepository.find(any())(any[ExecutionContext]))
+              .thenReturn(Future.successful(List(Notification(u.reference, "SUCCESS", "someFile.pdf"))))
           }
 
           val updatedCache = cache.copy(data = cache.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))

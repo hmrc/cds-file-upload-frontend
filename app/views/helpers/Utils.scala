@@ -22,27 +22,22 @@ import play.twirl.api.Html
 
 object Utils {
 
-  def errorPrefix(form: Form[_])(implicit messages: Messages): String = {
+  def errorPrefix(form: Form[_])(implicit messages: Messages): String =
     if (form.hasErrors || form.hasGlobalErrors) messages("error.browser.title.prefix") else ""
-  }
 
-  def multiline(values: String*): Html = {
+  def multiline(values: String*): Html =
     Html(values.toList.mkString("<br />"))
-  }
 
   def bold(value: Html): Html = bold(value.body)
 
-  def bold(value: String): Html = {
+  def bold(value: String): Html =
     Html(s"<strong class='bold'>$value</strong>")
-  }
 
-  def email(address: String): Html = {
+  def email(address: String): Html =
     Html(s"""<a href="email:$address">$address</a>""")
-  }
 
   def paragraph(content: Html): Html = paragraph(content.body)
 
-  def paragraph(content: String): Html = {
+  def paragraph(content: String): Html =
     Html(s"<p>$content</p>")
-  }
 }

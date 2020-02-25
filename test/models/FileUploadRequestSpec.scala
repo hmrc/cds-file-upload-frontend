@@ -26,7 +26,6 @@ class FileUploadRequestSpec extends SpecBase with XmlBehaviours {
     "pass schema validation" in {
 
       forAll { request: FileUploadRequest =>
-
         validateFileUploadRequest(request.toXml) mustBe true
       }
     }

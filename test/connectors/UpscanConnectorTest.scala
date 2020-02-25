@@ -35,14 +35,12 @@ import play.shaded.ahc.org.asynchttpclient.uri.Uri;
 import scala.concurrent.Future
 import play.shaded.ahc.org.asynchttpclient.Response
 
-
 class UpscanConnectorTest extends PlaySpec with MockitoSugar with SpecBase {
 
   val uploadUrl = "http://localhost/theUploadUrl"
   val as = ActorSystem("test-system")
   implicit val materializer = ActorMaterializer()(as)
   val contactDetails = ContactDetails("a", "b", "c", "d")
-
 
   "Upload" should {
 
@@ -52,9 +50,11 @@ class UpscanConnectorTest extends PlaySpec with MockitoSugar with SpecBase {
       val connector = new UpscanConnector(appConfig, wsClient)
       when(wsRequest.withFollowRedirects(any())).thenReturn(wsRequest)
       when(wsClient.url(eqTo(uploadUrl))).thenReturn(wsRequest)
-      val response = new AhcWSResponse(new Response.ResponseBuilder()
-        .accumulate(new CacheableHttpResponseStatus(Uri.create(uploadUrl), 303, "Everything is fine", "protocols"))
-        .build())
+      val response = new AhcWSResponse(
+        new Response.ResponseBuilder()
+          .accumulate(new CacheableHttpResponseStatus(Uri.create(uploadUrl), 303, "Everything is fine", "protocols"))
+          .build()
+      )
       when(wsRequest.post[Source[MultipartFormData.Part[Source[ByteString, _]], _]](any())(any())).thenReturn(Future.successful(response))
 
       val uploadRequest = UploadRequest(href = uploadUrl, fields = Map("key" -> "value"))
@@ -64,4 +64,3 @@ class UpscanConnectorTest extends PlaySpec with MockitoSugar with SpecBase {
     }
   }
 }
-

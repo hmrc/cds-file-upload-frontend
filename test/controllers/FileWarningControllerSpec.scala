@@ -23,7 +23,7 @@ import views.html.file_warning
 class FileWarningControllerSpec extends ControllerSpecBase {
 
   def controller(signedInUser: SignedInUser, eori: String) =
-    new FileWarningController(new FakeAuthAction(signedInUser), new FakeEORIAction(eori), appConfig,mcc)
+    new FileWarningController(new FakeAuthAction(signedInUser), new FakeEORIAction(eori), appConfig, mcc)
 
   def viewAsString() = file_warning()(fakeRequest, messages, appConfig).toString
 

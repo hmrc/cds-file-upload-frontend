@@ -35,11 +35,7 @@ class MRNFormProviderSpec extends SpecBase {
     "return success for valid MRN" in {
 
       forAll(validMRNGen) { mrn =>
-
-        form.bind(Map("value" -> mrn)).fold(
-          _      => fail("Form binding must not fail!"),
-          result => result.value mustBe mrn
-        )
+        form.bind(Map("value" -> mrn)).fold(_ => fail("Form binding must not fail!"), result => result.value mustBe mrn)
       }
     }
 
@@ -48,10 +44,7 @@ class MRNFormProviderSpec extends SpecBase {
       forAll { mrn: String =>
         whenever(!mrn.matches(MRN.validRegex)) {
 
-          form.bind(Map("value" -> mrn)).fold(
-            errors => errorMessage(errors) mustBe "mrn.invalid",
-            _      => fail("Form binding must fail!")
-          )
+          form.bind(Map("value" -> mrn)).fold(errors => errorMessage(errors) mustBe "mrn.invalid", _ => fail("Form binding must fail!"))
         }
       }
     }

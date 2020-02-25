@@ -26,7 +26,8 @@ import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Result}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ContactDetailsRequiredActionImpl @Inject()(val dataCacheConnector: Cache,mcc: MessagesControllerComponents) extends ContactDetailsRequiredAction {
+class ContactDetailsRequiredActionImpl @Inject()(val dataCacheConnector: Cache, mcc: MessagesControllerComponents)
+    extends ContactDetailsRequiredAction {
 
   implicit val executionContext: ExecutionContext = mcc.executionContext
   private val onError = Redirect(routes.ErrorPageController.error())

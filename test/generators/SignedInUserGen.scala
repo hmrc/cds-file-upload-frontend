@@ -29,39 +29,41 @@ trait SignedInUserGen {
   implicit lazy val arbitraryUser: Arbitrary[SignedInUser] = Arbitrary(userGen)
 
   lazy val userGen: Gen[SignedInUser] = for {
-    credentials   <- credentialsGen
-    name          <- nameGen
-    email         <- option(arbitrary[String])
+    credentials <- credentialsGen
+    name <- nameGen
+    email <- option(arbitrary[String])
     affinityGroup <- option(affinityGroupGen)
-    internalId    <- arbitrary[String]
-    enrolments    <- enrolmentsGen
+    internalId <- arbitrary[String]
+    enrolments <- enrolmentsGen
   } yield SignedInUser(credentials, name, email, affinityGroup, internalId, enrolments)
 
   val credentialsGen: Gen[Credentials] = for {
-    providerId   <- arbitrary[String]
+    providerId <- arbitrary[String]
     providerType <- arbitrary[String]
   } yield Credentials(providerId, providerType)
 
   val nameGen: Gen[Name] = for {
-    name     <- option(arbitrary[String])
+    name <- option(arbitrary[String])
     lastName <- option(arbitrary[String])
   } yield Name(name, lastName)
 
   val affinityGroupGen: Gen[AffinityGroup] =
     Gen.oneOf(Individual, Organisation, Agent)
 
-  val enrolmentGen: Gen[Enrolment] = Gen.oneOf(
-    "HMRC-CUS-ORG",
-    "HMRC-ATED-ORG",
-    "IR-CT",
-    "IR-SA",
-    "HMCE-VATDEC-ORG",
-    "HMRC-AWRS-ORG",
-    "HMRC-PSA-ORG",
-    "IR-SA-AGENT",
-    "IR-PAYE",
-    "HMRC-EI-ORG"
-  ).map(Enrolment(_))
+  val enrolmentGen: Gen[Enrolment] = Gen
+    .oneOf(
+      "HMRC-CUS-ORG",
+      "HMRC-ATED-ORG",
+      "IR-CT",
+      "IR-SA",
+      "HMCE-VATDEC-ORG",
+      "HMRC-AWRS-ORG",
+      "HMRC-PSA-ORG",
+      "IR-SA-AGENT",
+      "IR-PAYE",
+      "HMRC-EI-ORG"
+    )
+    .map(Enrolment(_))
 
   val enrolmentsGen: Gen[Enrolments] =
     listOf(enrolmentGen).map(es => Enrolments(es.toSet))

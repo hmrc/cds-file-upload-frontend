@@ -30,12 +30,13 @@ class FileUploadCountProvider {
   def fileUploadCountFormatter(errorKey: String): Formatter[FileUploadCount] = new Formatter[FileUploadCount] {
 
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], FileUploadCount] =
-      data.get(key)
+      data
+        .get(key)
         .flatMap(s => Try(s.toInt).toOption)
         .flatMap(FileUploadCount(_)) match {
-          case None        => Left(Seq(FormError(key, errorKey)))
-          case Some(count) => Right(count)
-        }
+        case None        => Left(Seq(FormError(key, errorKey)))
+        case Some(count) => Right(count)
+      }
 
     override def unbind(key: String, value: FileUploadCount): Map[String, String] =
       Map(key -> value.value.toString)

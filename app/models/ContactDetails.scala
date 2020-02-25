@@ -18,10 +18,7 @@ package models
 
 import play.api.libs.json.Json
 
-case class ContactDetails(name: String,
-                          companyName: String,
-                          phoneNumber: String,
-                          email: String) {
+case class ContactDetails(name: String, companyName: String, phoneNumber: String, email: String) {
 
   override def toString: String =
     s"""Name: $name

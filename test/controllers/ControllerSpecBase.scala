@@ -41,11 +41,14 @@ abstract class ControllerSpecBase extends SpecBase with FakeActions {
   def withSignedInUser(user: SignedInUser)(test: => Unit): Unit = {
     when(
       mockAuthConnector
-        .authorise(
-          any(),
-          eqTo(credentials and name and email and affinityGroup and internalId and allEnrolments))(any(), any())
+        .authorise(any(), eqTo(credentials and name and email and affinityGroup and internalId and allEnrolments))(any(), any())
     ).thenReturn(
-      Future.successful(new ~(new ~(new ~(new ~(new ~(Some(user.credentials), Some(user.name)), user.email), user.affinityGroup), Some(user.internalId)), user.enrolments))
+      Future.successful(
+        new ~(
+          new ~(new ~(new ~(new ~(Some(user.credentials), Some(user.name)), user.email), user.affinityGroup), Some(user.internalId)),
+          user.enrolments
+        )
+      )
     )
 
     test

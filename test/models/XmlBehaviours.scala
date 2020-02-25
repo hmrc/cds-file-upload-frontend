@@ -32,12 +32,12 @@ trait XmlBehaviours {
   val fileUploadResponse: Seq[String] = Seq("/FileUploadResponse.xsd")
 
   def validateFileUploadRequest(elem: => Elem): Boolean =
-      validateXml(elem, fileUploadRequest)
+    validateXml(elem, fileUploadRequest)
 
   def validateFileUploadResponse(elem: => Elem): Boolean =
     validateXml(elem, fileUploadResponse)
 
-  def validateXml(elem: => Elem, schemas: Seq[String]): Boolean = {
+  def validateXml(elem: => Elem, schemas: Seq[String]): Boolean =
     try {
       validateAgainstSchemaResources(elem, schemas)
       true
@@ -46,7 +46,6 @@ trait XmlBehaviours {
         e.printStackTrace()
         false
     }
-  }
 
   private def validateAgainstSchemaResources(xml: Elem, schemas: Seq[String]): Unit = {
     val schema: Schema = {

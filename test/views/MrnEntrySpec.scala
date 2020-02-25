@@ -24,7 +24,6 @@ import play.twirl.api.{Html, HtmlFormat}
 import views.behaviours.StringViewBehaviours
 import views.html.mrn_entry
 
-
 class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with PropertyChecks {
 
   val form = new MRNFormProvider()()
@@ -37,11 +36,6 @@ class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with Pro
 
   "MRN Entry Page" must {
     behave like normalPage(view, messagePrefix)
-    behave like stringPage(
-      createViewUsingForm,
-      "value",
-      messagePrefix,
-      List("mrnEntryPage.hint1", "mrnEntryPage.hint2"))
+    behave like stringPage(createViewUsingForm, "value", messagePrefix, List("mrnEntryPage.hint1", "mrnEntryPage.hint2"))
   }
 }
-

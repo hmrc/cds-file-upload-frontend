@@ -24,10 +24,11 @@ import play.api.mvc.MessagesControllerComponents
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 @Singleton
-class SignOutController @Inject()(authenticate: AuthAction, mcc: MessagesControllerComponents, implicit val appConfig: AppConfig) extends FrontendController(mcc) with I18nSupport {
+class SignOutController @Inject()(authenticate: AuthAction, mcc: MessagesControllerComponents, implicit val appConfig: AppConfig)
+    extends FrontendController(mcc) with I18nSupport {
 
   val feedbackLink = appConfig.feedback.url
-  
+
   def signOut = authenticate { implicit req =>
     Redirect(feedbackLink).withNewSession
   }

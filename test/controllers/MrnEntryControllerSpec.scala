@@ -42,9 +42,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
       fakeContactDetailsRequiredAction(cache, contactDetails)
     }
 
-  def controller(signedInUser: SignedInUser,
-                 eori: String,
-                 requireContactDetails: ContactDetailsRequiredAction) =
+  def controller(signedInUser: SignedInUser, eori: String, requireContactDetails: ContactDetailsRequiredAction) =
     new MrnEntryController(
       new FakeAuthAction(signedInUser),
       new FakeEORIAction(eori),
@@ -53,7 +51,8 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
       new MRNFormProvider,
       mockDataCacheConnector,
       appConfig,
-      mcc)(executionContext)
+      mcc
+    )(executionContext)
 
   def viewAsString(form: Form[MRN] = form) = views.html.mrn_entry(form)(fakeRequest, messages, appConfig).toString
 
@@ -61,7 +60,6 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
     "load the correct page when user is logged in " in {
 
       forAll(arbitrary[SignedInUser], arbitrary[String], contactDetailsRequiredGen) { (user, eori, fakeContactDetails) =>
-
         val result = controller(user, eori, fakeContactDetails).onPageLoad(fakeRequest)
 
         status(result) mustBe OK
@@ -71,64 +69,51 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
 
     "mrn should be displayed if it exist on the cache" in {
 
-      forAll(arbitrary[SignedInUser], arbitrary[String], arbitrary[MRN]) {
-        (user, eori, mrn) =>
+      forAll(arbitrary[SignedInUser], arbitrary[String], arbitrary[MRN]) { (user, eori, mrn) =>
+        val fakeContactDetails =
+          new FakeContactDetailsRequiredAction(CacheMap("", Map(MrnEntryPage.toString -> JsString(mrn.value))), ContactDetails("", "", "", ""))
+        val result = controller(user, eori, fakeContactDetails).onPageLoad(fakeRequest)
 
-          val fakeContactDetails = new FakeContactDetailsRequiredAction(
-            CacheMap("", Map(MrnEntryPage.toString -> JsString(mrn.value))),
-            ContactDetails("", "", "", "")
-          )
-          val result = controller(user, eori, fakeContactDetails).onPageLoad(fakeRequest)
-
-          contentAsString(result) mustBe viewAsString(form.fill(mrn))
+        contentAsString(result) mustBe viewAsString(form.fill(mrn))
       }
     }
 
     "return an ok when valid data is submitted" in {
 
-      forAll(arbitrary[SignedInUser], arbitrary[String], arbitrary[MRN], contactDetailsRequiredGen) {
-        (user, eori, mrn, fakeContactDetails) =>
+      forAll(arbitrary[SignedInUser], arbitrary[String], arbitrary[MRN], contactDetailsRequiredGen) { (user, eori, mrn, fakeContactDetails) =>
+        val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn.value)
+        val result = controller(user, eori, fakeContactDetails).onSubmit(postRequest)
 
-          val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn.value)
-          val result = controller(user, eori, fakeContactDetails).onSubmit(postRequest)
-
-          status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(routes.FileWarningController.onPageLoad().url)
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result) mustBe Some(routes.FileWarningController.onPageLoad().url)
       }
     }
 
     "return a bad request when invalid data is submitted" in {
 
-      forAll(arbitrary[SignedInUser], arbitrary[String], arbitrary[String], contactDetailsRequiredGen) {
-        (user, eori, mrn, fakeContactDetails) =>
+      forAll(arbitrary[SignedInUser], arbitrary[String], arbitrary[String], contactDetailsRequiredGen) { (user, eori, mrn, fakeContactDetails) =>
+        whenever(!mrn.matches(MRN.validRegex)) {
 
-          whenever(!mrn.matches(MRN.validRegex)) {
+          val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn)
+          val boundForm = form.bind(Map("value" -> mrn))
 
-            val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn)
-            val boundForm = form.bind(Map("value" -> mrn))
+          val result = controller(user, eori, fakeContactDetails).onSubmit(postRequest)
 
-            val result = controller(user, eori, fakeContactDetails).onSubmit(postRequest)
-
-            status(result) mustBe BAD_REQUEST
-            contentAsString(result) mustBe viewAsString(boundForm)
-          }
+          status(result) mustBe BAD_REQUEST
+          contentAsString(result) mustBe viewAsString(boundForm)
+        }
       }
     }
 
     "save data in cache when valid" in {
 
-      forAll(arbitrary[SignedInUser], arbitrary[String], arbitrary[MRN]) {
-        (user, eori, mrn) =>
+      forAll(arbitrary[SignedInUser], arbitrary[String], arbitrary[MRN]) { (user, eori, mrn) =>
+        val expectedMap = CacheMap(user.internalId, Map(MrnEntryPage.toString -> JsString(mrn.value)))
+        val fakeContactDetails = new FakeContactDetailsRequiredAction(expectedMap, ContactDetails("", "", "", ""))
+        val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn.value)
+        await(controller(user, eori, fakeContactDetails).onSubmit(postRequest))
 
-          val expectedMap = CacheMap(user.internalId, Map(MrnEntryPage.toString -> JsString(mrn.value)))
-          val fakeContactDetails = new FakeContactDetailsRequiredAction(
-            expectedMap,
-            ContactDetails("", "", "", "")
-          )
-          val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn.value)
-          await(controller(user, eori, fakeContactDetails).onSubmit(postRequest))
-
-          verify(mockDataCacheConnector).save(eqTo(expectedMap))(any[HeaderCarrier])
+        verify(mockDataCacheConnector).save(eqTo(expectedMap))(any[HeaderCarrier])
       }
     }
   }

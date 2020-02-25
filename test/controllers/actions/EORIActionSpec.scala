@@ -32,9 +32,9 @@ import scala.concurrent.Future
 class EORIActionSpec extends ControllerSpecBase with SignedInUserGen {
 
   lazy val conf = app.injector.instanceOf[Configuration]
-  lazy val env  = app.injector.instanceOf[Environment]
+  lazy val env = app.injector.instanceOf[Environment]
 
-  def authAction = new AuthActionImpl(mockAuthConnector, conf, env,mcc)
+  def authAction = new AuthActionImpl(mockAuthConnector, conf, env, mcc)
   def eoriAction = new EORIRequiredActionImpl(mcc)
 
   def eoriController = new TestController(authAction, eoriAction)
@@ -46,7 +46,6 @@ class EORIActionSpec extends ControllerSpecBase with SignedInUserGen {
       "user has an eori number" in {
 
         forAll { (user: SignedInUser, eori: EORIEnrolment) =>
-
           val eoriEnrolments = user.enrolments.enrolments.filterNot(_.key == "HMRC-CUS-ORG") + eori.enrolment
           val userWithEORI = user.copy(enrolments = Enrolments(eoriEnrolments))
 

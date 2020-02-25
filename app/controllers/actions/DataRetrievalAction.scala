@@ -27,7 +27,7 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class DataRetrievalActionImpl @Inject()(val dataCacheConnector: Cache,mcc: MessagesControllerComponents) extends DataRetrievalAction {
+class DataRetrievalActionImpl @Inject()(val dataCacheConnector: Cache, mcc: MessagesControllerComponents) extends DataRetrievalAction {
 
   implicit val executionContext: ExecutionContext = mcc.executionContext
   override protected def transform[A](request: EORIRequest[A]): Future[OptionalDataRequest[A]] = {

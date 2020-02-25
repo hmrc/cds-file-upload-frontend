@@ -29,7 +29,8 @@ case class SignedInUser(
   email: Option[String],
   affinityGroup: Option[AffinityGroup],
   internalId: String,
-  enrolments: Enrolments)
+  enrolments: Enrolments
+)
 
 object SignedInUser {
 

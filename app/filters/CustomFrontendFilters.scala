@@ -21,4 +21,4 @@ import play.api.http.DefaultHttpFilters
 import uk.gov.hmrc.play.bootstrap.filters.FrontendFilters
 
 class CustomFrontendFilters @Inject()(frontendFilters: FrontendFilters, csrfFilter: CsrfFilter)
-  extends DefaultHttpFilters(frontendFilters.filters :+ csrfFilter: _*)
+    extends DefaultHttpFilters(frontendFilters.filters :+ csrfFilter: _*)

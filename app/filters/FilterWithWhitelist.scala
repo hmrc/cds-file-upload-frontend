@@ -21,4 +21,4 @@ import play.api.http.DefaultHttpFilters
 import uk.gov.hmrc.play.bootstrap.filters.FrontendFilters
 
 class FilterWithWhitelist @Inject()(frontendFilters: FrontendFilters, whitelistFilter: WhitelistFilter)
-  extends DefaultHttpFilters(frontendFilters.filters :+ whitelistFilter: _*)
+    extends DefaultHttpFilters(frontendFilters.filters :+ whitelistFilter: _*)

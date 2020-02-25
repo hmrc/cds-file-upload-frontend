@@ -20,9 +20,7 @@ import java.util.UUID
 
 import scala.xml.Elem
 
-final case class FileUploadRequest(
-  declarationId: MRN,
-  files: Seq[FileUploadFile]) {
+final case class FileUploadRequest(declarationId: MRN, files: Seq[FileUploadFile]) {
 
   def toXml: Elem =
     <FileUploadRequest xmlns="hmrc:fileupload">
@@ -48,7 +46,7 @@ sealed abstract case class FileUploadFile(fileSequenceNo: Int, documentType: Str
 
 object FileUploadFile {
 
-  def apply(fileSequenceNo: Int, documentType: String, serviceUrl: String ): Option[FileUploadFile] =
+  def apply(fileSequenceNo: Int, documentType: String, serviceUrl: String): Option[FileUploadFile] =
     if (fileSequenceNo > 0) Some(new FileUploadFile(fileSequenceNo, documentType, serviceUrl) {})
     else None
 }

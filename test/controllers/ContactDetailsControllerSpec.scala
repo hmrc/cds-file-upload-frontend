@@ -30,7 +30,6 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 
-
 class ContactDetailsControllerSpec extends ControllerSpecBase {
 
   private val form = Form(contactDetailsMapping)
@@ -38,21 +37,15 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
   def view(form: Form[ContactDetails] = form): String = views.html.contact_details(form)(fakeRequest, messages, appConfig).toString
 
   def controller(signedInUser: SignedInUser, eori: String, dataRetrieval: DataRetrievalAction = new FakeDataRetrievalAction(None)) =
-    new ContactDetailsController(
-      new FakeAuthAction(signedInUser),
-      new FakeEORIAction(eori),
-      dataRetrieval,
-      mockDataCacheConnector,
-      appConfig,
-      mcc
-    )(mcc.executionContext)
+    new ContactDetailsController(new FakeAuthAction(signedInUser), new FakeEORIAction(eori), dataRetrieval, mockDataCacheConnector, appConfig, mcc)(
+      mcc.executionContext
+    )
 
   "Contact details page" should {
 
     "load the correct page when user is logged in" in {
 
       forAll { (user: SignedInUser, eori: String) =>
-
         val result = controller(user, eori).onPageLoad(fakeRequest)
 
         status(result) mustBe OK
@@ -63,7 +56,6 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
     "contact details should be displayed if they exist in the cache" in {
 
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
-
         val cacheMap: CacheMap = CacheMap("", Map(ContactDetailsPage.toString -> Json.toJson(contactDetails)))
         val result = controller(user, eori, fakeDataRetrievalAction(cacheMap)).onPageLoad(fakeRequest)
 
@@ -74,7 +66,6 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
     "return an see other when valid data is submitted" in {
 
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
-
         whenever(contactDetails.email.matches(emailRegex)) {
           val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
           val result = controller(user, eori).onSubmit(postRequest)
@@ -89,7 +80,6 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
 
       forAll(arbitrary[SignedInUser], arbitrary[String], arbitrary[ContactDetails], minStringLength(36)) {
         (user, eori, contactDetails, invalidName) =>
-
           val badData = contactDetails.copy(name = invalidName)
 
           val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(badData): _*)
@@ -105,7 +95,6 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
     "save data in cache when valid" in {
 
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
-
         whenever(contactDetails.email.matches(emailRegex)) {
           val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
           await(controller(user, eori).onSubmit(postRequest))

@@ -25,8 +25,8 @@ import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Result}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-
-class FileUploadResponseRequiredAction @Inject()(implicit mcc: MessagesControllerComponents) extends ActionRefiner[OptionalDataRequest, FileUploadResponseRequest] {
+class FileUploadResponseRequiredAction @Inject()(implicit mcc: MessagesControllerComponents)
+    extends ActionRefiner[OptionalDataRequest, FileUploadResponseRequest] {
 
   implicit override val executionContext: ExecutionContext = mcc.executionContext
   private val onError = Redirect(routes.ErrorPageController.error())

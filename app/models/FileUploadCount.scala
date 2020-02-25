@@ -30,7 +30,8 @@ object FileUploadCount {
     else None
 
   implicit val reads: Reads[FileUploadCount] =
-    __.read[Int].map(FileUploadCount(_))
+    __.read[Int]
+      .map(FileUploadCount(_))
       .collect(JsonValidationError("FileUploadCount did not pass validation")) {
         case Some(count) => count
       }

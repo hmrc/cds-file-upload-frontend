@@ -23,10 +23,8 @@ import config.AppConfig
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html._
 
-class StaticPagesController @Inject() (
-                                        implicit val appConfig: AppConfig,
-                                        mcc: MessagesControllerComponents
-                                      ) extends FrontendController(mcc) with I18nSupport {
+class StaticPagesController @Inject()(implicit val appConfig: AppConfig, mcc: MessagesControllerComponents)
+    extends FrontendController(mcc) with I18nSupport {
 
   def accessibility: Action[AnyContent] = Action { implicit request =>
     Ok(views.html.accessibility_statement())

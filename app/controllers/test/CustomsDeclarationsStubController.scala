@@ -29,26 +29,29 @@ import scala.concurrent.ExecutionContext
 import scala.xml._
 
 @Singleton
-class CustomsDeclarationsStubController @Inject()(notificationService: NotificationService,mcc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends FrontendController(mcc) {
+class CustomsDeclarationsStubController @Inject()(notificationService: NotificationService, mcc: MessagesControllerComponents)(
+  implicit ec: ExecutionContext
+) extends FrontendController(mcc) {
 
-
-  def waiting(ref: String) = Waiting(UploadRequest(
-    href = "http://localhost:6793/cds-file-upload-service/test-only/s3-bucket",
-    fields = Map(
-      Algorithm.toString -> "AWS4-HMAC-SHA256",
-      Signature.toString -> "xxxx",
-      Key.toString -> "xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-      ACL.toString -> "private",
-      Credentials.toString -> "ASIAxxxxxxxxx/20180202/eu-west-2/s3/aws4_request",
-      Policy.toString -> "xxxxxxxx==",
-      SuccessRedirect.toString -> s"http://localhost:6793/cds-file-upload-service/upload/upscan-success/${ref}",
-      ErrorRedirect.toString -> s"http://localhost:6793/cds-file-upload-service/upload/upscan-error/${ref}"
+  def waiting(ref: String) =
+    Waiting(
+      UploadRequest(
+        href = "http://localhost:6793/cds-file-upload-service/test-only/s3-bucket",
+        fields = Map(
+          Algorithm.toString -> "AWS4-HMAC-SHA256",
+          Signature.toString -> "xxxx",
+          Key.toString -> "xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+          ACL.toString -> "private",
+          Credentials.toString -> "ASIAxxxxxxxxx/20180202/eu-west-2/s3/aws4_request",
+          Policy.toString -> "xxxxxxxx==",
+          SuccessRedirect.toString -> s"http://localhost:6793/cds-file-upload-service/upload/upscan-success/${ref}",
+          ErrorRedirect.toString -> s"http://localhost:6793/cds-file-upload-service/upload/upscan-error/${ref}"
+        )
+      )
     )
-  ))
 
   // for now, we will just return some random
   def handleBatchFileUploadRequest: Action[NodeSeq] = Action(parse.xml) { implicit req =>
-
     Thread.sleep(100)
 
     val fileGroupSize = (scala.xml.XML.loadString(req.body.mkString) \ "FileGroupSize").text.toInt
@@ -71,7 +74,7 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
     Thread.sleep(1000)
 
     val notification =
-    <Root>
+      <Root>
         <FileReference>{ref}</FileReference>
         <BatchId>5e634e09-77f6-4ff1-b92a-8a9676c715c4</BatchId>
         <FileName>File_{ref}.pdf</FileName>
@@ -86,7 +89,7 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
 object XmlHelper {
 
   def toXml(field: (String, String)): Elem =
-      <a/>.copy(label = field._1, child = Seq(Text(field._2)))
+    <a/>.copy(label = field._1, child = Seq(Text(field._2)))
 
   def toXml(uploadRequest: UploadRequest): Elem =
     <UploadRequest>
@@ -101,7 +104,7 @@ object XmlHelper {
   def toXml(upload: FileUpload): Elem = {
     val request = upload.state match {
       case Waiting(req) => toXml(req)
-      case _ => NodeSeq.Empty
+      case _            => NodeSeq.Empty
     }
     <File>
       <Reference>
@@ -110,12 +113,11 @@ object XmlHelper {
     </File>
   }
 
-  def toXml(response: FileUploadResponse): Elem = {
+  def toXml(response: FileUploadResponse): Elem =
     <FileUploadResponse xmlns="hmrc:fileupload">
       <Files>
         {response.uploads.map(toXml)}
       </Files>
     </FileUploadResponse>
-  }
 
 }

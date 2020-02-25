@@ -31,9 +31,8 @@ trait FakeActions extends Generators {
   class FakeAuthAction(user: SignedInUser = arbitrary[SignedInUser].sample.get) extends AuthAction {
     protected def executionContext = ExecutionContext.global
     def parser = BodyParsers.parse.anyContent
-    override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
+    override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] =
       Future.successful(Right(AuthenticatedRequest(request, user)))
-    }
   }
 
   class FakeEORIAction(eori: String = arbitrary[String].sample.get) extends EORIRequiredAction {
@@ -50,7 +49,10 @@ trait FakeActions extends Generators {
       Future.successful(OptionalDataRequest(request, cacheMap.map(UserAnswers(_))))
   }
 
-  class FakeContactDetailsRequiredAction(val cacheMap: CacheMap = arbitraryCacheMap.arbitrary.sample.get, val contactDetails: ContactDetails = arbitraryContactDetails.arbitrary.sample.get) extends ContactDetailsRequiredAction {
+  class FakeContactDetailsRequiredAction(
+    val cacheMap: CacheMap = arbitraryCacheMap.arbitrary.sample.get,
+    val contactDetails: ContactDetails = arbitraryContactDetails.arbitrary.sample.get
+  ) extends ContactDetailsRequiredAction {
     protected def executionContext = ExecutionContext.global
     def parser = BodyParsers.parse.anyContent
     override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] =

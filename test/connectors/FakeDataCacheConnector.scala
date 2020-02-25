@@ -24,10 +24,9 @@ import scala.concurrent.Future
 
 object FakeDataCacheConnector extends Cache {
 
-  def save[A](cacheMap: CacheMap)(implicit hc: HeaderCarrier): Future[CacheMap] =  Future.successful(cacheMap)
+  def save[A](cacheMap: CacheMap)(implicit hc: HeaderCarrier): Future[CacheMap] = Future.successful(cacheMap)
 
   def fetch(cacheId: String)(implicit hc: HeaderCarrier): Future[Option[CacheMap]] = Future.successful(Some(CacheMap(cacheId, Map())))
 
   def getEntry[A](cacheId: String, key: String)(implicit hc: HeaderCarrier, fmt: Format[A]): Future[Option[A]] = ???
 }
-

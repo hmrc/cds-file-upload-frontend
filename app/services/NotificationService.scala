@@ -34,7 +34,8 @@ class NotificationService @Inject()(repository: NotificationRepository) {
     if (fileReference.isEmpty || outcome.isEmpty) {
       Future.successful(Left(new BadRequestException("File reference or outcome not found in xml")))
     } else {
-      repository.insert(Notification(fileReference, outcome, filename))
+      repository
+        .insert(Notification(fileReference, outcome, filename))
         .map(_ => Right(()))
         .recover { case e => Left(e) }
     }

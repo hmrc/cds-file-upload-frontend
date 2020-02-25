@@ -37,7 +37,6 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
     "have title" in {
 
       forAll { fileUploads: List[FileUpload] =>
-
         val doc = asDocument(view(fileUploads))
 
         assertEqualsMessage(doc, "title", s"$pagePrefix.title")
@@ -47,7 +46,6 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
     "have heading" in {
 
       forAll { fileUploads: List[FileUpload] =>
-
         val doc = asDocument(view(fileUploads))
 
         assertH1EqualsMessage(doc, s"$pagePrefix.heading", fileUploads.length)
@@ -57,7 +55,6 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
     "display all receipts" in {
 
       forAll { fileUploads: List[FileUpload] =>
-
         val doc = asDocument(view(fileUploads))
 
         fileUploads.foreach { fu =>

@@ -40,7 +40,6 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with Propert
       "first file upload is shown" in {
 
         forAll { total: Int =>
-
           assertEqualsMessage(asDocument(view(First(total))), "title", s"$messagePrefix.title.first")
         }
       }
@@ -48,7 +47,6 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with Propert
       "a middle file upload is shown" in {
 
         forAll { (index: Int, total: Int) =>
-
           assertEqualsMessage(asDocument(view(Middle(index, total))), "title", s"$messagePrefix.title.middle")
         }
       }
@@ -56,7 +54,6 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with Propert
       "the last file upload is shown" in {
 
         forAll { total: Int =>
-
           assertEqualsMessage(asDocument(view(Last(total))), "title", s"$messagePrefix.title.last")
         }
       }
@@ -67,7 +64,6 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with Propert
       "first file upload is shown" in {
 
         forAll { total: Int =>
-
           assertH1EqualsMessage(asDocument(view(First(total))), s"$messagePrefix.heading.first")
         }
       }
@@ -75,7 +71,6 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with Propert
       "a middle file upload is shown" in {
 
         forAll { (index: Int, total: Int) =>
-
           assertH1EqualsMessage(asDocument(view(Middle(index, total))), s"$messagePrefix.heading.middle")
         }
       }
@@ -83,7 +78,6 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with Propert
       "the last file upload is shown" in {
 
         forAll { total: Int =>
-
           assertH1EqualsMessage(asDocument(view(Last(total))), s"$messagePrefix.heading.last")
         }
       }
@@ -94,7 +88,6 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with Propert
       "a file middle is requested" in {
 
         forAll { (index: Int, total: Int) =>
-
           val doc = asDocument(view(Middle(index, total)))
           assertContainsMessage(doc, s"$messagePrefix.filesUploaded", index - 1, total)
         }
@@ -103,7 +96,6 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with Propert
       "the last file is requested" in {
 
         forAll { total: Int =>
-
           val doc = asDocument(view(Last(total)))
           assertContainsMessage(doc, s"$messagePrefix.filesUploaded", total - 1, total)
         }

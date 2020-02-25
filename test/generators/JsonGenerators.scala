@@ -25,11 +25,7 @@ trait JsonGenerators {
 
   implicit lazy val arbitraryJsonValue: Arbitrary[JsValue] =
     Arbitrary {
-      Gen.oneOf(
-        arbitraryJsonString.arbitrary,
-        arbitraryJsonNumber.arbitrary,
-        arbitraryJsonBoolean.arbitrary,
-        arbitraryJsonArray.arbitrary)
+      Gen.oneOf(arbitraryJsonString.arbitrary, arbitraryJsonNumber.arbitrary, arbitraryJsonBoolean.arbitrary, arbitraryJsonArray.arbitrary)
     }
 
   implicit val arbitraryJsonString: Arbitrary[JsString] =
@@ -43,13 +39,9 @@ trait JsonGenerators {
 
   implicit val arbitraryJsonArray: Arbitrary[JsArray] =
     Arbitrary {
-      val valuesGen: Gen[JsValue] = Gen.oneOf(
-          arbitraryJsonString.arbitrary,
-          arbitraryJsonNumber.arbitrary,
-          arbitraryJsonBoolean.arbitrary
-      )
+      val valuesGen: Gen[JsValue] = Gen.oneOf(arbitraryJsonString.arbitrary, arbitraryJsonNumber.arbitrary, arbitraryJsonBoolean.arbitrary)
 
-      val f :List[JsValue] => JsArray = in => JsArray(in)
+      val f: List[JsValue] => JsArray = in => JsArray(in)
       Gen.listOf(valuesGen).map(f)
     }
 }

@@ -32,31 +32,30 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ContactDetailsController @Inject()(authenticate: AuthAction,
-                                         requireEori: EORIRequiredAction,
-                                         getData: DataRetrievalAction,
-                                         dataCacheConnector: Cache,
-                                         implicit val appConfig: AppConfig,
-                                          mcc: MessagesControllerComponents)(implicit ec: ExecutionContext)
-                                          extends FrontendController(mcc) with I18nSupport {
+class ContactDetailsController @Inject()(
+  authenticate: AuthAction,
+  requireEori: EORIRequiredAction,
+  getData: DataRetrievalAction,
+  dataCacheConnector: Cache,
+  implicit val appConfig: AppConfig,
+  mcc: MessagesControllerComponents
+)(implicit ec: ExecutionContext)
+    extends FrontendController(mcc) with I18nSupport {
 
   private val form = Form(contactDetailsMapping)
 
   def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData) { implicit req =>
-
     val populatedForm = req.userAnswers.flatMap(_.get(ContactDetailsPage)).fold(form)(form.fill)
     Ok(views.html.contact_details(populatedForm))
   }
 
-  def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen getData).async {
-    implicit req =>
+  def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen getData).async { implicit req =>
+    val userAnswers = req.userAnswers.getOrElse(UserAnswers(req.request.user.internalId))
 
-      val userAnswers = req.userAnswers.getOrElse(UserAnswers(req.request.user.internalId))
-
-      form.bindFromRequest().fold(
-        errorForm =>
-          Future.successful(BadRequest(views.html.contact_details(errorForm))),
-
+    form
+      .bindFromRequest()
+      .fold(
+        errorForm => Future.successful(BadRequest(views.html.contact_details(errorForm))),
         contactDetails => {
           val cacheMap = userAnswers.set(ContactDetailsPage, contactDetails).cacheMap
 
