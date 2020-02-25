@@ -89,14 +89,14 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       mockUpscanConnector,
       mockCustomsDeclarationsService,
       appConfig,
-      mcc)(executionContext)
+      mcc
+    )(executionContext)
 
   "How Many Files Upload Page" must {
 
     "load correct page when user is logged in " in {
 
       forAll { action: ContactDetailsRequiredAction =>
-
         val result = controller(action).onPageLoad(fakeRequest)
 
         status(result) mustBe OK
@@ -106,7 +106,9 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
     }
 
     "display file count if it exist in the cache" in {
-      val updatedCacheMap = fakeContactDetailsRequiredAction.cacheMap.copy(data = fakeContactDetailsRequiredAction.cacheMap.data + (HowManyFilesUploadPage.toString -> JsNumber(7)))
+      val updatedCacheMap = fakeContactDetailsRequiredAction.cacheMap.copy(
+        data = fakeContactDetailsRequiredAction.cacheMap.data + (HowManyFilesUploadPage.toString -> JsNumber(7))
+      )
       val updatedAction = new FakeContactDetailsRequiredAction(updatedCacheMap, fakeContactDetailsRequiredAction.contactDetails)
 
       val result = controller(updatedAction).onPageLoad(fakeRequest)
@@ -118,7 +120,6 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
     "redirect to error page when no data is found in the cache on page load" in {
 
       forAll { contactDetails: ContactDetails =>
-
         val action = new FakeContactDetailsRequiredAction(CacheMap("", Map()), contactDetails)
         val result = controller(action).onPageLoad(fakeRequest)
 
@@ -130,7 +131,6 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
     "redirect to error page when no data is found in the cache on submit" in {
 
       forAll { contactDetails: ContactDetails =>
-
         val action = new FakeContactDetailsRequiredAction(CacheMap("", Map()), contactDetails)
         val result = controller(action).onSubmit(fakeRequest)
 
@@ -151,11 +151,13 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       when(wsResponse.header("Location")).thenReturn(Some("upscan-success"))
       when(wsResponse.status).thenReturn(303)
 
-      val fileUploadResponse = FileUploadResponse(List(
-        FileUpload("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> ""))), id = "id1"),
-        FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> ""))), id = "id2"),
-        FileUpload("someFileRef3", Waiting(UploadRequest("http://s3bucket/myfile3", Map("" -> ""))), id = "id3")
-      ))
+      val fileUploadResponse = FileUploadResponse(
+        List(
+          FileUpload("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> ""))), id = "id1"),
+          FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> ""))), id = "id2"),
+          FileUpload("someFileRef3", Waiting(UploadRequest("http://s3bucket/myfile3", Map("" -> ""))), id = "id3")
+        )
+      )
       val fileUploadsAfterContactDetails = fileUploadResponse.uploads.tail
 
       when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
@@ -181,11 +183,12 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       when(wsResponse.header("Location")).thenReturn(Some("upscan-error"))
       when(wsResponse.status).thenReturn(303)
 
-
-      val fileUploadResponse = FileUploadResponse(List(
-        FileUpload("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> ""))), id = "id1"),
-        FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> ""))), id = "id2")
-      ))
+      val fileUploadResponse = FileUploadResponse(
+        List(
+          FileUpload("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> ""))), id = "id1"),
+          FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> ""))), id = "id2")
+        )
+      )
       reset(mockUpscanConnector)
       when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
       val f = new RuntimeException("something went wrong")
@@ -205,11 +208,12 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       when(wsResponse.header("Location")).thenReturn(Some("upscan-error"))
       when(wsResponse.status).thenReturn(400)
 
-
-      val fileUploadResponse = FileUploadResponse(List(
-        FileUpload("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> ""))), id = "id1"),
-        FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> ""))), id = "id2")
-      ))
+      val fileUploadResponse = FileUploadResponse(
+        List(
+          FileUpload("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> ""))), id = "id1"),
+          FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> ""))), id = "id2")
+        )
+      )
       reset(mockUpscanConnector)
       when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
       val f = new RuntimeException("something went wrong")
@@ -228,7 +232,11 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       await(controller(fakeContactDetailsRequiredAction).onSubmit(postRequest))
 
       val Some(fileUploadCount) = FileUploadCount(2)
-      verify(mockCustomsDeclarationsService).batchFileUpload(any(), eqTo(fakeContactDetailsRequiredAction.cacheMap.getEntry[MRN](MrnEntryPage).get), eqTo(fileUploadCount))(any())
+      verify(mockCustomsDeclarationsService).batchFileUpload(
+        any(),
+        eqTo(fakeContactDetailsRequiredAction.cacheMap.getEntry[MRN](MrnEntryPage).get),
+        eqTo(fileUploadCount)
+      )(any())
     }
   }
 }

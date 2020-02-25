@@ -24,9 +24,11 @@ object ContactDetailsMapping extends Mappings {
   val contactDetailsMapping = mapping(
     "name" -> text().verifying(maxLength(35, "contactDetails.name.invalid")),
     "companyName" -> text().verifying(maxLength(35, "contactDetails.companyName.invalid")),
-    "phoneNumber" -> text().verifying(maxLength(15, "contactDetails.phoneNumber.invalid"))
+    "phoneNumber" -> text()
+      .verifying(maxLength(15, "contactDetails.phoneNumber.invalid"))
       .verifying("contactDetails.phoneNumber.invalidPattern", isValidPhoneNumber),
-    "email" -> text().verifying(maxLength(50, "contactDetails.email.invalid"))
+    "email" -> text()
+      .verifying(maxLength(50, "contactDetails.email.invalid"))
       .verifying("contactDetails.email.invalidPattern", isValidEmail)
   )(ContactDetails.apply)(ContactDetails.unapply)
 }

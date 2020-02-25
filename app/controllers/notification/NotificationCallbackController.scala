@@ -28,8 +28,9 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.NodeSeq
 
 @Singleton
-class NotificationCallbackController @Inject()(notificationService: NotificationService, val appConfig: AppConfig, mcc: MessagesControllerComponents)(implicit ec: ExecutionContext)
-  extends FrontendController(mcc) {
+class NotificationCallbackController @Inject()(notificationService: NotificationService, val appConfig: AppConfig, mcc: MessagesControllerComponents)(
+  implicit ec: ExecutionContext
+) extends FrontendController(mcc) {
 
   def onNotify = Action.async(parse.xml) { implicit req =>
     val authHeader = req.headers.toSimpleMap.get("Authorization")
@@ -44,9 +45,7 @@ class NotificationCallbackController @Inject()(notificationService: Notification
     }
   }
 
-  private def saveNotification(notification: NodeSeq) = {
-
-
+  private def saveNotification(notification: NodeSeq) =
     notificationService.save(notification) map {
       case Right(_) => Accepted
       case Left(e: BadRequestException) =>
@@ -56,5 +55,4 @@ class NotificationCallbackController @Inject()(notificationService: Notification
         Logger.error(s"Failed to save notification: $notification", e)
         InternalServerError
     }
-  }
 }

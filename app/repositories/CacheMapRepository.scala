@@ -32,7 +32,7 @@ class CacheMapRepository @Inject()(cfg: AppConfig, httpClient: HttpClient)(impli
   override def defaultSource: String = cfg.microservice.services.keystore.defaultSource
 
   override def http = httpClient
-  
+
   def get(id: String)(implicit r: Reads[CacheMap], hc: HeaderCarrier): Future[Option[CacheMap]] =
     fetchAndGetEntry[CacheMap](id)
 

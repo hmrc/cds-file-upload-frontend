@@ -23,13 +23,14 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html._
 
-class ErrorPageController @Inject()(implicit val appConfig: AppConfig, mcc: MessagesControllerComponents) extends FrontendController(mcc) with I18nSupport {
+class ErrorPageController @Inject()(implicit val appConfig: AppConfig, mcc: MessagesControllerComponents)
+    extends FrontendController(mcc) with I18nSupport {
 
-  def uploadError: Action[AnyContent]= Action { implicit request =>
+  def uploadError: Action[AnyContent] = Action { implicit request =>
     Ok(upload_error())
   }
 
-  def error: Action[AnyContent]= Action { implicit request =>
+  def error: Action[AnyContent] = Action { implicit request =>
     Ok(generic_error())
   }
 }

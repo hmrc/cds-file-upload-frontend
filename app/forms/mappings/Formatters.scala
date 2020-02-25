@@ -53,10 +53,7 @@ trait Formatters {
       def unbind(key: String, value: Boolean) = Map(key -> value.toString)
     }
 
-  private[mappings] def intFormatter(
-    requiredKey: String,
-    wholeNumberKey: String,
-    nonNumericKey: String): Formatter[Int] =
+  private[mappings] def intFormatter(requiredKey: String, wholeNumberKey: String, nonNumericKey: String): Formatter[Int] =
     new Formatter[Int] {
 
       val decimalRegexp = """^(\d*\.\d*)$"""

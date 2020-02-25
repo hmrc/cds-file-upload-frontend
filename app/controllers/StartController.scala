@@ -23,7 +23,8 @@ import play.api.mvc.MessagesControllerComponents
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 @Singleton
-class StartController @Inject()(mcc: MessagesControllerComponents, implicit val appConfig: AppConfig) extends FrontendController(mcc) with I18nSupport {
+class StartController @Inject()(mcc: MessagesControllerComponents, implicit val appConfig: AppConfig)
+    extends FrontendController(mcc) with I18nSupport {
 
   val displayStartPage = Action { implicit req =>
     Ok(views.html.start())

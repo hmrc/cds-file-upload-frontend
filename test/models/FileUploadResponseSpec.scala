@@ -55,38 +55,42 @@ class FileUploadResponseSpec extends SpecBase with XmlBehaviours {
         </Files>
       </FileUploadResponse>
 
-      val expectedResponse = FileUploadResponse(List(
-        FileUpload(
-          "31400000-8ce0-11bd-b23e-10b96e4ef00f",
-          Waiting(UploadRequest(
-            "https://a.b.com",
-            Map(
-              "Content-Type" -> "application/xml",
-              "x-amz-meta-callback-url" -> "https://some-callback-url",
-              "x-amz-date" -> "2019-03-05T11:56:34Z",
-              "success_action_redirect" -> "https://success-redirect/abc-211",
-              "error_action_redirect" -> "https://error-redirect/abc-211"
-            )
-          )),
-          id = "abc-211"
-        ),
-        FileUpload(
-          "32400000-8cf0-11bd-b23e-10b96e4ef00f",
-          Waiting(UploadRequest(
-            "https://x.y.com",
-            Map(
-              "Content-Type" -> "application/xml",
-              "x-amz-meta-callback-url" -> "https://some-callback-url2",
-              "x-amz-date" -> "2019-03-05T11:57:11Z",
-              "success_action_redirect" -> "https://success-redirect2/fyr-993",
-              "error_action_redirect" -> "https://error-redirect2/fyr-993"
-            )
-          )),
-          id = "fyr-993"
-          
+      val expectedResponse = FileUploadResponse(
+        List(
+          FileUpload(
+            "31400000-8ce0-11bd-b23e-10b96e4ef00f",
+            Waiting(
+              UploadRequest(
+                "https://a.b.com",
+                Map(
+                  "Content-Type" -> "application/xml",
+                  "x-amz-meta-callback-url" -> "https://some-callback-url",
+                  "x-amz-date" -> "2019-03-05T11:56:34Z",
+                  "success_action_redirect" -> "https://success-redirect/abc-211",
+                  "error_action_redirect" -> "https://error-redirect/abc-211"
+                )
+              )
+            ),
+            id = "abc-211"
+          ),
+          FileUpload(
+            "32400000-8cf0-11bd-b23e-10b96e4ef00f",
+            Waiting(
+              UploadRequest(
+                "https://x.y.com",
+                Map(
+                  "Content-Type" -> "application/xml",
+                  "x-amz-meta-callback-url" -> "https://some-callback-url2",
+                  "x-amz-date" -> "2019-03-05T11:57:11Z",
+                  "success_action_redirect" -> "https://success-redirect2/fyr-993",
+                  "error_action_redirect" -> "https://error-redirect2/fyr-993"
+                )
+              )
+            ),
+            id = "fyr-993"
+          )
         )
-      ))
-
+      )
 
       FileUploadResponse.fromXml(xml) mustBe expectedResponse
     }

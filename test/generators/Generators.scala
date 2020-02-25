@@ -41,7 +41,7 @@ trait Generators extends CacheMapGenerator with ModelGenerators with JsonGenerat
   def saneString: Gen[String] =
     for {
       length <- choose(1, 100)
-      chars  <- listOfN(length, alphaChar)
+      chars <- listOfN(length, alphaChar)
     } yield chars.mkString
 
   def minStringLength(length: Int): Gen[String] =
@@ -64,10 +64,10 @@ trait Generators extends CacheMapGenerator with ModelGenerators with JsonGenerat
 
   implicit val arbitraryContactDetails: Arbitrary[ContactDetails] = Arbitrary {
     for {
-      name        <- nonEmptyString.map(_.take(35))
+      name <- nonEmptyString.map(_.take(35))
       companyName <- nonEmptyString.map(_.take(35))
       phoneNumber <- validPhoneNumberGen
-      email       <- validEmailGen.map(_.take(50))
+      email <- validEmailGen.map(_.take(50))
     } yield ContactDetails(name, companyName, phoneNumber, email)
   }
 }

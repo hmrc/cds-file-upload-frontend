@@ -26,6 +26,6 @@ trait Constraints {
   protected def maxLength(maximum: Int, errorKey: String): Constraint[String] =
     Constraint {
       case str if str.length <= maximum => Valid
-      case _ => Invalid(errorKey, maximum)
+      case _                            => Invalid(errorKey, maximum)
     }
 }

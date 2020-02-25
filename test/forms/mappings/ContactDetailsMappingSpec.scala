@@ -25,10 +25,7 @@ import org.scalatest.MustMatchers
 import org.scalatest.prop.PropertyChecks
 import play.api.data.Form
 
-class ContactDetailsMappingSpec extends SpecBase
-  with MustMatchers
-  with PropertyChecks
-  with Generators {
+class ContactDetailsMappingSpec extends SpecBase with MustMatchers with PropertyChecks with Generators {
 
   val form = Form(contactDetailsMapping)
 
@@ -41,10 +38,7 @@ class ContactDetailsMappingSpec extends SpecBase
       "valid values are bound" in {
 
         forAll { contactDetails: ContactDetails =>
-          Form(contactDetailsMapping).fillAndValidate(contactDetails).fold(
-            _ => fail("form should not have errors"),
-            _ mustBe contactDetails
-          )
+          Form(contactDetailsMapping).fillAndValidate(contactDetails).fold(_ => fail("form should not have errors"), _ mustBe contactDetails)
         }
       }
     }
@@ -53,84 +47,67 @@ class ContactDetailsMappingSpec extends SpecBase
 
       "name is larger than 35 chars" in {
 
-        forAll(arbitrary[ContactDetails], minStringLength(36)) {
-          (contactDetails, invalidName) =>
+        forAll(arbitrary[ContactDetails], minStringLength(36)) { (contactDetails, invalidName) =>
+          val badData = contactDetails.copy(name = invalidName)
 
-            val badData = contactDetails.copy(name = invalidName)
-
-            Form(contactDetailsMapping).fillAndValidate(badData).fold(
-              errors => errorMessage(errors) mustBe "contactDetails.name.invalid",
-              _ => fail("form should not succeed")
-            )
+          Form(contactDetailsMapping)
+            .fillAndValidate(badData)
+            .fold(errors => errorMessage(errors) mustBe "contactDetails.name.invalid", _ => fail("form should not succeed"))
         }
       }
 
       "Company name is larger than 35 chars" in {
 
-        forAll(arbitrary[ContactDetails], minStringLength(36)) {
-          (contactDetails, invalidCompanyName) =>
+        forAll(arbitrary[ContactDetails], minStringLength(36)) { (contactDetails, invalidCompanyName) =>
+          val badData = contactDetails.copy(companyName = invalidCompanyName)
 
-            val badData = contactDetails.copy(companyName = invalidCompanyName)
-
-            Form(contactDetailsMapping).fillAndValidate(badData).fold(
-              errors => errorMessage(errors) mustBe "contactDetails.companyName.invalid",
-              _ => fail("form should not succeed")
-            )
+          Form(contactDetailsMapping)
+            .fillAndValidate(badData)
+            .fold(errors => errorMessage(errors) mustBe "contactDetails.companyName.invalid", _ => fail("form should not succeed"))
         }
       }
 
       "Phone number is invalid" in {
 
         forAll(arbitrary[ContactDetails], arbitrary[String]) { (contactDetails, invalidPhoneNumber) =>
-
           val badData = contactDetails.copy(phoneNumber = invalidPhoneNumber.take(15))
 
-          Form(contactDetailsMapping).fillAndValidate(badData).fold(
-            errors => errorMessage(errors) mustBe "contactDetails.phoneNumber.invalidPattern",
-            _ => fail("form should not succeed")
-          )
+          Form(contactDetailsMapping)
+            .fillAndValidate(badData)
+            .fold(errors => errorMessage(errors) mustBe "contactDetails.phoneNumber.invalidPattern", _ => fail("form should not succeed"))
         }
       }
 
       "Phone number is larger than 15 chars" in {
 
-        forAll(arbitrary[ContactDetails], minStringLength(16)) {
-          (contactDetails, invalidPhoneNumber) =>
+        forAll(arbitrary[ContactDetails], minStringLength(16)) { (contactDetails, invalidPhoneNumber) =>
+          val badData = contactDetails.copy(phoneNumber = invalidPhoneNumber)
 
-            val badData = contactDetails.copy(phoneNumber = invalidPhoneNumber)
-
-            Form(contactDetailsMapping).fillAndValidate(badData).fold(
-              errors => errorMessage(errors) mustBe "contactDetails.phoneNumber.invalid",
-              _ => fail("form should not succeed")
-            )
+          Form(contactDetailsMapping)
+            .fillAndValidate(badData)
+            .fold(errors => errorMessage(errors) mustBe "contactDetails.phoneNumber.invalid", _ => fail("form should not succeed"))
         }
       }
 
       "Email is invalid" in {
 
-        forAll(arbitrary[ContactDetails], stringsWithMaxLength(50)) {
-          (contactDetails, invalidEmail) =>
+        forAll(arbitrary[ContactDetails], stringsWithMaxLength(50)) { (contactDetails, invalidEmail) =>
+          val badData = contactDetails.copy(email = invalidEmail)
 
-            val badData = contactDetails.copy(email = invalidEmail)
-
-            Form(contactDetailsMapping).fillAndValidate(badData).fold(
-              errors => errorMessage(errors) mustBe "contactDetails.email.invalidPattern",
-              _ => fail("form should not succeed")
-            )
+          Form(contactDetailsMapping)
+            .fillAndValidate(badData)
+            .fold(errors => errorMessage(errors) mustBe "contactDetails.email.invalidPattern", _ => fail("form should not succeed"))
         }
       }
 
       "Email is larger than 50 chars" in {
 
-        forAll(arbitrary[ContactDetails], minStringLength(51)) {
-          (contactDetails, invalidEmail) =>
+        forAll(arbitrary[ContactDetails], minStringLength(51)) { (contactDetails, invalidEmail) =>
+          val badData = contactDetails.copy(email = invalidEmail)
 
-            val badData = contactDetails.copy(email = invalidEmail)
-
-            Form(contactDetailsMapping).fillAndValidate(badData).fold(
-              errors => errorMessage(errors) mustBe "contactDetails.email.invalid",
-              _ => fail("form should not succeed")
-            )
+          Form(contactDetailsMapping)
+            .fillAndValidate(badData)
+            .fold(errors => errorMessage(errors) mustBe "contactDetails.email.invalid", _ => fail("form should not succeed"))
         }
       }
     }

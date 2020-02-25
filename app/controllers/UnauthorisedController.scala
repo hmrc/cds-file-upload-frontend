@@ -24,7 +24,8 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.unauthorised
 
 @Singleton
-class UnauthorisedController @Inject()(implicit val appConfig: AppConfig,mcc: MessagesControllerComponents) extends FrontendController(mcc) with I18nSupport {
+class UnauthorisedController @Inject()(implicit val appConfig: AppConfig, mcc: MessagesControllerComponents)
+    extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = Action { implicit req =>
     Ok(unauthorised())

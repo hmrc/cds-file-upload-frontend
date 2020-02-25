@@ -27,11 +27,14 @@ import scala.concurrent.Future
 
 class MongoCacheConnector @Inject()(val repository: CacheMapRepository) extends Cache {
 
-  def save[A](cacheMap: CacheMap)(implicit hc: HeaderCarrier): Future[CacheMap] = repository.put(cacheMap).map { _ => cacheMap }
+  def save[A](cacheMap: CacheMap)(implicit hc: HeaderCarrier): Future[CacheMap] = repository.put(cacheMap).map { _ =>
+    cacheMap
+  }
 
   def fetch(cacheId: String)(implicit hc: HeaderCarrier): Future[Option[CacheMap]] = repository.get(cacheId)
 
-  def getEntry[A](cacheId: String, key: String)(implicit hc: HeaderCarrier, fmt: Format[A]): Future[Option[A]] = fetch(cacheId).map(_.flatMap(_.getEntry(key)))
+  def getEntry[A](cacheId: String, key: String)(implicit hc: HeaderCarrier, fmt: Format[A]): Future[Option[A]] =
+    fetch(cacheId).map(_.flatMap(_.getEntry(key)))
 }
 
 trait Cache {

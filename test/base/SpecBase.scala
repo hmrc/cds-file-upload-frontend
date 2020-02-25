@@ -31,7 +31,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext
 
-trait SpecBase extends PlaySpec with MockitoSugar with BeforeAndAfterEach with PropertyChecks with Generators with ScalaFutures with GuiceOneServerPerSuite {
+trait SpecBase
+    extends PlaySpec with MockitoSugar with BeforeAndAfterEach with PropertyChecks with Generators with ScalaFutures with GuiceOneServerPerSuite {
 
   implicit lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
   implicit lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
@@ -45,22 +46,19 @@ trait SpecBase extends PlaySpec with MockitoSugar with BeforeAndAfterEach with P
 
   implicit val executionContext = ExecutionContext.global
 
-
   // toJson strips out Some and None and replaces them with string values
   def asFormParams(cc: Product): List[(String, String)] =
-    cc.getClass.getDeclaredFields.toList
-      .map { f =>
-        f.setAccessible(true)
-        (f.getName, f.get(cc))
-      }
-      .flatMap {
-        case (n, l: List[_]) if l.headOption.exists(_.isInstanceOf[Product]) =>
-          l.zipWithIndex.flatMap {
-            case (x, i) => asFormParams(x.asInstanceOf[Product]).map { case (k, v) => (s"$n[$i].$k", v) }
-          }
-        case (n, Some(p: Product)) => asFormParams(p).map { case (k, v) => (s"$n.$k", v) }
-        case (n, Some(a))          => List((n, a.toString))
-        case (n, None)             => List((n, ""))
-        case (n, a)                => List((n, a.toString))
-      }
+    cc.getClass.getDeclaredFields.toList.map { f =>
+      f.setAccessible(true)
+      (f.getName, f.get(cc))
+    }.flatMap {
+      case (n, l: List[_]) if l.headOption.exists(_.isInstanceOf[Product]) =>
+        l.zipWithIndex.flatMap {
+          case (x, i) => asFormParams(x.asInstanceOf[Product]).map { case (k, v) => (s"$n[$i].$k", v) }
+        }
+      case (n, Some(p: Product)) => asFormParams(p).map { case (k, v) => (s"$n.$k", v) }
+      case (n, Some(a))          => List((n, a.toString))
+      case (n, None)             => List((n, ""))
+      case (n, a)                => List((n, a.toString))
+    }
 }

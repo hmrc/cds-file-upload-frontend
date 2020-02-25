@@ -32,21 +32,16 @@ class FileUploadCountProviderSpec extends SpecBase with PropertyChecks {
 
     "return success for valid FileUploadCount" in {
       forAll(validFileUploadCountGen) { count: Int =>
-
-        form.bind(Map("value" -> count.toString)).fold(
-          _      => fail("Form binding must not fail!"),
-          result => result.value mustBe count
-        )
+        form.bind(Map("value" -> count.toString)).fold(_ => fail("Form binding must not fail!"), result => result.value mustBe count)
       }
     }
 
     "retun invalid error for invalid FileUploadCount" in {
-      forAll{count: Int =>
-        if(count<1 || count>10){
-          form.bind(Map("value" -> count.toString)).fold(
-            errors => errorMessage(errors) mustBe "howManyFilesUpload.invalid",
-            _      => fail("Form binding must fail!")
-          )
+      forAll { count: Int =>
+        if (count < 1 || count > 10) {
+          form
+            .bind(Map("value" -> count.toString))
+            .fold(errors => errorMessage(errors) mustBe "howManyFilesUpload.invalid", _ => fail("Form binding must fail!"))
         }
       }
     }

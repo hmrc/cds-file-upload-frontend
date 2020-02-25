@@ -50,9 +50,8 @@ trait DomAssertions extends SpecBase {
     assert(elements.first().html().replace("\n", "").contains(expectedValue))
   }
 
-  def assertPageTitleEquals(doc: Document, expectedMessage: String) = {
+  def assertPageTitleEquals(doc: Document, expectedMessage: String) =
     doc.title mustBe expectedMessage
-  }
 
   def assertH1EqualsMessage(doc: Document, expectedMessageKey: String, args: Any*) = {
     val headers = doc.getElementsByTag("h1")
@@ -69,29 +68,23 @@ trait DomAssertions extends SpecBase {
     assert(exists, s"\n\nanchor with text $text and href $href was not rendered on the page.\n")
   }
 
-  def assertContainsMessages(doc: Document, expectedMessageKeys: String*) = {
+  def assertContainsMessages(doc: Document, expectedMessageKeys: String*) =
     for (key <- expectedMessageKeys) assertContainsMessage(doc, key)
-  }
 
-  def assertContainsMessage(doc: Document, messageKey: String, args: Any*) = {
+  def assertContainsMessage(doc: Document, messageKey: String, args: Any*) =
     assertContainsText(doc, messages(messageKey, args: _*))
-  }
 
-  def assertRenderedById(doc: Document, id: String) = {
+  def assertRenderedById(doc: Document, id: String) =
     assert(doc.getElementById(id) != null, "\n\nElement " + id + " was not rendered on the page.\n")
-  }
 
-  def assertNotRenderedById(doc: Document, id: String) = {
+  def assertNotRenderedById(doc: Document, id: String) =
     assert(doc.getElementById(id) == null, "\n\nElement " + id + " was rendered on the page.\n")
-  }
 
-  def assertRenderedByCssSelector(doc: Document, cssSelector: String) = {
+  def assertRenderedByCssSelector(doc: Document, cssSelector: String) =
     assert(!doc.select(cssSelector).isEmpty, "Element " + cssSelector + " was not rendered on the page.")
-  }
 
-  def assertNotRenderedByCssSelector(doc: Document, cssSelector: String) = {
+  def assertNotRenderedByCssSelector(doc: Document, cssSelector: String) =
     assert(doc.select(cssSelector).isEmpty, "\n\nElement " + cssSelector + " was rendered on the page.\n")
-  }
 
   def assertContainsLabel(doc: Document, forElement: String, expectedText: String, expectedHintText: List[String] = List()) = {
     val labels = doc.getElementsByAttributeValue("for", forElement)
@@ -99,15 +92,17 @@ trait DomAssertions extends SpecBase {
     val label = labels.first
     assert(label.text().contains(expectedText), s"\n\nLabel for $forElement was not $expectedText")
 
-    expectedHintText.foreach(msg =>
-      assert(
-        label.getElementsByClass("form-hint").first.text.contains(msg),
-        s"\n\nLabel for $forElement did not contain hint text $expectedHintText"))
+    expectedHintText.foreach(
+      msg =>
+        assert(
+          label.getElementsByClass("form-hint").first.text.contains(msg),
+          s"\n\nLabel for $forElement did not contain hint text $expectedHintText"
+      )
+    )
   }
 
-  def assertElementHasClass(doc: Document, id: String, expectedClass: String) = {
+  def assertElementHasClass(doc: Document, id: String, expectedClass: String) =
     assert(doc.getElementById(id).hasClass(expectedClass), s"\n\nElement $id does not have class $expectedClass")
-  }
 
   def assertContainsRadioButton(doc: Document, id: String, name: String, value: String, isChecked: Boolean) = {
     assertRenderedById(doc, id)
@@ -116,7 +111,7 @@ trait DomAssertions extends SpecBase {
     assert(radio.attr("value") == value, s"\n\nElement $id does not have value $value")
     isChecked match {
       case true => assert(radio.attr("checked") == "checked", s"\n\nElement $id is not checked")
-      case _ => assert(!radio.hasAttr("checked") && radio.attr("checked") != "checked", s"\n\nElement $id is checked")
+      case _    => assert(!radio.hasAttr("checked") && radio.attr("checked") != "checked", s"\n\nElement $id is checked")
     }
   }
 }

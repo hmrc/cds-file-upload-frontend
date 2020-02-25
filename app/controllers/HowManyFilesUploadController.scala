@@ -34,51 +34,56 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class HowManyFilesUploadController @Inject()(authenticate: AuthAction,
-                                             requireEori: EORIRequiredAction,
-                                             getData: DataRetrievalAction,
-                                             requireMrn: MrnRequiredAction,
-                                             requireContactDetails: ContactDetailsRequiredAction,
-                                             formProvider: FileUploadCountProvider,
-                                             dataCacheConnector: Cache,
-                                             uploadContactDetails: UpscanConnector,
-                                             customsDeclarationsService: CustomsDeclarationsService,
-                                             implicit val appConfig: AppConfig,
-                                             mcc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
+class HowManyFilesUploadController @Inject()(
+  authenticate: AuthAction,
+  requireEori: EORIRequiredAction,
+  getData: DataRetrievalAction,
+  requireMrn: MrnRequiredAction,
+  requireContactDetails: ContactDetailsRequiredAction,
+  formProvider: FileUploadCountProvider,
+  dataCacheConnector: Cache,
+  uploadContactDetails: UpscanConnector,
+  customsDeclarationsService: CustomsDeclarationsService,
+  implicit val appConfig: AppConfig,
+  mcc: MessagesControllerComponents
+)(implicit ec: ExecutionContext)
+    extends FrontendController(mcc) with I18nSupport {
 
   val form = formProvider()
 
   def onPageLoad: Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireContactDetails andThen requireMrn) { implicit req =>
-
       val populatedForm =
         req.userAnswers
           .get(HowManyFilesUploadPage)
-          .map(form.fill).getOrElse(form)
+          .map(form.fill)
+          .getOrElse(form)
 
       Ok(views.html.how_many_files_upload(populatedForm))
     }
 
   def onSubmit: Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireContactDetails andThen requireMrn).async { implicit req =>
-
-      form.bindFromRequest().fold(
-        errorForm => Future.successful(BadRequest(views.html.how_many_files_upload(errorForm))),
-
-        fileUploadCount => {
-          uploadContactDetails(req, fileUploadCount) map {
-            case Right(firstUpload :: _ ) =>
-              Logger.warn("uploadContactDetails success: " + firstUpload)
-              Redirect(routes.UpscanStatusController.onPageLoad(firstUpload.reference))
-            case err =>
-              Logger.warn("uploadContactDetails error: " + err)
-              Redirect(routes.ErrorPageController.error())
+      form
+        .bindFromRequest()
+        .fold(
+          errorForm => Future.successful(BadRequest(views.html.how_many_files_upload(errorForm))),
+          fileUploadCount => {
+            uploadContactDetails(req, fileUploadCount) map {
+              case Right(firstUpload :: _) =>
+                Logger.warn("uploadContactDetails success: " + firstUpload)
+                Redirect(routes.UpscanStatusController.onPageLoad(firstUpload.reference))
+              case err =>
+                Logger.warn("uploadContactDetails error: " + err)
+                Redirect(routes.ErrorPageController.error())
+            }
           }
-        }
-      )
+        )
     }
 
-  private def uploadContactDetails(req: MrnRequest[AnyContent], fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier): Future[Either[Throwable, List[FileUpload]]] = {
+  private def uploadContactDetails(req: MrnRequest[AnyContent], fileUploadCount: FileUploadCount)(
+    implicit hc: HeaderCarrier
+  ): Future[Either[Throwable, List[FileUpload]]] = {
     def saveRemainingFileUploadsToCache(fileUploadResponse: FileUploadResponse): Future[List[FileUpload]] = {
 
       val remainingFileUploads = fileUploadResponse.uploads.tail
@@ -87,7 +92,8 @@ class HowManyFilesUploadController @Inject()(authenticate: AuthAction,
       dataCacheConnector.save(answers.cacheMap).map { _ =>
         Logger.warn("saving remaining uploads")
 
-        remainingFileUploads }
+        remainingFileUploads
+      }
     }
 
     initiateUpload(req, fileUploadCount).flatMap { fileUploadResponse =>
@@ -97,10 +103,9 @@ class HowManyFilesUploadController @Inject()(authenticate: AuthAction,
             Logger.warn(s"Upload contact details successful: ${res}")
             Logger.warn(s"Upload contact details headers: ${res.header("Location")}")
             val isSuccessRedirect = res.header("Location").exists(_.contains("upscan-success"))
-            if (res.status == SEE_OTHER  && isSuccessRedirect) {
+            if (res.status == SEE_OTHER && isSuccessRedirect) {
               saveRemainingFileUploadsToCache(fileUploadResponse).map(uploads => Right(uploads))
-            }
-            else {
+            } else {
               Logger.warn(s"Left: error: illegal state")
               Future.successful(Left(new IllegalStateException("Contact details was not uploaded successfully")))
             }
@@ -119,5 +124,7 @@ class HowManyFilesUploadController @Inject()(authenticate: AuthAction,
     customsDeclarationsService.batchFileUpload(req.eori, req.mrn, fileUploadCount)
 
   private def firstUploadFile(response: FileUploadResponse): Either[Throwable, (FileUpload, UploadRequest)] =
-    response.uploads.headOption map { case f@FileUpload(_, Waiting(u), _, _) => Right((f, u)) } getOrElse Left(new IllegalStateException("Unable to initiate upload"))
+    response.uploads.headOption map { case f @ FileUpload(_, Waiting(u), _, _) => Right((f, u)) } getOrElse Left(
+      new IllegalStateException("Unable to initiate upload")
+    )
 }

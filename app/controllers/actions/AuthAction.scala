@@ -32,7 +32,7 @@ import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthActionImpl @Inject()(val authConnector: AuthConnector, val config: Configuration, val env: Environment, mcc: MessagesControllerComponents)
-  extends AuthAction with AuthorisedFunctions with AuthRedirects {
+    extends AuthAction with AuthorisedFunctions with AuthRedirects {
 
   implicit override val executionContext: ExecutionContext = mcc.executionContext
   override val parser: BodyParser[AnyContent] = mcc.parsers.defaultBodyParser
@@ -47,20 +47,20 @@ class AuthActionImpl @Inject()(val authConnector: AuthConnector, val config: Con
           email and
           affinityGroup and
           internalId and
-          allEnrolments) {
+          allEnrolments
+      ) {
 
         case Some(credentials) ~ Some(name) ~ email ~ affinityGroup ~ Some(identifier) ~ enrolments =>
           val signedInUser = SignedInUser(credentials, name, email, affinityGroup, identifier, enrolments)
           Future.successful(Right(AuthenticatedRequest(request, signedInUser)))
 
         case _ =>
-
           //TODO Change this msg
           throw new UnauthorizedException("Unable to retrieve internal Id")
 
       } recover {
       case _: NoActiveSession => Left(toGGLogin(request.uri))
-      case _ => Left(Redirect(routes.UnauthorisedController.onPageLoad()))
+      case _                  => Left(Redirect(routes.UnauthorisedController.onPageLoad()))
     }
   }
 }

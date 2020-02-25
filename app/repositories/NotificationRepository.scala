@@ -29,22 +29,26 @@ import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class NotificationRepository @Inject()(mongo: ReactiveMongoComponent, appConfig: AppConfig)(implicit ec: ExecutionContext) extends ReactiveRepository[Notification, BSONObjectID](
-  collectionName = "notifications",
-  mongo = mongo.mongoConnector.db,
-  domainFormat = Notification.notificationFormat,
-  idFormat = ReactiveMongoFormats.objectIdFormats
-) {
+class NotificationRepository @Inject()(mongo: ReactiveMongoComponent, appConfig: AppConfig)(implicit ec: ExecutionContext)
+    extends ReactiveRepository[Notification, BSONObjectID](
+      collectionName = "notifications",
+      mongo = mongo.mongoConnector.db,
+      domainFormat = Notification.notificationFormat,
+      idFormat = ReactiveMongoFormats.objectIdFormats
+    ) {
 
   override def indexes: Seq[Index] = Seq(
     Index(key = Seq(("fileReference", IndexType.Ascending)), name = Some("fileReferenceIndex")),
-    Index(key = Seq(("createdAt", IndexType.Ascending)), name = Some("createdAtIndex"), options = BSONDocument("expireAfterSeconds" -> appConfig.notifications.ttlSeconds))
+    Index(
+      key = Seq(("createdAt", IndexType.Ascending)),
+      name = Some("createdAtIndex"),
+      options = BSONDocument("expireAfterSeconds" -> appConfig.notifications.ttlSeconds)
+    )
   )
 
-
   override def ensureIndexes(implicit ec: ExecutionContext): Future[Seq[Boolean]] = Future.successful(Seq.empty)
-  
-  def ensureIndex(index: Index)(implicit ec: ExecutionContext): Future[Unit] = {
+
+  def ensureIndex(index: Index)(implicit ec: ExecutionContext): Future[Unit] =
     collection.indexesManager
       .create(index)
       .map(wr => Logger.info(wr.toString))
@@ -52,7 +56,6 @@ class NotificationRepository @Inject()(mongo: ReactiveMongoComponent, appConfig:
         case t =>
           Logger.warn(s"$message (${index.eventualName})", t)
       }
-  }
 
   Future.sequence(indexes.map(ensureIndex))
 }

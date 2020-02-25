@@ -28,34 +28,32 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
-
-
 @Singleton
-class MrnEntryController @Inject()(authenticate: AuthAction,
-                                   requireEori: EORIRequiredAction,
-                                   requireContactDetails: ContactDetailsRequiredAction,
-                                   getData: DataRetrievalAction,
-                                   formProvider: MRNFormProvider,
-                                   dataCacheConnector: Cache,
-                                   implicit val appConfig: AppConfig,
-                                   mcc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
+class MrnEntryController @Inject()(
+  authenticate: AuthAction,
+  requireEori: EORIRequiredAction,
+  requireContactDetails: ContactDetailsRequiredAction,
+  getData: DataRetrievalAction,
+  formProvider: MRNFormProvider,
+  dataCacheConnector: Cache,
+  implicit val appConfig: AppConfig,
+  mcc: MessagesControllerComponents
+)(implicit ec: ExecutionContext)
+    extends FrontendController(mcc) with I18nSupport {
 
   val form = formProvider()
 
-  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireContactDetails) {
-    implicit req =>
-      val populatedForm = req.userAnswers.get(MrnEntryPage).map(form.fill).getOrElse(form)
+  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireContactDetails) { implicit req =>
+    val populatedForm = req.userAnswers.get(MrnEntryPage).map(form.fill).getOrElse(form)
 
-      Ok(views.html.mrn_entry(populatedForm))
+    Ok(views.html.mrn_entry(populatedForm))
   }
 
-  def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireContactDetails).async {
-    implicit req =>
-
-      form.bindFromRequest().fold(
-        errorForm =>
-          Future.successful(BadRequest(views.html.mrn_entry(errorForm))),
-
+  def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireContactDetails).async { implicit req =>
+    form
+      .bindFromRequest()
+      .fold(
+        errorForm => Future.successful(BadRequest(views.html.mrn_entry(errorForm))),
         value => {
           val cacheMap = req.userAnswers.set(MrnEntryPage, value).cacheMap
 
@@ -64,5 +62,5 @@ class MrnEntryController @Inject()(authenticate: AuthAction,
           }
         }
       )
-    }
+  }
 }

@@ -35,7 +35,7 @@ class ContactDetailsSpec extends DomAssertions with ViewBehaviours with Property
   def view(form: Form[ContactDetails] = form): String = contact_details(form)(fakeRequest, messages, appConfig).toString()
 
   val messagePrefix = "contactDetails"
-  
+
   def getMessage(key: String): String = messages(s"$messagePrefix.$key")
 
   "Contact details page" must {
@@ -45,7 +45,6 @@ class ContactDetailsSpec extends DomAssertions with ViewBehaviours with Property
     "display name input" in {
 
       forAll { contactDetails: ContactDetails =>
-
         val popForm = form.fillAndValidate(contactDetails)
         val input = input_text(popForm("name"), getMessage("name")).toString()
 
@@ -56,7 +55,6 @@ class ContactDetailsSpec extends DomAssertions with ViewBehaviours with Property
     "display company name input" in {
 
       forAll { contactDetails: ContactDetails =>
-
         val popForm = form.fillAndValidate(contactDetails)
         val input = input_text(popForm("companyName"), getMessage("companyName")).toString()
 
@@ -67,7 +65,6 @@ class ContactDetailsSpec extends DomAssertions with ViewBehaviours with Property
     "display phone number input" in {
 
       forAll { contactDetails: ContactDetails =>
-
         val popForm = form.fillAndValidate(contactDetails)
         val input = input_text(popForm("phoneNumber"), getMessage("phoneNumber")).toString()
 
@@ -78,7 +75,6 @@ class ContactDetailsSpec extends DomAssertions with ViewBehaviours with Property
     "display email input" in {
 
       forAll { contactDetails: ContactDetails =>
-
         val popForm = form.fillAndValidate(contactDetails)
         val input = input_text(popForm("email"), getMessage("email")).toString()
 

@@ -32,12 +32,11 @@ import services.NotificationService
 import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.NodeSeq
 
-
 class NotificationCallbackControllerSpec extends ControllerSpecBase with MockitoSugar with ScalaFutures with BeforeAndAfterEach {
 
   val mockNotificationService = mock[NotificationService]
   val mockAppConfig = mock[AppConfig]
-  val controller = new NotificationCallbackController(mockNotificationService, mockAppConfig,mcc)(executionContext)
+  val controller = new NotificationCallbackController(mockNotificationService, mockAppConfig, mcc)(executionContext)
   val expectedAuthToken = "authToken"
 
   override def beforeEach = {
@@ -47,11 +46,11 @@ class NotificationCallbackControllerSpec extends ControllerSpecBase with Mockito
 
   "NotificationCallbackController" should {
     "return internal server error when there is a downstream failure" in {
-      
+
       when(mockNotificationService.save(any[NodeSeq])(any[ExecutionContext])).thenReturn(Future.successful(Left(new IOException("Server error"))))
-      
+
       val result = controller.onNotify()(FakeRequest("", "").withBody(<notification/>).withHeaders("Authorization" -> expectedAuthToken))
-      
+
       status(result) mustBe INTERNAL_SERVER_ERROR
     }
 

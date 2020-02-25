@@ -20,23 +20,24 @@ import pureconfig.{CamelCase, ConfigFieldMapping, KebabCase}
 import pureconfig.generic.ProductHint
 
 case class AppConfig(
-                      appName: String,
-                      developerHubClientId: String,
-                      contactFrontend: ContactFrontend,
-                      assets: Assets,
-                      googleAnalytics: GoogleAnalytics,
-                      microservice: Microservice,
-                      fileFormats: FileFormats,
-                      notifications: Notifications,
-                      feedback: Feedback,
-                      proxy: Proxy,
-                      accessibilityLinkUrl: String)
+  appName: String,
+  developerHubClientId: String,
+  contactFrontend: ContactFrontend,
+  assets: Assets,
+  googleAnalytics: GoogleAnalytics,
+  microservice: Microservice,
+  fileFormats: FileFormats,
+  notifications: Notifications,
+  feedback: Feedback,
+  proxy: Proxy,
+  accessibilityLinkUrl: String
+)
 
 object AppConfig {
   implicit val appNameHint: ProductHint[AppConfig] = ProductHint(new ConfigFieldMapping {
     def apply(fieldName: String): String = fieldName match {
       case "appName" | "developerHubClientId" => fieldName
-      case _ => KebabCase.fromTokens(CamelCase.toTokens(fieldName))
+      case _                                  => KebabCase.fromTokens(CamelCase.toTokens(fieldName))
     }
   })
 }
@@ -60,7 +61,6 @@ case class CustomsDeclarations(protocol: Option[String], host: String, port: Opt
   def batchUploadEndpoint: String = s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$batchUploadUri"
 }
 
-
 case class CDSFileUploadFrontend(protocol: Option[String], host: String, port: Option[Int]) {
   val uri: String = s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}"
 }
@@ -75,4 +75,4 @@ case class Notifications(authToken: String, maxRetries: Int, retryPauseMillis: I
 
 case class Feedback(url: String)
 
-case class Proxy(protocol:String, host:String, port:Int,username:String,password:String,proxyRequiredForThisEnvironment:Boolean)
+case class Proxy(protocol: String, host: String, port: Int, username: String, password: String, proxyRequiredForThisEnvironment: Boolean)

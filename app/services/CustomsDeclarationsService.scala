@@ -31,14 +31,14 @@ trait CustomsDeclarationsService {
 
 }
 
-class CustomsDeclarationsServiceImpl @Inject()(customsDeclarationsConnector: CustomsDeclarationsConnector, appConfig:AppConfig) extends CustomsDeclarationsService {
+class CustomsDeclarationsServiceImpl @Inject()(customsDeclarationsConnector: CustomsDeclarationsConnector, appConfig: AppConfig)
+    extends CustomsDeclarationsService {
 
-  override def batchFileUpload(eori: String, mrn: MRN, fileUploadCount: FileUploadCount)
-                              (implicit hc: HeaderCarrier): Future[FileUploadResponse] = {
+  override def batchFileUpload(eori: String, mrn: MRN, fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier): Future[FileUploadResponse] = {
 
     val uploadUrl = appConfig.microservice.services.cdsFileUploadFrontend.uri
     Logger.warn(s"uploadUrl: $uploadUrl")
-    val files = for(i <- 1 to fileUploadCount.value + 1) yield FileUploadFile(i, "", uploadUrl)
+    val files = for (i <- 1 to fileUploadCount.value + 1) yield FileUploadFile(i, "", uploadUrl)
     val fileSeq = files.flatten
 
     val request = FileUploadRequest(mrn, fileSeq)

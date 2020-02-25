@@ -30,7 +30,6 @@ class MRNSpec extends SpecBase with PropertyChecks {
     "return Some for valid MRN" in {
 
       forAll(validMRNGen) { mrn =>
-
         MRN(mrn).map(_.value) mustBe Some(mrn)
       }
     }

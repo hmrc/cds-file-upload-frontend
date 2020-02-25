@@ -43,7 +43,14 @@ class AuthActionSpec extends ControllerSpecBase {
 
     "return authenticated user" in {
 
-      val user = SignedInUser(Credentials("providerId", "providerType"), Name(Some("John"), Some("Doe")), Some("john@doe.com"), Some(Individual), "internalID", Enrolments(Set(Enrolment("HMRC-CUS-ORG", Seq(EnrolmentIdentifier("EORINumber", "GB1234567890")), ""))))
+      val user = SignedInUser(
+        Credentials("providerId", "providerType"),
+        Name(Some("John"), Some("Doe")),
+        Some("john@doe.com"),
+        Some(Individual),
+        "internalID",
+        Enrolments(Set(Enrolment("HMRC-CUS-ORG", Seq(EnrolmentIdentifier("EORINumber", "GB1234567890")), "")))
+      )
 
       withSignedInUser(user) {
 

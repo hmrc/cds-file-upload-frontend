@@ -45,11 +45,10 @@ trait ViewBehaviours extends DomAssertions {
       }
     }
 
-    behave like pageWithoutHeading(view, messageKeyPrefix, expectedGuidanceKeys:_*)
+    behave like pageWithoutHeading(view, messageKeyPrefix, expectedGuidanceKeys: _*)
   }
 
-  def pageWithoutHeading(view: () => HtmlFormat.Appendable, messageKeyPrefix: String, expectedGuidanceKeys: String*) = {
-
+  def pageWithoutHeading(view: () => HtmlFormat.Appendable, messageKeyPrefix: String, expectedGuidanceKeys: String*) =
     "behave like a normal page" when {
       "rendered" must {
         "have the correct banner title" in {
@@ -65,15 +64,12 @@ trait ViewBehaviours extends DomAssertions {
         }
       }
     }
-  }
 
-  def pageWithBackLink(view: () => HtmlFormat.Appendable) = {
-
+  def pageWithBackLink(view: () => HtmlFormat.Appendable) =
     "behave like a page with a back link" must {
       "have a back link" in {
         val doc = asDocument(view())
         assertRenderedById(doc, "back-link")
       }
     }
-  }
 }

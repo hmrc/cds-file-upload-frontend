@@ -36,10 +36,6 @@ class HowManyFilesUploadSpec extends DomAssertions with IntViewBehaviours[FileUp
 
   "How Many Files Upload Page" must {
     behave like normalPage(view, messagePrefix)
-    behave like intPage(
-        createViewUsingForm,
-        (form, i) => form.bind(Map("value" -> i.toString)),
-        "value",
-        messagePrefix)
+    behave like intPage(createViewUsingForm, (form, i) => form.bind(Map("value" -> i.toString)), "value", messagePrefix)
   }
 }

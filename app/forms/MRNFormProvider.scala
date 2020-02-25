@@ -24,9 +24,7 @@ import play.api.data.{Form, FormError}
 class MRNFormProvider {
 
   def apply(): Form[MRN] =
-    Form(
-      "value" -> of(mrnFormatter("mrn.invalid"))
-    )
+    Form("value" -> of(mrnFormatter("mrn.invalid")))
 
   def mrnFormatter(errorKey: String): Formatter[MRN] = new Formatter[MRN] {
 

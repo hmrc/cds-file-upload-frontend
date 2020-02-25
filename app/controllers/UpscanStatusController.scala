@@ -37,15 +37,18 @@ import views.html.upload_error
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class UpscanStatusController @Inject()(authenticate: AuthAction,
-                                       requireEori: EORIRequiredAction,
-                                       getData: DataRetrievalAction,
-                                       requireResponse: FileUploadResponseRequiredAction,
-                                       cache: Cache,
-                                       notificationRepository: NotificationRepository,
-                                       auditConnector: AuditConnector,
-                                       implicit val appConfig: AppConfig,
-                                       mcc: MessagesControllerComponents)(implicit ec: ExecutionContext) extends FrontendController(mcc) with I18nSupport {
+class UpscanStatusController @Inject()(
+  authenticate: AuthAction,
+  requireEori: EORIRequiredAction,
+  getData: DataRetrievalAction,
+  requireResponse: FileUploadResponseRequiredAction,
+  cache: Cache,
+  notificationRepository: NotificationRepository,
+  auditConnector: AuditConnector,
+  implicit val appConfig: AppConfig,
+  mcc: MessagesControllerComponents
+)(implicit ec: ExecutionContext)
+    extends FrontendController(mcc) with I18nSupport {
 
   private val AuditSource = appConfig.appName
   private val audit = Audit(AuditSource, auditConnector)
@@ -54,7 +57,6 @@ class UpscanStatusController @Inject()(authenticate: AuthAction,
 
   def onPageLoad(ref: String): Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
-
       val references = req.fileUploadResponse.uploads.map(_.reference)
       val refPosition = getPosition(ref, references)
 
@@ -62,14 +64,14 @@ class UpscanStatusController @Inject()(authenticate: AuthAction,
         case Some(upload) =>
           upload.state match {
             case Waiting(ur) => Future.successful(Ok(views.html.upload_your_files(ur, refPosition)))
-            case _ => nextPage(upload.reference, req.fileUploadResponse.uploads)
+            case _           => nextPage(upload.reference, req.fileUploadResponse.uploads)
           }
 
-        case None => 
+        case None =>
           Future.successful(Redirect(routes.ErrorPageController.error()))
       }
     }
-  
+
   def error(id: String): Action[AnyContent] =
     (authenticate andThen requireEori) { implicit req =>
       Ok(upload_error())
@@ -77,7 +79,6 @@ class UpscanStatusController @Inject()(authenticate: AuthAction,
 
   def success(id: String): Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
-
       val uploads = req.fileUploadResponse.uploads
       uploads.find(_.id == id) match {
         case Some(upload) =>
@@ -95,7 +96,7 @@ class UpscanStatusController @Inject()(authenticate: AuthAction,
     def nextFile(file: FileUpload) = routes.UpscanStatusController.onPageLoad(file.reference)
 
     val nextFileToUpload = files.collectFirst {
-      case file@FileUpload(reference, Waiting(_),  _, _) if reference > ref => file
+      case file @ FileUpload(reference, Waiting(_), _, _) if reference > ref => file
     }
 
     nextFileToUpload match {
@@ -114,11 +115,9 @@ class UpscanStatusController @Inject()(authenticate: AuthAction,
     val uploads = req.fileUploadResponse.uploads
 
     def retrieveNotifications(retries: Int = 0): Future[Result] = {
-      val receivedNotifications = Future.sequence(
-        uploads.map { upload =>
-          notificationRepository.find("fileReference" -> JsString(upload.reference))
-        }
-      )
+      val receivedNotifications = Future.sequence(uploads.map { upload =>
+        notificationRepository.find("fileReference" -> JsString(upload.reference))
+      })
 
       receivedNotifications.flatMap { notifications =>
         notifications.flatten match {
@@ -150,7 +149,11 @@ class UpscanStatusController @Inject()(authenticate: AuthAction,
 
   private def auditUploadSuccess()(implicit req: FileUploadResponseRequest[_]) = {
     def auditDetails = {
-      val contactDetails = req.userAnswers.get(ContactDetailsPage).fold(Map.empty[String, String])(cd => Map("fullName" -> cd.name, "companyName" -> cd.companyName, "emailAddress" -> cd.email, "telephoneNumber" -> cd.phoneNumber))
+      val contactDetails = req.userAnswers
+        .get(ContactDetailsPage)
+        .fold(Map.empty[String, String])(
+          cd => Map("fullName" -> cd.name, "companyName" -> cd.companyName, "emailAddress" -> cd.email, "telephoneNumber" -> cd.phoneNumber)
+        )
       val eori = Map("eori" -> req.request.eori)
       val mrn = req.userAnswers.get(MrnEntryPage).fold(Map.empty[String, String])(m => Map("mrn" -> m.value))
       val numberOfFiles = req.userAnswers.get(HowManyFilesUploadPage).fold(Map.empty[String, String])(n => Map("numberOfFiles" -> s"${n.value}"))
@@ -162,18 +165,20 @@ class UpscanStatusController @Inject()(authenticate: AuthAction,
     sendDataEvent(transactionName = "trader-submission", detail = auditDetails, auditType = "UploadSuccess")
   }
 
-  private def sendDataEvent(transactionName: String, path: String = "N/A", tags: Map[String, String] = Map.empty, detail: Map[String, String], auditType: String)(implicit hc: HeaderCarrier): Unit = {
-    audit.sendDataEvent(DataEvent(
-      AuditSource,
-      auditType,
-      tags = hc.toAuditTags(transactionName, path) ++ tags,
-      detail = hc.toAuditDetails(detail.toSeq: _*))
+  private def sendDataEvent(
+    transactionName: String,
+    path: String = "N/A",
+    tags: Map[String, String] = Map.empty,
+    detail: Map[String, String],
+    auditType: String
+  )(implicit hc: HeaderCarrier): Unit =
+    audit.sendDataEvent(
+      DataEvent(AuditSource, auditType, tags = hc.toAuditTags(transactionName, path) ++ tags, detail = hc.toAuditDetails(detail.toSeq: _*))
     )
-  }
-  
+
   private def getPosition(ref: String, refs: List[String]) = refs match {
     case head :: tail if head == ref => First(refs.size)
     case init :+ last if last == ref => Last(refs.size)
-    case _ => Middle(refs.indexOf(ref) + 1, refs.size)
+    case _                           => Middle(refs.indexOf(ref) + 1, refs.size)
   }
 }

@@ -31,7 +31,6 @@ class MrnRequiredAction @Inject()(mcc: MessagesControllerComponents) extends Act
   implicit val executionContext: ExecutionContext = mcc.executionContext
   private val onError = Redirect(routes.ErrorPageController.error())
 
-  override protected def refine[A](request: ContactDetailsRequest[A]): Future[Either[Result, MrnRequest[A]]] = {
+  override protected def refine[A](request: ContactDetailsRequest[A]): Future[Either[Result, MrnRequest[A]]] =
     Future.successful(request.userAnswers.get(MrnEntryPage).map(mrn => MrnRequest(request, request.userAnswers, mrn)).toRight(onError))
-  }
 }

@@ -16,7 +16,6 @@
 
 package models
 
-
 sealed trait Position
 
 case class First(total: Int) extends Position

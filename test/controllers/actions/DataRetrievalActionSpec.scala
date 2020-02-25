@@ -33,7 +33,7 @@ import scala.concurrent.Future
 
 class DataRetrievalActionSpec extends ControllerSpecBase with SignedInUserGen {
 
-  class Harness(dataCacheConnector: Cache) extends DataRetrievalActionImpl(dataCacheConnector,mcc) {
+  class Harness(dataCacheConnector: Cache) extends DataRetrievalActionImpl(dataCacheConnector, mcc) {
     def callTransform[A](request: EORIRequest[A]): Future[OptionalDataRequest[A]] = transform(request)
   }
 
@@ -42,10 +42,9 @@ class DataRetrievalActionSpec extends ControllerSpecBase with SignedInUserGen {
       "set userAnswers to 'None' in the request" in {
 
         forAll { (user: SignedInUser, eori: String) =>
-
           val dataCacheConnector = mock[Cache]
           when(dataCacheConnector.fetch(eqTo(user.internalId))(any[HeaderCarrier])) thenReturn Future.successful(None)
-          val action  = new Harness(dataCacheConnector)
+          val action = new Harness(dataCacheConnector)
           val request = EORIRequest(AuthenticatedRequest(fakeRequest, user), eori)
 
           val futureResult = action.callTransform(request)
@@ -61,7 +60,6 @@ class DataRetrievalActionSpec extends ControllerSpecBase with SignedInUserGen {
       "build a userAnswers object and add it to the request" in {
 
         forAll { (user: SignedInUser, eori: String) =>
-
           val id = user.internalId
           val dataCacheConnector = mock[Cache]
           when(dataCacheConnector.fetch(eqTo(id))(any[HeaderCarrier])) thenReturn Future.successful(Some(new CacheMap(id, Map())))

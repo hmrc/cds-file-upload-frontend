@@ -52,24 +52,25 @@ class NotificationServiceSpec extends PlaySpec with MockitoSugar {
   "Notification service" should {
 
     "save a success notification with timestamp for TTL" in {
-      when(mockRepository.insert(any[Notification])(any[ExecutionContext])).thenReturn(Future.successful(DefaultWriteResult(ok = true, 1, Seq.empty, None, None, None)))
+      when(mockRepository.insert(any[Notification])(any[ExecutionContext]))
+        .thenReturn(Future.successful(DefaultWriteResult(ok = true, 1, Seq.empty, None, None, None)))
 
       await(service.save(SuccessNotification))
-      
+
       val captor: ArgumentCaptor[Notification] = ArgumentCaptor.forClass(classOf[Notification])
       verify(mockRepository).insert(captor.capture())(any[ExecutionContext])
       val notification = captor.getValue
       notification.fileReference mustBe "e4d94295-52b1-4837-bdc0-7ab8d7b0f1af"
       notification.outcome mustBe "SUCCESS"
-      notification.createdAt.withTimeAtStartOfDay() mustBe DateTimeUtils.now.withTimeAtStartOfDay()  
+      notification.createdAt.withTimeAtStartOfDay() mustBe DateTimeUtils.now.withTimeAtStartOfDay()
     }
-    
+
     "return an exception when insert fails" in {
       val exception = new IOException("downstream failure")
       when(mockRepository.insert(any[Notification])(any[ExecutionContext])).thenReturn(Future.failed(exception))
-      
+
       val result = await(service.save(SuccessNotification))
-      
+
       result mustBe Left(exception)
     }
   }
