@@ -17,20 +17,21 @@
 package controllers
 
 import com.google.inject.{Inject, Singleton}
-import config.AppConfig
 import controllers.actions._
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import views.html.file_warning
+
 @Singleton
 class FileWarningController @Inject()(
   authenticate: AuthAction,
   requireEori: EORIRequiredAction,
-  implicit val appConfig: AppConfig,
-  mcc: MessagesControllerComponents
+  mcc: MessagesControllerComponents,
+  fileWarning: file_warning
 ) extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori) { implicit req =>
-    Ok(views.html.file_warning())
+    Ok(fileWarning())
   }
 }

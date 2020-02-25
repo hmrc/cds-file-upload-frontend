@@ -29,12 +29,13 @@ import org.scalacheck.Gen
 import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
 import play.api.libs.json.Json
 import play.api.test.Helpers._
+import play.twirl.api.HtmlFormat
 import repositories.NotificationRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
-import views.html.upload_your_files
+import views.html.{upload_error, upload_your_files}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -43,6 +44,8 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
   val cache = mock[Cache]
   val notificationRepository = mock[NotificationRepository]
   val auditConnector = mock[AuditConnector]
+  val uploadYourFiles = mock[upload_your_files]
+  val uploadError = mock[upload_error]
 
   val controller = new UpscanStatusController(
     new FakeAuthAction(),
@@ -53,18 +56,10 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
     notificationRepository,
     auditConnector,
     appConfig,
-    mcc
+    mcc,
+    uploadYourFiles,
+    uploadError
   )(executionContext)
-
-  "Upscan Status error" should {
-
-    "return error page" in {
-      val result = controller.error("someId")(fakeRequest)
-
-      status(result) mustBe OK
-      contentAsString(result) must include("An error occurred during upload")
-    }
-  }
 
   private val mockMaterializer = mock[Materializer]
   private val mockAuditConnector = mock[AuditConnector]
@@ -87,11 +82,6 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
       }
   }
 
-  override def beforeEach = {
-    super.beforeEach
-    reset(mockMaterializer, mockAuditConnector, mockNotificationRepository)
-  }
-
   def controller(getData: DataRetrievalAction) =
     new UpscanStatusController(
       new FakeAuthAction(),
@@ -102,31 +92,46 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
       mockNotificationRepository,
       mockAuditConnector,
       appConfig.copy(notifications = Notifications(appConfig.notifications.authToken, maxRetries = 3, retryPauseMillis = 500, ttlSeconds = 60)),
-      mcc
+      mcc,
+      uploadYourFiles,
+      uploadError
     )(executionContext)
+
+  override protected def beforeEach(): Unit = {
+    super.beforeEach()
+
+    when(uploadYourFiles.apply(any(), any())(any(), any(), any())).thenReturn(HtmlFormat.empty)
+    when(uploadError.apply()(any(), any())).thenReturn(HtmlFormat.empty)
+  }
+
+  override protected def afterEach(): Unit = {
+    reset(mockMaterializer, mockAuditConnector, mockNotificationRepository, uploadYourFiles, uploadError)
+
+    super.afterEach()
+  }
+
+  "Upscan Status error" should {
+
+    "return error page" in {
+      val result = controller.error("someId")(fakeRequest)
+
+      status(result) mustBe OK
+      verify(uploadError).apply()(any(), any())
+    }
+  }
 
   ".onPageLoad" should {
 
     "load the view" when {
 
-      def nextPosition(ref: String, refs: List[String]): Position =
-        refs.indexOf(ref) match {
-          case 0                           => First(refs.size)
-          case x if x == (refs.length - 1) => Last(refs.size)
-          case x                           => Middle(x + 1, refs.size)
-        }
-
       "request file exists in response" in {
 
         forAll(waitingGen, arbitrary[CacheMap]) {
-          case ((file, ur, response), cacheMap) =>
-            val refPosition: Position = nextPosition(file.reference, response.uploads.map(_.reference))
-
+          case ((file, _, response), cacheMap) =>
             val updatedCache = combine(response, cacheMap)
             val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad(file.reference)(fakeRequest)
 
             status(result) mustBe OK
-            contentAsString(result) mustBe viewAsString(ur, refPosition)
         }
       }
     }
@@ -394,9 +399,6 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
 
   }
 
-  private def viewAsString(uploadRequest: UploadRequest, refPosition: Position) =
-    upload_your_files(uploadRequest, refPosition)(fakeRequest, messages, appConfig, fakeRequest.flash).toString
-
-  private def combine(response: FileUploadResponse, cache: CacheMap) =
+  private def combine(response: FileUploadResponse, cache: CacheMap): CacheMap =
     cache.copy(data = cache.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))
 }

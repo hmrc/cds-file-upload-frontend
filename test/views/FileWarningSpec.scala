@@ -23,7 +23,8 @@ import views.html.file_warning
 
 class FileWarningSpec extends DomAssertions with ViewBehaviours {
 
-  val view: () => Html = () => file_warning()(fakeRequest, messages, appConfig)
+  val page = app.injector.instanceOf[file_warning]
+  val view: () => Html = () => page()(fakeRequest, messages)
 
   val messageKeyPrefix = "fileWarning"
 

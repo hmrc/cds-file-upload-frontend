@@ -61,7 +61,7 @@ abstract class ControllerSpecBase extends SpecBase with FakeActions {
     test
   }
 
-  override def beforeEach = {
+  override protected def beforeEach(): Unit = {
     reset(mockDataCacheConnector, mockAuthConnector)
     when(mockDataCacheConnector.save(any[CacheMap])(any[HeaderCarrier])).thenReturn(Future.successful(CacheMap("", Map())))
   }

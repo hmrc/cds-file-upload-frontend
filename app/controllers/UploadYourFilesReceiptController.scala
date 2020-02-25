@@ -36,18 +36,20 @@ class UploadYourFilesReceiptController @Inject()(
   requireEori: EORIRequiredAction,
   getData: DataRetrievalAction,
   requireResponse: FileUploadResponseRequiredAction,
-  notificationRepository: NotificationRepository
-)(implicit val appConfig: AppConfig, mcc: MessagesControllerComponents, ec: ExecutionContext)
+  notificationRepository: NotificationRepository,
+  uploadYourFilesReceipt: upload_your_files_receipt
+)(implicit mcc: MessagesControllerComponents, ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
     addFilenames(req.fileUploadResponse.uploads).map { uploads =>
-      Ok(upload_your_files_receipt(uploads))
+      Ok(uploadYourFilesReceipt(uploads))
     }
   }
 
-  private def addFilenames(uploads: List[FileUpload]): Future[List[FileUpload]] = Future.sequence(uploads.map { u =>
-    val filenameF = notificationRepository.find("fileReference" -> JsString(u.reference)).map(_.headOption.fold("")(_.filename))
-    filenameF.map(f => u.copy(filename = f))
-  })
+  private def addFilenames(uploads: List[FileUpload]): Future[List[FileUpload]] =
+    Future.sequence(uploads.map { u =>
+      val filenameF = notificationRepository.find("fileReference" -> JsString(u.reference)).map(_.headOption.fold("")(_.filename))
+      filenameF.map(f => u.copy(filename = f))
+    })
 }

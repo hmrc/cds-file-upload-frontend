@@ -22,7 +22,9 @@ import views.html.start
 
 class StartSpec extends DomAssertions with ViewBehaviours {
 
-  val view = () => start()(fakeRequest, messages, appConfig)
+  val page = app.injector.instanceOf[start]
+
+  val view = () => page()(fakeRequest, messages)
 
   val messageKeyPrefix = "startPage"
 

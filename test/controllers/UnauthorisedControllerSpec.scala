@@ -16,13 +16,29 @@
 
 package controllers
 
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{reset, verify, when}
 import play.api.test.Helpers._
+import play.twirl.api.HtmlFormat
 import views.html.unauthorised
 
 class UnauthorisedControllerSpec extends ControllerSpecBase {
 
-  lazy val view = unauthorised()(fakeRequest, messages, appConfig)
-  def controller = new UnauthorisedController()
+  val page = mock[unauthorised]
+
+  def controller = new UnauthorisedController(mcc, page)
+
+  override protected def beforeEach(): Unit = {
+    super.beforeEach()
+
+    when(page.apply()(any(), any())).thenReturn(HtmlFormat.empty)
+  }
+
+  override protected def afterEach(): Unit = {
+    reset(page)
+
+    super.afterEach()
+  }
 
   "controller.onPageLoad" should {
 
@@ -30,12 +46,7 @@ class UnauthorisedControllerSpec extends ControllerSpecBase {
       val result = controller.onPageLoad(fakeRequest)
 
       status(result) mustBe OK
-    }
-
-    "return unauthorised view" in {
-      val result = controller.onPageLoad(fakeRequest)
-
-      contentAsString(result) mustBe view.toString
+      verify(page).apply()(any(), any())
     }
   }
 }

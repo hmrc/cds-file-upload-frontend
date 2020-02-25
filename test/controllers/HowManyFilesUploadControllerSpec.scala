@@ -30,10 +30,12 @@ import pages.{HowManyFilesUploadPage, MrnEntryPage}
 import play.api.libs.json.{JsNumber, JsString}
 import play.api.libs.ws.WSResponse
 import play.api.test.Helpers._
+import play.twirl.api.HtmlFormat
 import services.CustomsDeclarationsService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import views.DomAssertions
+import views.html.how_many_files_upload
 
 import scala.concurrent.Future
 
@@ -71,11 +73,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
   private val mockCustomsDeclarationsService = mock[CustomsDeclarationsService]
   private val mockUpscanConnector = mock[UpscanConnector]
 
-  override def beforeEach: Unit = {
-    super.beforeEach
-    reset(mockCustomsDeclarationsService, mockUpscanConnector)
-    when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(FileUploadResponse(List())))
-  }
+  private val page = app.injector.instanceOf[how_many_files_upload]
 
   private def controller(contactDetailsRequiredAction: ContactDetailsRequiredAction) =
     new HowManyFilesUploadController(
@@ -88,9 +86,21 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       mockDataCacheConnector,
       mockUpscanConnector,
       mockCustomsDeclarationsService,
-      appConfig,
-      mcc
+      mcc,
+      page
     )(executionContext)
+
+  override protected def beforeEach(): Unit = {
+    super.beforeEach()
+
+    when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(FileUploadResponse(List())))
+  }
+
+  override protected def afterEach(): Unit = {
+    reset(mockCustomsDeclarationsService, mockUpscanConnector)
+
+    super.afterEach()
+  }
 
   "How Many Files Upload Page" must {
 

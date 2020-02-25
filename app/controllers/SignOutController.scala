@@ -20,7 +20,7 @@ import config.AppConfig
 import controllers.actions._
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
-import play.api.mvc.MessagesControllerComponents
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 @Singleton
@@ -29,7 +29,7 @@ class SignOutController @Inject()(authenticate: AuthAction, mcc: MessagesControl
 
   val feedbackLink = appConfig.feedback.url
 
-  def signOut = authenticate { implicit req =>
+  def signOut: Action[AnyContent] = authenticate { implicit req =>
     Redirect(feedbackLink).withNewSession
   }
 }

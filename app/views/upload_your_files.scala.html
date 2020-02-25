@@ -15,11 +15,12 @@
  *@
 
 @import config.AppConfig
-@import uk.gov.hmrc.play.views.html.helpers._
-@import uk.gov.hmrc.play.views.html.{helpers => hmrcHelpers}
+@import uk.gov.hmrc.play.views.html.helpers.ErrorInline
 @import views.helpers.Utils._
 
-@(uploadRequest: UploadRequest, refPosition: Position)(implicit request: Request[_], messages: Messages, appConfig: AppConfig, flash: Flash)
+@this(mainTemplate: main_template, errorInline: ErrorInline, appConfig: AppConfig)
+
+@(uploadRequest: UploadRequest, refPosition: Position)(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @positionModifier = @{
     refPosition match {
@@ -29,7 +30,7 @@
     }
 }
 
-@main_template(title = messages(s"fileUploadPage.title.$positionModifier")) {
+@mainTemplate(title = messages(s"fileUploadPage.title.$positionModifier")) {
 
 
     <h1 class="heading-large">

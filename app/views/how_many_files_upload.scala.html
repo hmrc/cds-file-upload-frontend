@@ -14,20 +14,20 @@
  * limitations under the License.
  *@
 
-@import config.AppConfig
-@import uk.gov.hmrc.play.views.html.{helpers => hmrcHelpers}
 @import views.helpers.Utils._
 
-@(form: Form[FileUploadCount])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@this(mainTemplate: main_template)
 
-@main_template(title = s"${errorPrefix(form)} ${messages("howManyFilesUpload.title")}") {
+@(form: Form[FileUploadCount])(implicit request: Request[_], messages: Messages)
+
+@mainTemplate(title = s"${errorPrefix(form)} ${messages("howManyFilesUpload.title")}") {
 
 <div class="form-group">
     <h1 class="heading-large">@messages("howManyFilesUpload.heading")</h1>
 
     @components.error_summary(form.errors)
     
-    @hmrcHelpers.form(action = routes.HowManyFilesUploadController.onSubmit()) {
+    @helper.form(action = routes.HowManyFilesUploadController.onSubmit()) {
 
     @components.input_text(
     form("value"),
