@@ -28,14 +28,16 @@
     @components.error_summary(form.errors)
 
     @helper.form(action = routes.MrnEntryController.onSubmit()) {
+        @helper.CSRF.formField
 
-      @components.input_text(
-        form("value"),
-        messages("mrnEntryPage.heading"),
-        labelClass = Some("visually-hidden"),
-        hint = Some(multiline(messages("mrnEntryPage.hint1"), messages("mrnEntryPage.hint2"))))
+          @components.input_text(
+                form("value"),
+                messages("mrnEntryPage.heading"),
+                labelClass = Some("visually-hidden"),
+                hint = Some(multiline(messages("mrnEntryPage.hint1"), messages("mrnEntryPage.hint2")))
+          )
 
-      @components.submit_button()
+          @components.submit_button()
     }
 </div>
 

@@ -21,6 +21,7 @@ import models.MRN
 import org.scalatest.prop.PropertyChecks
 import play.api.data.Form
 import play.twirl.api.{Html, HtmlFormat}
+import utils.FakeRequestCSRFSupport._
 import views.behaviours.StringViewBehaviours
 import views.html.mrn_entry
 
@@ -30,11 +31,11 @@ class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with Pro
 
   val page = app.injector.instanceOf[mrn_entry]
 
-  val view: () => Html = () => page(form)(fakeRequest, messages)
+  val view: () => Html = () => page(form)(fakeRequest.withCSRFToken, messages)
 
   val messagePrefix = "mrnEntryPage"
 
-  def createViewUsingForm: Form[MRN] => HtmlFormat.Appendable = form => page(form)(fakeRequest, messages)
+  def createViewUsingForm: Form[MRN] => HtmlFormat.Appendable = form => page(form)(fakeRequest.withCSRFToken, messages)
 
   "MRN Entry Page" must {
     behave like normalPage(view, messagePrefix)

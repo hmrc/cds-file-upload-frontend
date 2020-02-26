@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@()(implicit messages: Messages)
+package utils
 
-<div class="section">
-	<p>@messages("helpline.paragraph1")</p>
-</div>
+import play.api.mvc.Request
+import play.api.test.{CSRFTokenHelper, FakeRequest}
+
+object FakeRequestCSRFSupport {
+
+  implicit class CSRFFakeRequest[A](request: FakeRequest[A]) {
+    def withCSRFToken: Request[A] = CSRFTokenHelper.addCSRFToken(request)
+  }
+}

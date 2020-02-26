@@ -22,6 +22,7 @@ import models.ContactDetails
 import org.scalatest.prop.PropertyChecks
 import play.api.data.Form
 import play.twirl.api.Html
+import utils.FakeRequestCSRFSupport._
 import views.behaviours.ViewBehaviours
 import views.html.components.input_text
 import views.html.contact_details
@@ -32,9 +33,9 @@ class ContactDetailsSpec extends DomAssertions with ViewBehaviours with Property
 
   val page = app.injector.instanceOf[contact_details]
 
-  val simpleView: () => Html = () => page(form)(fakeRequest, messages)
+  val simpleView: () => Html = () => page(form)(fakeRequest.withCSRFToken, messages)
 
-  def view(form: Form[ContactDetails] = form): String = page(form)(fakeRequest, messages).toString()
+  def view(form: Form[ContactDetails] = form): String = page(form)(fakeRequest.withCSRFToken, messages).toString()
 
   val messagePrefix = "contactDetails"
 

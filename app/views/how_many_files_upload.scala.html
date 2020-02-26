@@ -28,13 +28,15 @@
     @components.error_summary(form.errors)
     
     @helper.form(action = routes.HowManyFilesUploadController.onSubmit()) {
+        @helper.CSRF.formField
 
-    @components.input_text(
-    form("value"),
-    messages("howManyFilesUpload.title"),
-    labelClass = Some("visually-hidden"))
+        @components.input_text(
+            form("value"),
+            messages("howManyFilesUpload.title"),
+            labelClass = Some("visually-hidden")
+        )
 
-    @components.submit_button()
+        @components.submit_button()
     }
 </div>
 

@@ -28,6 +28,7 @@
         @components.error_summary(form.errors)
 
         @helper.form(action = routes.ContactDetailsController.onSubmit()) {
+            @helper.CSRF.formField
 
             @components.input_text(form("name"), messages("contactDetails.name"))
             @components.input_text(form("companyName"), messages("contactDetails.companyName"))
