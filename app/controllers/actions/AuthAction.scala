@@ -37,6 +37,10 @@ class AuthActionImpl @Inject()(val authConnector: AuthConnector, val config: Con
   implicit override val executionContext: ExecutionContext = mcc.executionContext
   override val parser: BodyParser[AnyContent] = mcc.parsers.defaultBodyParser
 
+  lazy val loginUrl = config.getOptional[String]("urls.login").getOrElse(throw new Exception("Missing login url configuration"))
+  lazy val continueLoginUrl =
+    config.getOptional[String]("urls.loginContinue").getOrElse(throw new Exception("Missing continue login url configuration"))
+
   override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
@@ -59,7 +63,7 @@ class AuthActionImpl @Inject()(val authConnector: AuthConnector, val config: Con
           throw new UnauthorizedException("Unable to retrieve internal Id")
 
       } recover {
-      case _: NoActiveSession => Left(toGGLogin(request.uri))
+      case _: NoActiveSession => Left(Redirect(loginUrl, Map("continue" -> Seq(continueLoginUrl))))
       case _                  => Left(Redirect(routes.UnauthorisedController.onPageLoad()))
     }
   }

@@ -65,12 +65,11 @@ class AuthActionSpec extends ControllerSpecBase {
 
       withAuthError(new NoActiveSession("") {}) {
 
-        val myURI = "http://myservice:1234/somecontext"
-        val request = FakeRequest("GET", myURI)
+        val request = FakeRequest("GET", "")
         val response = authController.action(request)
 
         status(response) mustBe SEE_OTHER
-        redirectLocation(response) mustBe Some(s"/gg/sign-in?continue=${escaped(myURI)}&origin=cds-file-upload-frontend")
+        redirectLocation(response).get must include("cds-file-upload-service")
       }
     }
 
