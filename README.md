@@ -20,6 +20,9 @@ In order to run CDS File Upload Frontend with the stubbed endpoints you will nee
 ./run-with-stubs.sh
 ```
 
+If you're running service manually without using the bash scripts on localhost you must use `sbt -Dapplication.router=testOnlyDoNotUseInAppConf.Routes` because test routes contains endpoints that are treated like a stub for uploading files.
+
+Inside `application.conf` you can find that `customs-declarations` settings not point to the different repo but to the endpoints that are in the test routes.
 
 ### Config settings
 
