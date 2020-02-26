@@ -66,7 +66,7 @@ class AuthActionSpec extends ControllerSpecBase {
       withAuthError(new NoActiveSession("") {}) {
 
         val myURI = "http://myservice:1234/somecontext"
-        val request = FakeRequest().copyFakeRequest(uri = myURI)
+        val request = FakeRequest("GET", myURI)
         val response = authController.action(request)
 
         status(response) mustBe SEE_OTHER

@@ -21,25 +21,40 @@ import forms.mappings.ContactDetailsMapping._
 import models._
 import models.requests.SignedInUser
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}
-import org.mockito.Mockito.{times, verify}
+import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalacheck.Arbitrary._
 import pages.ContactDetailsPage
 import play.api.data.Form
 import play.api.libs.json.Json
 import play.api.test.Helpers._
+import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
+import views.html.contact_details
 
 class ContactDetailsControllerSpec extends ControllerSpecBase {
 
   private val form = Form(contactDetailsMapping)
+  val page = mock[contact_details]
 
-  def view(form: Form[ContactDetails] = form): String = views.html.contact_details(form)(fakeRequest, messages, appConfig).toString
+  def view(form: Form[ContactDetails] = form): String = page(form)(fakeRequest, messages).toString
 
   def controller(signedInUser: SignedInUser, eori: String, dataRetrieval: DataRetrievalAction = new FakeDataRetrievalAction(None)) =
-    new ContactDetailsController(new FakeAuthAction(signedInUser), new FakeEORIAction(eori), dataRetrieval, mockDataCacheConnector, appConfig, mcc)(
+    new ContactDetailsController(new FakeAuthAction(signedInUser), new FakeEORIAction(eori), dataRetrieval, mockDataCacheConnector, mcc, page)(
       mcc.executionContext
     )
+
+  override protected def beforeEach(): Unit = {
+    super.beforeEach
+
+    when(page.apply(any())(any(), any())).thenReturn(HtmlFormat.empty)
+  }
+
+  override protected def afterEach(): Unit = {
+    reset(page)
+
+    super.afterEach()
+  }
 
   "Contact details page" should {
 

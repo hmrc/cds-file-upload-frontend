@@ -14,11 +14,10 @@
  * limitations under the License.
  *@
 
-@import config.AppConfig
-@import uk.gov.hmrc.play.views.html.helpers
+@this(mainTemplate: main_template)
 
-@()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@()(implicit request: Request[_], messages: Messages)
 
-@main_template(title = "File Size Form") {
+@mainTemplate(title = "File Size Form") {
     <h1 class="heading-xlarge">File Size Form</h1>
 }

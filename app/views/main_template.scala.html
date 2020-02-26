@@ -14,14 +14,10 @@
  * limitations under the License.
  *@
 
-@import config.AppConfig
+@import uk.gov.hmrc.play.views.html.layouts.Article
 
-@(title: String, contentHeader: Option[Html] = None)(mainContent: Html)(implicit request : Request[_], messages: Messages, appConfig: AppConfig)
+@this(govukWrapper: govuk_wrapper, article_di: Article)
 
-@import uk.gov.hmrc.play.views.html.layouts
+@(title: String, contentHeader: Option[Html] = None)(mainContent: Html)(implicit request : Request[_], messages: Messages)
 
-@govuk_wrapper(appConfig = appConfig,
-               title = title,
-               contentHeader = contentHeader,
-               mainContent = layouts.article(mainContent)
-)
+@govukWrapper(title = title, contentHeader = contentHeader, mainContent = article_di(mainContent))

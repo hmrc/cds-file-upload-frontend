@@ -18,14 +18,16 @@ package views
 
 import generators.Generators
 import models.FileUpload
-import org.scalacheck.Gen
 import org.scalatest.prop.PropertyChecks
 import play.twirl.api.Html
 import views.behaviours.ViewBehaviours
+import views.html.upload_your_files_receipt
 
 class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with PropertyChecks with Generators {
 
-  def view(receipts: List[FileUpload]): Html = views.html.upload_your_files_receipt(receipts)(fakeRequest, messages, appConfig)
+  val page = app.injector.instanceOf[upload_your_files_receipt]
+
+  def view(receipts: List[FileUpload]): Html = page(receipts)(fakeRequest, messages)
 
   val view: () => Html = () => view(Nil)
 

@@ -14,13 +14,11 @@
  * limitations under the License.
  *@
 
-@import config.AppConfig
-@import uk.gov.hmrc.play.views.html.{helpers => hmrcHelpers}
-@import views.helpers.Utils._
+@this(mainTemplate: main_template)
 
-@()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@()(implicit request: Request[_], messages: Messages)
 
-@main_template(title = messages("fuf.accessibility.statement.title")) {
+@mainTemplate(title = messages("fuf.accessibility.statement.title")) {
 
 <div class="grid-row">
     <header>

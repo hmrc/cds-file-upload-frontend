@@ -20,7 +20,9 @@ import views.html.unauthorised
 
 class UnauthorisedSpec extends DomAssertions {
 
-  lazy val view = unauthorised()(fakeRequest, messages, appConfig).toString
+  val page = app.injector.instanceOf[unauthorised]
+
+  lazy val view = page()(fakeRequest, messages).toString
 
   "view" should {
 

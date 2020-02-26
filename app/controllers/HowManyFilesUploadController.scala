@@ -16,7 +16,6 @@
 
 package controllers
 
-import config.AppConfig
 import connectors.{Cache, UpscanConnector}
 import controllers.actions._
 import forms.FileUploadCountProvider
@@ -30,6 +29,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.CustomsDeclarationsService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import views.html.how_many_files_upload
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -44,8 +44,8 @@ class HowManyFilesUploadController @Inject()(
   dataCacheConnector: Cache,
   uploadContactDetails: UpscanConnector,
   customsDeclarationsService: CustomsDeclarationsService,
-  implicit val appConfig: AppConfig,
-  mcc: MessagesControllerComponents
+  mcc: MessagesControllerComponents,
+  howManyFilesUpload: how_many_files_upload
 )(implicit ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
@@ -59,7 +59,7 @@ class HowManyFilesUploadController @Inject()(
           .map(form.fill)
           .getOrElse(form)
 
-      Ok(views.html.how_many_files_upload(populatedForm))
+      Ok(howManyFilesUpload(populatedForm))
     }
 
   def onSubmit: Action[AnyContent] =
@@ -67,7 +67,7 @@ class HowManyFilesUploadController @Inject()(
       form
         .bindFromRequest()
         .fold(
-          errorForm => Future.successful(BadRequest(views.html.how_many_files_upload(errorForm))),
+          errorForm => Future.successful(BadRequest(howManyFilesUpload(errorForm))),
           fileUploadCount => {
             uploadContactDetails(req, fileUploadCount) map {
               case Right(firstUpload :: _) =>
@@ -120,7 +120,7 @@ class HowManyFilesUploadController @Inject()(
   private def updateUserAnswers(userAnswers: UserAnswers, fileUploadCount: FileUploadCount, fileUploadResponse: FileUploadResponse) =
     userAnswers.set(HowManyFilesUploadPage, fileUploadCount).set(HowManyFilesUploadPage.Response, fileUploadResponse)
 
-  private def initiateUpload(req: MrnRequest[AnyContent], fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier) =
+  private def initiateUpload(req: MrnRequest[AnyContent], fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier): Future[FileUploadResponse] =
     customsDeclarationsService.batchFileUpload(req.eori, req.mrn, fileUploadCount)
 
   private def firstUploadFile(response: FileUploadResponse): Either[Throwable, (FileUpload, UploadRequest)] =

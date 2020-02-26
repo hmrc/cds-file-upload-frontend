@@ -24,11 +24,12 @@ import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito._
 import org.scalacheck.Arbitrary._
 import pages.MrnEntryPage
-import play.api.data.Form
 import play.api.libs.json.JsString
 import play.api.test.Helpers.{status, _}
+import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
+import views.html.mrn_entry
 
 class MrnEntryControllerSpec extends ControllerSpecBase {
 
@@ -42,6 +43,8 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
       fakeContactDetailsRequiredAction(cache, contactDetails)
     }
 
+  val page = mock[mrn_entry]
+
   def controller(signedInUser: SignedInUser, eori: String, requireContactDetails: ContactDetailsRequiredAction) =
     new MrnEntryController(
       new FakeAuthAction(signedInUser),
@@ -50,11 +53,21 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
       new FakeDataRetrievalAction(None),
       new MRNFormProvider,
       mockDataCacheConnector,
-      appConfig,
-      mcc
+      mcc,
+      page
     )(executionContext)
 
-  def viewAsString(form: Form[MRN] = form) = views.html.mrn_entry(form)(fakeRequest, messages, appConfig).toString
+  override protected def beforeEach(): Unit = {
+    super.beforeEach()
+
+    when(page.apply(any())(any(), any())).thenReturn(HtmlFormat.empty)
+  }
+
+  override protected def afterEach(): Unit = {
+    reset(page)
+
+    super.afterEach()
+  }
 
   "Mrn Entry Page" must {
     "load the correct page when user is logged in " in {
@@ -63,7 +76,6 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
         val result = controller(user, eori, fakeContactDetails).onPageLoad(fakeRequest)
 
         status(result) mustBe OK
-        contentAsString(result) mustBe viewAsString(form)
       }
     }
 
@@ -74,7 +86,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
           new FakeContactDetailsRequiredAction(CacheMap("", Map(MrnEntryPage.toString -> JsString(mrn.value))), ContactDetails("", "", "", ""))
         val result = controller(user, eori, fakeContactDetails).onPageLoad(fakeRequest)
 
-        contentAsString(result) mustBe viewAsString(form.fill(mrn))
+        status(result) mustBe OK
       }
     }
 
@@ -95,12 +107,10 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
         whenever(!mrn.matches(MRN.validRegex)) {
 
           val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn)
-          val boundForm = form.bind(Map("value" -> mrn))
 
           val result = controller(user, eori, fakeContactDetails).onSubmit(postRequest)
 
           status(result) mustBe BAD_REQUEST
-          contentAsString(result) mustBe viewAsString(boundForm)
         }
       }
     }

@@ -16,23 +16,48 @@
 
 package controllers
 
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{reset, verify, when}
 import play.api.test.Helpers._
+import play.twirl.api.HtmlFormat
 import views.html._
 
 class ErrorPageControllerSpec extends ControllerSpecBase {
 
+  val uploadErrorPage = mock[upload_error]
+  val genericErrorPage = mock[generic_error]
+
+  val controller = new ErrorPageController(mcc, uploadErrorPage, genericErrorPage)
+
+  override protected def beforeEach(): Unit = {
+    super.beforeEach()
+
+    when(uploadErrorPage()(any(), any())).thenReturn(HtmlFormat.empty)
+    when(genericErrorPage()(any(), any())).thenReturn(HtmlFormat.empty)
+  }
+
+  override protected def afterEach(): Unit = {
+    reset(uploadErrorPage, genericErrorPage)
+
+    super.afterEach()
+  }
+
   "Error Controller" must {
 
     "return the correct view for upload error" in {
-      val result = new ErrorPageController().uploadError()(fakeRequest)
+      val result = controller.uploadError()(fakeRequest)
+
       status(result) mustBe OK
-      contentAsString(result) mustBe upload_error()(fakeRequest, messages, appConfig).toString
+
+      verify(uploadErrorPage).apply()(any(), any())
     }
 
     "return the correct view for generic error" in {
-      val result = new ErrorPageController().error()(fakeRequest)
+      val result = controller.error()(fakeRequest)
+
       status(result) mustBe OK
-      contentAsString(result) mustBe generic_error()(fakeRequest, messages, appConfig).toString
+
+      verify(genericErrorPage).apply()(any(), any())
     }
   }
 }

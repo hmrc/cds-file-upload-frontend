@@ -26,14 +26,14 @@ import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
 import play.api.Logger
 import play.api.i18n.I18nSupport
 import play.api.libs.json.JsString
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
 import repositories.NotificationRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{Audit, DataEvent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import views.html.upload_error
+import views.html.{upload_error, upload_your_files}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -46,7 +46,9 @@ class UpscanStatusController @Inject()(
   notificationRepository: NotificationRepository,
   auditConnector: AuditConnector,
   implicit val appConfig: AppConfig,
-  mcc: MessagesControllerComponents
+  mcc: MessagesControllerComponents,
+  uploadYourFiles: upload_your_files,
+  uploadError: upload_error
 )(implicit ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
@@ -63,7 +65,7 @@ class UpscanStatusController @Inject()(
       req.fileUploadResponse.uploads.find(_.reference == ref) match {
         case Some(upload) =>
           upload.state match {
-            case Waiting(ur) => Future.successful(Ok(views.html.upload_your_files(ur, refPosition)))
+            case Waiting(ur) => Future.successful(Ok(uploadYourFiles(ur, refPosition)))
             case _           => nextPage(upload.reference, req.fileUploadResponse.uploads)
           }
 
@@ -74,7 +76,7 @@ class UpscanStatusController @Inject()(
 
   def error(id: String): Action[AnyContent] =
     (authenticate andThen requireEori) { implicit req =>
-      Ok(upload_error())
+      Ok(uploadError())
     }
 
   def success(id: String): Action[AnyContent] =
@@ -93,7 +95,7 @@ class UpscanStatusController @Inject()(
     }
 
   private def nextPage(ref: String, files: List[FileUpload])(implicit req: FileUploadResponseRequest[_]) = {
-    def nextFile(file: FileUpload) = routes.UpscanStatusController.onPageLoad(file.reference)
+    def nextFile(file: FileUpload): Call = routes.UpscanStatusController.onPageLoad(file.reference)
 
     val nextFileToUpload = files.collectFirst {
       case file @ FileUpload(reference, Waiting(_), _, _) if reference > ref => file

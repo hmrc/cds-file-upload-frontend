@@ -17,7 +17,6 @@
 package controllers
 
 import com.google.inject.Singleton
-import config.AppConfig
 import connectors.Cache
 import controllers.actions._
 import forms.MRNFormProvider
@@ -26,8 +25,10 @@ import pages.MrnEntryPage
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import views.html.mrn_entry
 
 import scala.concurrent.{ExecutionContext, Future}
+
 @Singleton
 class MrnEntryController @Inject()(
   authenticate: AuthAction,
@@ -36,8 +37,8 @@ class MrnEntryController @Inject()(
   getData: DataRetrievalAction,
   formProvider: MRNFormProvider,
   dataCacheConnector: Cache,
-  implicit val appConfig: AppConfig,
-  mcc: MessagesControllerComponents
+  mcc: MessagesControllerComponents,
+  mrnEntry: mrn_entry
 )(implicit ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
@@ -46,14 +47,14 @@ class MrnEntryController @Inject()(
   def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireContactDetails) { implicit req =>
     val populatedForm = req.userAnswers.get(MrnEntryPage).map(form.fill).getOrElse(form)
 
-    Ok(views.html.mrn_entry(populatedForm))
+    Ok(mrnEntry(populatedForm))
   }
 
   def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireContactDetails).async { implicit req =>
     form
       .bindFromRequest()
       .fold(
-        errorForm => Future.successful(BadRequest(views.html.mrn_entry(errorForm))),
+        errorForm => Future.successful(BadRequest(mrnEntry(errorForm))),
         value => {
           val cacheMap = req.userAnswers.set(MrnEntryPage, value).cacheMap
 

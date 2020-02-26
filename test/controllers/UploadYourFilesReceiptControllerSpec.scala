@@ -23,8 +23,10 @@ import org.mockito.Mockito._
 import pages.HowManyFilesUploadPage
 import play.api.libs.json.Json
 import play.api.test.Helpers._
+import play.twirl.api.HtmlFormat
 import repositories.NotificationRepository
 import uk.gov.hmrc.http.cache.client.CacheMap
+import views.html.upload_your_files_receipt
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -32,6 +34,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase {
 
   implicit val ac = appConfig
   val mockNotificationRepository = mock[NotificationRepository]
+  val page = mock[upload_your_files_receipt]
 
   def controller(getData: DataRetrievalAction) =
     new UploadYourFilesReceiptController(
@@ -39,10 +42,21 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase {
       new FakeEORIAction(),
       getData,
       new FileUploadResponseRequiredAction(),
-      mockNotificationRepository
-    )(appConfig, mcc, executionContext)
+      mockNotificationRepository,
+      page
+    )(mcc, executionContext)
 
-  def viewAsString(receipts: List[FileUpload]): String = views.html.upload_your_files_receipt(receipts)(fakeRequest, messages, appConfig).toString
+  override protected def beforeEach(): Unit = {
+    super.beforeEach()
+
+    when(page.apply(any())(any(), any())).thenReturn(HtmlFormat.empty)
+  }
+
+  override protected def afterEach(): Unit = {
+    reset(page)
+
+    super.afterEach()
+  }
 
   def addFilenames(uploads: List[FileUpload]): List[FileUpload] = uploads.map(u => u.copy(filename = "someFile.pdf"))
 
@@ -62,7 +76,6 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase {
           val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad()(fakeRequest)
 
           status(result) mustBe OK
-          contentAsString(result) mustBe viewAsString(addFilenames(response.uploads.sortBy(_.reference)))
         }
       }
     }

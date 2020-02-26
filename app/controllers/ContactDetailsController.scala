@@ -17,7 +17,6 @@
 package controllers
 
 import com.google.inject.Singleton
-import config.AppConfig
 import connectors.Cache
 import controllers.actions._
 import forms.mappings.ContactDetailsMapping._
@@ -28,6 +27,7 @@ import play.api.data.Form
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import views.html.contact_details
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -37,8 +37,8 @@ class ContactDetailsController @Inject()(
   requireEori: EORIRequiredAction,
   getData: DataRetrievalAction,
   dataCacheConnector: Cache,
-  implicit val appConfig: AppConfig,
-  mcc: MessagesControllerComponents
+  mcc: MessagesControllerComponents,
+  contactDetails: contact_details
 )(implicit ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
@@ -46,7 +46,7 @@ class ContactDetailsController @Inject()(
 
   def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData) { implicit req =>
     val populatedForm = req.userAnswers.flatMap(_.get(ContactDetailsPage)).fold(form)(form.fill)
-    Ok(views.html.contact_details(populatedForm))
+    Ok(contactDetails(populatedForm))
   }
 
   def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen getData).async { implicit req =>
@@ -55,7 +55,7 @@ class ContactDetailsController @Inject()(
     form
       .bindFromRequest()
       .fold(
-        errorForm => Future.successful(BadRequest(views.html.contact_details(errorForm))),
+        errorForm => Future.successful(BadRequest(contactDetails(errorForm))),
         contactDetails => {
           val cacheMap = userAnswers.set(ContactDetailsPage, contactDetails).cacheMap
 

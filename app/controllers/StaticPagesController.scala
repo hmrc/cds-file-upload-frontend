@@ -19,14 +19,13 @@ package controllers
 import javax.inject.Inject
 import play.api.mvc._
 import play.api.i18n.{I18nSupport}
-import config.AppConfig
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html._
 
-class StaticPagesController @Inject()(implicit val appConfig: AppConfig, mcc: MessagesControllerComponents)
+class StaticPagesController @Inject()(mcc: MessagesControllerComponents, accessibilityStatement: accessibility_statement)
     extends FrontendController(mcc) with I18nSupport {
 
   def accessibility: Action[AnyContent] = Action { implicit request =>
-    Ok(views.html.accessibility_statement())
+    Ok(accessibilityStatement())
   }
 }
