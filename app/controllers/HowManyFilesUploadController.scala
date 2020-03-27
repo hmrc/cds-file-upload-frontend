@@ -49,6 +49,8 @@ class HowManyFilesUploadController @Inject()(
 )(implicit ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
+  private val logger = Logger(this.getClass)
+
   val form = formProvider()
 
   def onPageLoad: Action[AnyContent] =
@@ -71,10 +73,10 @@ class HowManyFilesUploadController @Inject()(
           fileUploadCount => {
             uploadContactDetails(req, fileUploadCount) map {
               case Right(firstUpload :: _) =>
-                Logger.warn("uploadContactDetails success: " + firstUpload)
+                logger.info("uploadContactDetails success: " + firstUpload)
                 Redirect(routes.UpscanStatusController.onPageLoad(firstUpload.reference))
               case err =>
-                Logger.warn("uploadContactDetails error: " + err)
+                logger.warn("uploadContactDetails error: " + err)
                 Redirect(routes.ErrorPageController.error())
             }
           }
@@ -87,10 +89,10 @@ class HowManyFilesUploadController @Inject()(
     def saveRemainingFileUploadsToCache(fileUploadResponse: FileUploadResponse): Future[List[FileUpload]] = {
 
       val remainingFileUploads = fileUploadResponse.uploads.tail
-      Logger.warn("remainingFileUploads " + remainingFileUploads)
+      logger.info("remainingFileUploads " + remainingFileUploads)
       val answers = updateUserAnswers(req.userAnswers, fileUploadCount, FileUploadResponse(remainingFileUploads))
       dataCacheConnector.save(answers.cacheMap).map { _ =>
-        Logger.warn("saving remaining uploads")
+        logger.info("saving remaining uploads")
 
         remainingFileUploads
       }
@@ -100,18 +102,19 @@ class HowManyFilesUploadController @Inject()(
       firstUploadFile(fileUploadResponse) match {
         case Right((_, uploadRequest)) =>
           uploadContactDetails.upload(uploadRequest, req.request.contactDetails).flatMap { res =>
-            Logger.warn(s"Upload contact details successful: ${res}")
-            Logger.warn(s"Upload contact details headers: ${res.header("Location")}")
+            logger.info(s"Upload contact details successful: $res")
+            logger.info(s"Upload contact details headers: ${res.header("Location")}")
             val isSuccessRedirect = res.header("Location").exists(_.contains("upscan-success"))
             if (res.status == SEE_OTHER && isSuccessRedirect) {
               saveRemainingFileUploadsToCache(fileUploadResponse).map(uploads => Right(uploads))
             } else {
-              Logger.warn(s"Left: error: illegal state")
+              logger.warn(s"Left: error: illegal state")
+              logger.info(s"Response: $res")
               Future.successful(Left(new IllegalStateException("Contact details was not uploaded successfully")))
             }
           }
         case Left(error) =>
-          Logger.warn(s"Left: error: $error")
+          logger.warn(s"Left: error: $error")
           Future.successful(Left(error))
       }
     }

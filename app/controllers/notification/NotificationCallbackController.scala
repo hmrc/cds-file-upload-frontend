@@ -19,7 +19,7 @@ package controllers.notification
 import config.AppConfig
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.mvc.MessagesControllerComponents
+import play.api.mvc.{Action, MessagesControllerComponents}
 import services.NotificationService
 import uk.gov.hmrc.http.BadRequestException
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -32,7 +32,9 @@ class NotificationCallbackController @Inject()(notificationService: Notification
   implicit ec: ExecutionContext
 ) extends FrontendController(mcc) {
 
-  def onNotify = Action.async(parse.xml) { implicit req =>
+  private val logger = Logger(this.getClass)
+
+  def onNotify: Action[NodeSeq] = Action.async(parse.xml) { implicit req =>
     val authHeader = req.headers.toSimpleMap.get("Authorization")
     val authToken = appConfig.notifications.authToken
 
@@ -40,19 +42,19 @@ class NotificationCallbackController @Inject()(notificationService: Notification
       case Some(ah) if ah == authToken =>
         saveNotification(req.body)
       case _ =>
-        Logger.warn(s"Failed to auth: $authHeader")
+        logger.warn(s"Failed to auth: $authHeader")
         Future.successful(Unauthorized)
     }
   }
 
-  private def saveNotification(notification: NodeSeq) =
+  private def saveNotification(notification: NodeSeq): Future[Status] =
     notificationService.save(notification) map {
       case Right(_) => Accepted
       case Left(e: BadRequestException) =>
-        Logger.error(s"Failed to save invalid notification: $notification", e)
-        BadRequest
+        logger.warn(s"Failed to save invalid notification: $notification", e)
+        Accepted
       case Left(e) =>
-        Logger.error(s"Failed to save notification: $notification", e)
+        logger.warn(s"Failed to save notification: $notification", e)
         InternalServerError
     }
 }

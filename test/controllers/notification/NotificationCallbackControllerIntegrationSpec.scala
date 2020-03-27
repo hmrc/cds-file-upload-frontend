@@ -62,14 +62,14 @@ class NotificationCallbackControllerIntegrationSpec extends PlaySpec with GuiceO
 
   "Notification endpoint" should {
 
-    "return 400 Bad Request on POST request for invalid xml" in {
+    "return 202 (ACCEPTED) status on POST request for invalid xml" in {
       val response =
         await(wsClient.url(notificationUrl).withHeaders("Content-Type" -> "application/xml", "Authorization" -> authToken).post(invalidNotification))
 
-      response.status mustBe BAD_REQUEST
+      response.status mustBe ACCEPTED
     }
 
-    "return 400 Bad Request on POST request for xml with empty File Reference" in {
+    "return 202 (ACCEPTED) status on POST request for xml with empty File Reference" in {
       val response = await(
         wsClient
           .url(notificationUrl)
@@ -77,10 +77,10 @@ class NotificationCallbackControllerIntegrationSpec extends PlaySpec with GuiceO
           .post(notificationWithEmptyFileReference)
       )
 
-      response.status mustBe BAD_REQUEST
+      response.status mustBe ACCEPTED
     }
 
-    "return 400 Bad Request on POST request for xml with empty Outcome" in {
+    "return 202 (ACCEPTED) status on POST request for xml with empty Outcome" in {
       val response = await(
         wsClient
           .url(notificationUrl)
@@ -88,7 +88,7 @@ class NotificationCallbackControllerIntegrationSpec extends PlaySpec with GuiceO
           .post(notificationWithEmptyOutcome)
       )
 
-      response.status mustBe BAD_REQUEST
+      response.status mustBe ACCEPTED
     }
 
     "return 202 Accepted on POST request for valid xml" in {

@@ -52,6 +52,8 @@ class UpscanStatusController @Inject()(
 )(implicit ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
+  private val logger = Logger(this.getClass)
+
   private val AuditSource = appConfig.appName
   private val audit = Audit(AuditSource, auditConnector)
   private val notificationsMaxRetries = appConfig.notifications.maxRetries
@@ -124,23 +126,23 @@ class UpscanStatusController @Inject()(
       receivedNotifications.flatMap { notifications =>
         notifications.flatten match {
           case ns if ns.exists(failedUpload) =>
-            Logger.error("Failed notification received for an upload.")
-            Logger.error(s"Notifications: ${prettyPrint(ns)}")
+            logger.warn("Failed notification received for an upload.")
+            logger.warn(s"Notifications: ${prettyPrint(ns)}")
             Future.successful(Redirect(routes.ErrorPageController.uploadError()))
 
           case ns if ns.length == uploads.length =>
-            Logger.debug("All notifications successful.")
+            logger.info("All notifications successful.")
             auditUploadSuccess()
             Future.successful(Redirect(routes.UploadYourFilesReceiptController.onPageLoad()))
 
           case ns if retries < notificationsMaxRetries =>
-            Logger.debug(s"Retrieved ${ns.length} of ${uploads.length} notifications. Retrying in $notificationsRetryPause ms ...")
+            logger.info(s"Retrieved ${ns.length} of ${uploads.length} notifications. Retrying in $notificationsRetryPause ms ...")
             Thread.sleep(notificationsRetryPause)
             retrieveNotifications(retries + 1)
 
           case ns =>
-            Logger.error(s"Maximum number of retries exceeded. Retrieved ${ns.length} of ${uploads.length} notifications.")
-            Logger.error(s"Notifications: ${prettyPrint(ns)}")
+            logger.warn(s"Maximum number of retries exceeded. Retrieved ${ns.length} of ${uploads.length} notifications.")
+            logger.warn(s"Notifications: ${prettyPrint(ns)}")
             Future.successful(Redirect(routes.ErrorPageController.uploadError()))
         }
       }
@@ -149,7 +151,7 @@ class UpscanStatusController @Inject()(
     retrieveNotifications()
   }
 
-  private def auditUploadSuccess()(implicit req: FileUploadResponseRequest[_]) = {
+  private def auditUploadSuccess()(implicit req: FileUploadResponseRequest[_]): Unit = {
     def auditDetails = {
       val contactDetails = req.userAnswers
         .get(ContactDetailsPage)
@@ -179,8 +181,8 @@ class UpscanStatusController @Inject()(
     )
 
   private def getPosition(ref: String, refs: List[String]) = refs match {
-    case head :: tail if head == ref => First(refs.size)
-    case init :+ last if last == ref => Last(refs.size)
-    case _                           => Middle(refs.indexOf(ref) + 1, refs.size)
+    case head :: _ if head == ref => First(refs.size)
+    case _ :+ last if last == ref => Last(refs.size)
+    case _                        => Middle(refs.indexOf(ref) + 1, refs.size)
   }
 }
