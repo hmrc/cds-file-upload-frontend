@@ -36,11 +36,13 @@ import scala.concurrent.{Await, ExecutionContext}
 @Singleton
 class UpscanConnector @Inject()(conf: AppConfig, wsClient: WSClient)(implicit ec: ExecutionContext, materializer: Materializer) {
 
+  private val logger = Logger(this.getClass)
+
   def upload(upload: UploadRequest, contactDetails: ContactDetails) = {
     val settings = conf.proxy
 
-    Logger.warn(s"Connecting to proxy = ${settings.proxyRequiredForThisEnvironment}")
-    Logger.warn(s" Proxy settings: ${settings.host} ${settings.port} ${settings.protocol} ${settings.username} ${settings.password.take(5)}")
+    logger.info(s"Connecting to proxy = ${settings.proxyRequiredForThisEnvironment}")
+    logger.info(s"Proxy settings: ${settings.host} ${settings.port} ${settings.protocol} ${settings.username} ${settings.password.take(5)}")
     val proxy = DefaultWSProxyServer(settings.host, settings.port, Some(settings.protocol), Some(settings.username), Some(settings.password))
 
     val preparedRequest = wsClient.url(upload.href).withFollowRedirects(false)
@@ -62,9 +64,9 @@ class UpscanConnector @Inject()(conf: AppConfig, wsClient: WSClient)(implicit ec
 
     val filePart = FilePart("file", fileName, Some("text/plain"), Source.single(ByteString(contactDetails.toString)))
 
-    Logger.warn(s"Upload url: ${req.url}")
-    Logger.warn(s"Upload URI: ${req.uri}")
-    Logger.warn(s"Upload Headers: ${req.headers}")
+    logger.info(s"Upload url: ${req.url}")
+    logger.info(s"Upload URI: ${req.uri}")
+    logger.info(s"Upload Headers: ${req.headers}")
 
     val body = dataparts ++ List(filePart)
 

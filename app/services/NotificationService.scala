@@ -18,6 +18,7 @@ package services
 
 import javax.inject._
 import models.Notification
+import play.api.Logger
 import repositories.NotificationRepository
 import uk.gov.hmrc.http.BadRequestException
 
@@ -27,11 +28,16 @@ import scala.xml.NodeSeq
 @Singleton
 class NotificationService @Inject()(repository: NotificationRepository) {
 
+  private val logger = Logger(this.getClass)
+
   def save(notification: NodeSeq)(implicit ec: ExecutionContext): Future[Either[Throwable, Unit]] = {
     val fileReference = (notification \\ "FileReference").text
     val outcome = (notification \\ "Outcome").text
     val filename = (notification \\ "FileName").text
+    logger.info("Notification payload: " + notification)
     if (fileReference.isEmpty || outcome.isEmpty) {
+      logger.info("File reference: " + fileReference)
+      logger.info("Outcome: " + outcome)
       Future.successful(Left(new BadRequestException("File reference or outcome not found in xml")))
     } else {
       repository

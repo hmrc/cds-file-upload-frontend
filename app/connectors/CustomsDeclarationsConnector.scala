@@ -31,23 +31,25 @@ import scala.xml.XML
 
 class CustomsDeclarationsConnector @Inject()(config: AppConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) {
 
+  private val logger = Logger(this.getClass)
+
   private val fileUploadUrl = config.microservice.services.customsDeclarations.batchUploadEndpoint
   private val apiVersion = config.microservice.services.customsDeclarations.apiVersion
   private val clientId = config.developerHubClientId
 
   def requestFileUpload(eori: String, request: FileUploadRequest)(implicit hc: HeaderCarrier): Future[FileUploadResponse] = {
-    Logger.info(s"Request to initiate ${request.toXml}")
-    Logger.info(s"fileUploadUrl: $fileUploadUrl")
+    logger.info(s"Request to initiate ${request.toXml}")
+    logger.info(s"fileUploadUrl: $fileUploadUrl")
     httpClient
       .POSTString[HttpResponse](fileUploadUrl, request.toXml.mkString, headers(eori))
       .map(
         r =>
           Try(XML.loadString(r.body)) match {
             case Success(value) =>
-              Logger.info(s"Got initiate response: ${FileUploadResponse}")
+              logger.info(s"Got initiate response: $FileUploadResponse")
               FileUploadResponse.fromXml(value)
             case Failure(exception) =>
-              Logger.error("Failed to load XML")
+              logger.warn(s"Failed to load XML with exception: $exception")
               throw exception
         }
       )
