@@ -109,7 +109,7 @@ class HowManyFilesUploadController @Inject()(
               saveRemainingFileUploadsToCache(fileUploadResponse).map(uploads => Right(uploads))
             } else {
               logger.warn(s"Left: error: illegal state")
-              logger.info(s"Response: $res")
+              logger.warn(s"Response: $res")
               Future.successful(Left(new IllegalStateException("Contact details was not uploaded successfully")))
             }
           }
