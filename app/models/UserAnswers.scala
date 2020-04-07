@@ -23,10 +23,12 @@ import play.api.libs.json._
 
 case class UserAnswers(cacheMap: CacheMap) {
 
+  private val logger = Logger(this.getClass)
+
   def get[A](page: QuestionPage[A])(implicit rds: Reads[A]): Option[A] = cacheMap.getEntry[A](page)
 
   def set[A](page: QuestionPage[A], value: A)(implicit writes: Writes[A]): UserAnswers = {
-    Logger.warn("setting user answers")
+    logger.info("Setting user answers")
     val updatedAnswers = UserAnswers(cacheMap copy (data = cacheMap.data + (page.toString -> Json.toJson(value))))
     page.cleanup(Some(value), updatedAnswers)
   }
