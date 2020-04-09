@@ -97,7 +97,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
         val result = controller(user, eori, fakeContactDetails).onSubmit(postRequest)
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.FileWarningController.onPageLoad().url)
+        redirectLocation(result) mustBe Some(routes.HowManyFilesUploadController.onPageLoad().url)
       }
     }
 

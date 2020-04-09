@@ -20,8 +20,6 @@ POST        /mrn-entry                          controllers.MrnEntryController.o
 GET         /how-many-files-upload              controllers.HowManyFilesUploadController.onPageLoad
 POST        /how-many-files-upload              controllers.HowManyFilesUploadController.onSubmit
 
-GET         /upload/warning                     controllers.FileWarningController.onPageLoad
-
 GET         /upload/receipt                     controllers.UploadYourFilesReceiptController.onPageLoad
 
 GET         /upload/:ref                        controllers.UpscanStatusController.onPageLoad(ref: String)
