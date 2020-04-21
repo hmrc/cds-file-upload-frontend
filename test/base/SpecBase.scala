@@ -23,20 +23,19 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.PropertyChecks
 import org.scalatestplus.play.PlaySpec
-import org.scalatestplus.play.guice._
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
+import utils.Injector
 
 import scala.concurrent.ExecutionContext
 
-trait SpecBase
-    extends PlaySpec with MockitoSugar with BeforeAndAfterEach with PropertyChecks with Generators with ScalaFutures with GuiceOneServerPerSuite {
+trait SpecBase extends PlaySpec with MockitoSugar with BeforeAndAfterEach with PropertyChecks with Generators with ScalaFutures with Injector {
 
-  implicit lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
-  implicit lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
-  implicit val mcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
+  implicit lazy val messagesApi: MessagesApi = instanceOf[MessagesApi]
+  implicit lazy val appConfig: AppConfig = instanceOf[AppConfig]
+  implicit val mcc: MessagesControllerComponents = instanceOf[MessagesControllerComponents]
 
   lazy val fakeRequest = FakeRequest("", "")
 

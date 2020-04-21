@@ -31,8 +31,8 @@ import scala.concurrent.Future
 
 class EORIActionSpec extends ControllerSpecBase with SignedInUserGen {
 
-  lazy val conf = app.injector.instanceOf[Configuration]
-  lazy val env = app.injector.instanceOf[Environment]
+  lazy val conf = instanceOf[Configuration]
+  lazy val env = instanceOf[Environment]
 
   def authAction = new AuthActionImpl(mockAuthConnector, conf, env, mcc)
   def eoriAction = new EORIRequiredActionImpl(mcc)
