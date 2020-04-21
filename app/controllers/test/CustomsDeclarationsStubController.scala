@@ -16,20 +16,21 @@
 
 package controllers.test
 
+import config.AppConfig
 import javax.inject.{Inject, Singleton}
 import models.Field._
 import models._
-import play.api.http.ContentTypes
-import play.api.mvc.{Action, MessagesControllerComponents}
-import services.NotificationService
-import uk.gov.hmrc.http.HeaderCarrier
+import play.api.http.{ContentTypes, HeaderNames}
+import play.api.mvc.{Action, Codec, MessagesControllerComponents}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.ExecutionContext
 import scala.xml._
 
 @Singleton
-class CustomsDeclarationsStubController @Inject()(notificationService: NotificationService, mcc: MessagesControllerComponents)(
+class CustomsDeclarationsStubController @Inject()(appConfig: AppConfig, httpClient: HttpClient, mcc: MessagesControllerComponents)(
   implicit ec: ExecutionContext
 ) extends FrontendController(mcc) {
 
@@ -82,7 +83,15 @@ class CustomsDeclarationsStubController @Inject()(notificationService: Notificat
         <Details>[detail block]</Details>
       </Root>
 
-    notificationService.save(notification)
+    val cdsFileUploadConfig = appConfig.microservice.services.cdsFileUpload
+
+    val cdsFileUploadBaseUrl = cdsFileUploadConfig.protocol.get + "://" + cdsFileUploadConfig.host + ":" + cdsFileUploadConfig.port.get
+
+    val url = cdsFileUploadBaseUrl + "/internal/notification"
+
+    val header: (String, String) = HeaderNames.CONTENT_TYPE -> ContentTypes.XML(Codec.utf_8)
+
+    httpClient.POSTString[HttpResponse](url, notification.toString(), Seq(header))
   }
 }
 
