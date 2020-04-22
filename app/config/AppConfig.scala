@@ -81,7 +81,7 @@ case class Keystore(protocol: String = "https", host: String, port: Int, default
 
 case class FileFormats(maxFileSizeMb: Int, approvedFileTypes: String, approvedFileExtensions: String)
 
-case class Notifications(authToken: String, maxRetries: Int, retryPauseMillis: Int, ttlSeconds: Int)
+case class Notifications(maxRetries: Int, retryPauseMillis: Int)
 
 case class Feedback(url: String)
 

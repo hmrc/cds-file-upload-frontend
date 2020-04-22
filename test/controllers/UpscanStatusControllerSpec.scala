@@ -87,7 +87,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
       mockDataCacheConnector,
       mockAuditConnector,
       cdsFileUploadConnector,
-      appConfig.copy(notifications = Notifications(appConfig.notifications.authToken, maxRetries = 3, retryPauseMillis = 500, ttlSeconds = 60)),
+      appConfig.copy(notifications = Notifications(maxRetries = 3, retryPauseMillis = 500)),
       mcc,
       uploadYourFiles,
       uploadError
