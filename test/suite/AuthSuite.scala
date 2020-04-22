@@ -58,7 +58,7 @@ trait AuthSuite extends ScalaFutures {
     val ws = app.injector.instanceOf[WSClient]
 
     ws.url("http://localhost:8585/government-gateway/session/login").post(Json.parse(json)).map { auth =>
-      val headers = Headers(auth.allHeaders.mapValues(_.headOption.getOrElse("")).toList: _*)
+      val headers = Headers(auth.headers.mapValues(_.headOption.getOrElse("")).toList: _*)
       HeaderCarrierConverter.fromHeadersAndSession(headers)
     }
   }
