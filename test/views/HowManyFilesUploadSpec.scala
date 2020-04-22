@@ -29,7 +29,7 @@ class HowManyFilesUploadSpec extends DomAssertions with IntViewBehaviours[FileUp
 
   val form = new FileUploadCountProvider()()
 
-  val page = app.injector.instanceOf[how_many_files_upload]
+  val page = instanceOf[how_many_files_upload]
   val view: () => Html = () => page(form)(fakeRequest.withCSRFToken, messages)
 
   val messagePrefix = "howManyFilesUpload"

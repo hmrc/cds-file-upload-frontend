@@ -16,6 +16,7 @@
 
 package controllers
 
+import connectors.CdsFileUploadConnector
 import controllers.actions.{DataRetrievalAction, FileUploadResponseRequiredAction}
 import models.{FileUpload, FileUploadResponse, Notification}
 import org.mockito.ArgumentMatchers._
@@ -24,7 +25,6 @@ import pages.HowManyFilesUploadPage
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
-import repositories.NotificationRepository
 import uk.gov.hmrc.http.cache.client.CacheMap
 import views.html.upload_your_files_receipt
 
@@ -33,7 +33,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase {
 
   implicit val ac = appConfig
-  val mockNotificationRepository = mock[NotificationRepository]
+  val cdsFileUploadConnector = mock[CdsFileUploadConnector]
   val page = mock[upload_your_files_receipt]
 
   def controller(getData: DataRetrievalAction) =
@@ -42,7 +42,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase {
       new FakeEORIAction(),
       getData,
       new FileUploadResponseRequiredAction(),
-      mockNotificationRepository,
+      cdsFileUploadConnector,
       page
     )(mcc, executionContext)
 
@@ -68,8 +68,8 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase {
 
         forAll { (response: FileUploadResponse, cache: CacheMap) =>
           response.uploads.foreach { u =>
-            when(mockNotificationRepository.find(any())(any[ExecutionContext]))
-              .thenReturn(Future.successful(List(Notification(u.reference, "SUCCESS", "someFile.pdf"))))
+            when(cdsFileUploadConnector.getNotification(any())(any()))
+              .thenReturn(Future.successful(Option(Notification(u.reference, "SUCCESS", "someFile.pdf"))))
           }
 
           val updatedCache = cache.copy(data = cache.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))

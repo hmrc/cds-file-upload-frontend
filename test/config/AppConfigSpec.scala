@@ -23,12 +23,26 @@ class AppConfigSpec extends PlaySpec {
   import pureconfig.ConfigSource
   import pureconfig.generic.auto._
 
-  val cfg = ConfigSource.default.loadOrThrow[AppConfig]
+  val config = ConfigSource.default.loadOrThrow[AppConfig]
 
-  "app config" should {
+  "App Config" should {
 
     "have test-only batch upload endpoint in packaged configuration" in {
-      cfg.microservice.services.customsDeclarations.batchUploadEndpoint mustBe "http://localhost:6793/cds-file-upload-service/test-only/batch-file-upload"
+
+      val customsDeclarations = config.microservice.services.customsDeclarations
+
+      val expectedUrl = "http://localhost:6793/cds-file-upload-service/test-only/batch-file-upload"
+
+      customsDeclarations.batchUploadEndpoint mustBe expectedUrl
+    }
+
+    "have a correct configuration for CDS File Upload" in {
+      val cdsFileUpload = config.microservice.services.cdsFileUpload
+
+      val fileReference = "reference"
+      val expectedUrl = "http://localhost:6795/cds-file-upload/notification/reference"
+
+      cdsFileUpload.fetchNotificationEndpoint(fileReference) mustBe expectedUrl
     }
   }
 }

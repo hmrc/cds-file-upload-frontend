@@ -14,24 +14,9 @@
  * limitations under the License.
  */
 
-package views
+package base
 
-import views.html.unauthorised
+import org.scalatest.mockito.MockitoSugar
+import org.scalatest.{MustMatchers, WordSpec}
 
-class UnauthorisedSpec extends DomAssertions {
-
-  val page = instanceOf[unauthorised]
-
-  lazy val view = page()(fakeRequest, messages).toString
-
-  "view" should {
-
-    "include header" in {
-      view must include(messages("unauthorised.heading"))
-    }
-
-    "include title" in {
-      view must include(messages("unauthorised.title"))
-    }
-  }
-}
+trait UnitSpec extends WordSpec with MustMatchers with MockitoSugar

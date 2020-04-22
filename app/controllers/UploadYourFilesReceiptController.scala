@@ -17,14 +17,13 @@
 package controllers
 
 import com.google.inject.Singleton
-import config.AppConfig
+import connectors.CdsFileUploadConnector
 import controllers.actions._
 import javax.inject.Inject
 import models.FileUpload
 import play.api.i18n.I18nSupport
-import play.api.libs.json.JsString
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import repositories.NotificationRepository
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.upload_your_files_receipt
 
@@ -36,7 +35,7 @@ class UploadYourFilesReceiptController @Inject()(
   requireEori: EORIRequiredAction,
   getData: DataRetrievalAction,
   requireResponse: FileUploadResponseRequiredAction,
-  notificationRepository: NotificationRepository,
+  cdsFileUploadConnector: CdsFileUploadConnector,
   uploadYourFilesReceipt: upload_your_files_receipt
 )(implicit mcc: MessagesControllerComponents, ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
@@ -47,9 +46,14 @@ class UploadYourFilesReceiptController @Inject()(
     }
   }
 
-  private def addFilenames(uploads: List[FileUpload]): Future[List[FileUpload]] =
-    Future.sequence(uploads.map { u =>
-      val filenameF = notificationRepository.find("fileReference" -> JsString(u.reference)).map(_.headOption.fold("")(_.filename))
-      filenameF.map(f => u.copy(filename = f))
-    })
+  private def addFilenames(uploads: List[FileUpload])(implicit hc: HeaderCarrier): Future[List[FileUpload]] =
+    Future
+      .sequence(uploads.map { u =>
+        cdsFileUploadConnector.getNotification(u.reference).map { notificationOpt =>
+          notificationOpt.map { notification =>
+            u.copy(filename = notification.filename)
+          }
+        }
+      })
+      .map(_.flatten)
 }

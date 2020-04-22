@@ -31,7 +31,7 @@ class ContactDetailsSpec extends DomAssertions with ViewBehaviours with Property
 
   val form: Form[ContactDetails] = Form(contactDetailsMapping)
 
-  val page = app.injector.instanceOf[contact_details]
+  val page = instanceOf[contact_details]
 
   val simpleView: () => Html = () => page(form)(fakeRequest.withCSRFToken, messages)
 

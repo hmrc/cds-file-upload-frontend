@@ -26,6 +26,7 @@ import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito._
 import org.scalacheck.Arbitrary._
 import org.scalacheck.{Arbitrary, Gen}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import pages.{HowManyFilesUploadPage, MrnEntryPage}
 import play.api.libs.json.{JsNumber, JsString}
 import play.api.libs.ws.WSResponse
@@ -39,7 +40,7 @@ import views.html.how_many_files_upload
 
 import scala.concurrent.Future
 
-class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssertions {
+class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssertions with GuiceOneAppPerSuite {
 
   type UserInfo = (SignedInUser, String)
 

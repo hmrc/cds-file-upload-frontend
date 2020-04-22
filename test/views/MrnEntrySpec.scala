@@ -29,7 +29,7 @@ class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with Pro
 
   val form = new MRNFormProvider()()
 
-  val page = app.injector.instanceOf[mrn_entry]
+  val page = instanceOf[mrn_entry]
 
   val view: () => Html = () => page(form)(fakeRequest.withCSRFToken, messages)
 

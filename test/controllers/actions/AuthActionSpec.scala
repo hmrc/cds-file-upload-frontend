@@ -32,8 +32,8 @@ import scala.concurrent.Future
 
 class AuthActionSpec extends ControllerSpecBase {
 
-  lazy val conf = app.injector.instanceOf[Configuration]
-  lazy val env = app.injector.instanceOf[Environment]
+  lazy val conf = instanceOf[Configuration]
+  lazy val env = instanceOf[Environment]
 
   def authAction = new AuthActionImpl(mockAuthConnector, conf, env, mcc)
 

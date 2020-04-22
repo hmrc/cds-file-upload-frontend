@@ -25,7 +25,7 @@ import views.html.upload_your_files_receipt
 
 class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with PropertyChecks with Generators {
 
-  val page = app.injector.instanceOf[upload_your_files_receipt]
+  val page = instanceOf[upload_your_files_receipt]
 
   def view(receipts: List[FileUpload]): Html = page(receipts)(fakeRequest, messages)
 

@@ -17,7 +17,7 @@
 package controllers
 
 import config.AppConfig
-import connectors.Cache
+import connectors.{Cache, CdsFileUploadConnector}
 import controllers.actions.{AuthAction, DataRetrievalAction, EORIRequiredAction, FileUploadResponseRequiredAction}
 import javax.inject.Inject
 import models._
@@ -25,9 +25,7 @@ import models.requests.FileUploadResponseRequest
 import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
 import play.api.Logger
 import play.api.i18n.I18nSupport
-import play.api.libs.json.JsString
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
-import repositories.NotificationRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -43,8 +41,8 @@ class UpscanStatusController @Inject()(
   getData: DataRetrievalAction,
   requireResponse: FileUploadResponseRequiredAction,
   cache: Cache,
-  notificationRepository: NotificationRepository,
   auditConnector: AuditConnector,
+  cdsFileUploadConnector: CdsFileUploadConnector,
   implicit val appConfig: AppConfig,
   mcc: MessagesControllerComponents,
   uploadYourFiles: upload_your_files,
@@ -120,7 +118,7 @@ class UpscanStatusController @Inject()(
 
     def retrieveNotifications(retries: Int = 0): Future[Result] = {
       val receivedNotifications = Future.sequence(uploads.map { upload =>
-        notificationRepository.find("fileReference" -> JsString(upload.reference))
+        cdsFileUploadConnector.getNotification(upload.reference)
       })
 
       receivedNotifications.flatMap { notifications =>

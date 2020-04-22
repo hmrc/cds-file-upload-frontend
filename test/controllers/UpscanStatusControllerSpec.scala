@@ -16,13 +16,12 @@
 
 package controllers
 
-import akka.stream.Materializer
 import config.Notifications
-import connectors.Cache
+import connectors.{Cache, CdsFileUploadConnector}
 import controllers.actions.{DataRetrievalAction, FileUploadResponseRequiredAction}
 import models._
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers._
+import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen
@@ -30,7 +29,6 @@ import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
-import repositories.NotificationRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -42,10 +40,10 @@ import scala.concurrent.{ExecutionContext, Future}
 class UpscanStatusControllerSpec extends ControllerSpecBase {
 
   val cache = mock[Cache]
-  val notificationRepository = mock[NotificationRepository]
   val auditConnector = mock[AuditConnector]
   val uploadYourFiles = mock[upload_your_files]
   val uploadError = mock[upload_error]
+  val cdsFileUploadConnector = mock[CdsFileUploadConnector]
 
   val controller = new UpscanStatusController(
     new FakeAuthAction(),
@@ -53,17 +51,15 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
     fakeDataRetrievalAction(CacheMap("", Map.empty)),
     new FileUploadResponseRequiredAction(),
     cache,
-    notificationRepository,
     auditConnector,
+    cdsFileUploadConnector,
     appConfig,
     mcc,
     uploadYourFiles,
     uploadError
   )(executionContext)
 
-  private val mockMaterializer = mock[Materializer]
   private val mockAuditConnector = mock[AuditConnector]
-  private val mockNotificationRepository = mock[NotificationRepository]
 
   private val responseGen: Gen[(FileUpload, FileUploadResponse)] =
     for {
@@ -89,8 +85,8 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
       getData,
       new FileUploadResponseRequiredAction(),
       mockDataCacheConnector,
-      mockNotificationRepository,
       mockAuditConnector,
+      cdsFileUploadConnector,
       appConfig.copy(notifications = Notifications(appConfig.notifications.authToken, maxRetries = 3, retryPauseMillis = 500, ttlSeconds = 60)),
       mcc,
       uploadYourFiles,
@@ -105,7 +101,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
   }
 
   override protected def afterEach(): Unit = {
-    reset(mockMaterializer, mockAuditConnector, mockNotificationRepository, uploadYourFiles, uploadError)
+    reset(mockAuditConnector, cdsFileUploadConnector, uploadYourFiles, uploadError)
 
     super.afterEach()
   }
@@ -145,8 +141,8 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
         forAll { cache: CacheMap =>
           val updatedCache = combine(response, cache)
 
-          when(mockNotificationRepository.find(any())(any[ExecutionContext]))
-            .thenReturn(Future.successful(List(Notification("ref1", "SUCCESS", "file1.pdf"))))
+          when(cdsFileUploadConnector.getNotification(any())(any()))
+            .thenReturn(Future.successful(Some(Notification("ref1", "SUCCESS", "file1.pdf"))))
           val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad(fileUpload.reference)(fakeRequest)
 
           status(result) mustBe SEE_OTHER
@@ -182,8 +178,8 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
       val response = FileUploadResponse(List(fileUpload1, fileUpload2))
 
       forAll { cache: CacheMap =>
-        when(mockNotificationRepository.find(any())(any[ExecutionContext]))
-          .thenReturn(Future.successful(List(Notification("ref1", "SUCCESS", "myfile.doc"))))
+        when(cdsFileUploadConnector.getNotification(any())(any()))
+          .thenReturn(Future.successful(Some(Notification("ref1", "SUCCESS", "myfile.doc"))))
         val updatedCache = combine(response, cache)
 
         val result = controller(fakeDataRetrievalAction(updatedCache)).success("ref1")(fakeRequest)
@@ -227,8 +223,8 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
       val response = FileUploadResponse(List(fileUpload))
 
       forAll { cache: CacheMap =>
-        when(mockNotificationRepository.find(any())(any[ExecutionContext]))
-          .thenReturn(Future.successful(List(Notification("ref", "SUCCESS", "myfile.xls"))))
+        when(cdsFileUploadConnector.getNotification(any())(any()))
+          .thenReturn(Future.successful(Some(Notification("ref", "SUCCESS", "myfile.xls"))))
 
         val updatedCache = combine(response, cache)
         await(controller(fakeDataRetrievalAction(updatedCache)).success("ref")(fakeRequest))
@@ -289,11 +285,12 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
         "fileReference3" -> "fileRef3"
       )
 
-      when(mockNotificationRepository.find(any())(any[ExecutionContext])).thenReturn(
-        Future.successful(List(Notification("fileRef1", "SUCCESS", "file1.pdf"))), //first find
-        Future.successful(List(Notification("fileRef2", "SUCCESS", "file2.doc"))), //second find
-        Future.successful(List(Notification("fileRef3", "SUCCESS", "file3.png"))) //third find
-      )
+      when(cdsFileUploadConnector.getNotification(meq("fileRef1"))(any()))
+        .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", "file1.pdf"))))
+      when(cdsFileUploadConnector.getNotification(meq("fileRef2"))(any()))
+        .thenReturn(Future.successful(Some(Notification("fileRef2", "SUCCESS", "file2.doc"))))
+      when(cdsFileUploadConnector.getNotification(meq("fileRef3"))(any()))
+        .thenReturn(Future.successful(Some(Notification("fileRef3", "SUCCESS", "file3.png"))))
 
       val result = controller(fakeDataRetrievalAction(updatedCache)).success(lastFile.reference)(fakeRequest)
       status(result) mustBe SEE_OTHER
@@ -326,11 +323,12 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
       )
       val updatedCache = combine(response, cache)
 
-      when(mockNotificationRepository.find(any())(any[ExecutionContext])).thenReturn(
-        Future.successful(List(Notification("fileRef1", "SUCCESS", "file1.pdf"))), //first find
-        Future.successful(List(Notification("fileRef2", "SUCCESS", "file2.doc"))), //second find
-        Future.successful(List(Notification("fileRef3", "SUCCESS", "file3.gif"))) //third find
-      )
+      when(cdsFileUploadConnector.getNotification(meq("fileRef1"))(any()))
+        .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", "file1.pdf"))))
+      when(cdsFileUploadConnector.getNotification(meq("fileRef2"))(any()))
+        .thenReturn(Future.successful(Some(Notification("fileRef2", "SUCCESS", "file2.doc"))))
+      when(cdsFileUploadConnector.getNotification(meq("fileRef3"))(any()))
+        .thenReturn(Future.successful(Some(Notification("fileRef3", "SUCCESS", "file3.gif"))))
 
       val result = controller(fakeDataRetrievalAction(updatedCache)).success(lastFile.reference)(fakeRequest)
       status(result) mustBe SEE_OTHER
@@ -356,11 +354,12 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
       )
       val updatedCache = combine(response, cache)
 
-      when(mockNotificationRepository.find(any())(any[ExecutionContext])).thenReturn(
-        Future.successful(List(Notification("fileRef1", "SUCCESS", "file1.pdf"))), //first find
-        Future.successful(List(Notification("fileRef2", "FAIL", "file2.doc"))), //second find
-        Future.successful(List(Notification("fileRef3", "SUCCESS", "file3.gif"))) //third find
-      )
+      when(cdsFileUploadConnector.getNotification(meq("fileRef1"))(any()))
+        .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", "file1.pdf"))))
+      when(cdsFileUploadConnector.getNotification(meq("fileRef2"))(any()))
+        .thenReturn(Future.successful(Some(Notification("fileRef2", "FAIL", "file2.doc"))))
+      when(cdsFileUploadConnector.getNotification(meq("fileRef3"))(any()))
+        .thenReturn(Future.successful(Some(Notification("fileRef3", "SUCCESS", "file3.gif"))))
 
       val result = controller(fakeDataRetrievalAction(updatedCache)).success(lastFile.reference)(fakeRequest)
       status(result) mustBe SEE_OTHER
@@ -386,11 +385,12 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
       )
       val updatedCache = combine(response, cache)
 
-      when(mockNotificationRepository.find(any())(any[ExecutionContext])).thenReturn(
-        Future.successful(List(Notification("fileRef1", "SUCCESS", "file1.doc"))), //first find
-        Future.successful(List(Notification("fileRef2", "SUCCESS", "file2.xls"))), //second find
-        Future.successful(List.empty) //third find
-      )
+      when(cdsFileUploadConnector.getNotification(meq("fileRef1"))(any()))
+        .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", "file1.pdf"))))
+      when(cdsFileUploadConnector.getNotification(meq("fileRef2"))(any()))
+        .thenReturn(Future.successful(Some(Notification("fileRef2", "SUCCESS", "file2.doc"))))
+      when(cdsFileUploadConnector.getNotification(meq("fileRef3"))(any()))
+        .thenReturn(Future.successful(None))
 
       val result = controller(fakeDataRetrievalAction(updatedCache)).success(lastFile.reference)(fakeRequest)
       status(result) mustBe SEE_OTHER
