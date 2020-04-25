@@ -36,9 +36,11 @@
     <p>@Html(messages("startPage.paragraph4", bold(messages("startPage.paragraph4.bold"))))</p>
 </div>
 
-<a id="submit" class="button button-start" href="@{routes.ContactDetailsController.onPageLoad().url}" role="button">
-    @messages("common.button.startNow")
-</a>
+    @helper.form(action = routes.StartController.onStart()) {
+        @helper.CSRF.formField
+
+        @components.submit_button("common.button.startNow")
+    }
 
     @components.helpline_information()
 }

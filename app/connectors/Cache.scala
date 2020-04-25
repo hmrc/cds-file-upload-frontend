@@ -35,6 +35,9 @@ class MongoCacheConnector @Inject()(val repository: CacheMapRepository) extends 
 
   def getEntry[A](cacheId: String, key: String)(implicit hc: HeaderCarrier, fmt: Format[A]): Future[Option[A]] =
     fetch(cacheId).map(_.flatMap(_.getEntry(key)))
+
+  def remove()(implicit hc: HeaderCarrier): Unit =
+    repository.remove()
 }
 
 trait Cache {
@@ -44,4 +47,6 @@ trait Cache {
   def fetch(cacheId: String)(implicit hc: HeaderCarrier): Future[Option[CacheMap]]
 
   def getEntry[A](cacheId: String, key: String)(implicit hc: HeaderCarrier, fmt: Format[A]): Future[Option[A]]
+
+  def remove()(implicit hc: HeaderCarrier)
 }
