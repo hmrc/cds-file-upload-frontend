@@ -18,9 +18,9 @@ package connectors
 
 import com.google.inject.Inject
 import play.api.libs.json.Format
-import uk.gov.hmrc.http.cache.client.CacheMap
 import repositories.CacheMapRepository
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -35,6 +35,9 @@ class MongoCacheConnector @Inject()(val repository: CacheMapRepository) extends 
 
   def getEntry[A](cacheId: String, key: String)(implicit hc: HeaderCarrier, fmt: Format[A]): Future[Option[A]] =
     fetch(cacheId).map(_.flatMap(_.getEntry(key)))
+
+  def remove()(implicit hc: HeaderCarrier): Future[HttpResponse] =
+    repository.remove()
 }
 
 trait Cache {
@@ -44,4 +47,6 @@ trait Cache {
   def fetch(cacheId: String)(implicit hc: HeaderCarrier): Future[Option[CacheMap]]
 
   def getEntry[A](cacheId: String, key: String)(implicit hc: HeaderCarrier, fmt: Format[A]): Future[Option[A]]
+
+  def remove()(implicit hc: HeaderCarrier): Future[HttpResponse]
 }

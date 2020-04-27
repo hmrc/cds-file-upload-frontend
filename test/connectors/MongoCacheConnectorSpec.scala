@@ -133,4 +133,17 @@ class MongoCacheConnectorSpec extends SpecBase {
       }
     }
   }
+
+  ".remove" must {
+
+    "delegate to the CacheMapRepository" in {
+
+      val mockCacheMapRepository = mock[CacheMapRepository]
+      val mongoCacheConnector = new MongoCacheConnector(mockCacheMapRepository)
+
+      mongoCacheConnector.remove()
+
+      verify(mockCacheMapRepository).remove()
+    }
+  }
 }

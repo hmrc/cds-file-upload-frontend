@@ -35,6 +35,7 @@ class Module extends AbstractModule {
     // Bind the actions for DI
     bind(classOf[AuthAction]).to(classOf[AuthActionImpl]).asEagerSingleton()
     bind(classOf[EORIRequiredAction]).to(classOf[EORIRequiredActionImpl]).asEagerSingleton()
+    bind(classOf[CacheDeleteAction]).to(classOf[CacheDeleteActionImpl]).asEagerSingleton()
     bind(classOf[ContactDetailsRequiredAction]).to(classOf[ContactDetailsRequiredActionImpl]).asEagerSingleton()
     bind(classOf[DataRetrievalAction]).to(classOf[DataRetrievalActionImpl]).asEagerSingleton()
     bind(classOf[Cache]).to(classOf[MongoCacheConnector]).asEagerSingleton()

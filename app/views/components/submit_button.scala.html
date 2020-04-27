@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@()(implicit messages: Messages)
+@(labelKey: String = "common.continue")(implicit messages: Messages)
 
-  <button id="submit" class="button">@messages("common.continue")</button>
+  <button id="submit" class="button">@messages(labelKey)</button>
 
