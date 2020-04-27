@@ -31,7 +31,7 @@ class CacheDeleteActionSpec extends ControllerSpecBase with SignedInUserGen {
   lazy val user = mock[SignedInUser]
   lazy val cache = mock[Cache]
 
-  def cacheDeleteAction = new CacheDeleteActionImpl(cache, executionContext)
+  def cacheDeleteAction = new CacheDeleteActionImpl(cache)
 
   "CacheDeleteAction" should {
 
