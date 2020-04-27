@@ -58,4 +58,9 @@ trait FakeActions extends Generators {
     override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] =
       Future.successful(Right(ContactDetailsRequest(request.request, UserAnswers(cacheMap), contactDetails)))
   }
+
+  class FakeCacheDeleteAction extends CacheDeleteAction {
+    override protected def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] = Future.successful(None)
+    override protected def executionContext: ExecutionContext = ExecutionContext.global
+  }
 }

@@ -19,21 +19,22 @@ package controllers.actions
 import connectors.Cache
 import javax.inject.{Inject, Singleton}
 import models.requests.AuthenticatedRequest
-import play.api.mvc.{ActionFunction, Result}
+import play.api.mvc.{ActionFilter, Result}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class CacheDeleteAction @Inject()(val dataCacheConnector: Cache, val exc: ExecutionContext)
-    extends ActionFunction[AuthenticatedRequest, AuthenticatedRequest] {
-  override def invokeBlock[A](request: AuthenticatedRequest[A], block: AuthenticatedRequest[A] => Future[Result]): Future[Result] = {
+class CacheDeleteActionImpl @Inject()(val dataCacheConnector: Cache, val exc: ExecutionContext) extends CacheDeleteAction {
+  override def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
     dataCacheConnector.remove()
-    block(request)
+    Future.successful(None)
   }
 
   override protected def executionContext: ExecutionContext = exc
 }
+
+trait CacheDeleteAction extends ActionFilter[AuthenticatedRequest]
