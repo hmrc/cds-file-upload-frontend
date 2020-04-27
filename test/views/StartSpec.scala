@@ -17,6 +17,7 @@
 package views
 
 import controllers.routes
+import utils.FakeRequestCSRFSupport._
 import views.behaviours.ViewBehaviours
 import views.html.start
 
@@ -24,7 +25,7 @@ class StartSpec extends DomAssertions with ViewBehaviours {
 
   val page = instanceOf[start]
 
-  val view = () => page()(fakeRequest, messages)
+  val view = () => page()(fakeRequest.withCSRFToken, messages)
 
   val messageKeyPrefix = "startPage"
 
@@ -32,9 +33,12 @@ class StartSpec extends DomAssertions with ViewBehaviours {
     behave like normalPage(view, messageKeyPrefix, "paragraph2", "p.youWillNeed", "listItem1", "listItem2", "listItem3")
     "have a start button with correct link" in {
       val doc = asDocument(view())
-      val expectedLink = routes.ContactDetailsController.onPageLoad().url
+      val expectedLink = routes.StartController.onStart().url
 
-      assertContainsLink(doc, messages("common.button.startNow"), expectedLink)
+      val form = doc.getElementsByTag("form").first()
+      form.attr("action") mustBe expectedLink
+
+      form.getElementsByTag("button").text() mustBe messages("common.button.startNow")
     }
 
     "have paragraph3 with bold text" in {
