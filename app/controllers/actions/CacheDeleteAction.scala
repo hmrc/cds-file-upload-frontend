@@ -30,8 +30,7 @@ class CacheDeleteActionImpl @Inject()(val dataCacheConnector: Cache, val exc: Ex
   override def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    dataCacheConnector.remove()
-    Future.successful(None)
+    dataCacheConnector.remove().map(_ => None)(executionContext)
   }
 
   override protected def executionContext: ExecutionContext = exc

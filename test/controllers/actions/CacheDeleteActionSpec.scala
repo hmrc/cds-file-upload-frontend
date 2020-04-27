@@ -22,20 +22,22 @@ import generators.SignedInUserGen
 import models.requests.{AuthenticatedRequest, SignedInUser}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
+import uk.gov.hmrc.http.HttpResponse
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
 
 class CacheDeleteActionSpec extends ControllerSpecBase with SignedInUserGen {
 
   lazy val user = mock[SignedInUser]
   lazy val cache = mock[Cache]
-  lazy val ec = mock[ExecutionContext]
 
-  def cacheDeleteAction = new CacheDeleteActionImpl(cache, ec)
+  def cacheDeleteAction = new CacheDeleteActionImpl(cache, executionContext)
 
   "CacheDeleteAction" should {
 
-    "delegate to cache and executeblock" in {
+    "delegate to cache" in {
+
+      when(cache.remove()(any())) thenReturn Future.successful(HttpResponse(200))
 
       val request = AuthenticatedRequest(fakeRequest, user)
 
