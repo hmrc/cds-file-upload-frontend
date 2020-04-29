@@ -23,9 +23,8 @@
 @mainTemplate(title = s"${errorPrefix(form)} ${messages("howManyFilesUpload.title")}") {
 
 <div class="form-group">
-    <h1 class="heading-large">@messages("howManyFilesUpload.heading")</h1>
-
     @components.error_summary(form.errors)
+    <h1 class="heading-large">@messages("howManyFilesUpload.heading")</h1>
     
     @helper.form(action = routes.HowManyFilesUploadController.onSubmit()) {
         @helper.CSRF.formField
