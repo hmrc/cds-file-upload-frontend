@@ -34,18 +34,18 @@ lazy val microservice = (project in file("."))
 val httpComponentsVersion = "4.5.11"
 
 val compileDependencies = Seq(
-  "uk.gov.hmrc" %% "govuk-template" % "5.48.0-play-26",
-  "uk.gov.hmrc" %% "play-ui" % "8.5.0-play-26",
-  "uk.gov.hmrc" %% "bootstrap-play-26" % "1.3.0",
-  "uk.gov.hmrc" %% "auth-client" % "2.33.0-play-26",
-  "com.github.pureconfig" %% "pureconfig" % "0.12.2",
+  "uk.gov.hmrc" %% "govuk-template" % "5.54.0-play-26",
+  "uk.gov.hmrc" %% "play-ui" % "8.9.0-play-26",
+  "uk.gov.hmrc" %% "bootstrap-play-26" % "1.7.0",
+  "uk.gov.hmrc" %% "auth-client" % "3.0.0-play-26",
+  "com.github.pureconfig" %% "pureconfig" % "0.12.3",
   "org.apache.httpcomponents"        %  "httpclient"               % httpComponentsVersion,
   "org.apache.httpcomponents"        %  "httpmime"                 % httpComponentsVersion,
   "uk.gov.hmrc" %% "http-caching-client" % "9.0.0-play-26",
   "com.typesafe.play" %% "play-json" % "2.6.0",
-  "uk.gov.hmrc" %% "play-whitelist-filter" % "3.1.0-play-26",
-  "uk.gov.hmrc" %% "crypto" % "5.5.0",
-  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.23.0-play-26"
+  "uk.gov.hmrc" %% "play-whitelist-filter" % "3.3.0-play-26",
+  "uk.gov.hmrc" %% "crypto" % "5.6.0",
+  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.26.0-play-26"
 )
 
 val testDependencies = Seq(
