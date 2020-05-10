@@ -18,7 +18,7 @@ package controllers.actions
 
 import com.google.inject.Inject
 import controllers.routes
-import models.requests.{ContactDetailsRequest, OptionalDataRequest}
+import models.requests.{ContactDetailsRequest, DataRequest}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Result}
 
@@ -29,7 +29,7 @@ class ContactDetailsRequiredActionImpl @Inject()(val mcc: MessagesControllerComp
   implicit val executionContext: ExecutionContext = mcc.executionContext
   private val onError = Redirect(routes.ErrorPageController.error())
 
-  override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] = {
+  override protected def refine[A](request: DataRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] = {
     val req = for {
       response <- request.userAnswers.contactDetails
     } yield ContactDetailsRequest(request.request, request.userAnswers, response)
@@ -38,4 +38,4 @@ class ContactDetailsRequiredActionImpl @Inject()(val mcc: MessagesControllerComp
   }
 }
 
-trait ContactDetailsRequiredAction extends ActionRefiner[OptionalDataRequest, ContactDetailsRequest]
+trait ContactDetailsRequiredAction extends ActionRefiner[DataRequest, ContactDetailsRequest]

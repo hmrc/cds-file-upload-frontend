@@ -20,7 +20,7 @@ import connectors.AnswersConnector
 import controllers.ControllerSpecBase
 import generators.SignedInUserGen
 import models.UserAnswers
-import models.requests.{AuthenticatedRequest, EORIRequest, OptionalDataRequest, SignedInUser}
+import models.requests.{AuthenticatedRequest, EORIRequest, DataRequest, SignedInUser}
 import org.mockito.ArgumentMatchers.{eq => eqTo}
 import org.mockito.Mockito._
 
@@ -29,7 +29,7 @@ import scala.concurrent.Future
 class DataRetrievalActionSpec extends ControllerSpecBase with SignedInUserGen {
 
   class Harness(answersConnector: AnswersConnector) extends DataRetrievalActionImpl(answersConnector, mcc) {
-    def callTransform[A](request: EORIRequest[A]): Future[OptionalDataRequest[A]] = transform(request)
+    def callTransform[A](request: EORIRequest[A]): Future[DataRequest[A]] = transform(request)
   }
 
   "Data Retrieval Action" when {

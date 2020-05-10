@@ -44,15 +44,15 @@ trait FakeActions extends Generators {
   class FakeDataRetrievalAction(answers: Option[UserAnswers] = None) extends DataRetrievalAction {
     protected def executionContext = ExecutionContext.global
     def parser = stubBodyParser()
-    override protected def transform[A](request: EORIRequest[A]): Future[OptionalDataRequest[A]] =
-      Future.successful(OptionalDataRequest(request, answers.getOrElse(UserAnswers(request.eori))))
+    override protected def transform[A](request: EORIRequest[A]): Future[DataRequest[A]] =
+      Future.successful(DataRequest(request, answers.getOrElse(UserAnswers(request.eori))))
   }
 
   class FakeContactDetailsRequiredAction(val contactDetails: ContactDetails = arbitraryContactDetails.arbitrary.sample.get)
       extends ContactDetailsRequiredAction {
     protected def executionContext = ExecutionContext.global
     def parser = stubBodyParser()
-    override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] =
+    override protected def refine[A](request: DataRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] =
       Future.successful(Right(ContactDetailsRequest(request.request, request.userAnswers, contactDetails)))
   }
 
@@ -62,7 +62,7 @@ trait FakeActions extends Generators {
       Future.successful(Right(MrnRequest(request, request.userAnswers, mrn)))
   }
 
-  class FakeCacheDeleteAction extends CacheDeleteAction {
+  class FakeAnswersDeleteAction extends AnswersDeleteAction {
     override protected def filter[A](request: EORIRequest[A]): Future[Option[Result]] = Future.successful(None)
     override protected def executionContext: ExecutionContext = ExecutionContext.global
   }

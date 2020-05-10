@@ -25,12 +25,12 @@ import org.mockito.Mockito._
 
 import scala.concurrent.Future
 
-class CacheDeleteActionSpec extends ControllerSpecBase with SignedInUserGen {
+class AnswersDeleteActionSpec extends ControllerSpecBase with SignedInUserGen {
 
   lazy val user = mock[SignedInUser]
   lazy val cache = mock[AnswersConnector]
 
-  def cacheDeleteAction = new CacheDeleteActionImpl(cache)
+  def cacheDeleteAction = new AnswersDeleteActionImpl(cache)
 
   "CacheDeleteAction" should {
 

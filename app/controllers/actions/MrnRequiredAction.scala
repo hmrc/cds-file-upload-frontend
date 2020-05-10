@@ -18,8 +18,7 @@ package controllers.actions
 
 import controllers.routes
 import javax.inject.{Inject, Singleton}
-import models.requests.{AuthenticatedRequest, ContactDetailsRequest, EORIRequest, MrnRequest}
-import pages.MrnEntryPage
+import models.requests.{ContactDetailsRequest, MrnRequest}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Result}
 

@@ -26,7 +26,7 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class CacheDeleteActionImpl @Inject()(val answersConnector: AnswersConnector)(implicit val exc: ExecutionContext) extends CacheDeleteAction {
+class AnswersDeleteActionImpl @Inject()(val answersConnector: AnswersConnector)(implicit val exc: ExecutionContext) extends AnswersDeleteAction {
   override def filter[A](request: EORIRequest[A]): Future[Option[Result]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
@@ -36,4 +36,4 @@ class CacheDeleteActionImpl @Inject()(val answersConnector: AnswersConnector)(im
   override protected def executionContext: ExecutionContext = exc
 }
 
-trait CacheDeleteAction extends ActionFilter[EORIRequest]
+trait AnswersDeleteAction extends ActionFilter[EORIRequest]
