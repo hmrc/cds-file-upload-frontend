@@ -20,15 +20,11 @@ import controllers.actions.ContactDetailsRequiredAction
 import forms.MRNFormProvider
 import models.requests.SignedInUser
 import models.{ContactDetails, MRN}
-import org.mockito.ArgumentMatchers.{eq => eqTo, _}
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalacheck.Arbitrary._
-import pages.MrnEntryPage
-import play.api.libs.json.JsString
 import play.api.test.Helpers.{status, _}
 import play.twirl.api.HtmlFormat
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.cache.client.CacheMap
 import views.html.mrn_entry
 
 class MrnEntryControllerSpec extends ControllerSpecBase {
@@ -37,10 +33,9 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
 
   val contactDetailsRequiredGen =
     for {
-      cache <- arbitrary[CacheMap]
       contactDetails <- arbitrary[ContactDetails]
     } yield {
-      fakeContactDetailsRequiredAction(cache, contactDetails)
+      fakeContactDetailsRequiredAction(contactDetails)
     }
 
   val page = mock[mrn_entry]
@@ -52,7 +47,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
       requireContactDetails,
       new FakeDataRetrievalAction(None),
       new MRNFormProvider,
-      mockDataCacheConnector,
+      mockAnswersConnector,
       mcc,
       page
     )(executionContext)
@@ -83,7 +78,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
 
       forAll(arbitrary[SignedInUser], arbitrary[String], arbitrary[MRN]) { (user, eori, mrn) =>
         val fakeContactDetails =
-          new FakeContactDetailsRequiredAction(CacheMap("", Map(MrnEntryPage.toString -> JsString(mrn.value))), ContactDetails("", "", "", ""))
+          new FakeContactDetailsRequiredAction(ContactDetails("", "", "", ""))
         val result = controller(user, eori, fakeContactDetails).onPageLoad(fakeRequest)
 
         status(result) mustBe OK
@@ -118,12 +113,12 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
     "save data in cache when valid" in {
 
       forAll(arbitrary[SignedInUser], arbitrary[String], arbitrary[MRN]) { (user, eori, mrn) =>
-        val expectedMap = CacheMap(user.internalId, Map(MrnEntryPage.toString -> JsString(mrn.value)))
-        val fakeContactDetails = new FakeContactDetailsRequiredAction(expectedMap, ContactDetails("", "", "", ""))
+        resetAnswersConnector()
+        val fakeContactDetails = new FakeContactDetailsRequiredAction(ContactDetails("", "", "", ""))
         val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn.value)
         await(controller(user, eori, fakeContactDetails).onSubmit(postRequest))
 
-        verify(mockDataCacheConnector).save(eqTo(expectedMap))(any[HeaderCarrier])
+        theSavedUserAnswers.mrn mustBe MRN(mrn.value)
       }
     }
   }

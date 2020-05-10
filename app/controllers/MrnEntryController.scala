@@ -17,11 +17,10 @@
 package controllers
 
 import com.google.inject.Singleton
-import connectors.Cache
+import connectors.AnswersConnector
 import controllers.actions._
 import forms.MRNFormProvider
 import javax.inject.Inject
-import pages.MrnEntryPage
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -36,7 +35,7 @@ class MrnEntryController @Inject()(
   requireContactDetails: ContactDetailsRequiredAction,
   getData: DataRetrievalAction,
   formProvider: MRNFormProvider,
-  dataCacheConnector: Cache,
+  answersConnector: AnswersConnector,
   mcc: MessagesControllerComponents,
   mrnEntry: mrn_entry
 )(implicit ec: ExecutionContext)
@@ -45,8 +44,7 @@ class MrnEntryController @Inject()(
   val form = formProvider()
 
   def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireContactDetails) { implicit req =>
-    val populatedForm = req.userAnswers.get(MrnEntryPage).map(form.fill).getOrElse(form)
-
+    val populatedForm = req.userAnswers.mrn.fold(form)(form.fill)
     Ok(mrnEntry(populatedForm))
   }
 
@@ -56,9 +54,7 @@ class MrnEntryController @Inject()(
       .fold(
         errorForm => Future.successful(BadRequest(mrnEntry(errorForm))),
         value => {
-          val cacheMap = req.userAnswers.set(MrnEntryPage, value).cacheMap
-
-          dataCacheConnector.save(cacheMap).map { _ =>
+          answersConnector.upsert(req.userAnswers.copy(mrn = Some(value))).map { _ =>
             Redirect(routes.HowManyFilesUploadController.onPageLoad())
           }
         }

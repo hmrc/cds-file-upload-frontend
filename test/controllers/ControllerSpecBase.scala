@@ -19,24 +19,23 @@ package controllers
 import java.net.URLEncoder
 
 import base.SpecBase
-import connectors.Cache
+import connectors.AnswersConnector
 import controllers.actions.{ContactDetailsRequiredAction, DataRetrievalAction, FakeActions}
-import models.ContactDetails
 import models.requests.SignedInUser
+import models.{ContactDetails, UserAnswers}
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{reset, when}
+import org.mockito.Mockito.{reset, verify, when}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
 
 abstract class ControllerSpecBase extends SpecBase with FakeActions {
 
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
-  val mockDataCacheConnector: Cache = mock[Cache]
+  val mockAnswersConnector: AnswersConnector = mock[AnswersConnector]
 
   def withSignedInUser(user: SignedInUser)(test: => Unit): Unit = {
     when(
@@ -61,15 +60,25 @@ abstract class ControllerSpecBase extends SpecBase with FakeActions {
     test
   }
 
-  override protected def beforeEach(): Unit = {
-    reset(mockDataCacheConnector, mockAuthConnector)
-    when(mockDataCacheConnector.save(any[CacheMap])(any[HeaderCarrier])).thenReturn(Future.successful(CacheMap("", Map())))
+  override protected def beforeEach(): Unit =
+    resetAnswersConnector()
+
+  def resetAnswersConnector() = {
+    reset(mockAnswersConnector)
+    when(mockAnswersConnector.upsert(any[UserAnswers])).thenReturn(Future.successful(UserAnswers("")))
+  }
+
+  def theSavedUserAnswers: UserAnswers = {
+    val captor = ArgumentCaptor.forClass(classOf[UserAnswers])
+    verify(mockAnswersConnector).upsert(captor.capture())
+    captor.getValue
   }
 
   val escaped: String => String = URLEncoder.encode(_, "utf-8")
 
-  def fakeContactDetailsRequiredAction(cacheMap: CacheMap, contactDetails: ContactDetails): ContactDetailsRequiredAction =
-    new FakeContactDetailsRequiredAction(cacheMap, contactDetails)
+  def fakeContactDetailsRequiredAction(contactDetails: ContactDetails): ContactDetailsRequiredAction =
+    new FakeContactDetailsRequiredAction(contactDetails)
 
-  def fakeDataRetrievalAction(cacheMap: CacheMap): DataRetrievalAction = new FakeDataRetrievalAction(Some(cacheMap))
+  def fakeDataRetrievalAction(): DataRetrievalAction = new FakeDataRetrievalAction(None)
+  def fakeDataRetrievalAction(answers: UserAnswers): DataRetrievalAction = new FakeDataRetrievalAction(Some(answers))
 }

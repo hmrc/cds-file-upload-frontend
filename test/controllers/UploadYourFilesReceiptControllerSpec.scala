@@ -18,28 +18,27 @@ package controllers
 
 import connectors.CdsFileUploadConnector
 import controllers.actions.{DataRetrievalAction, FileUploadResponseRequiredAction}
-import models.{FileUpload, FileUploadResponse, Notification}
+import models.{FileUpload, FileUploadResponse, Notification, UserAnswers}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import pages.HowManyFilesUploadPage
-import play.api.libs.json.Json
+import org.scalacheck.Arbitrary.arbitrary
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
-import uk.gov.hmrc.http.cache.client.CacheMap
 import views.html.upload_your_files_receipt
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase {
 
   implicit val ac = appConfig
   val cdsFileUploadConnector = mock[CdsFileUploadConnector]
   val page = mock[upload_your_files_receipt]
+  val eori: String = arbitrary[String].sample.get
 
   def controller(getData: DataRetrievalAction) =
     new UploadYourFilesReceiptController(
       new FakeAuthAction(),
-      new FakeEORIAction(),
+      new FakeEORIAction(eori),
       getData,
       new FileUploadResponseRequiredAction(),
       cdsFileUploadConnector,
@@ -66,14 +65,14 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase {
 
       "request file exists in response" in {
 
-        forAll { (response: FileUploadResponse, cache: CacheMap) =>
+        forAll { response: FileUploadResponse =>
           response.uploads.foreach { u =>
             when(cdsFileUploadConnector.getNotification(any())(any()))
               .thenReturn(Future.successful(Option(Notification(u.reference, "SUCCESS", "someFile.pdf"))))
           }
 
-          val updatedCache = cache.copy(data = cache.data + (HowManyFilesUploadPage.Response.toString -> Json.toJson(response)))
-          val result = controller(fakeDataRetrievalAction(updatedCache)).onPageLoad()(fakeRequest)
+          val answers = UserAnswers(eori, fileUploadResponse = Some(response))
+          val result = controller(fakeDataRetrievalAction(answers)).onPageLoad()(fakeRequest)
 
           status(result) mustBe OK
         }

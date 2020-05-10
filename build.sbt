@@ -41,7 +41,6 @@ val compileDependencies = Seq(
   "com.github.pureconfig" %% "pureconfig" % "0.12.3",
   "org.apache.httpcomponents"        %  "httpclient"               % httpComponentsVersion,
   "org.apache.httpcomponents"        %  "httpmime"                 % httpComponentsVersion,
-  "uk.gov.hmrc" %% "http-caching-client" % "9.0.0-play-26",
   "com.typesafe.play" %% "play-json" % "2.6.0",
   "uk.gov.hmrc" %% "play-whitelist-filter" % "3.3.0-play-26",
   "uk.gov.hmrc" %% "crypto" % "5.6.0",

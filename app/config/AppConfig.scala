@@ -30,7 +30,8 @@ case class AppConfig(
   notifications: Notifications,
   feedback: Feedback,
   proxy: Proxy,
-  accessibilityLinkUrl: String
+  accessibilityLinkUrl: String,
+  answersRepository: AnswersRepository
 )
 
 object AppConfig {
@@ -86,3 +87,5 @@ case class Notifications(maxRetries: Int, retryPauseMillis: Int)
 case class Feedback(url: String)
 
 case class Proxy(protocol: String, host: String, port: Int, username: String, password: String, proxyRequiredForThisEnvironment: Boolean)
+
+case class AnswersRepository(ttlSeconds: Int)

@@ -34,9 +34,8 @@ class FileUploadResponseRequiredAction @Inject()(implicit mcc: MessagesControlle
   override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, FileUploadResponseRequest[A]]] = {
 
     val req = for {
-      answers <- request.userAnswers
-      response <- answers.get(HowManyFilesUploadPage.Response)
-    } yield FileUploadResponseRequest(request.request, answers, response)
+      response <- request.userAnswers.fileUploadResponse
+    } yield FileUploadResponseRequest(request.request, request.userAnswers, response)
 
     Future.successful(req.toRight(onError))
   }

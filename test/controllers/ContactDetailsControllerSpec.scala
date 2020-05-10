@@ -20,16 +20,12 @@ import controllers.actions.DataRetrievalAction
 import forms.mappings.ContactDetailsMapping._
 import models._
 import models.requests.SignedInUser
-import org.mockito.ArgumentMatchers.{eq => eqTo, _}
-import org.mockito.Mockito.{reset, times, verify, when}
+import org.mockito.ArgumentMatchers._
+import org.mockito.Mockito.{reset, when}
 import org.scalacheck.Arbitrary._
-import pages.ContactDetailsPage
 import play.api.data.Form
-import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.cache.client.CacheMap
 import views.html.contact_details
 
 class ContactDetailsControllerSpec extends ControllerSpecBase {
@@ -40,7 +36,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
   def view(form: Form[ContactDetails] = form): String = page(form)(fakeRequest, messages).toString
 
   def controller(signedInUser: SignedInUser, eori: String, dataRetrieval: DataRetrievalAction = new FakeDataRetrievalAction(None)) =
-    new ContactDetailsController(new FakeAuthAction(signedInUser), new FakeEORIAction(eori), dataRetrieval, mockDataCacheConnector, mcc, page)(
+    new ContactDetailsController(new FakeAuthAction(signedInUser), new FakeEORIAction(eori), dataRetrieval, mockAnswersConnector, mcc, page)(
       mcc.executionContext
     )
 
@@ -71,8 +67,8 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
     "contact details should be displayed if they exist in the cache" in {
 
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
-        val cacheMap: CacheMap = CacheMap("", Map(ContactDetailsPage.toString -> Json.toJson(contactDetails)))
-        val result = controller(user, eori, fakeDataRetrievalAction(cacheMap)).onPageLoad(fakeRequest)
+        val answers = UserAnswers(eori, contactDetails = Some(contactDetails))
+        val result = controller(user, eori, fakeDataRetrievalAction(answers)).onPageLoad(fakeRequest)
 
         contentAsString(result) mustBe view(form.fill(contactDetails))
       }
@@ -111,11 +107,11 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
 
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
         whenever(contactDetails.email.matches(emailRegex)) {
+          resetAnswersConnector()
           val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
           await(controller(user, eori).onSubmit(postRequest))
 
-          val expectedMap = CacheMap(user.internalId, Map(ContactDetailsPage.toString -> Json.toJson(contactDetails)))
-          verify(mockDataCacheConnector, times(1)).save(eqTo(expectedMap))(any[HeaderCarrier])
+          theSavedUserAnswers.contactDetails mustBe Some(contactDetails)
         }
       }
     }

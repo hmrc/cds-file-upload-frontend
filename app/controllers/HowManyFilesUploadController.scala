@@ -16,13 +16,12 @@
 
 package controllers
 
-import connectors.{Cache, UpscanConnector}
+import connectors.{AnswersConnector, UpscanConnector}
 import controllers.actions._
 import forms.FileUploadCountProvider
 import javax.inject.{Inject, Singleton}
 import models._
 import models.requests.MrnRequest
-import pages.HowManyFilesUploadPage
 import play.api.Logger
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -41,7 +40,7 @@ class HowManyFilesUploadController @Inject()(
   requireMrn: MrnRequiredAction,
   requireContactDetails: ContactDetailsRequiredAction,
   formProvider: FileUploadCountProvider,
-  dataCacheConnector: Cache,
+  answersConnector: AnswersConnector,
   uploadContactDetails: UpscanConnector,
   customsDeclarationsService: CustomsDeclarationsService,
   mcc: MessagesControllerComponents,
@@ -56,10 +55,7 @@ class HowManyFilesUploadController @Inject()(
   def onPageLoad: Action[AnyContent] =
     (authenticate andThen requireEori andThen getData andThen requireContactDetails andThen requireMrn) { implicit req =>
       val populatedForm =
-        req.userAnswers
-          .get(HowManyFilesUploadPage)
-          .map(form.fill)
-          .getOrElse(form)
+        req.userAnswers.fileUploadCount.fold(form)(form.fill)
 
       Ok(howManyFilesUpload(populatedForm))
     }
@@ -90,12 +86,15 @@ class HowManyFilesUploadController @Inject()(
 
       val remainingFileUploads = fileUploadResponse.uploads.tail
       logger.info("remainingFileUploads " + remainingFileUploads)
-      val answers = updateUserAnswers(req.userAnswers, fileUploadCount, FileUploadResponse(remainingFileUploads))
-      dataCacheConnector.save(answers.cacheMap).map { _ =>
-        logger.info("saving remaining uploads")
 
-        remainingFileUploads
-      }
+      answersConnector
+        .upsert(req.userAnswers.copy(fileUploadCount = Some(fileUploadCount), fileUploadResponse = Some(FileUploadResponse(remainingFileUploads))))
+        .map { _ =>
+          logger.info("saving remaining uploads")
+
+          remainingFileUploads
+        }
+
     }
 
     initiateUpload(req, fileUploadCount).flatMap { fileUploadResponse =>
@@ -119,9 +118,6 @@ class HowManyFilesUploadController @Inject()(
       }
     }
   }
-
-  private def updateUserAnswers(userAnswers: UserAnswers, fileUploadCount: FileUploadCount, fileUploadResponse: FileUploadResponse) =
-    userAnswers.set(HowManyFilesUploadPage, fileUploadCount).set(HowManyFilesUploadPage.Response, fileUploadResponse)
 
   private def initiateUpload(req: MrnRequest[AnyContent], fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier): Future[FileUploadResponse] =
     customsDeclarationsService.batchFileUpload(req.eori, req.mrn, fileUploadCount)
