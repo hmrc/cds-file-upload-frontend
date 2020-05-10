@@ -20,7 +20,7 @@ import connectors.AnswersConnector
 import controllers.ControllerSpecBase
 import generators.SignedInUserGen
 import models.UserAnswers
-import models.requests.{AuthenticatedRequest, EORIRequest, DataRequest, SignedInUser}
+import models.requests.{AuthenticatedRequest, DataRequest, EORIRequest, SignedInUser}
 import org.mockito.ArgumentMatchers.{eq => eqTo}
 import org.mockito.Mockito._
 

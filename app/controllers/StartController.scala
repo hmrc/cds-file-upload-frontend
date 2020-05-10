@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions.{AuthAction, AnswersDeleteAction, EORIRequiredAction}
+import controllers.actions.{AnswersDeleteAction, AuthAction, EORIRequiredAction}
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -25,11 +25,11 @@ import views.html.start
 
 @Singleton
 class StartController @Inject()(
-                                 authenticate: AuthAction,
-                                 requireEori: EORIRequiredAction,
-                                 clearAnswers: AnswersDeleteAction,
-                                 mcc: MessagesControllerComponents,
-                                 start: start
+  authenticate: AuthAction,
+  requireEori: EORIRequiredAction,
+  clearAnswers: AnswersDeleteAction,
+  mcc: MessagesControllerComponents,
+  start: start
 ) extends FrontendController(mcc) with I18nSupport {
 
   val displayStartPage: Action[AnyContent] = Action { implicit req =>
