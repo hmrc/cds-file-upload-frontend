@@ -16,9 +16,9 @@
 
 package controllers.actions
 
-import connectors.Cache
+import connectors.AnswersConnector
 import javax.inject.{Inject, Singleton}
-import models.requests.AuthenticatedRequest
+import models.requests.EORIRequest
 import play.api.mvc.{ActionFilter, Result}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
@@ -26,14 +26,14 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class CacheDeleteActionImpl @Inject()(val dataCacheConnector: Cache)(implicit val exc: ExecutionContext) extends CacheDeleteAction {
-  override def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] = {
+class AnswersDeleteActionImpl @Inject()(val answersConnector: AnswersConnector)(implicit val exc: ExecutionContext) extends AnswersDeleteAction {
+  override def filter[A](request: EORIRequest[A]): Future[Option[Result]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    dataCacheConnector.remove().map(_ => None)
+    answersConnector.removeByEori(request.eori).map(_ => None)
   }
 
   override protected def executionContext: ExecutionContext = exc
 }
 
-trait CacheDeleteAction extends ActionFilter[AuthenticatedRequest]
+trait AnswersDeleteAction extends ActionFilter[EORIRequest]

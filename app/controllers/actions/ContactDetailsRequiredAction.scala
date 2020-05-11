@@ -17,29 +17,25 @@
 package controllers.actions
 
 import com.google.inject.Inject
-import connectors.Cache
 import controllers.routes
-import models.requests.{ContactDetailsRequest, OptionalDataRequest}
-import pages.ContactDetailsPage
+import models.requests.{ContactDetailsRequest, DataRequest}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Result}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ContactDetailsRequiredActionImpl @Inject()(val dataCacheConnector: Cache, mcc: MessagesControllerComponents)
-    extends ContactDetailsRequiredAction {
+class ContactDetailsRequiredActionImpl @Inject()(val mcc: MessagesControllerComponents) extends ContactDetailsRequiredAction {
 
   implicit val executionContext: ExecutionContext = mcc.executionContext
   private val onError = Redirect(routes.ErrorPageController.error())
 
-  override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] = {
+  override protected def refine[A](request: DataRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] = {
     val req = for {
-      answers <- request.userAnswers
-      response <- answers.get(ContactDetailsPage)
-    } yield ContactDetailsRequest(request.request, answers, response)
+      response <- request.userAnswers.contactDetails
+    } yield ContactDetailsRequest(request.request, request.userAnswers, response)
 
     Future.successful(req.toRight(onError))
   }
 }
 
-trait ContactDetailsRequiredAction extends ActionRefiner[OptionalDataRequest, ContactDetailsRequest]
+trait ContactDetailsRequiredAction extends ActionRefiner[DataRequest, ContactDetailsRequest]

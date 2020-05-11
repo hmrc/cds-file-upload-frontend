@@ -18,25 +18,23 @@ package controllers.actions
 
 import com.google.inject.Inject
 import controllers.routes
-import models.requests.{FileUploadResponseRequest, OptionalDataRequest}
-import pages.HowManyFilesUploadPage
+import models.requests.{DataRequest, FileUploadResponseRequest}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Result}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class FileUploadResponseRequiredAction @Inject()(implicit mcc: MessagesControllerComponents)
-    extends ActionRefiner[OptionalDataRequest, FileUploadResponseRequest] {
+    extends ActionRefiner[DataRequest, FileUploadResponseRequest] {
 
   implicit override val executionContext: ExecutionContext = mcc.executionContext
   private val onError = Redirect(routes.ErrorPageController.error())
 
-  override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, FileUploadResponseRequest[A]]] = {
+  override protected def refine[A](request: DataRequest[A]): Future[Either[Result, FileUploadResponseRequest[A]]] = {
 
     val req = for {
-      answers <- request.userAnswers
-      response <- answers.get(HowManyFilesUploadPage.Response)
-    } yield FileUploadResponseRequest(request.request, answers, response)
+      response <- request.userAnswers.fileUploadResponse
+    } yield FileUploadResponseRequest(request.request, request.userAnswers, response)
 
     Future.successful(req.toRight(onError))
   }

@@ -16,8 +16,7 @@
 
 package pages
 
-import models.{FileUploadCount, UserAnswers}
-import play.api.libs.json.Json
+import models.UserAnswers
 
 trait QuestionPage[A] extends Page {
 

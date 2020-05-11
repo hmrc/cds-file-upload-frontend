@@ -22,7 +22,7 @@ import org.scalacheck.Gen._
 import org.scalacheck.{Arbitrary, Gen, Shrink}
 import wolfendale.scalacheck.regexp.RegexpGen
 
-trait Generators extends CacheMapGenerator with ModelGenerators with JsonGenerators {
+trait Generators extends ModelGenerators with JsonGenerators {
 
   implicit val dontShrink: Shrink[String] = Shrink.shrinkAny
 

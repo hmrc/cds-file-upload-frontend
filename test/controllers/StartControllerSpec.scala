@@ -29,7 +29,7 @@ class StartControllerSpec extends ControllerSpecBase {
   def view(): String = page()(fakeRequest, messages).toString
 
   def controller() =
-    new StartController(new FakeAuthAction(), new FakeCacheDeleteAction(), mcc, page)
+    new StartController(new FakeAuthAction(), new FakeEORIAction(), new FakeAnswersDeleteAction(), mcc, page)
 
   override protected def beforeEach(): Unit = {
     super.beforeEach

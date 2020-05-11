@@ -16,7 +16,6 @@
 
 import com.google.inject.{AbstractModule, Provides}
 import config.AppConfig
-import connectors.{Cache, MongoCacheConnector}
 import controllers.actions._
 import javax.inject.Singleton
 import play.filters.csrf.CSRFConfig
@@ -35,10 +34,10 @@ class Module extends AbstractModule {
     // Bind the actions for DI
     bind(classOf[AuthAction]).to(classOf[AuthActionImpl]).asEagerSingleton()
     bind(classOf[EORIRequiredAction]).to(classOf[EORIRequiredActionImpl]).asEagerSingleton()
-    bind(classOf[CacheDeleteAction]).to(classOf[CacheDeleteActionImpl]).asEagerSingleton()
+    bind(classOf[AnswersDeleteAction]).to(classOf[AnswersDeleteActionImpl]).asEagerSingleton()
     bind(classOf[ContactDetailsRequiredAction]).to(classOf[ContactDetailsRequiredActionImpl]).asEagerSingleton()
+    bind(classOf[MrnRequiredAction]).to(classOf[MrnRequiredActionImpl]).asEagerSingleton()
     bind(classOf[DataRetrievalAction]).to(classOf[DataRetrievalActionImpl]).asEagerSingleton()
-    bind(classOf[Cache]).to(classOf[MongoCacheConnector]).asEagerSingleton()
     bind(classOf[CustomsDeclarationsService]).to(classOf[CustomsDeclarationsServiceImpl]).asEagerSingleton()
   }
 

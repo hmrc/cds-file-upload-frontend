@@ -16,29 +16,21 @@
 
 package models
 
-import uk.gov.hmrc.http.cache.client.CacheMap
-import pages._
-import play.api.Logger
-import play.api.libs.json._
+import org.joda.time.DateTime
+import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
+import uk.gov.hmrc.time.DateTimeUtils
 
-case class UserAnswers(cacheMap: CacheMap) {
-
-  private val logger = Logger(this.getClass)
-
-  def get[A](page: QuestionPage[A])(implicit rds: Reads[A]): Option[A] = cacheMap.getEntry[A](page)
-
-  def set[A](page: QuestionPage[A], value: A)(implicit writes: Writes[A]): UserAnswers = {
-    logger.info("Setting user answers")
-    val updatedAnswers = UserAnswers(cacheMap copy (data = cacheMap.data + (page.toString -> Json.toJson(value))))
-    page.cleanup(Some(value), updatedAnswers)
-  }
-
-  def remove[A](page: QuestionPage[A]): UserAnswers = {
-    val updatedAnswers = UserAnswers(cacheMap copy (data = cacheMap.data - page))
-    page.cleanup(None, updatedAnswers)
-  }
-}
+case class UserAnswers(
+  eori: String,
+  contactDetails: Option[ContactDetails] = None,
+  mrn: Option[MRN] = None,
+  fileUploadCount: Option[FileUploadCount] = None,
+  fileUploadResponse: Option[FileUploadResponse] = None,
+  updated: DateTime = DateTimeUtils.now
+)
 
 object UserAnswers {
-  def apply(cacheId: String): UserAnswers = UserAnswers(new CacheMap(cacheId, Map()))
+  implicit val dateFormat: Format[DateTime] = ReactiveMongoFormats.dateTimeFormats
+  implicit val answersFormat = Json.format[UserAnswers]
 }

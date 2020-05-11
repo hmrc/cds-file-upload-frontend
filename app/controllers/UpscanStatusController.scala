@@ -17,15 +17,14 @@
 package controllers
 
 import config.AppConfig
-import connectors.{Cache, CdsFileUploadConnector}
+import connectors.{AnswersConnector, CdsFileUploadConnector}
 import controllers.actions.{AuthAction, DataRetrievalAction, EORIRequiredAction, FileUploadResponseRequiredAction}
 import javax.inject.Inject
 import models._
 import models.requests.FileUploadResponseRequest
-import pages.{ContactDetailsPage, HowManyFilesUploadPage, MrnEntryPage}
 import play.api.Logger
 import play.api.i18n.I18nSupport
-import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
+import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -40,7 +39,7 @@ class UpscanStatusController @Inject()(
   requireEori: EORIRequiredAction,
   getData: DataRetrievalAction,
   requireResponse: FileUploadResponseRequiredAction,
-  cache: Cache,
+  answersConnector: AnswersConnector,
   auditConnector: AuditConnector,
   cdsFileUploadConnector: CdsFileUploadConnector,
   implicit val appConfig: AppConfig,
@@ -85,8 +84,8 @@ class UpscanStatusController @Inject()(
       uploads.find(_.id == id) match {
         case Some(upload) =>
           val updatedFiles = upload.copy(state = Uploaded) :: uploads.filterNot(_.id == id)
-          val answers = req.userAnswers.set(HowManyFilesUploadPage.Response, FileUploadResponse(updatedFiles))
-          cache.save(answers.cacheMap).flatMap { _ =>
+          val answers = req.userAnswers.copy(fileUploadResponse = Some(FileUploadResponse(updatedFiles)))
+          answersConnector.upsert(answers).flatMap { _ =>
             nextPage(upload.reference, uploads)
           }
         case None =>
@@ -151,14 +150,13 @@ class UpscanStatusController @Inject()(
 
   private def auditUploadSuccess()(implicit req: FileUploadResponseRequest[_]): Unit = {
     def auditDetails = {
-      val contactDetails = req.userAnswers
-        .get(ContactDetailsPage)
+      val contactDetails = req.userAnswers.contactDetails
         .fold(Map.empty[String, String])(
           cd => Map("fullName" -> cd.name, "companyName" -> cd.companyName, "emailAddress" -> cd.email, "telephoneNumber" -> cd.phoneNumber)
         )
       val eori = Map("eori" -> req.request.eori)
-      val mrn = req.userAnswers.get(MrnEntryPage).fold(Map.empty[String, String])(m => Map("mrn" -> m.value))
-      val numberOfFiles = req.userAnswers.get(HowManyFilesUploadPage).fold(Map.empty[String, String])(n => Map("numberOfFiles" -> s"${n.value}"))
+      val mrn = req.userAnswers.mrn.fold(Map.empty[String, String])(m => Map("mrn" -> m.value))
+      val numberOfFiles = req.userAnswers.fileUploadCount.fold(Map.empty[String, String])(n => Map("numberOfFiles" -> s"${n.value}"))
       val files = req.fileUploadResponse.uploads
       val fileReferences = (1 to files.size).map(i => s"fileReference$i").zip(files.map(_.reference)).toMap
       contactDetails ++ eori ++ mrn ++ numberOfFiles ++ fileReferences

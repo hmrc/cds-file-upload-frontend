@@ -17,9 +17,8 @@
 package controllers.actions
 
 import com.google.inject.Inject
-import connectors.Cache
-import models.UserAnswers
-import models.requests.{EORIRequest, OptionalDataRequest}
+import connectors.AnswersConnector
+import models.requests.{DataRequest, EORIRequest}
 import play.api.mvc.{ActionTransformer, MessagesControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
@@ -27,17 +26,18 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class DataRetrievalActionImpl @Inject()(val dataCacheConnector: Cache, mcc: MessagesControllerComponents) extends DataRetrievalAction {
+class DataRetrievalActionImpl @Inject()(val answersConnector: AnswersConnector, mcc: MessagesControllerComponents) extends DataRetrievalAction {
 
   implicit val executionContext: ExecutionContext = mcc.executionContext
-  override protected def transform[A](request: EORIRequest[A]): Future[OptionalDataRequest[A]] = {
+  override protected def transform[A](request: EORIRequest[A]): Future[DataRequest[A]] = {
     val id = request.user.internalId
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    dataCacheConnector.fetch(id).map { data =>
-      OptionalDataRequest(request, data.map(UserAnswers(_)))
-    }
+    val answersFuture = answersConnector.findOrCreate(request.eori)
+    for {
+      answers <- answersFuture
+    } yield DataRequest(request, answers)
   }
 }
 
-trait DataRetrievalAction extends ActionTransformer[EORIRequest, OptionalDataRequest]
+trait DataRetrievalAction extends ActionTransformer[EORIRequest, DataRequest]

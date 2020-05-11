@@ -21,19 +21,14 @@ import controllers.actions._
 import forms.FileUploadCountProvider
 import models._
 import models.requests.SignedInUser
-import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito._
 import org.scalacheck.Arbitrary._
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import pages.{HowManyFilesUploadPage, MrnEntryPage}
-import play.api.libs.json.{JsNumber, JsString}
 import play.api.libs.ws.WSResponse
 import play.api.test.Helpers._
 import services.CustomsDeclarationsService
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.FakeRequestCSRFSupport._
 import views.DomAssertions
 import views.html.how_many_files_upload
@@ -48,14 +43,9 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
     ga.flatMap(a => gb.map(b => (a, b)))
 
   implicit val arbitraryUserInfo: Arbitrary[UserInfo] = Arbitrary(zip(userGen, arbitrary[String]))
-
-  implicit val arbitraryMrnCacheMap: Arbitrary[CacheMap] =
-    Arbitrary {
-      zip(arbitraryCacheMap.arbitrary, arbitraryMrn.arbitrary).map {
-        case (cacheMap, mrn) =>
-          cacheMap.copy(data = cacheMap.data + (MrnEntryPage.toString -> JsString(mrn.value)))
-      }
-    }
+  val eori: String = arbitrary[String].sample.get
+  val mrn: MRN = arbitraryMrn.arbitrary.sample.get
+  val validAnswers = UserAnswers(eori, mrn = Some(mrn), fileUploadCount = FileUploadCount(7))
 
   implicit val arbitraryContactDetailsActions: Arbitrary[ContactDetailsRequiredAction] =
     Arbitrary(arbitrary[FakeContactDetailsRequiredAction].map(_.asInstanceOf[ContactDetailsRequiredAction]))
@@ -64,9 +54,8 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
     Arbitrary {
       for {
         details <- arbitrary[ContactDetails]
-        cache <- arbitrary[CacheMap]
       } yield {
-        new FakeContactDetailsRequiredAction(cache, details)
+        new FakeContactDetailsRequiredAction(details)
       }
     }
 
@@ -76,15 +65,15 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
 
   private val page = app.injector.instanceOf[how_many_files_upload]
 
-  private def controller(contactDetailsRequiredAction: ContactDetailsRequiredAction) =
+  private def controller(contactDetailsRequiredAction: ContactDetailsRequiredAction, answers: Option[UserAnswers] = Some(validAnswers)) =
     new HowManyFilesUploadController(
       new FakeAuthAction(),
-      new FakeEORIAction(),
-      new FakeDataRetrievalAction(None),
-      new MrnRequiredAction(mcc),
+      new FakeEORIAction(eori),
+      new FakeDataRetrievalAction(answers),
+      new MrnRequiredActionImpl(mcc),
       contactDetailsRequiredAction,
       new FileUploadCountProvider,
-      mockDataCacheConnector,
+      mockAnswersConnector,
       mockUpscanConnector,
       mockCustomsDeclarationsService,
       mcc,
@@ -117,10 +106,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
     }
 
     "display file count if it exist in the cache" in {
-      val updatedCacheMap = fakeContactDetailsRequiredAction.cacheMap.copy(
-        data = fakeContactDetailsRequiredAction.cacheMap.data + (HowManyFilesUploadPage.toString -> JsNumber(7))
-      )
-      val updatedAction = new FakeContactDetailsRequiredAction(updatedCacheMap, fakeContactDetailsRequiredAction.contactDetails)
+      val updatedAction = new FakeContactDetailsRequiredAction(fakeContactDetailsRequiredAction.contactDetails)
 
       val result = controller(updatedAction).onPageLoad(fakeRequest.withCSRFToken)
 
@@ -131,8 +117,8 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
     "redirect to error page when no data is found in the cache on page load" in {
 
       forAll { contactDetails: ContactDetails =>
-        val action = new FakeContactDetailsRequiredAction(CacheMap("", Map()), contactDetails)
-        val result = controller(action).onPageLoad(fakeRequest.withCSRFToken)
+        val action = new FakeContactDetailsRequiredAction(contactDetails)
+        val result = controller(action, None).onPageLoad(fakeRequest.withCSRFToken)
 
         status(result) mustBe SEE_OTHER
         redirectLocation(result) mustBe Some("/cds-file-upload-service/error")
@@ -142,8 +128,8 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
     "redirect to error page when no data is found in the cache on submit" in {
 
       forAll { contactDetails: ContactDetails =>
-        val action = new FakeContactDetailsRequiredAction(CacheMap("", Map()), contactDetails)
-        val result = controller(action).onSubmit(fakeRequest.withCSRFToken)
+        val action = new FakeContactDetailsRequiredAction(contactDetails)
+        val result = controller(action, None).onSubmit(fakeRequest.withCSRFToken)
 
         status(result) mustBe SEE_OTHER
         redirectLocation(result) mustBe Some("/cds-file-upload-service/error")
@@ -173,7 +159,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
 
       when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
       when(mockUpscanConnector.upload(any(), any())).thenReturn(Future.successful(wsResponse))
-      when(mockDataCacheConnector.save(any())(any[HeaderCarrier])).thenReturn(Future.successful(CacheMap("", Map.empty)))
+
       val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2").withCSRFToken
 
       val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
@@ -181,11 +167,11 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       status(result) mustBe SEE_OTHER
       val nextRef = fileUploadsAfterContactDetails.map(_.reference).min
       redirectLocation(result) mustBe Some(routes.UpscanStatusController.onPageLoad(nextRef).url)
-      val captor: ArgumentCaptor[CacheMap] = ArgumentCaptor.forClass(classOf[CacheMap])
-      verify(mockDataCacheConnector).save(captor.capture())(any[HeaderCarrier])
+
+      val savedAnswers = theSavedUserAnswers
       val Some(fileUploadCount) = FileUploadCount(2)
-      captor.getValue.getEntry[FileUploadCount](HowManyFilesUploadPage) mustBe Some(fileUploadCount)
-      captor.getValue.getEntry[FileUploadResponse](HowManyFilesUploadPage.Response) mustBe Some(FileUploadResponse(fileUploadResponse.uploads.tail))
+      savedAnswers.fileUploadCount mustBe Some(fileUploadCount)
+      savedAnswers.fileUploadResponse mustBe Some(FileUploadResponse(fileUploadResponse.uploads.tail))
     }
 
     "redirect to error page when contact details upload fails" in {
@@ -202,7 +188,6 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       )
       reset(mockUpscanConnector)
       when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
-      val f = new RuntimeException("something went wrong")
       when(mockUpscanConnector.upload(any(), any())).thenReturn(Future.successful(wsResponse))
 
       val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2").withCSRFToken
@@ -227,7 +212,6 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       )
       reset(mockUpscanConnector)
       when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
-      val f = new RuntimeException("something went wrong")
       when(mockUpscanConnector.upload(any(), any())).thenReturn(Future.successful(wsResponse))
 
       val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2").withCSRFToken
@@ -243,11 +227,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       await(controller(fakeContactDetailsRequiredAction).onSubmit(postRequest.withCSRFToken))
 
       val Some(fileUploadCount) = FileUploadCount(2)
-      verify(mockCustomsDeclarationsService).batchFileUpload(
-        any(),
-        eqTo(fakeContactDetailsRequiredAction.cacheMap.getEntry[MRN](MrnEntryPage).get),
-        eqTo(fileUploadCount)
-      )(any())
+      verify(mockCustomsDeclarationsService).batchFileUpload(any(), eqTo(mrn), eqTo(fileUploadCount))(any())
     }
   }
 }

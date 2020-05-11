@@ -18,11 +18,10 @@ package controllers.actions
 
 import generators.Generators
 import models.requests._
-import models.{ContactDetails, UserAnswers}
+import models.{ContactDetails, MRN, UserAnswers}
 import org.scalacheck.Arbitrary._
 import play.api.mvc.{Request, Result}
 import play.api.test.Helpers.stubBodyParser
-import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -42,25 +41,29 @@ trait FakeActions extends Generators {
       Future.successful(Right(EORIRequest[A](request, eori)))
   }
 
-  class FakeDataRetrievalAction(cacheMap: Option[CacheMap]) extends DataRetrievalAction {
+  class FakeDataRetrievalAction(answers: Option[UserAnswers] = None) extends DataRetrievalAction {
     protected def executionContext = ExecutionContext.global
     def parser = stubBodyParser()
-    override protected def transform[A](request: EORIRequest[A]): Future[OptionalDataRequest[A]] =
-      Future.successful(OptionalDataRequest(request, cacheMap.map(UserAnswers(_))))
+    override protected def transform[A](request: EORIRequest[A]): Future[DataRequest[A]] =
+      Future.successful(DataRequest(request, answers.getOrElse(UserAnswers(request.eori))))
   }
 
-  class FakeContactDetailsRequiredAction(
-    val cacheMap: CacheMap = arbitraryCacheMap.arbitrary.sample.get,
-    val contactDetails: ContactDetails = arbitraryContactDetails.arbitrary.sample.get
-  ) extends ContactDetailsRequiredAction {
+  class FakeContactDetailsRequiredAction(val contactDetails: ContactDetails = arbitraryContactDetails.arbitrary.sample.get)
+      extends ContactDetailsRequiredAction {
     protected def executionContext = ExecutionContext.global
     def parser = stubBodyParser()
-    override protected def refine[A](request: OptionalDataRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] =
-      Future.successful(Right(ContactDetailsRequest(request.request, UserAnswers(cacheMap), contactDetails)))
+    override protected def refine[A](request: DataRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] =
+      Future.successful(Right(ContactDetailsRequest(request.request, request.userAnswers, contactDetails)))
   }
 
-  class FakeCacheDeleteAction extends CacheDeleteAction {
-    override protected def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] = Future.successful(None)
+  class FakeMrnRequiredAction(val mrn: MRN = arbitraryMrn.arbitrary.sample.get) extends MrnRequiredAction {
+    protected def executionContext = ExecutionContext.global
+    override protected def refine[A](request: ContactDetailsRequest[A]): Future[Either[Result, MrnRequest[A]]] =
+      Future.successful(Right(MrnRequest(request, request.userAnswers, mrn)))
+  }
+
+  class FakeAnswersDeleteAction extends AnswersDeleteAction {
+    override protected def filter[A](request: EORIRequest[A]): Future[Option[Result]] = Future.successful(None)
     override protected def executionContext: ExecutionContext = ExecutionContext.global
   }
 }

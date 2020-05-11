@@ -17,12 +17,10 @@
 package controllers
 
 import com.google.inject.Singleton
-import connectors.Cache
+import connectors.AnswersConnector
 import controllers.actions._
 import forms.mappings.ContactDetailsMapping._
 import javax.inject.Inject
-import models._
-import pages.ContactDetailsPage
 import play.api.data.Form
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -36,7 +34,7 @@ class ContactDetailsController @Inject()(
   authenticate: AuthAction,
   requireEori: EORIRequiredAction,
   getData: DataRetrievalAction,
-  dataCacheConnector: Cache,
+  answersConnector: AnswersConnector,
   mcc: MessagesControllerComponents,
   contactDetails: contact_details
 )(implicit ec: ExecutionContext)
@@ -45,21 +43,17 @@ class ContactDetailsController @Inject()(
   private val form = Form(contactDetailsMapping)
 
   def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData) { implicit req =>
-    val populatedForm = req.userAnswers.flatMap(_.get(ContactDetailsPage)).fold(form)(form.fill)
+    val populatedForm = req.userAnswers.contactDetails.fold(form)(form.fill)
     Ok(contactDetails(populatedForm))
   }
 
   def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen getData).async { implicit req =>
-    val userAnswers = req.userAnswers.getOrElse(UserAnswers(req.request.user.internalId))
-
     form
       .bindFromRequest()
       .fold(
         errorForm => Future.successful(BadRequest(contactDetails(errorForm))),
         contactDetails => {
-          val cacheMap = userAnswers.set(ContactDetailsPage, contactDetails).cacheMap
-
-          dataCacheConnector.save(cacheMap).map { _ =>
+          answersConnector.upsert(req.userAnswers.copy(contactDetails = Some(contactDetails))).map { _ =>
             Redirect(routes.MrnEntryController.onPageLoad())
           }
         }
