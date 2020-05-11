@@ -29,7 +29,7 @@ class AnswersConnector @Inject()(val repository: AnswersRepository)(implicit ec:
 
   private val logger = Logger(this.getClass)
 
-  def removeByEori(eori: String): Future[Unit] = repository.remove("eori" -> eori).filter(_.ok).map(_ => (): Unit)
+  def removeByEori(eori: String): Future[Unit] = repository.remove("eori" -> eori).map(_ => (): Unit)
 
   def findByEori(eori: String): Future[Option[UserAnswers]] = repository.find("eori" -> eori).map(_.headOption)
 

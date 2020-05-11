@@ -18,8 +18,6 @@ package base
 
 import config.AppConfig
 import generators.Generators
-import org.mockito.invocation.InvocationOnMock
-import org.mockito.stubbing.Answer
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
@@ -31,7 +29,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.Injector
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 trait SpecBase extends PlaySpec with MockitoSugar with BeforeAndAfterEach with PropertyChecks with Generators with ScalaFutures with Injector {
 
