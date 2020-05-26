@@ -16,6 +16,7 @@
 
 package controllers
 
+import base.SfusMetricsMock
 import config.Notifications
 import connectors.CdsFileUploadConnector
 import controllers.actions.{DataRetrievalAction, FileUploadResponseRequiredAction}
@@ -34,7 +35,7 @@ import views.html.{upload_error, upload_your_files}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class UpscanStatusControllerSpec extends ControllerSpecBase {
+class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock {
 
   val auditConnector = mock[AuditConnector]
   val uploadYourFiles = mock[upload_your_files]
@@ -52,6 +53,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
     cdsFileUploadConnector,
     appConfig,
     mcc,
+    sfusMetrics,
     uploadYourFiles,
     uploadError
   )(executionContext)
@@ -86,6 +88,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
       cdsFileUploadConnector,
       appConfig.copy(notifications = Notifications(maxRetries = 3, retryPauseMillis = 500)),
       mcc,
+      sfusMetrics,
       uploadYourFiles,
       uploadError
     )(executionContext)
@@ -106,7 +109,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase {
   "Upscan Status error" should {
 
     "return error page" in {
-      val result = controller.error("someId")(fakeRequest)
+      val result = controller.error()(fakeRequest)
 
       status(result) mustBe OK
       verify(uploadError).apply()(any(), any())

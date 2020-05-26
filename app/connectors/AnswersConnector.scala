@@ -16,7 +16,7 @@
 
 package connectors
 
-import com.google.inject.Inject
+import javax.inject.Inject
 import models.UserAnswers
 import play.api.Logger
 import play.api.libs.json.{JsObject, Json}

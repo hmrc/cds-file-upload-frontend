@@ -16,6 +16,7 @@
 
 package controllers
 
+import base.SfusMetricsMock
 import connectors.CdsFileUploadConnector
 import controllers.actions.{DataRetrievalAction, FileUploadResponseRequiredAction}
 import models.{FileUpload, FileUploadResponse, Notification, UserAnswers}
@@ -28,7 +29,7 @@ import views.html.upload_your_files_receipt
 
 import scala.concurrent.Future
 
-class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase {
+class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusMetricsMock {
 
   implicit val ac = appConfig
   val cdsFileUploadConnector = mock[CdsFileUploadConnector]
@@ -42,6 +43,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase {
       getData,
       new FileUploadResponseRequiredAction(),
       cdsFileUploadConnector,
+      sfusMetrics,
       page
     )(mcc, executionContext)
 

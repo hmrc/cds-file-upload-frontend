@@ -16,25 +16,22 @@
 
 package services
 
-import com.google.inject.Inject
+import javax.inject.Inject
 import config.AppConfig
 import connectors.CustomsDeclarationsConnector
+import metrics.SfusMetrics
+import metrics.MetricIdentifiers.fileUploadRequestMetric
 import models._
 import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-trait CustomsDeclarationsService {
+class CustomsDeclarationsService @Inject()(customsDeclarationsConnector: CustomsDeclarationsConnector, appConfig: AppConfig, metrics: SfusMetrics)(
+  implicit ec: ExecutionContext
+) {
 
-  def batchFileUpload(eori: String, mrn: MRN, fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier): Future[FileUploadResponse]
-
-}
-
-class CustomsDeclarationsServiceImpl @Inject()(customsDeclarationsConnector: CustomsDeclarationsConnector, appConfig: AppConfig)
-    extends CustomsDeclarationsService {
-
-  override def batchFileUpload(eori: String, mrn: MRN, fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier): Future[FileUploadResponse] = {
+  def batchFileUpload(eori: String, mrn: MRN, fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier): Future[FileUploadResponse] = {
 
     val uploadUrl = appConfig.microservice.services.cdsFileUploadFrontend.uri
     Logger.warn(s"uploadUrl: $uploadUrl")
@@ -42,7 +39,13 @@ class CustomsDeclarationsServiceImpl @Inject()(customsDeclarationsConnector: Cus
     val fileSeq = files.flatten
 
     val request = FileUploadRequest(mrn, fileSeq)
+    val timer = metrics.startTimer(fileUploadRequestMetric)
 
-    customsDeclarationsConnector.requestFileUpload(eori, request)
+    customsDeclarationsConnector.requestFileUpload(eori, request).map { response =>
+      timer.stop()
+      metrics.incrementCounter(fileUploadRequestMetric)
+
+      response
+    }
   }
 }

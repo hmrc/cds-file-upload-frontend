@@ -20,6 +20,8 @@ import config.AppConfig
 import connectors.{AnswersConnector, CdsFileUploadConnector}
 import controllers.actions.{AuthAction, DataRetrievalAction, EORIRequiredAction, FileUploadResponseRequiredAction}
 import javax.inject.Inject
+import metrics.MetricIdentifiers.fetchNotificationMetric
+import metrics.SfusMetrics
 import models._
 import models.requests.FileUploadResponseRequest
 import play.api.Logger
@@ -44,6 +46,7 @@ class UpscanStatusController @Inject()(
   cdsFileUploadConnector: CdsFileUploadConnector,
   implicit val appConfig: AppConfig,
   mcc: MessagesControllerComponents,
+  metrics: SfusMetrics,
   uploadYourFiles: upload_your_files,
   uploadError: upload_error
 )(implicit ec: ExecutionContext)
@@ -73,7 +76,7 @@ class UpscanStatusController @Inject()(
       }
     }
 
-  def error(id: String): Action[AnyContent] =
+  def error(): Action[AnyContent] =
     (authenticate andThen requireEori) { implicit req =>
       Ok(uploadError())
     }
@@ -93,7 +96,7 @@ class UpscanStatusController @Inject()(
       }
     }
 
-  private def nextPage(ref: String, files: List[FileUpload])(implicit req: FileUploadResponseRequest[_]) = {
+  private def nextPage(ref: String, files: List[FileUpload])(implicit req: FileUploadResponseRequest[_]): Future[Result] = {
     def nextFile(file: FileUpload): Call = routes.UpscanStatusController.onPageLoad(file.reference)
 
     val nextFileToUpload = files.collectFirst {
@@ -108,7 +111,7 @@ class UpscanStatusController @Inject()(
     }
   }
 
-  private def allFilesUploaded(implicit req: FileUploadResponseRequest[_]) = {
+  private def allFilesUploaded(implicit req: FileUploadResponseRequest[_]): Future[Result] = {
     def failedUpload(notification: Notification): Boolean = notification.outcome != "SUCCESS"
 
     def prettyPrint: List[Notification] => String = _.map(n => s"(${n.fileReference}, ${n.outcome})").mkString(",")
@@ -116,11 +119,14 @@ class UpscanStatusController @Inject()(
     val uploads = req.fileUploadResponse.uploads
 
     def retrieveNotifications(retries: Int = 0): Future[Result] = {
+      val timer = metrics.startTimer(fetchNotificationMetric)
+
       val receivedNotifications = Future.sequence(uploads.map { upload =>
         cdsFileUploadConnector.getNotification(upload.reference)
       })
 
       receivedNotifications.flatMap { notifications =>
+        timer.stop()
         notifications.flatten match {
           case ns if ns.exists(failedUpload) =>
             logger.warn("Failed notification received for an upload.")
@@ -149,7 +155,7 @@ class UpscanStatusController @Inject()(
   }
 
   private def auditUploadSuccess()(implicit req: FileUploadResponseRequest[_]): Unit = {
-    def auditDetails = {
+    def auditDetails: Map[String, String] = {
       val contactDetails = req.userAnswers.contactDetails
         .fold(Map.empty[String, String])(
           cd => Map("fullName" -> cd.name, "companyName" -> cd.companyName, "emailAddress" -> cd.email, "telephoneNumber" -> cd.phoneNumber)
@@ -176,7 +182,7 @@ class UpscanStatusController @Inject()(
       DataEvent(AuditSource, auditType, tags = hc.toAuditTags(transactionName, path) ++ tags, detail = hc.toAuditDetails(detail.toSeq: _*))
     )
 
-  private def getPosition(ref: String, refs: List[String]) = refs match {
+  private def getPosition(ref: String, refs: List[String]): Position = refs match {
     case head :: _ if head == ref => First(refs.size)
     case _ :+ last if last == ref => Last(refs.size)
     case _                        => Middle(refs.indexOf(ref) + 1, refs.size)

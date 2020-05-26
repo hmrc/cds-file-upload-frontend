@@ -16,7 +16,7 @@
 
 package filters
 
-import com.google.inject.Inject
+import javax.inject.Inject
 import play.api.http.DefaultHttpFilters
 import uk.gov.hmrc.play.bootstrap.filters.FrontendFilters
 

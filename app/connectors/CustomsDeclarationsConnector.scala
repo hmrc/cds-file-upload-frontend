@@ -16,7 +16,7 @@
 
 package connectors
 
-import com.google.inject.Inject
+import javax.inject.Inject
 import config.AppConfig
 import models.{FileUploadRequest, FileUploadResponse}
 import play.api.Logger

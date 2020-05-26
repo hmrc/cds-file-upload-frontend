@@ -20,7 +20,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import base.SpecBase
+import base.{SfusMetricsMock, SpecBase}
 import models.{ContactDetails, UploadRequest}
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito._
@@ -31,11 +31,12 @@ import play.api.libs.ws.ahc.AhcWSResponse
 import play.api.libs.ws.ahc.cache.CacheableHttpResponseStatus
 import play.api.libs.ws.{WSClient, WSRequest}
 import play.api.mvc.MultipartFormData
-import play.shaded.ahc.org.asynchttpclient.uri.Uri;
+import play.shaded.ahc.org.asynchttpclient.uri.Uri
+
 import scala.concurrent.Future
 import play.shaded.ahc.org.asynchttpclient.Response
 
-class UpscanConnectorTest extends PlaySpec with MockitoSugar with SpecBase {
+class UpscanConnectorTest extends PlaySpec with MockitoSugar with SpecBase with SfusMetricsMock {
 
   val uploadUrl = "http://localhost/theUploadUrl"
   val as = ActorSystem("test-system")
@@ -47,7 +48,7 @@ class UpscanConnectorTest extends PlaySpec with MockitoSugar with SpecBase {
     "POST to Upscan" in {
       val wsClient = mock[WSClient]
       val wsRequest = mock[WSRequest]
-      val connector = new UpscanConnector(appConfig, wsClient)
+      val connector = new UpscanConnector(appConfig, wsClient, sfusMetrics)
       when(wsRequest.withFollowRedirects(any())).thenReturn(wsRequest)
       when(wsClient.url(eqTo(uploadUrl))).thenReturn(wsRequest)
       val response = new AhcWSResponse(
@@ -61,6 +62,7 @@ class UpscanConnectorTest extends PlaySpec with MockitoSugar with SpecBase {
       val res = connector.upload(uploadRequest, contactDetails)
       res.futureValue.status mustBe Status.SEE_OTHER
 
+      verify(sfusMetrics, times(1)).incrementCounter(any())
     }
   }
 }

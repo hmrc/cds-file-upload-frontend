@@ -19,7 +19,7 @@ import config.AppConfig
 import controllers.actions._
 import javax.inject.Singleton
 import play.filters.csrf.CSRFConfig
-import services.{CustomsDeclarationsService, CustomsDeclarationsServiceImpl}
+import services.CustomsDeclarationsService
 
 class Module extends AbstractModule {
 
@@ -38,7 +38,6 @@ class Module extends AbstractModule {
     bind(classOf[ContactDetailsRequiredAction]).to(classOf[ContactDetailsRequiredActionImpl]).asEagerSingleton()
     bind(classOf[MrnRequiredAction]).to(classOf[MrnRequiredActionImpl]).asEagerSingleton()
     bind(classOf[DataRetrievalAction]).to(classOf[DataRetrievalActionImpl]).asEagerSingleton()
-    bind(classOf[CustomsDeclarationsService]).to(classOf[CustomsDeclarationsServiceImpl]).asEagerSingleton()
   }
 
   @Provides @Singleton

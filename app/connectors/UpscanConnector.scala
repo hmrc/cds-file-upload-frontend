@@ -23,6 +23,8 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import config.AppConfig
 import javax.inject.{Inject, Singleton}
+import metrics.SfusMetrics
+import metrics.MetricIdentifiers.fileUploadMetric
 import models.{ContactDetails, UploadRequest}
 import play.api.Logger
 import play.api.libs.ws.{BodyWritable, DefaultWSProxyServer, InMemoryBody, WSClient}
@@ -34,7 +36,10 @@ import scala.concurrent.duration.{Duration, SECONDS}
 import scala.concurrent.{Await, ExecutionContext}
 
 @Singleton
-class UpscanConnector @Inject()(conf: AppConfig, wsClient: WSClient)(implicit ec: ExecutionContext, materializer: Materializer) {
+class UpscanConnector @Inject()(conf: AppConfig, wsClient: WSClient, metrics: SfusMetrics)(
+  implicit ec: ExecutionContext,
+  materializer: Materializer
+) {
 
   private val logger = Logger(this.getClass)
 
@@ -49,9 +54,7 @@ class UpscanConnector @Inject()(conf: AppConfig, wsClient: WSClient)(implicit ec
 
     val req = if (settings.proxyRequiredForThisEnvironment) preparedRequest.withProxyServer(proxy) else preparedRequest
 
-    val dataparts = upload.fields.map {
-      case (name, value) => DataPart(name, value)
-    }
+    val dataParts = upload.fields.map { case (name, value) => DataPart(name, value) }
 
     implicit val multipartBodyWriter: BodyWritable[Source[MultipartFormData.Part[Source[ByteString, _]], _]] = {
       val boundary = Multipart.randomBoundary()
@@ -68,9 +71,14 @@ class UpscanConnector @Inject()(conf: AppConfig, wsClient: WSClient)(implicit ec
     logger.info(s"Upload URI: ${req.uri}")
     logger.info(s"Upload Headers: ${req.headers}")
 
-    val body = dataparts ++ List(filePart)
+    val body = dataParts ++ List(filePart)
+    val timer = metrics.startTimer(fileUploadMetric)
 
-    req.post[Source[MultipartFormData.Part[Source[ByteString, _]], _]](Source(body))(multipartBodyWriter)
+    req.post[Source[MultipartFormData.Part[Source[ByteString, _]], _]](Source(body))(multipartBodyWriter).map { response =>
+      timer.stop()
+      metrics.incrementCounter(fileUploadMetric)
+      response
+    }
   }
 
   private def fileName = s"contact_details_${UUID.randomUUID().toString}.txt"
