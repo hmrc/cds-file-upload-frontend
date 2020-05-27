@@ -17,7 +17,7 @@
 package filters
 
 import akka.stream.Materializer
-import com.google.inject.Inject
+import javax.inject.Inject
 import play.api.Configuration
 import play.api.mvc.Call
 import uk.gov.hmrc.whitelist.AkamaiWhitelistFilter

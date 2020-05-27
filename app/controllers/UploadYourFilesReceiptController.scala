@@ -20,6 +20,8 @@ import com.google.inject.Singleton
 import connectors.CdsFileUploadConnector
 import controllers.actions._
 import javax.inject.Inject
+import metrics.SfusMetrics
+import metrics.MetricIdentifiers._
 import models.FileUpload
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -36,6 +38,7 @@ class UploadYourFilesReceiptController @Inject()(
   getData: DataRetrievalAction,
   requireResponse: FileUploadResponseRequiredAction,
   cdsFileUploadConnector: CdsFileUploadConnector,
+  metrics: SfusMetrics,
   uploadYourFilesReceipt: upload_your_files_receipt
 )(implicit mcc: MessagesControllerComponents, ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
@@ -49,7 +52,9 @@ class UploadYourFilesReceiptController @Inject()(
   private def addFilenames(uploads: List[FileUpload])(implicit hc: HeaderCarrier): Future[List[FileUpload]] =
     Future
       .sequence(uploads.map { u =>
+        val timer = metrics.startTimer(fetchNotificationMetric)
         cdsFileUploadConnector.getNotification(u.reference).map { notificationOpt =>
+          timer.stop()
           notificationOpt.map { notification =>
             u.copy(filename = notification.filename)
           }

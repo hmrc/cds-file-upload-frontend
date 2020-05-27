@@ -16,28 +16,33 @@
 
 package services
 
-import base.SpecBase
-import config.AppConfig
+import base.{SfusMetricsMock, SpecBase}
 import connectors.CustomsDeclarationsConnector
 import models._
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}
-import org.mockito.Mockito._
+import org.mockito.Mockito.{verify, _}
 import org.scalatest._
 import org.scalatest.mockito.MockitoSugar
 import play.api.test.Helpers._
-import play.api.{Configuration, Environment}
-import scala.concurrent.Future
-import config.AppConfig
 
-class CustomsDeclarationsServiceSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach {
+import scala.concurrent.Future
+
+class CustomsDeclarationsServiceSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach with SfusMetricsMock {
 
   lazy val mockConnector = mock[CustomsDeclarationsConnector]
-  lazy val service = new CustomsDeclarationsServiceImpl(mockConnector, appConfig)
+  lazy val service = new CustomsDeclarationsService(mockConnector, appConfig, sfusMetrics)
 
-  override def beforeEach = {
-    reset(mockConnector)
+  override protected def beforeEach: Unit = {
+    super.beforeEach()
+
     when(mockConnector.requestFileUpload(any(), any())(any())).thenReturn(Future.successful(FileUploadResponse(List())))
+  }
+
+  override protected def afterEach(): Unit = {
+    reset(mockConnector)
+
+    super.afterEach()
   }
 
   ".batchFileUpload" must {
@@ -45,12 +50,15 @@ class CustomsDeclarationsServiceSpec extends SpecBase with MockitoSugar with Bef
     "use eori number for the upload" in {
       await(service.batchFileUpload("GBEORINUMBER12345", MRN("13GB12345678901234").get, FileUploadCount(5).get))
       verify(mockConnector).requestFileUpload(eqTo("GBEORINUMBER12345"), any())(any())
+      verify(sfusMetrics, times(1)).incrementCounter(any())
+
     }
   }
 
   "use the mrn for the declaration id" in {
     await(service.batchFileUpload("GBEORINUMBER12345", MRN("13GB12345678901234").get, FileUploadCount(1).get))
     verify(mockConnector).requestFileUpload(any(), eqTo(FileUploadRequest(MRN("13GB12345678901234").get, expectedUploadFiles(2))))(any())
+    verify(sfusMetrics, times(1)).incrementCounter(any())
   }
 
   "have a max file sequence number as group size" in {
@@ -61,6 +69,7 @@ class CustomsDeclarationsServiceSpec extends SpecBase with MockitoSugar with Bef
 
     val request = captor.getValue
     request.files.length mustBe request.files.map(_.fileSequenceNo).max
+    verify(sfusMetrics, times(1)).incrementCounter(any())
   }
 
   "start file sequence number at 1" in {
@@ -71,6 +80,7 @@ class CustomsDeclarationsServiceSpec extends SpecBase with MockitoSugar with Bef
 
     val request = captor.getValue
     request.files.map(_.fileSequenceNo).min mustBe 1
+    verify(sfusMetrics, times(1)).incrementCounter(any())
   }
 
   "have init an upload request for an additional file for the contact details text" in {
@@ -81,6 +91,7 @@ class CustomsDeclarationsServiceSpec extends SpecBase with MockitoSugar with Bef
 
     verify(mockConnector).requestFileUpload(any(), captor.capture())(any())
     captor.getValue.files.size mustBe userUploadedFiles + 1
+    verify(sfusMetrics, times(1)).incrementCounter(any())
   }
 
   private def expectedUploadFiles(n: Int) = (1 to n).map(FileUploadFile(_, "", "http://localhost:6793").get)

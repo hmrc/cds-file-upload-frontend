@@ -16,7 +16,7 @@
 
 package controllers.actions
 
-import com.google.inject.Inject
+import javax.inject.Inject
 import connectors.AnswersConnector
 import models.requests.{DataRequest, EORIRequest}
 import play.api.mvc.{ActionTransformer, MessagesControllerComponents}

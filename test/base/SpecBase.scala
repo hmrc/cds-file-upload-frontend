@@ -16,6 +16,7 @@
 
 package base
 
+import com.codahale.metrics.SharedMetricRegistries
 import config.AppConfig
 import generators.Generators
 import org.scalatest.BeforeAndAfterEach
@@ -32,6 +33,8 @@ import utils.Injector
 import scala.concurrent.ExecutionContext
 
 trait SpecBase extends PlaySpec with MockitoSugar with BeforeAndAfterEach with PropertyChecks with Generators with ScalaFutures with Injector {
+
+  SharedMetricRegistries.clear()
 
   implicit lazy val messagesApi: MessagesApi = instanceOf[MessagesApi]
   implicit lazy val appConfig: AppConfig = instanceOf[AppConfig]

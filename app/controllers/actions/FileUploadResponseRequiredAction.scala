@@ -16,7 +16,7 @@
 
 package controllers.actions
 
-import com.google.inject.Inject
+import javax.inject.Inject
 import controllers.routes
 import models.requests.{DataRequest, FileUploadResponseRequest}
 import play.api.mvc.Results.Redirect
