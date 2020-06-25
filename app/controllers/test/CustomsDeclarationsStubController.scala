@@ -36,7 +36,8 @@ class CustomsDeclarationsStubController @Inject()(appConfig: AppConfig, httpClie
 
   def waiting(ref: String) = {
     val customsDeclarationsConfig = appConfig.microservice.services.customsDeclarations
-    val customsDeclarationsBaseUrl = s"${customsDeclarationsConfig.protocol.get}://${customsDeclarationsConfig.host}:${customsDeclarationsConfig.port.get}"
+    val customsDeclarationsBaseUrl =
+      s"${customsDeclarationsConfig.protocol.get}://${customsDeclarationsConfig.host}:${customsDeclarationsConfig.port.get}"
 
     Waiting(
       UploadRequest(
