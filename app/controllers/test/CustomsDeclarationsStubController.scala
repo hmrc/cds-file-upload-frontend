@@ -34,10 +34,13 @@ class CustomsDeclarationsStubController @Inject()(appConfig: AppConfig, httpClie
   implicit ec: ExecutionContext
 ) extends FrontendController(mcc) {
 
-  def waiting(ref: String) =
+  def waiting(ref: String) = {
+    val customsDeclarationsConfig = appConfig.microservice.services.customsDeclarations
+    val customsDeclarationsBaseUrl = customsDeclarationsConfig.protocol.get + "://" + customsDeclarationsConfig.host + ":" + customsDeclarationsConfig.port.get
+
     Waiting(
       UploadRequest(
-        href = "http://localhost:6793/cds-file-upload-service/test-only/s3-bucket",
+        href = s"$customsDeclarationsBaseUrl/cds-file-upload-service/test-only/s3-bucket",
         fields = Map(
           Algorithm.toString -> "AWS4-HMAC-SHA256",
           Signature.toString -> "xxxx",
@@ -45,11 +48,12 @@ class CustomsDeclarationsStubController @Inject()(appConfig: AppConfig, httpClie
           ACL.toString -> "private",
           Credentials.toString -> "ASIAxxxxxxxxx/20180202/eu-west-2/s3/aws4_request",
           Policy.toString -> "xxxxxxxx==",
-          SuccessRedirect.toString -> s"http://localhost:6793/cds-file-upload-service/upload/upscan-success/${ref}",
-          ErrorRedirect.toString -> s"http://localhost:6793/cds-file-upload-service/upload/upscan-error/${ref}"
+          SuccessRedirect.toString -> s"$customsDeclarationsBaseUrl/cds-file-upload-service/upload/upscan-success/${ref}",
+          ErrorRedirect.toString -> s"$customsDeclarationsBaseUrl/cds-file-upload-service/upload/upscan-error/${ref}"
         )
       )
     )
+  }
 
   // for now, we will just return some random
   def handleBatchFileUploadRequest: Action[NodeSeq] = Action(parse.xml) { implicit req =>
