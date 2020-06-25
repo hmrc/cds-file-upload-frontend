@@ -36,7 +36,7 @@ class CustomsDeclarationsStubController @Inject()(appConfig: AppConfig, httpClie
 
   def waiting(ref: String) = {
     val customsDeclarationsConfig = appConfig.microservice.services.customsDeclarations
-    val customsDeclarationsBaseUrl = customsDeclarationsConfig.protocol.get + "://" + customsDeclarationsConfig.host + ":" + customsDeclarationsConfig.port.get
+    val customsDeclarationsBaseUrl = s"${customsDeclarationsConfig.protocol.get}://${customsDeclarationsConfig.host}:${customsDeclarationsConfig.port.get}"
 
     Waiting(
       UploadRequest(
@@ -89,7 +89,7 @@ class CustomsDeclarationsStubController @Inject()(appConfig: AppConfig, httpClie
 
     val cdsFileUploadConfig = appConfig.microservice.services.cdsFileUpload
 
-    val cdsFileUploadBaseUrl = cdsFileUploadConfig.protocol.get + "://" + cdsFileUploadConfig.host + ":" + cdsFileUploadConfig.port.get
+    val cdsFileUploadBaseUrl = s"${cdsFileUploadConfig.protocol.get}://${cdsFileUploadConfig.host}:${cdsFileUploadConfig.port.get}"
 
     val url = cdsFileUploadBaseUrl + "/internal/notification"
 
