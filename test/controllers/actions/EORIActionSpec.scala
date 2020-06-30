@@ -34,7 +34,7 @@ class EORIActionSpec extends ControllerSpecBase with SignedInUserGen {
   lazy val conf = instanceOf[Configuration]
   lazy val env = instanceOf[Environment]
 
-  def authAction = new AuthActionImpl(mockAuthConnector, conf, env, mcc)
+  def authAction = new AuthActionImpl(mockAuthConnector, conf, env, new EoriWhitelist(Seq.empty), mcc)
   def eoriAction = new EORIRequiredActionImpl(mcc)
 
   def eoriController = new TestController(authAction, eoriAction)

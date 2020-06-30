@@ -16,7 +16,8 @@
 
 package controllers.actions
 
-import javax.inject.Inject
+import com.google.inject.ProvidedBy
+import javax.inject.{Inject, Provider}
 import controllers.routes
 import models.requests.{AuthenticatedRequest, SignedInUser}
 import play.api.mvc.Results.Redirect
@@ -24,15 +25,20 @@ import play.api.mvc._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, NoActiveSession}
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, Enrolments, NoActiveSession}
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuthActionImpl @Inject()(val authConnector: AuthConnector, val config: Configuration, val env: Environment, mcc: MessagesControllerComponents)
-    extends AuthAction with AuthorisedFunctions with AuthRedirects {
+class AuthActionImpl @Inject()(
+  val authConnector: AuthConnector,
+  val config: Configuration,
+  val env: Environment,
+  eoriWhitelist: EoriWhitelist,
+  mcc: MessagesControllerComponents
+) extends AuthAction with AuthorisedFunctions with AuthRedirects {
 
   implicit override val executionContext: ExecutionContext = mcc.executionContext
   override val parser: BodyParser[AnyContent] = mcc.parsers.defaultBodyParser
@@ -54,7 +60,7 @@ class AuthActionImpl @Inject()(val authConnector: AuthConnector, val config: Con
           allEnrolments
       ) {
 
-        case Some(credentials) ~ Some(name) ~ email ~ affinityGroup ~ Some(identifier) ~ enrolments =>
+        case Some(credentials) ~ Some(name) ~ email ~ affinityGroup ~ Some(identifier) ~ enrolments if isEoriWhitelisted(enrolments) =>
           val signedInUser = SignedInUser(credentials, name, email, affinityGroup, identifier, enrolments)
           Future.successful(Right(AuthenticatedRequest(request, signedInUser)))
 
@@ -67,6 +73,22 @@ class AuthActionImpl @Inject()(val authConnector: AuthConnector, val config: Con
       case _                  => Left(Redirect(routes.UnauthorisedController.onPageLoad()))
     }
   }
+
+  private def isEoriWhitelisted(enrolments: Enrolments): Boolean = {
+    val eoriOpt = enrolments.getEnrolment("HMRC-CUS-ORG").flatMap(_.getIdentifier("EORINumber"))
+
+    eoriOpt.exists(eori => eoriWhitelist.allows(eori.value))
+  }
 }
 
 trait AuthAction extends ActionBuilder[AuthenticatedRequest, AnyContent] with ActionRefiner[Request, AuthenticatedRequest]
+
+@ProvidedBy(classOf[EoriWhitelistProvider])
+class EoriWhitelist(val values: Seq[String]) {
+  def allows(eori: String): Boolean = values.isEmpty || values.contains(eori)
+}
+
+class EoriWhitelistProvider @Inject()(configuration: Configuration) extends Provider[EoriWhitelist] {
+  override def get(): EoriWhitelist =
+    new EoriWhitelist(configuration.get[Seq[String]]("whitelist.eori"))
+}
