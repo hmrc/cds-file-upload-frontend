@@ -35,9 +35,9 @@ class AuthActionSpec extends ControllerSpecBase {
   lazy val conf = instanceOf[Configuration]
   lazy val env = instanceOf[Environment]
 
-  def authAction = new AuthActionImpl(mockAuthConnector, conf, env, mcc)
+  def authAction(allowedEoris: Seq[String]) = new AuthActionImpl(mockAuthConnector, conf, env, new EoriWhitelist(allowedEoris), mcc)
 
-  def authController = new TestController(authAction)
+  def authController(allowedEoris: Seq[String] = Seq.empty) = new TestController(authAction(allowedEoris))
 
   "AuthAction" should {
 
@@ -54,7 +54,7 @@ class AuthActionSpec extends ControllerSpecBase {
 
       withSignedInUser(user) {
 
-        val response = authController.action(FakeRequest())
+        val response = authController().action(FakeRequest())
 
         status(response) mustBe OK
         contentAsString(response) mustBe user.toString
@@ -66,7 +66,7 @@ class AuthActionSpec extends ControllerSpecBase {
       withAuthError(new NoActiveSession("") {}) {
 
         val request = FakeRequest("GET", "")
-        val response = authController.action(request)
+        val response = authController().action(request)
 
         status(response) mustBe SEE_OTHER
         redirectLocation(response).get must include("cds-file-upload-service")
@@ -77,10 +77,74 @@ class AuthActionSpec extends ControllerSpecBase {
 
       withAuthError(InsufficientEnrolments("")) {
 
-        val response = authController.action(FakeRequest())
+        val response = authController().action(FakeRequest())
 
         status(response) mustBe SEE_OTHER
         redirectLocation(response) mustBe Some(controllers.routes.UnauthorisedController.onPageLoad.url)
+      }
+    }
+  }
+
+  "Auth action" should {
+
+    "allow access" when {
+
+      "whitelisting doesn't have any eori and user has eori" in {
+
+        val user = SignedInUser(
+          Credentials("providerId", "providerType"),
+          Name(Some("John"), Some("Doe")),
+          Some("john@doe.com"),
+          Some(Individual),
+          "internalID",
+          Enrolments(Set(Enrolment("HMRC-CUS-ORG", Seq(EnrolmentIdentifier("EORINumber", "GB1234567890")), "")))
+        )
+
+        withSignedInUser(user) {
+          val response = authController().action(FakeRequest())
+
+          status(response) mustBe OK
+        }
+      }
+
+      "whitelisting contains eori and user has allowed eori" in {
+
+        val user = SignedInUser(
+          Credentials("providerId", "providerType"),
+          Name(Some("John"), Some("Doe")),
+          Some("john@doe.com"),
+          Some(Individual),
+          "internalID",
+          Enrolments(Set(Enrolment("HMRC-CUS-ORG", Seq(EnrolmentIdentifier("EORINumber", "GB1234567890")), "")))
+        )
+
+        withSignedInUser(user) {
+          val response = authController(Seq("GB1234567890")).action(FakeRequest())
+
+          status(response) mustBe OK
+        }
+      }
+    }
+
+    "doesn't allow access" when {
+
+      "user has not whitelisted eori" in {
+
+        val user = SignedInUser(
+          Credentials("providerId", "providerType"),
+          Name(Some("John"), Some("Doe")),
+          Some("john@doe.com"),
+          Some(Individual),
+          "internalID",
+          Enrolments(Set(Enrolment("HMRC-CUS-ORG", Seq(EnrolmentIdentifier("EORINumber", "GB1234567890")), "")))
+        )
+
+        withSignedInUser(user) {
+          val response = authController(Seq("GB1111231")).action(FakeRequest())
+
+          status(response) mustBe SEE_OTHER
+          redirectLocation(response) mustBe Some(controllers.routes.UnauthorisedController.onPageLoad.url)
+        }
       }
     }
   }
