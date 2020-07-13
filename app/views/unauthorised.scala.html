@@ -14,12 +14,58 @@
  * limitations under the License.
  *@
 
-@this(mainTemplate: main_template)
+@import config.ExternalServicesConfig
+
+@this(mainTemplate: main_template, config: ExternalServicesConfig)
 
 @()(implicit request: Request[_], messages: Messages)
 
 @mainTemplate(title = messages("unauthorised.title")) {
- <h1 class="heading-xlarge">@messages("unauthorised.heading")</h1>
- <p>@messages("unauthorised.guidance")</p>
- @components.helpline_information()
+    <h1 class="heading-xlarge">@messages("unauthorised.heading")</h1>
+
+    <h2 class="govuk-heading-m">@messages("unauthorised.how.heading")</h2>
+
+    <p class="govuk-body">
+    @Html(
+        messages(
+            "unauthorised.how.paragraph1",
+            components.link(
+                config.eoriService,
+                messages("unauthorised.how.paragraph1.link"),
+                "get_eori_link"
+            )
+        )
+    )
+    </p>
+    <p class="govuk-body">
+    @Html(
+        messages(
+            "unauthorised.how.paragraph2",
+            components.link(
+                config.cdsRegister,
+                messages("unauthorised.how.paragraph2.link"),
+                "access_cds_link"
+            )
+        )
+    )
+    </p>
+    <p class="govuk-body">
+    @Html(messages("unauthorised.how.paragraph3"))
+    </p>
+
+
+    <h2 class="govuk-heading-m">@messages("unauthorised.applied.heading")</h2>
+
+    <p class="govuk-body">
+    @Html(
+        messages(
+            "unauthorised.applied.paragraph1",
+            components.link(
+                config.cdsCheckStatus,
+                messages("unauthorised.applied.paragraph1.link"),
+                "check_cds_status_link"
+            )
+        )
+    )
+    </p>
 }
