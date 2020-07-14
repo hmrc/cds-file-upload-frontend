@@ -28,10 +28,28 @@ class UnauthorisedSpec extends DomAssertions {
 
     "include header" in {
       view must include(messages("unauthorised.heading"))
+      assertH1EqualsMessage(asDocument(view), "unauthorised.heading")
     }
 
     "include title" in {
       view must include(messages("unauthorised.title"))
     }
+
+    "display get EORI link" in {
+      assertContainsLink(asDocument(view), messages("unauthorised.how.paragraph1.link"), "https://www.gov.uk/eori")
+    }
+
+    "display access CDS link" in {
+      assertContainsLink(asDocument(view), messages("unauthorised.how.paragraph2.link"), "https://www.tax.service.gov.uk/customs/register-for-cds")
+    }
+
+    "display check CDS status link" in {
+      assertContainsLink(
+        asDocument(view),
+        messages("unauthorised.applied.paragraph1.link"),
+        "https://www.tax.service.gov.uk/customs/register-for-cds/match"
+      )
+    }
+
   }
 }

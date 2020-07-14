@@ -24,7 +24,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.prop.PropertyChecks
 import org.scalatestplus.play.PlaySpec
-import play.api.i18n.{Messages, MessagesApi}
+import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
@@ -42,7 +42,8 @@ trait SpecBase extends PlaySpec with MockitoSugar with BeforeAndAfterEach with P
 
   lazy val fakeRequest = FakeRequest("", "")
 
-  implicit lazy val messages: Messages = messagesApi.preferred(fakeRequest)
+  implicit lazy val messages: Messages =
+    new AllMessageKeysAreMandatoryMessages(messagesApi.preferred(fakeRequest))
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -63,4 +64,24 @@ trait SpecBase extends PlaySpec with MockitoSugar with BeforeAndAfterEach with P
       case (n, None)             => List((n, ""))
       case (n, a)                => List((n, a.toString))
     }
+}
+
+private class AllMessageKeysAreMandatoryMessages(msg: Messages) extends Messages {
+  override def messages: Messages = msg.messages
+
+  override def lang: Lang = msg.lang
+
+  override def apply(key: String, args: Any*): String =
+    if (msg.isDefinedAt(key))
+      msg.apply(key, args: _*)
+    else throw new AssertionError(s"Message Key is not configured for {$key}")
+
+  override def apply(keys: Seq[String], args: Any*): String =
+    if (keys.exists(key => !msg.isDefinedAt(key)))
+      msg.apply(keys, args)
+    else throw new AssertionError(s"Message Key is not configured for {$keys}")
+
+  override def translate(key: String, args: Seq[Any]): Option[String] = msg.translate(key, args)
+
+  override def isDefinedAt(key: String): Boolean = msg.isDefinedAt(key)
 }
