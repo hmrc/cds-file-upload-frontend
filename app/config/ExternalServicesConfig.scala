@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +12,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@()(implicit messages: Messages)
+package config
 
-<div class="section">
-	<p>@messages("helpline.paragraph1")</p>
-</div>
+import com.google.inject.{Inject, Singleton}
+import play.api.Configuration
+
+@Singleton
+class ExternalServicesConfig @Inject()(val configuration: Configuration) {
+
+  private def loadUrl(key: String): String =
+    configuration.getOptional[String](s"urls.$key").getOrElse(throw new Exception(s"Missing configuration key: urls.$key"))
+
+  lazy val eoriService = loadUrl("eoriService")
+  lazy val cdsRegister = loadUrl("cdsRegister")
+  lazy val cdsCheckStatus = loadUrl("cdsCheckStatus")
+}

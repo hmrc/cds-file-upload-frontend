@@ -14,14 +14,8 @@
  * limitations under the License.
  *@
 
-@this(mainTemplate: main_template)
+@(href: String, message: String, id: String, target: String = "_blank")
 
-@()(implicit request: Request[_], messages: Messages)
-
-@mainTemplate(title = messages("uploadError.title")) {
-
-    <h1 class="heading-xlarge">@messages("uploadError.heading")</h1>
-
-    <p>@messages("uploadError.guidance")</p>
-
-}
+<a class="govuk-link govuk-link--no-visited-state" href="@{href}" target="@{target}" id="@{id}">
+ @message
+</a>
