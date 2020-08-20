@@ -36,19 +36,19 @@ class AllowListFilterSpec extends FreeSpec with MustMatchers with PropertyChecks
     value <- arbitrary[String]
   } yield (key, value))
 
-  "the list of whitelisted IP addresses" - {
+  "the list of allowListed IP addresses" - {
 
     "must throw an exception" - {
 
       "when the underlying config value is not there" in {
 
         forAll(otherConfigGen, arbitrary[String], arbitrary[String]) { (otherConfig, destination, excluded) =>
-          whenever(!otherConfig.contains("filters.whitelist.ips")) {
+          whenever(!otherConfig.contains("filters.allowList.ips")) {
 
             val config = Configuration(
               (otherConfig +
-                ("filters.whitelist.destination" -> destination) +
-                ("filters.whitelist.excluded" -> excluded)).toSeq: _*
+                ("filters.allowList.destination" -> destination) +
+                ("filters.allowList.excluded" -> excluded)).toSeq: _*
             )
 
             assertThrows[ConfigException] {
@@ -66,9 +66,9 @@ class AllowListFilterSpec extends FreeSpec with MustMatchers with PropertyChecks
         forAll(otherConfigGen, arbitrary[String], arbitrary[String]) { (otherConfig, destination, excluded) =>
           val config = Configuration(
             (otherConfig +
-              ("filters.whitelist.destination" -> destination) +
-              ("filters.whitelist.excluded" -> excluded) +
-              ("filters.whitelist.ips" -> "")).toSeq: _*
+              ("filters.allowList.destination" -> destination) +
+              ("filters.allowList.excluded" -> excluded) +
+              ("filters.allowList.ips" -> "")).toSeq: _*
           )
 
           val allowListFilter = new AllowListFilter(config, mockMaterializer)
