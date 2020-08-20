@@ -33,11 +33,11 @@ import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthActionImpl @Inject()(
-                                val authConnector: AuthConnector,
-                                val config: Configuration,
-                                val env: Environment,
-                                eoriAllowList: EoriAllowList,
-                                mcc: MessagesControllerComponents
+  val authConnector: AuthConnector,
+  val config: Configuration,
+  val env: Environment,
+  eoriAllowList: EoriAllowList,
+  mcc: MessagesControllerComponents
 ) extends AuthAction with AuthorisedFunctions with AuthRedirects {
 
   implicit override val executionContext: ExecutionContext = mcc.executionContext
