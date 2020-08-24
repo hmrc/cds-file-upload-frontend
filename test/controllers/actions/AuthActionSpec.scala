@@ -35,7 +35,7 @@ class AuthActionSpec extends ControllerSpecBase {
   lazy val conf = instanceOf[Configuration]
   lazy val env = instanceOf[Environment]
 
-  def authAction(allowedEoris: Seq[String]) = new AuthActionImpl(mockAuthConnector, conf, env, new EoriWhitelist(allowedEoris), mcc)
+  def authAction(allowedEoris: Seq[String]) = new AuthActionImpl(mockAuthConnector, conf, env, new EoriAllowList(allowedEoris), mcc)
 
   def authController(allowedEoris: Seq[String] = Seq.empty) = new TestController(authAction(allowedEoris))
 
@@ -89,7 +89,7 @@ class AuthActionSpec extends ControllerSpecBase {
 
     "allow access" when {
 
-      "whitelisting doesn't have any eori and user has eori" in {
+      "allowListing doesn't have any eori and user has eori" in {
 
         val user = SignedInUser(
           Credentials("providerId", "providerType"),
@@ -107,7 +107,7 @@ class AuthActionSpec extends ControllerSpecBase {
         }
       }
 
-      "whitelisting contains eori and user has allowed eori" in {
+      "allowListing contains eori and user has allowed eori" in {
 
         val user = SignedInUser(
           Credentials("providerId", "providerType"),
@@ -128,7 +128,7 @@ class AuthActionSpec extends ControllerSpecBase {
 
     "doesn't allow access" when {
 
-      "user has not whitelisted eori" in {
+      "user has not allowListed eori" in {
 
         val user = SignedInUser(
           Credentials("providerId", "providerType"),

@@ -36,7 +36,7 @@ class AuthActionImpl @Inject()(
   val authConnector: AuthConnector,
   val config: Configuration,
   val env: Environment,
-  eoriWhitelist: EoriWhitelist,
+  eoriAllowList: EoriAllowList,
   mcc: MessagesControllerComponents
 ) extends AuthAction with AuthorisedFunctions with AuthRedirects {
 
@@ -60,7 +60,7 @@ class AuthActionImpl @Inject()(
           allEnrolments
       ) {
 
-        case Some(credentials) ~ Some(name) ~ email ~ affinityGroup ~ Some(identifier) ~ enrolments if isEoriWhitelisted(enrolments) =>
+        case Some(credentials) ~ Some(name) ~ email ~ affinityGroup ~ Some(identifier) ~ enrolments if isEoriAllowListed(enrolments) =>
           val signedInUser = SignedInUser(credentials, name, email, affinityGroup, identifier, enrolments)
           Future.successful(Right(AuthenticatedRequest(request, signedInUser)))
 
@@ -74,21 +74,21 @@ class AuthActionImpl @Inject()(
     }
   }
 
-  private def isEoriWhitelisted(enrolments: Enrolments): Boolean = {
+  private def isEoriAllowListed(enrolments: Enrolments): Boolean = {
     val eoriOpt = enrolments.getEnrolment("HMRC-CUS-ORG").flatMap(_.getIdentifier("EORINumber"))
 
-    eoriOpt.exists(eori => eoriWhitelist.allows(eori.value))
+    eoriOpt.exists(eori => eoriAllowList.allows(eori.value))
   }
 }
 
 trait AuthAction extends ActionBuilder[AuthenticatedRequest, AnyContent] with ActionRefiner[Request, AuthenticatedRequest]
 
-@ProvidedBy(classOf[EoriWhitelistProvider])
-class EoriWhitelist(val values: Seq[String]) {
+@ProvidedBy(classOf[EoriAllowListProvider])
+class EoriAllowList(val values: Seq[String]) {
   def allows(eori: String): Boolean = values.isEmpty || values.contains(eori)
 }
 
-class EoriWhitelistProvider @Inject()(configuration: Configuration) extends Provider[EoriWhitelist] {
-  override def get(): EoriWhitelist =
-    new EoriWhitelist(configuration.get[Seq[String]]("whitelist.eori"))
+class EoriAllowListProvider @Inject()(configuration: Configuration) extends Provider[EoriAllowList] {
+  override def get(): EoriAllowList =
+    new EoriAllowList(configuration.get[Seq[String]]("allowList.eori"))
 }
