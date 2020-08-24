@@ -89,7 +89,7 @@ class AuthActionSpec extends ControllerSpecBase {
 
     "allow access" when {
 
-      "allow listing doesn't have any eori and user has eori" in {
+      "allowListing doesn't have any eori and user has eori" in {
 
         val user = SignedInUser(
           Credentials("providerId", "providerType"),
@@ -107,7 +107,7 @@ class AuthActionSpec extends ControllerSpecBase {
         }
       }
 
-      "allow listing contains eori and user has allowed eori" in {
+      "allowListing contains eori and user has allowed eori" in {
 
         val user = SignedInUser(
           Credentials("providerId", "providerType"),
@@ -128,7 +128,7 @@ class AuthActionSpec extends ControllerSpecBase {
 
     "doesn't allow access" when {
 
-      "user has not allow listed eori" in {
+      "user has not allowListed eori" in {
 
         val user = SignedInUser(
           Credentials("providerId", "providerType"),
