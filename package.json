@@ -6,6 +6,6 @@
   },
   "dependencies": {
     "pa11y-ci": "2.1.1",
-    "puppeteer": "1.6.2"
+    "puppeteer": "5.2.1"
   }
 }
