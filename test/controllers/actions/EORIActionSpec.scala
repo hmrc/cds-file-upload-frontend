@@ -24,9 +24,8 @@ import play.api.test.Helpers._
 import play.api.test._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.play.bootstrap.controller.{BackendController, BaseController}
+import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class EORIActionSpec extends ControllerSpecBase with SignedInUserGen {

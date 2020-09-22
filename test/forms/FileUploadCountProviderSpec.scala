@@ -17,7 +17,6 @@
 package forms
 
 import base.SpecBase
-import models.FileUploadCount
 import org.scalacheck.Gen
 import org.scalatest.prop.PropertyChecks
 import play.api.data.Form

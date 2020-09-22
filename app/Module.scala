@@ -18,13 +18,12 @@ import com.google.inject.{AbstractModule, Provides}
 import config.AppConfig
 import controllers.actions._
 import javax.inject.Singleton
+import pureconfig.generic.auto._
 import play.filters.csrf.CSRFConfig
-import services.CustomsDeclarationsService
 
 class Module extends AbstractModule {
 
   import pureconfig.ConfigSource
-  import pureconfig.generic.auto._
 
   val cfg = ConfigSource.default.loadOrThrow[AppConfig]
 

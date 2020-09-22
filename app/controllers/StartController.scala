@@ -36,7 +36,7 @@ class StartController @Inject()(
     Ok(start())
   }
 
-  def onStart: Action[AnyContent] = (authenticate andThen requireEori andThen clearAnswers) { implicit req =>
+  def onStart: Action[AnyContent] = (authenticate andThen requireEori andThen clearAnswers) { _ =>
     Redirect(controllers.routes.ContactDetailsController.onPageLoad())
   }
 

@@ -18,8 +18,6 @@ package forms
 
 import base.SpecBase
 import models.MRN
-import org.scalacheck.Gen
-import org.scalatest.prop.PropertyChecks
 import play.api.data.Form
 import wolfendale.scalacheck.regexp.RegexpGen
 

@@ -25,10 +25,8 @@ import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
-import scala.concurrent.ExecutionContext
-
 @Singleton
-class AnswersRepository @Inject()(mongo: ReactiveMongoComponent, appConfig: AppConfig)(implicit ec: ExecutionContext)
+class AnswersRepository @Inject()(mongo: ReactiveMongoComponent, appConfig: AppConfig)
     extends ReactiveRepository[UserAnswers, BSONObjectID](
       collectionName = "answers",
       mongo = mongo.mongoConnector.db,

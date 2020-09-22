@@ -17,8 +17,6 @@
 package models
 
 import base.SpecBase
-import generators.Generators
-import org.scalatest.prop.PropertyChecks
 
 class FileUploadRequestSpec extends SpecBase with XmlBehaviours {
 

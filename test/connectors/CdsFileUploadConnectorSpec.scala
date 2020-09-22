@@ -17,7 +17,7 @@
 package connectors
 
 import base.UnitSpec
-import config.{AppConfig, CDSFileUpload}
+import config.AppConfig
 import models.Notification
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, when}
