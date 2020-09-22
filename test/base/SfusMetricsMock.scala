@@ -21,7 +21,7 @@ import metrics.SfusMetrics
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{doNothing, reset, when}
 import org.scalatest.{BeforeAndAfterEach, WordSpec}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 
 trait SfusMetricsMock extends WordSpec with MockitoSugar with BeforeAndAfterEach {
 

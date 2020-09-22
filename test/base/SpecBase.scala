@@ -21,8 +21,8 @@ import config.AppConfig
 import generators.Generators
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.prop.PropertyChecks
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import org.scalatestplus.play.PlaySpec
 import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.mvc.MessagesControllerComponents
@@ -32,7 +32,8 @@ import utils.Injector
 
 import scala.concurrent.ExecutionContext
 
-trait SpecBase extends PlaySpec with MockitoSugar with BeforeAndAfterEach with PropertyChecks with Generators with ScalaFutures with Injector {
+trait SpecBase
+    extends PlaySpec with MockitoSugar with BeforeAndAfterEach with ScalaCheckPropertyChecks with Generators with ScalaFutures with Injector {
 
   SharedMetricRegistries.clear()
 

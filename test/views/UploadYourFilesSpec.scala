@@ -18,12 +18,12 @@ package views
 
 import generators.Generators
 import models._
-import org.scalatest.prop.PropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.twirl.api.Html
 import views.behaviours.ViewBehaviours
 import views.html.upload_your_files
 
-class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with PropertyChecks with Generators {
+class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCheckPropertyChecks with Generators {
 
   val page = instanceOf[upload_your_files]
 

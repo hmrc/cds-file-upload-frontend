@@ -18,10 +18,10 @@ package forms
 
 import base.SpecBase
 import org.scalacheck.Gen
-import org.scalatest.prop.PropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.data.Form
 
-class FileUploadCountProviderSpec extends SpecBase with PropertyChecks {
+class FileUploadCountProviderSpec extends SpecBase with ScalaCheckPropertyChecks {
 
   private val validFileUploadCountGen = Gen.chooseNum(1, 10)
   private val form = new FileUploadCountProvider()()

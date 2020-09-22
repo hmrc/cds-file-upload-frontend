@@ -36,29 +36,29 @@ lazy val microservice = (project in file("."))
 val httpComponentsVersion = "4.5.11"
 
 val compileDependencies = Seq(
-  "uk.gov.hmrc"                   %% "govuk-template"           % "5.54.0-play-26",
-  "uk.gov.hmrc"                   %% "play-ui"                  % "8.9.0-play-26",
-  "uk.gov.hmrc"                   %% "bootstrap-play-26"        % "1.7.0",
-  "uk.gov.hmrc"                   %% "auth-client"              % "3.0.0-play-26",
-  "com.github.pureconfig"         %% "pureconfig"               % "0.12.3",
-  "org.apache.httpcomponents"     %  "httpclient"               % httpComponentsVersion,
-  "org.apache.httpcomponents"     %  "httpmime"                 % httpComponentsVersion,
-  "com.typesafe.play"             %% "play-json"                % "2.6.0",
-  "uk.gov.hmrc"                   %% "play-whitelist-filter"    % "3.3.0-play-26",
-  "uk.gov.hmrc"                   %% "crypto"                   % "5.6.0",
-  "uk.gov.hmrc"                   %% "simple-reactivemongo"     % "7.26.0-play-26"
+  "uk.gov.hmrc"                   %% "govuk-template"               % "5.54.0-play-26",
+  "uk.gov.hmrc"                   %% "play-ui"                      % "8.11.0-play-26",
+  "uk.gov.hmrc"                   %% "bootstrap-frontend-play-26"   % "2.24.0",
+  "uk.gov.hmrc"                   %% "auth-client"                  % "3.0.0-play-26",
+  "com.github.pureconfig"         %% "pureconfig"                   % "0.12.3",
+  "org.apache.httpcomponents"     %  "httpclient"                   % httpComponentsVersion,
+  "org.apache.httpcomponents"     %  "httpmime"                     % httpComponentsVersion,
+  "com.typesafe.play"             %% "play-json"                    % "2.6.0",
+  "uk.gov.hmrc"                   %% "play-whitelist-filter"        % "3.3.0-play-26",
+  "uk.gov.hmrc"                   %% "crypto"                       % "5.6.0",
+  "uk.gov.hmrc"                   %% "simple-reactivemongo"         % "7.30.0-play-26"
 )
 
 val testDependencies = Seq(
-  "org.scalatest"             %% "scalatest"                % "3.0.5"     % "test",
-  "org.jsoup"                 % "jsoup"                     % "1.11.3"    % "test",
-  "com.typesafe.play"         %% "play-test"                % current     % "test",
-  "org.pegdown"               % "pegdown"                   % "1.6.0"     % "test",
-  "org.scalatestplus.play"    %% "scalatestplus-play"       % "3.1.2"     % "test",
-  "org.mockito"               % "mockito-core"              % "2.27.0"    % "test",
-  "org.scalacheck"            %% "scalacheck"               % "1.14.0"    % "test",
-  "wolfendale"                %% "scalacheck-gen-regexp"    % "0.1.1"     % "test",
-  "com.github.tomakehurst"    % "wiremock-standalone"       % "2.22.0"    % "test"
+  "org.scalatest"             %%  "scalatest"                % "3.0.8"     % "test",
+  "org.jsoup"                 %   "jsoup"                    % "1.13.1"    % "test",
+  "com.typesafe.play"         %%  "play-test"                % current     % "test",
+  "org.pegdown"               %   "pegdown"                  % "1.6.0"     % "test",
+  "org.scalatestplus.play"    %%  "scalatestplus-play"       % "3.1.3"     % "test",
+  "org.mockito"               %   "mockito-core"             % "3.5.7"     % "test",
+  "org.scalacheck"            %%  "scalacheck"               % "1.14.0"    % "test",
+  "wolfendale"                %%  "scalacheck-gen-regexp"    % "0.1.1"     % "test",
+  "com.github.tomakehurst"    %   "wiremock-standalone"      % "2.22.0"    % "test"
 )
 
 libraryDependencies ++= compileDependencies ++ testDependencies

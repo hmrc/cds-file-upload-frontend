@@ -18,10 +18,10 @@ package connectors
 
 import javax.inject.Inject
 import models.UserAnswers
+import org.joda.time.{DateTime, DateTimeZone}
 import play.api.Logger
 import play.api.libs.json.{JsObject, Json}
 import repositories.AnswersRepository
-import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,7 +40,7 @@ class AnswersConnector @Inject()(val repository: AnswersRepository)(implicit ec:
     }
 
   def upsert(answers: UserAnswers): Future[UserAnswers] = {
-    val updated = answers.copy(updated = DateTimeUtils.now)
+    val updated = answers.copy(updated = DateTime.now.withZone(DateTimeZone.UTC))
     repository
       .findAndUpdate(Json.obj("eori" -> updated.eori), Json.toJson(updated).as[JsObject])
       .map(_.value.map(_.as[UserAnswers]))

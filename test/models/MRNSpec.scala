@@ -18,10 +18,10 @@ package models
 
 import base.SpecBase
 import org.scalacheck.Gen
-import org.scalatest.prop.PropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import wolfendale.scalacheck.regexp.RegexpGen
 
-class MRNSpec extends SpecBase with PropertyChecks {
+class MRNSpec extends SpecBase with ScalaCheckPropertyChecks {
 
   val validMRNGen: Gen[String] = RegexpGen.from(MRN.validRegex)
 

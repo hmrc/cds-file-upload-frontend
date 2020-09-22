@@ -24,7 +24,7 @@ import play.api.test.Helpers._
 import play.api.test._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
@@ -76,7 +76,7 @@ class EORIActionSpec extends ControllerSpecBase with SignedInUserGen {
     }
   }
 
-  class TestController(auth: AuthAction, eori: EORIRequiredAction) extends BackendController(mcc) {
+  class TestController(auth: AuthAction, eori: EORIRequiredAction) extends FrontendController(mcc) {
 
     def action: Action[AnyContent] = (auth andThen eori).async { request =>
       Future.successful(Ok(request.eori))
