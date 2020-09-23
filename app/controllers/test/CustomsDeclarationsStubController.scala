@@ -22,9 +22,8 @@ import models.Field._
 import models._
 import play.api.http.{ContentTypes, HeaderNames}
 import play.api.mvc.{Action, Codec, MessagesControllerComponents}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.ExecutionContext
 import scala.xml._

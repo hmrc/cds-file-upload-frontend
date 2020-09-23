@@ -16,10 +16,9 @@
 
 package models
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, DateTimeZone}
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
-import uk.gov.hmrc.time.DateTimeUtils
 
 case class UserAnswers(
   eori: String,
@@ -27,7 +26,7 @@ case class UserAnswers(
   mrn: Option[MRN] = None,
   fileUploadCount: Option[FileUploadCount] = None,
   fileUploadResponse: Option[FileUploadResponse] = None,
-  updated: DateTime = DateTimeUtils.now
+  updated: DateTime = DateTime.now.withZone(DateTimeZone.UTC)
 )
 
 object UserAnswers {

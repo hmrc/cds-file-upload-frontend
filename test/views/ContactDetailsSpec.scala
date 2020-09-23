@@ -19,7 +19,7 @@ package views
 import forms.mappings.ContactDetailsMapping._
 import generators.Generators
 import models.ContactDetails
-import org.scalatest.prop.PropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.data.Form
 import play.twirl.api.Html
 import utils.FakeRequestCSRFSupport._
@@ -27,7 +27,7 @@ import views.behaviours.ViewBehaviours
 import views.html.components.input_text
 import views.html.contact_details
 
-class ContactDetailsSpec extends DomAssertions with ViewBehaviours with PropertyChecks with Generators {
+class ContactDetailsSpec extends DomAssertions with ViewBehaviours with ScalaCheckPropertyChecks with Generators {
 
   val form: Form[ContactDetails] = Form(contactDetailsMapping)
 

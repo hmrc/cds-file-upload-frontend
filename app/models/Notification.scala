@@ -16,12 +16,11 @@
 
 package models
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, DateTimeZone}
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
-import uk.gov.hmrc.time.DateTimeUtils
 
-case class Notification(fileReference: String, outcome: String, filename: String, createdAt: DateTime = DateTimeUtils.now)
+case class Notification(fileReference: String, outcome: String, filename: String, createdAt: DateTime = DateTime.now.withZone(DateTimeZone.UTC))
 
 object Notification {
   implicit val dateFormat: Format[DateTime] = ReactiveMongoFormats.dateTimeFormats

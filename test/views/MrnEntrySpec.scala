@@ -18,14 +18,14 @@ package views
 
 import forms.MRNFormProvider
 import models.MRN
-import org.scalatest.prop.PropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.data.Form
 import play.twirl.api.{Html, HtmlFormat}
 import utils.FakeRequestCSRFSupport._
 import views.behaviours.StringViewBehaviours
 import views.html.mrn_entry
 
-class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with PropertyChecks {
+class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with ScalaCheckPropertyChecks {
 
   val form = new MRNFormProvider()()
 

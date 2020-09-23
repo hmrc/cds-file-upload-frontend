@@ -22,10 +22,10 @@ import generators.Generators
 import models.ContactDetails
 import org.scalacheck.Arbitrary._
 import org.scalatest.MustMatchers
-import org.scalatest.prop.PropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.data.Form
 
-class ContactDetailsMappingSpec extends SpecBase with MustMatchers with PropertyChecks with Generators {
+class ContactDetailsMappingSpec extends SpecBase with MustMatchers with ScalaCheckPropertyChecks with Generators {
 
   val form = Form(contactDetailsMapping)
 

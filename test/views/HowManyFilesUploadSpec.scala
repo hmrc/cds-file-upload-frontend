@@ -18,14 +18,14 @@ package views
 
 import forms.FileUploadCountProvider
 import models.FileUploadCount
-import org.scalatest.prop.PropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.data.Form
 import play.twirl.api.{Html, HtmlFormat}
 import utils.FakeRequestCSRFSupport._
 import views.behaviours.IntViewBehaviours
 import views.html.how_many_files_upload
 
-class HowManyFilesUploadSpec extends DomAssertions with IntViewBehaviours[FileUploadCount] with PropertyChecks {
+class HowManyFilesUploadSpec extends DomAssertions with IntViewBehaviours[FileUploadCount] with ScalaCheckPropertyChecks {
 
   val form = new FileUploadCountProvider()()
 

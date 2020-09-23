@@ -16,7 +16,6 @@
 
 package views.behaviours
 
-import play.api.test.Helpers.stubLangs
 import play.i18n.Lang
 import play.twirl.api.HtmlFormat
 import views.DomAssertions

@@ -16,28 +16,19 @@
 
 package controllers.actions
 
-import javax.inject.Inject
 import connectors.AnswersConnector
+import javax.inject.Inject
 import models.requests.{DataRequest, EORIRequest}
 import play.api.mvc.{ActionTransformer, MessagesControllerComponents}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.HeaderCarrierConverter
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 class DataRetrievalActionImpl @Inject()(val answersConnector: AnswersConnector, mcc: MessagesControllerComponents) extends DataRetrievalAction {
 
   implicit val executionContext: ExecutionContext = mcc.executionContext
-  override protected def transform[A](request: EORIRequest[A]): Future[DataRequest[A]] = {
-    val id = request.user.internalId
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    val answersFuture = answersConnector.findOrCreate(request.eori)
-    for {
-      answers <- answersFuture
-    } yield DataRequest(request, answers)
-  }
+  override protected def transform[A](request: EORIRequest[A]): Future[DataRequest[A]] =
+    answersConnector.findOrCreate(request.eori).map(DataRequest(request, _))
 }
 
 trait DataRetrievalAction extends ActionTransformer[EORIRequest, DataRequest]

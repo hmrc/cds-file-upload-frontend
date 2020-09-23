@@ -25,9 +25,8 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AffinityGroup.Individual
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, Name}
-import uk.gov.hmrc.play.bootstrap.controller.{BackendController, BaseController}
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class AuthActionSpec extends ControllerSpecBase {
@@ -80,7 +79,7 @@ class AuthActionSpec extends ControllerSpecBase {
         val response = authController().action(FakeRequest())
 
         status(response) mustBe SEE_OTHER
-        redirectLocation(response) mustBe Some(controllers.routes.UnauthorisedController.onPageLoad.url)
+        redirectLocation(response) mustBe Some(controllers.routes.UnauthorisedController.onPageLoad().url)
       }
     }
   }
@@ -143,13 +142,13 @@ class AuthActionSpec extends ControllerSpecBase {
           val response = authController(Seq("GB1111231")).action(FakeRequest())
 
           status(response) mustBe SEE_OTHER
-          redirectLocation(response) mustBe Some(controllers.routes.UnauthorisedController.onPageLoad.url)
+          redirectLocation(response) mustBe Some(controllers.routes.UnauthorisedController.onPageLoad().url)
         }
       }
     }
   }
 
-  class TestController(actions: AuthAction) extends BackendController(mcc) {
+  class TestController(actions: AuthAction) extends FrontendController(mcc) {
 
     def action: Action[AnyContent] = actions.async { request =>
       Future.successful(Ok(request.user.toString))
