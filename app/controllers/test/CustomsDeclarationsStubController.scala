@@ -22,6 +22,7 @@ import models.Field._
 import models._
 import play.api.http.{ContentTypes, HeaderNames}
 import play.api.mvc.{Action, Codec, MessagesControllerComponents}
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
