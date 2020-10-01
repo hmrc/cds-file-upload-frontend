@@ -1,6 +1,6 @@
 ## common
 common.service.name=Upload a customs document
-common.phase=Alpha
+common.phase=Beta
 common.feedbackFirst=This is a new service - your
 common.feedbackSecond=feedback
 common.feedbackThird=will help us to improve it.
