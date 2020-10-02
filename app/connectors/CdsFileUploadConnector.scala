@@ -20,6 +20,7 @@ import config.{AppConfig, CDSFileUpload}
 import javax.inject.Inject
 import models.Notification
 import play.api.Logger
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 
 import scala.concurrent.{ExecutionContext, Future}

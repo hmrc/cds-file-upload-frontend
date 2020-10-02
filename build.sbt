@@ -12,6 +12,7 @@ resolvers += Resolver.bintrayRepo("wolfendale", "maven")
 
 lazy val microservice = (project in file("."))
   .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
+  .settings(libraryDependencies ++= compileDependencies ++ testDependencies)
   .settings(scalaVersion := "2.12.12")
   .settings(publishingSettings: _*)
   .settings(resolvers += Resolver.jcenterRepo)
@@ -32,6 +33,7 @@ lazy val microservice = (project in file("."))
     includeFilter in uglify := GlobFilter("cdsfileuploadfrontend-*.js")
   )
   .settings(silencerSettings)
+  .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
 
 val httpComponentsVersion = "4.5.11"
 
@@ -60,8 +62,6 @@ val testDependencies = Seq(
   "wolfendale"                %%  "scalacheck-gen-regexp"    % "0.1.1"     % "test",
   "com.github.tomakehurst"    %   "wiremock-standalone"      % "2.22.0"    % "test"
 )
-
-libraryDependencies ++= compileDependencies ++ testDependencies
 
 lazy val silencerSettings: Seq[Setting[_]] = {
   val silencerVersion = "1.7.0"
