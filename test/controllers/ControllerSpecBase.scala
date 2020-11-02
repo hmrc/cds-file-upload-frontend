@@ -65,7 +65,7 @@ abstract class ControllerSpecBase extends SpecBase with FakeActions {
 
   def resetAnswersConnector() = {
     reset(mockAnswersConnector)
-    when(mockAnswersConnector.upsert(any[UserAnswers])).thenReturn(Future.successful(UserAnswers("")))
+    when(mockAnswersConnector.upsert(any[UserAnswers])).thenReturn(Future.successful(Some(UserAnswers(""))))
   }
 
   def theSavedUserAnswers: UserAnswers = {

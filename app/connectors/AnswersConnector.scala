@@ -39,15 +39,11 @@ class AnswersConnector @Inject()(val repository: AnswersRepository)(implicit ec:
       case None                => save(UserAnswers(eori))
     }
 
-  def upsert(answers: UserAnswers): Future[UserAnswers] = {
+  def upsert(answers: UserAnswers): Future[Option[UserAnswers]] = {
     val updated = answers.copy(updated = DateTime.now.withZone(DateTimeZone.UTC))
     repository
-      .findAndUpdate(Json.obj("eori" -> updated.eori), Json.toJson(updated).as[JsObject])
+      .findAndUpdate(Json.obj("eori" -> updated.eori), Json.toJson(updated).as[JsObject], upsert = false)
       .map(_.value.map(_.as[UserAnswers]))
-      .flatMap {
-        case Some(cache) => Future.successful(cache)
-        case None        => save(updated)
-      }
   }
 
   private def save(answers: UserAnswers): Future[UserAnswers] = repository.insert(answers).map { res =>
