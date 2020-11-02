@@ -41,7 +41,7 @@ class HowManyFilesUploadController @Inject()(
   requireContactDetails: ContactDetailsRequiredAction,
   formProvider: FileUploadCountProvider,
   answersConnector: AnswersConnector,
-  uploadContactDetails: UpscanConnector,
+  upscanConnector: UpscanConnector,
   customsDeclarationsService: CustomsDeclarationsService,
   mcc: MessagesControllerComponents,
   howManyFilesUpload: how_many_files_upload
@@ -100,7 +100,7 @@ class HowManyFilesUploadController @Inject()(
     initiateUpload(req, fileUploadCount).flatMap { fileUploadResponse =>
       firstUploadFile(fileUploadResponse) match {
         case Right((_, uploadRequest)) =>
-          uploadContactDetails.upload(uploadRequest, req.request.contactDetails).flatMap { res =>
+          upscanConnector.upload(uploadRequest, req.request.contactDetails).flatMap { res =>
             logger.info(s"Upload contact details successful: $res")
             logger.info(s"Upload contact details headers: ${res.header("Location")}")
             val isSuccessRedirect = res.header("Location").exists(_.contains("upscan-success"))
