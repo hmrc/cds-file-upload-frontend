@@ -42,7 +42,7 @@ class AnswersConnector @Inject()(val repository: AnswersRepository)(implicit ec:
   def upsert(answers: UserAnswers): Future[Option[UserAnswers]] = {
     val updated = answers.copy(updated = DateTime.now.withZone(DateTimeZone.UTC))
     repository
-      .findAndUpdate(Json.obj("eori" -> updated.eori), Json.toJson(updated).as[JsObject], upsert = false)
+      .findAndUpdate(Json.obj("eori" -> updated.eori), Json.toJson(updated).as[JsObject], upsert = true)
       .map(_.value.map(_.as[UserAnswers]))
   }
 
