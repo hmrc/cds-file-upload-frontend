@@ -44,5 +44,17 @@ class AppConfigSpec extends PlaySpec {
 
       cdsFileUpload.fetchNotificationEndpoint(fileReference) mustBe expectedUrl
     }
+
+    "have gtm container" in {
+
+        config.gtmCustoms.container mustBe "a"
+    }
+
+    "have tracking-consent-frontend url" in {
+
+      val expectedUrl = "http://localhost:6793/tracking-consent/tracking.js"
+
+      config.trackingConsentFrontend.url mustBe expectedUrl
+    }
   }
 }

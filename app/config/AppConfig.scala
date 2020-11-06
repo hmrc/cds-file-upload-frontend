@@ -20,18 +20,20 @@ import pureconfig.{CamelCase, ConfigFieldMapping, KebabCase}
 import pureconfig.generic.ProductHint
 
 case class AppConfig(
-  appName: String,
-  developerHubClientId: String,
-  contactFrontend: ContactFrontend,
-  assets: Assets,
-  googleAnalytics: GoogleAnalytics,
-  microservice: Microservice,
-  fileFormats: FileFormats,
-  notifications: Notifications,
-  feedback: Feedback,
-  proxy: Proxy,
-  accessibilityLinkUrl: String,
-  answersRepository: AnswersRepository
+                      appName: String,
+                      developerHubClientId: String,
+                      contactFrontend: ContactFrontend,
+                      assets: Assets,
+                      googleAnalytics: GoogleAnalytics,
+                      microservice: Microservice,
+                      fileFormats: FileFormats,
+                      notifications: Notifications,
+                      feedback: Feedback,
+                      proxy: Proxy,
+                      accessibilityLinkUrl: String,
+                      answersRepository: AnswersRepository,
+                      gtmCustoms: GtmCustoms,
+                      trackingConsentFrontend: TrackingConsentFrontend
 )
 
 object AppConfig {
@@ -89,3 +91,7 @@ case class Feedback(url: String)
 case class Proxy(protocol: String, host: String, port: Int, username: String, password: String, proxyRequiredForThisEnvironment: Boolean)
 
 case class AnswersRepository(ttlSeconds: Int)
+
+case class GtmCustoms(container: String)
+
+case class TrackingConsentFrontend(url: String)

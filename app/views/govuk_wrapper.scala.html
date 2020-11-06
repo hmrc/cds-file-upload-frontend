@@ -108,10 +108,12 @@
     }
 
     @content = {
-            <!-- Google Tag Manager (noscript) -->
-        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NDJKHWK" height="0" width="0" style="display: none;
-            visibility: hidden"></iframe></noscript>
-            <!-- End Google Tag Manager (noscript) -->
+            <!--[if !IE]>-->
+        <script type="text/javascript"
+        src="@{appConfig.trackingConsentFrontend.url}"
+        id="tracking-consent-script-tag"
+        data-gtm-container="@{appConfig.gtmCustoms.container}"></script>
+            <!--<![endif]-->
 
     @main_content_di(
         article = mainContent,
