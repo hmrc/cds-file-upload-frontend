@@ -47,12 +47,12 @@ class AppConfigSpec extends PlaySpec {
 
     "have gtm container" in {
 
-        config.gtmCustoms.container mustBe "a"
+      config.trackingConsentFrontend.gtm.container mustBe "a"
     }
 
     "have tracking-consent-frontend url" in {
 
-      val expectedUrl = "http://localhost:6793/tracking-consent/tracking.js"
+      val expectedUrl = "http://localhost:12345/tracking-consent/tracking.js"
 
       config.trackingConsentFrontend.url mustBe expectedUrl
     }
