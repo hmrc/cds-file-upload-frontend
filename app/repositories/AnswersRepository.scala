@@ -22,17 +22,21 @@ import models.UserAnswers
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
+import reactivemongo.play.json.collection.JSONCollection
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
 @Singleton
-class AnswersRepository @Inject()(mongo: ReactiveMongoComponent, appConfig: AppConfig)
+class AnswersRepository @Inject()(mc: ReactiveMongoComponent, appConfig: AppConfig)
     extends ReactiveRepository[UserAnswers, BSONObjectID](
       collectionName = "answers",
-      mongo = mongo.mongoConnector.db,
+      mongo = mc.mongoConnector.db,
       domainFormat = UserAnswers.answersFormat,
       idFormat = ReactiveMongoFormats.objectIdFormats
     ) {
+
+  override lazy val collection: JSONCollection =
+    mongo().collection[JSONCollection](collectionName, failoverStrategy = RepositorySettings.failoverStrategy)
 
   override def indexes: Seq[Index] = Seq(
     Index(Seq("eori" -> IndexType.Ascending), name = Some("eoriIdx")),
