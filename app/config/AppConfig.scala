@@ -31,7 +31,8 @@ case class AppConfig(
   feedback: Feedback,
   proxy: Proxy,
   accessibilityLinkUrl: String,
-  answersRepository: AnswersRepository
+  answersRepository: AnswersRepository,
+  trackingConsentFrontend: TrackingConsentFrontend
 )
 
 object AppConfig {
@@ -89,3 +90,7 @@ case class Feedback(url: String)
 case class Proxy(protocol: String, host: String, port: Int, username: String, password: String, proxyRequiredForThisEnvironment: Boolean)
 
 case class AnswersRepository(ttlSeconds: Int)
+
+case class Gtm(container: String)
+
+case class TrackingConsentFrontend(gtm: Gtm, url: String)
