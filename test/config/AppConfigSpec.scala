@@ -16,12 +16,11 @@
 
 package config
 
-import org.scalatestplus.play.{PlaySpec}
+import org.scalatestplus.play.PlaySpec
+import pureconfig.ConfigSource
+import pureconfig.generic.auto._
 
 class AppConfigSpec extends PlaySpec {
-
-  import pureconfig.ConfigSource
-  import pureconfig.generic.auto._
 
   val config = ConfigSource.default.loadOrThrow[AppConfig]
 
@@ -55,6 +54,13 @@ class AppConfigSpec extends PlaySpec {
       val expectedUrl = "http://localhost:12345/tracking-consent/tracking.js"
 
       config.trackingConsentFrontend.url mustBe expectedUrl
+    }
+
+    "have link to contact-frontend" in {
+
+      val expectedUrl = "http://localhost:9250/contact/beta-feedback-unauthenticated?service=SFUS"
+
+      config.microservice.services.contactFrontend.giveFeedbackLink mustBe expectedUrl
     }
   }
 }

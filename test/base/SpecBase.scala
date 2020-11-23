@@ -28,7 +28,6 @@ import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.Injector
 
 import scala.concurrent.ExecutionContext
 
