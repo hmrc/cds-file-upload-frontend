@@ -29,7 +29,8 @@
     footer_links_di: FooterLinks,
     reportAProblemLink: ReportAProblemLink,
     hmrc_gov_uk_template: GovUkTemplate,
-    appConfig: AppConfig
+    appConfig: AppConfig,
+    phaseBanner: components.phase_banner
 )
 
 @(title: String,
@@ -91,20 +92,12 @@
 
     @mainContentHeader = {
         <div id="global-header-bar"></div>
-        <div class="phase-banner">
-            <p>
-                <strong class="phase-tag">@Messages("common.phase")</strong>
-                <span>@messages("common.feedbackFirst") <a href="@appConfig.feedback.url">@messages("common.feedbackSecond")</a>
-                    @messages("common.feedbackThird")</span>
-            </p>
-        </div>
-    @if(contentHeader.isDefined) {
-        @main_content_header_di(contentHeader = contentHeader.get)
-    }
-    }
 
-    @getHelpForm = @{
-        reportAProblemLink(appConfig.contactFrontend.reportAProblemPartialUrl, appConfig.contactFrontend.reportAProblemNonJSUrl)
+        @phaseBanner("beta")
+
+        @if(contentHeader.isDefined) {
+            @main_content_header_di(contentHeader = contentHeader.get)
+        }
     }
 
     @content = {

@@ -16,13 +16,12 @@
 
 package config
 
-import pureconfig.{CamelCase, ConfigFieldMapping, KebabCase}
 import pureconfig.generic.ProductHint
+import pureconfig.{CamelCase, ConfigFieldMapping, KebabCase}
 
 case class AppConfig(
   appName: String,
   developerHubClientId: String,
-  contactFrontend: ContactFrontend,
   assets: Assets,
   googleAnalytics: GoogleAnalytics,
   microservice: Microservice,
@@ -44,11 +43,6 @@ object AppConfig {
   })
 }
 
-case class ContactFrontend(host: String, serviceIdentifier: String = "MyService") {
-  lazy val reportAProblemPartialUrl = s"$host/contact/problem_reports_ajax?service=$serviceIdentifier"
-  lazy val reportAProblemNonJSUrl = s"$host/contact/problem_reports_nonjs?service=$serviceIdentifier"
-}
-
 case class Assets(version: String, url: String) {
   lazy val prefix: String = s"$url$version"
 }
@@ -61,7 +55,8 @@ case class Services(
   customsDeclarations: CustomsDeclarations,
   cdsFileUploadFrontend: CDSFileUploadFrontend,
   cdsFileUpload: CDSFileUpload,
-  keystore: Keystore
+  keystore: Keystore,
+  contactFrontend: ContactFrontend
 )
 
 case class CustomsDeclarations(protocol: Option[String], host: String, port: Option[Int], batchUploadUri: String, apiVersion: String) {
@@ -79,6 +74,13 @@ case class CDSFileUpload(protocol: Option[String], host: String, port: Option[In
 
 case class Keystore(protocol: String = "https", host: String, port: Int, defaultSource: String, domain: String) {
   lazy val baseUri: String = s"$protocol://$host:$port"
+}
+
+case class ContactFrontend(protocol: String = "https", host: String, port: Option[Int], serviceId: String) {
+  lazy val giveFeedbackLink: String = {
+    val contactFrontendBaseUrl = s"$protocol://$host:${port.getOrElse(443)}"
+    s"$contactFrontendBaseUrl/contact/beta-feedback-unauthenticated?service=$serviceId"
+  }
 }
 
 case class FileFormats(maxFileSizeMb: Int, approvedFileTypes: String, approvedFileExtensions: String)

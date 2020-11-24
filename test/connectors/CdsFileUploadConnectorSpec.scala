@@ -16,7 +16,7 @@
 
 package connectors
 
-import base.UnitSpec
+import base.{Injector, UnitSpec}
 import config.AppConfig
 import models.Notification
 import org.mockito.ArgumentMatchers.any
@@ -24,7 +24,6 @@ import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
-import utils.Injector
 
 import scala.concurrent.ExecutionContext.global
 import scala.concurrent.Future

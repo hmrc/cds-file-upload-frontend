@@ -1,11 +1,11 @@
 ## common
 common.service.name=Upload a customs document
 common.phase=Beta
-common.feedbackFirst=This is a new service - your
-common.feedbackSecond=feedback
-common.feedbackThird=will help us to improve it.
 common.continue=Continue
 cds.sign.out=Sign out
+
+common.feedback=This is a new service - your {0} will help us to improve it.
+common.feedback.link=feedback
 
 ## errors
 error.browser.title.prefix=Error:
