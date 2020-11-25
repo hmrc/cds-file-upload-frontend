@@ -36,7 +36,7 @@ class PhaseBannerSpec extends UnitViewSpec with Injector {
     "display feedback link with correct href" in {
 
       val appConfig = instanceOf[AppConfig]
-      val expectedHrefValue = s"${appConfig.microservice.services.contactFrontend.giveFeedbackLink}&backUrl=http://localhost$requestPath"
+      val expectedHrefValue = s"${appConfig.microservice.services.contactFrontend.giveFeedbackLink}&backURL=$requestPath"
 
       createBanner().getElementsByClass("phase-banner").first().getElementsByTag("a").first() must haveHref(expectedHrefValue)
     }

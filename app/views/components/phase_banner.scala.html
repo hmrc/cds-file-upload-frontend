@@ -20,9 +20,7 @@
 
 @(phase: String)(implicit request: Request[_], messages: Messages)
 
-@protocol = @{ if(request.secure) "https" else "http" }
-@betaFeedbackUrl = @{s"${appConfig.microservice.services.contactFrontend.giveFeedbackLink}&backUrl=$protocol://${request.host}${request.uri}"}
-
+@betaFeedbackUrl = @{s"${appConfig.microservice.services.contactFrontend.giveFeedbackLink}&backURL=${request.uri}"}
 @link = {<a href="@betaFeedbackUrl">@messages("common.feedback.link")</a>}
 
 @feedbackBanner = {

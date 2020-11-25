@@ -76,11 +76,8 @@ case class Keystore(protocol: String = "https", host: String, port: Int, default
   lazy val baseUri: String = s"$protocol://$host:$port"
 }
 
-case class ContactFrontend(protocol: String = "https", host: String, port: Option[Int], serviceId: String) {
-  lazy val giveFeedbackLink: String = {
-    val contactFrontendBaseUrl = s"$protocol://$host:${port.getOrElse(443)}"
-    s"$contactFrontendBaseUrl/contact/beta-feedback-unauthenticated?service=$serviceId"
-  }
+case class ContactFrontend(url: String, serviceId: String) {
+  lazy val giveFeedbackLink: String = s"$url?service=$serviceId"
 }
 
 case class FileFormats(maxFileSizeMb: Int, approvedFileTypes: String, approvedFileExtensions: String)
