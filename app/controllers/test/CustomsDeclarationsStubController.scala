@@ -35,18 +35,13 @@ class CustomsDeclarationsStubController @Inject()(appConfig: AppConfig, httpClie
 ) extends FrontendController(mcc) {
 
   def waiting(ref: String) = {
-    val customsDeclarationsConfig = appConfig.microservice.services.customsDeclarations
-    val customsDeclarationsBaseUrl =
-      s"${customsDeclarationsConfig.protocol.get}://${customsDeclarationsConfig.host}:${customsDeclarationsConfig.port.get}"
-
-    val baseUri =
-      if (customsDeclarationsConfig.host != "cds-file-upload-frontend.public.mdtp")
-        s"$customsDeclarationsBaseUrl/cds-file-upload-service"
-      else "/cds-file-upload-service"
+    val fileUploadFrontendConfig = appConfig.microservice.services.cdsFileUploadFrontend
+    val baseUrl =
+      s"${fileUploadFrontendConfig.protocol.get}://${fileUploadFrontendConfig.host}:${fileUploadFrontendConfig.port.get}"
 
     Waiting(
       UploadRequest(
-        href = s"$baseUri/test-only/s3-bucket",
+        href = s"$baseUrl/cds-file-upload-service/test-only/s3-bucket",
         fields = Map(
           Algorithm.toString -> "AWS4-HMAC-SHA256",
           Signature.toString -> "xxxx",
@@ -54,8 +49,8 @@ class CustomsDeclarationsStubController @Inject()(appConfig: AppConfig, httpClie
           ACL.toString -> "private",
           Credentials.toString -> "ASIAxxxxxxxxx/20180202/eu-west-2/s3/aws4_request",
           Policy.toString -> "xxxxxxxx==",
-          SuccessRedirect.toString -> s"$baseUri/upload/upscan-success/${ref}",
-          ErrorRedirect.toString -> s"$baseUri/upload/upscan-error/${ref}"
+          SuccessRedirect.toString -> s"$baseUrl/cds-file-upload-service/upload/upscan-success/${ref}",
+          ErrorRedirect.toString -> s"$baseUrl/cds-file-upload-service/upload/upscan-error/${ref}"
         )
       )
     )
