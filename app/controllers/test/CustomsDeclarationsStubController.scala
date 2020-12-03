@@ -35,14 +35,9 @@ class CustomsDeclarationsStubController @Inject()(appConfig: AppConfig, httpClie
 ) extends FrontendController(mcc) {
 
   def waiting(ref: String) = {
-
     val customsDeclarationsConfig = appConfig.microservice.services.customsDeclarations
     val customsDeclarationsBaseUrl =
       s"${customsDeclarationsConfig.protocol.get}://${customsDeclarationsConfig.host}:${customsDeclarationsConfig.port.get}"
-
-    val fileUploadFrontendConfig = appConfig.microservice.services.cdsFileUploadFrontend
-    val fileUploadFrontendBaseUrl =
-      s"${fileUploadFrontendConfig.protocol.get}://${fileUploadFrontendConfig.host}:${fileUploadFrontendConfig.port.get}"
 
     Waiting(
       UploadRequest(
@@ -54,8 +49,8 @@ class CustomsDeclarationsStubController @Inject()(appConfig: AppConfig, httpClie
           ACL.toString -> "private",
           Credentials.toString -> "ASIAxxxxxxxxx/20180202/eu-west-2/s3/aws4_request",
           Policy.toString -> "xxxxxxxx==",
-          SuccessRedirect.toString -> s"$fileUploadFrontendBaseUrl/cds-file-upload-service/upload/upscan-success/${ref}",
-          ErrorRedirect.toString -> s"$fileUploadFrontendBaseUrl/cds-file-upload-service/upload/upscan-error/${ref}"
+          SuccessRedirect.toString -> s"$customsDeclarationsBaseUrl/cds-file-upload-service/upload/upscan-success/${ref}",
+          ErrorRedirect.toString -> s"$customsDeclarationsBaseUrl/cds-file-upload-service/upload/upscan-error/${ref}"
         )
       )
     )
