@@ -64,5 +64,14 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
         }
       }
     }
+
+    "display feedback section" in {
+
+      forAll { fileUploads: List[FileUpload] =>
+        val doc = asDocument(view(fileUploads))
+
+        assertEqualsMessage(doc, "h2", "feedback.header")
+      }
+    }
   }
 }
