@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,21 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package config
+@import config.ExternalServicesConfig
 
-import com.google.inject.{Inject, Singleton}
-import play.api.Configuration
+@this(config: ExternalServicesConfig)
 
-@Singleton
-class ExternalServicesConfig @Inject()(val configuration: Configuration) {
+@()(implicit messages: Messages)
 
-  private def loadUrl(key: String): String =
-    configuration.getOptional[String](s"urls.$key").getOrElse(throw new Exception(s"Missing configuration key: urls.$key"))
+@link = {<a href="@config.feedbackFrontend">@messages("feedback.link")</a>}
 
-  lazy val eoriService = loadUrl("eoriService")
-  lazy val cdsRegister = loadUrl("cdsRegister")
-  lazy val cdsCheckStatus = loadUrl("cdsCheckStatus")
-  lazy val feedbackFrontend = loadUrl("feedbackFrontend")
-}
+<h2 id="feedback" class="govuk-heading-m">@messages("feedback.header")</h2>
+<p id="feedback-element-1" class="govuk-body"> @messages("feedback.line.1") </p>
+<p id="feedback-element-2" class="govuk-body"> @Html(messages("feedback.line.2", link)) </p>

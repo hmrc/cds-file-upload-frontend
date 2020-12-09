@@ -167,3 +167,8 @@ fuf.accessibility.statement.howtested.heading=How we tested this service
 fuf.accessibility.statement.howtested.p1=The service was last tested on 30 May 2019 and was checked for compliance with WCAG 2.1 AA.
 fuf.accessibility.statement.howtested.p2=The service was built using parts that were tested by the <a href="http://www.digitalaccessibilitycentre.org/">Digital Accessibility Centre</a>. The full service was tested by HMRC.
 fuf.accessibility.statement.howtested.p3=This page was prepared on 16 September 2019. It was last updated on 16 September 2019.
+
+feedback.header = Tell us what you think
+feedback.line.1 = This is a new service and we want to know what you think of it.
+feedback.line.2 = {0}. Your thoughts and ideas will help us to make improvements.
+feedback.link = Send us your feedback

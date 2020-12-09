@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@this(mainTemplate: main_template)
+@this(mainTemplate: main_template, feedbackSection: components.feedback_section)
 
 @(files: List[FileUpload])(implicit request: Request[_], messages: Messages)
 
@@ -50,5 +50,6 @@
       <li>@messages("fileUploadReceiptPage.listitem3")</li>
     </ul>
 
+    @feedbackSection()
 </div>
 }
