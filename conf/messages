@@ -112,9 +112,14 @@ unauthorised.applied.heading = If you’ve already applied to get access to CDS
 unauthorised.applied.paragraph1 = You can {0}
 unauthorised.applied.paragraph1.link = check the status of your application (opens in a new window or tab)
 
-uploadError.title=An error occurred during upload
-uploadError.heading=An error occurred during upload
-uploadError.guidance=An error has prevented your documents from being accepted. Please follow the guidance on gov.uk and submit your documents by an alternative method.
+uploadError.title=One of your files has been rejected
+uploadError.heading=One of your files has been rejected
+uploadError.paragraph=At least one of your files may be:
+uploadError.bullet.1=larger than 10MB
+uploadError.bullet.2=not an accepted file type
+uploadError.bullet.3=corrupted, or contain a virus
+uploadError.button=Start your upload again
+uploadError.guidance=You may be asked to check or re-enter the contact details.
 
 cds.error.title=Sorry, there is a problem with the service
 cds.error.heading=Sorry, there is a problem with the service
