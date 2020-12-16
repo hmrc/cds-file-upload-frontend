@@ -20,8 +20,24 @@
 
 @mainTemplate(title = messages("uploadError.title")) {
 
-    <h1 class="heading-xlarge">@messages("uploadError.heading")</h1>
+  <h1 class="heading-xlarge">@messages("uploadError.heading")</h1>
 
-    <p>@messages("uploadError.guidance")</p>
+  <p>@messages("uploadError.paragraph")</p>
+
+  <nav>
+    <ul class="list list-bullet">
+      <li>@messages("uploadError.bullet.1")</li>
+      <li>@messages("uploadError.bullet.2")</li>
+      <li>@messages("uploadError.bullet.3")</li>
+    </ul>
+  </nav>
+
+  @components.button_link(
+    messageKey = "uploadError.button",
+    href = controllers.routes.StartController.displayStartPage().url,
+    id = "startAgainButton"
+  )
+
+  <p>@messages("uploadError.guidance")</p>
 
 }
