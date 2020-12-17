@@ -16,10 +16,9 @@
 
 package views
 
-import org.jsoup.nodes.Document
-import views.html.upload_error
 import utils.FakeRequestCSRFSupport._
 import views.behaviours.ViewBehaviours
+import views.html.upload_error
 import views.matchers.ViewMatchers
 
 class UploadErrorSpec extends ViewBehaviours with ViewMatchers {

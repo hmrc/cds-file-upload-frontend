@@ -37,7 +37,18 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
   val pagePrefix = "fileUploadReceiptPage"
 
   "File Upload Receipt Page" must {
-    behave like pageWithoutHeading(view, pagePrefix, "whatHappensNext", "paragraph1", "listitem1", "listitem2", "listitem3")
+    behave like normalPage(
+      view,
+      pagePrefix,
+      "whatHappensNext",
+      "paragraph1",
+      "paragraph2",
+      "paragraph3",
+      "listitem1",
+      "listitem2",
+      "listitem3",
+      "listitem4"
+    )
 
     "have title" in {
 
@@ -62,7 +73,7 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
       forAll { fileUploads: List[FileUpload] =>
         val doc = asDocument(view(fileUploads))
 
-        assertContainsValue(doc, "#content > article > div.govuk-panel.govuk-panel--confirmation > div", mrn.value)
+        assertContainsValue(doc, ".govuk-panel__body > strong:nth-child(2)", mrn.value)
       }
     }
 
@@ -86,20 +97,20 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
     }
 
     "have a paragraph expaining next steps" in {
-      val paragraph = asDocument(view()).getElementsByTag("p").get(3)
+      val paragraph = asDocument(view()).getElementsByTag("p").get(2)
 
       paragraph must containMessage(s"${pagePrefix}.paragraph1")
     }
 
     "have a bullet list" in {
-      val bulletList = asDocument(view()).getElementsByClass("list list-bullet").first()
+      val bulletList = asDocument(view()).getElementsByTag("ul").get(0)
 
       bulletList must containMessage(s"${pagePrefix}.listitem1")
       bulletList must containMessage(s"${pagePrefix}.listitem2")
     }
 
     "have a second bullet list" in {
-      val bulletList = asDocument(view()).getElementById("notChanged")
+      val bulletList = asDocument(view()).getElementsByTag("ul").get(1)
 
       bulletList must containMessage(s"${pagePrefix}.listitem3")
       bulletList must containMessage(s"${pagePrefix}.listitem4")
