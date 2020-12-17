@@ -14,15 +14,32 @@
  * limitations under the License.
  *@
 
-@this(mainTemplate: main_template, feedbackSection: components.feedback_section)
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import views.html.components._
+@import config.ExternalServicesConfig
 
-@(files: List[FileUpload])(implicit request: Request[_], messages: Messages)
+
+@this(
+    govukPanel : GovukPanel,
+    mainTemplate: main_template,
+    feedbackSection: components.feedback_section,
+    config: ExternalServicesConfig,
+    linkButton: link_button
+)
+
+@(files: List[models.FileUpload], mrn: Option[MRN])(implicit request: Request[_], messages: Messages)
+
+@panelContent = {@messages("fileUploadReceiptPage.mrn") </br> <strong>@{mrn.map(_.value).getOrElse("???")}</strong> }
 
 @mainTemplate(title = messages("fileUploadReceiptPage.title")) {
 
+@govukPanel(Panel(
+    title = Text(messages("fileUploadReceiptPage.heading")),
+    content = HtmlContent(panelContent)
+))
+
 <div class="form-group">
-    <h1 class="heading-large">@messages("fileUploadReceiptPage.heading", files.length)</h1>
-    <p>@messages("fileUploadReceiptPage.paragraphIntro")</p>
+    <h2 class="govuk-heading-m">@messages("fileUploadReceiptPage.tableTitle")</h2>
     <table>
         <thead>
         <tr>
@@ -33,12 +50,16 @@
         <tbody>
         @files.map { f =>
             <tr>
-                <td class="row">@f.filename</td>
+                <th scope="row" class="govuk-table__header">@f.filename</th>
                 <td class="row">@f.reference</td>
             </tr>
         }
         </tbody>
     </table>
+
+    <p class="govuk-body">
+        <a class="govuk-link govuk-link--visually-hidden govuk-!-display-none-print" href="javascript:if(window.print)window.print()">@messages("fileUploadReceiptPage.printPage")</a>
+    </p>
 
     <h3 class="heading-medium">@messages("fileUploadReceiptPage.whatHappensNext")</h3>
 
@@ -47,9 +68,19 @@
     <ul class="list list-bullet">
       <li>@messages("fileUploadReceiptPage.listitem1")</li>
       <li>@messages("fileUploadReceiptPage.listitem2")</li>
-      <li>@messages("fileUploadReceiptPage.listitem3")</li>
     </ul>
 
-    @feedbackSection()
+    <p>@messages("fileUploadReceiptPage.paragraph2")</p>
+
+    <ul class="list list-bullet" id="notChanged">
+        <li>@messages("fileUploadReceiptPage.listitem3")</li>
+        <li><a href="@config.nationalClearingHubLink">@messages("fileUploadReceiptPage.listitem4.linkText")</a> @messages("fileUploadReceiptPage.listitem4")</li>
+    </ul>
+
+    <p class="heading-medium">@messages("fileUploadReceiptPage.uploadAnother")</p>
+
+    <p>@messages("fileUploadReceiptPage.paragraph3")</p>
+
+    @linkButton("fileUploadReceiptPage.finalButton.text", controllers.routes.StartController.displayStartPage())
 </div>
 }

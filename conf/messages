@@ -87,16 +87,25 @@ fileUploadPage.validation.filesize=The file you have chosen is bigger than {0}MB
 fileUploadPage.paragraph1=Ensure that you select the correct documents as requested by HMRC.
 fileUploadPage.button=Upload a document
 
-fileUploadReceiptPage.title=Upload your files
-fileUploadReceiptPage.heading=You have uploaded {0} files:
-fileUploadReceiptPage.paragraphIntro=Ensure you take a copy or print your receipt numbers listed below.
-fileUploadReceiptPage.whatHappensNext=What happens next?
+fileUploadReceiptPage.title=Uploaded files receipt
+fileUploadReceiptPage.heading=Files have been uploaded and sent to HMRC
+fileUploadReceiptPage.mrn=Movement Reference Number:
+fileUploadReceiptPage.tableTitle=Uploaded files
 fileUploadReceiptPage.fileName=File name
 fileUploadReceiptPage.receipt=Receipt
-fileUploadReceiptPage.paragraph1=Providing you have submitted the correct documentation, HMRC aim to clear your goods within the following times:
-fileUploadReceiptPage.listitem1=Air freight/RoRo/exports - within two hours of receipt
-fileUploadReceiptPage.listitem2=Maritime freight – within three hours of receipt between 0800 hrs and 1500 hrs.
-fileUploadReceiptPage.listitem3=Declarations received after 1500 hrs will be cleared by 0800 hrs the following day
+fileUploadReceiptPage.printPage=Print this page for your records
+fileUploadReceiptPage.whatHappensNext=What happens next?
+fileUploadReceiptPage.paragraph1=As long as you have provided the documents that HMRC need to clear your goods, they should be cleared within these time limits:
+fileUploadReceiptPage.listitem1=2 hours for air freight imports, road freight imports, all exports
+fileUploadReceiptPage.listitem2=3 hours (between 0800 and 1500) for maritime freight imports
+fileUploadReceiptPage.paragraph2=If the status of your declaration has not changed within the specified time, you should:
+fileUploadReceiptPage.listitem3=first check your email
+fileUploadReceiptPage.listitem4.linkText=contact the National Clearance Hub
+fileUploadReceiptPage.listitem4=if you still need help
+fileUploadReceiptPage.uploadAnother=Upload documents for another declaration
+fileUploadReceiptPage.paragraph3=You only need to add documents that are required by HMRC: this will show in the status of the declaration or in a message to you from HMRC.
+fileUploadReceiptPage.finalButton.text=Upload documents for another declaration
+
 
 ## Errors
 unauthorised.title=To continue, you need to get access to Customs Declaration Services (CDS)
