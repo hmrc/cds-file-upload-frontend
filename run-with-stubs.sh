@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-sbt -Dapplication.router=testOnlyDoNotUseInAppConf.Routes run
+sbt run -Dconfig.resource=test.conf

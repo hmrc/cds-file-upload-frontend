@@ -14,42 +14,97 @@
  * limitations under the License.
  *@
 
-@this(mainTemplate: main_template, feedbackSection: components.feedback_section)
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import views.Title
+@import views.html.components.gds._
+@import config.ExternalServicesConfig
 
-@(files: List[FileUpload])(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = messages("fileUploadReceiptPage.title")) {
+@this(
+    govukPanel : GovukPanel,
+    govukTable : GovukTable,
+    govukLayout: gdsMainTemplate,
+    feedbackSection: components.feedback_section,
+    config: ExternalServicesConfig,
+    govukButton: GovukButton,
+    bulletList: bulletList,
+    paragraphBody: paragraphBody,
+    link: link
+)
 
-<div class="form-group">
-    <h1 class="heading-large">@messages("fileUploadReceiptPage.heading", files.length)</h1>
-    <p>@messages("fileUploadReceiptPage.paragraphIntro")</p>
-    <table>
-        <thead>
-        <tr>
-            <th scope="col">@messages("fileUploadReceiptPage.fileName")</th>
-            <th scope="col">@messages("fileUploadReceiptPage.receipt")</th>
-        </tr>
-        </thead>
-        <tbody>
-        @files.map { f =>
-            <tr>
-                <td class="row">@f.filename</td>
-                <td class="row">@f.reference</td>
-            </tr>
-        }
-        </tbody>
-    </table>
+@(files: List[models.FileUpload], mrn: Option[MRN])(implicit request: Request[_], messages: Messages)
 
-    <h3 class="heading-medium">@messages("fileUploadReceiptPage.whatHappensNext")</h3>
+@panelContent = {@messages("fileUploadReceiptPage.mrn") </br> <strong>@{mrn.map(_.value).getOrElse("???")}</strong> }
 
-    <p>@messages("fileUploadReceiptPage.paragraph1")</p>
+@nchLink = @{link(
+    text = messages("fileUploadReceiptPage.listitem4.linkText"),
+    call = Call("GET", config.nationalClearingHubLink)
+)}
 
-    <ul class="list list-bullet">
-      <li>@messages("fileUploadReceiptPage.listitem1")</li>
-      <li>@messages("fileUploadReceiptPage.listitem2")</li>
-      <li>@messages("fileUploadReceiptPage.listitem3")</li>
-    </ul>
+@listItemWithLink = {@nchLink @messages("fileUploadReceiptPage.listitem4")}
+
+@govukLayout(title = Title("fileUploadReceiptPage.title")) {
+    @govukPanel(Panel(
+        title = Text(messages("fileUploadReceiptPage.heading")),
+        content = HtmlContent(panelContent)
+    ))
+
+    @govukTable(Table(
+        rows = files.map { f =>
+            Seq(
+                TableRow(
+                    content = HtmlContent(s"<strong>${f.filename}</strong>")
+                ),
+                TableRow(
+                    content = Text(f.reference),
+                )
+            )
+        },
+        head = Some(List(
+            HeadCell(
+                content = Text(messages("fileUploadReceiptPage.fileName"))
+            ),
+            HeadCell(
+                content = Text(messages("fileUploadReceiptPage.receipt"))
+            )
+        )),
+        caption = Some(messages("fileUploadReceiptPage.tableTitle")),
+        captionClasses = "govuk-heading-m"
+    ))
+
+
+    <p class="govuk-body">
+        <a class="govuk-link govuk-link--visually-hidden govuk-!-display-none-print" href="javascript:if(window.print)window.print()">@messages("fileUploadReceiptPage.printPage")</a>
+    </p>
+
+    <h3 class="govuk-heading-m">@messages("fileUploadReceiptPage.whatHappensNext")</h3>
+
+    @paragraphBody(message = messages("fileUploadReceiptPage.paragraph1"))
+    @bulletList(
+        elements = Seq(
+            messages("fileUploadReceiptPage.listitem1"),
+            messages("fileUploadReceiptPage.listitem2")
+        )
+    )
+
+    @paragraphBody(message = messages("fileUploadReceiptPage.paragraph2"))
+    @bulletList(
+        elements = Seq(
+            messages("fileUploadReceiptPage.listitem3"),
+            listItemWithLink.toString()
+        )
+    )
+
+    <h3 class="govuk-heading-m">@messages("fileUploadReceiptPage.uploadAnother")</h3>
+
+    @paragraphBody(message = messages("fileUploadReceiptPage.paragraph3"))
+
+    @govukButton(
+        Button(
+            href = Some(controllers.routes.StartController.displayStartPage().url),
+            content = Text(messages("fileUploadReceiptPage.finalButton.text"))
+        )
+    )
 
     @feedbackSection()
-</div>
 }

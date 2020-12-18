@@ -52,9 +52,12 @@ trait ViewBehaviours extends DomAssertions {
       "rendered" must {
         "have the correct banner title" in {
           val doc = asDocument(view())
-          val nav = doc.getElementById("proposition-menu")
-          val span = nav.children.first
-          span.text mustBe messagesApi("common.service.name")(Lang.forCode("en-uk"))
+
+          val oldNav = doc.getElementById("proposition-menu")
+          val newNav = doc.select(".govuk-header__link--service-name")
+
+          val element = if (oldNav != null) oldNav.children.first else newNav.first()
+          element.text mustBe messagesApi("common.service.name")(Lang.forCode("en-uk"))
         }
 
         "display the correct guidance" in {

@@ -29,4 +29,5 @@ class ExternalServicesConfig @Inject()(val configuration: Configuration) {
   lazy val cdsRegister = loadUrl("cdsRegister")
   lazy val cdsCheckStatus = loadUrl("cdsCheckStatus")
   lazy val feedbackFrontend = loadUrl("feedbackFrontend")
+  lazy val nationalClearingHubLink = loadUrl("nationalClearingHubLink")
 }
