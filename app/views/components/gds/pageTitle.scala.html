@@ -14,18 +14,11 @@
  * limitations under the License.
  *@
 
-@import views.html.components.gds._
+@import views.components.gds.Styles._
 
-@this(paragraphBody: paragraphBody)
+@this()
 
-@(elements: Seq[Html])(implicit messages: Messages)
+@(text: String, classes: String = gdsPageHeading)
 
-<nav>
-    <ul class="govuk-list govuk-list--bullet">
-        @elements.map { element =>
-            <li class="dashed-list-item">
-                @element
-            </li>
-        }
-    </ul>
-</nav>
+<h1 id="title" class="@{classes}">@text</h1>
+

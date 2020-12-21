@@ -15,57 +15,55 @@
  *@
 
 @import config.ExternalServicesConfig
+@import views.Title
+@import views.html.components.gds._
 
-@this(mainTemplate: main_template, config: ExternalServicesConfig)
+@this(
+  mainTemplate: gdsMainTemplate,
+  pageTitle: pageTitle,
+  paragraphBody: paragraphBody,
+  link: link,
+  bulletList: bulletList,
+  config: ExternalServicesConfig
+)
 
 @()(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = messages("unauthorised.title")) {
-    <h1 class="heading-xlarge">@messages("unauthorised.heading")</h1>
-
-    <h2 class="govuk-heading-m">@messages("unauthorised.how.heading")</h2>
-
-    <p class="govuk-body">
-    @Html(
-        messages(
-            "unauthorised.how.paragraph1",
-            components.link(
-                config.eoriService,
-                messages("unauthorised.how.paragraph1.link"),
-                "get_eori_link"
-            )
-        )
+@howToSection = {
+  <p class="govuk-body">@messages("unauthorised.paragraph.1")</p>
+  @bulletList(
+    elements = Seq(
+      Html(messages("unauthorised.paragraph.1.bullet.1", link(
+        id = Some("get_eori_link"),
+        text = messages("unauthorised.paragraph.1.bullet.1.link"),
+        call = Call("GET", config.eoriService)
+      ))),
+      link(
+        id = Some("access_cds_link"),
+        text = messages("unauthorised.paragraph.1.bullet.2.link"),
+        call = Call("GET", config.cdsRegister)
+      )
     )
-    </p>
-    <p class="govuk-body">
-    @Html(
-        messages(
-            "unauthorised.how.paragraph2",
-            components.link(
-                config.cdsRegister,
-                messages("unauthorised.how.paragraph2.link"),
-                "access_cds_link"
-            )
-        )
+  )
+}
+
+@appliedSection = {
+  <p class="govuk-body">
+  @Html(messages("unauthorised.paragraph.2", link(
+      id = Some("check_cds_application_status_link"),
+      text = messages("unauthorised.paragraph.2.link"),
+      call = Call("GET", config.cdsCheckStatus)
     )
-    </p>
-    <p class="govuk-body">
-    @Html(messages("unauthorised.how.paragraph3"))
-    </p>
+  ))
+  </p>
+}
 
+@mainTemplate(title = Title("unauthorised.heading")) {
 
-    <h2 class="govuk-heading-m">@messages("unauthorised.applied.heading")</h2>
+  @pageTitle(messages("unauthorised.heading"))
 
-    <p class="govuk-body">
-    @Html(
-        messages(
-            "unauthorised.applied.paragraph1",
-            components.link(
-                config.cdsCheckStatus,
-                messages("unauthorised.applied.paragraph1.link"),
-                "check_cds_status_link"
-            )
-        )
-    )
-    </p>
+  @howToSection
+
+  @appliedSection
+
 }
