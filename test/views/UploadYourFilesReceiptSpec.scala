@@ -107,13 +107,14 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
 
       bulletList must containMessage(s"${pagePrefix}.listitem1")
       bulletList must containMessage(s"${pagePrefix}.listitem2")
+      bulletList must containMessage(s"${pagePrefix}.listitem3")
     }
 
     "have a second bullet list" in {
       val bulletList = asDocument(view()).getElementsByTag("ul").get(1)
 
-      bulletList must containMessage(s"${pagePrefix}.listitem3")
       bulletList must containMessage(s"${pagePrefix}.listitem4")
+      bulletList must containMessage(s"${pagePrefix}.listitem5")
     }
 
     "have a links to restart the journey" in {
