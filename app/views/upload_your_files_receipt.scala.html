@@ -37,11 +37,11 @@
 @panelContent = {@messages("fileUploadReceiptPage.mrn") </br> <strong>@{mrn.map(_.value).getOrElse("???")}</strong> }
 
 @nchLink = @{link(
-    text = messages("fileUploadReceiptPage.listitem4.linkText"),
+    text = messages("fileUploadReceiptPage.listitem5.linkText"),
     call = Call("GET", config.nationalClearingHubLink)
 )}
 
-@listItemWithLink = {@nchLink @messages("fileUploadReceiptPage.listitem4")}
+@listItemWithLink = {@nchLink @messages("fileUploadReceiptPage.listitem5")}
 
 @govukLayout(title = Title("fileUploadReceiptPage.title")) {
     @govukPanel(Panel(
@@ -83,14 +83,15 @@
     @bulletList(
         elements = Seq(
             messages("fileUploadReceiptPage.listitem1"),
-            messages("fileUploadReceiptPage.listitem2")
+            messages("fileUploadReceiptPage.listitem2"),
+            messages("fileUploadReceiptPage.listitem3")
         )
     )
 
     @paragraphBody(message = messages("fileUploadReceiptPage.paragraph2"))
     @bulletList(
         elements = Seq(
-            messages("fileUploadReceiptPage.listitem3"),
+            messages("fileUploadReceiptPage.listitem4"),
             listItemWithLink.toString()
         )
     )
