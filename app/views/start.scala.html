@@ -34,12 +34,13 @@
     <p>@messages("startPage.paragraph2")</p>
     <p>@Html(messages("startPage.paragraph3", bold(messages("startPage.paragraph3.bold"))))</p>
     <p>@Html(messages("startPage.paragraph4", bold(messages("startPage.paragraph4.bold"))))</p>
-</div>
+
 
     @helper.form(action = routes.StartController.onStart()) {
         @helper.CSRF.formField
 
         @components.submit_button("common.button.startNow")
     }
+</div>
 
 }
