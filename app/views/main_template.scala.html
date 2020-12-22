@@ -14,10 +14,30 @@
  * limitations under the License.
  *@
 
+@import config.AppConfig
 @import uk.gov.hmrc.play.views.html.layouts.Article
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.HmrcReportTechnicalIssue
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.reporttechnicalissue.ReportTechnicalIssue
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.language.{En, Cy}
 
-@this(govukWrapper: govuk_wrapper, article_di: Article)
+@this(
+  govukWrapper: govuk_wrapper,
+  article_di: Article,
+  hmrcReportTechnicalIssue: HmrcReportTechnicalIssue,
+  appConfig: AppConfig,
+
+)
 
 @(title: String, contentHeader: Option[Html] = None)(mainContent: Html)(implicit request : Request[_], messages: Messages)
 
-@govukWrapper(title = title, contentHeader = contentHeader, mainContent = article_di(mainContent))
+@content = {
+  @mainContent
+
+  @hmrcReportTechnicalIssue(
+    ReportTechnicalIssue(
+      serviceCode = appConfig.appName,
+      language = if(messages.lang.code == "en") En else Cy)
+  )
+}
+
+@govukWrapper(title = title, contentHeader = contentHeader, mainContent = article_di(content))
