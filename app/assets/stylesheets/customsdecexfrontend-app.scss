@@ -2,4 +2,7 @@ $govuk-assets-path: '/cds-file-upload-service/assets/';
 $govuk-images-path: "/cds-file-upload-service/assets/lib/govuk-frontend/govuk/assets/images/";
 $govuk-fonts-path: "/cds-file-upload-service/assets/lib/govuk-frontend/govuk/assets/fonts/";
 
+$hmrc-assets-path: "/cds-file-upload-service/assets/lib/hmrc-frontend/hmrc/assets/";
+
 @import 'lib/govuk-frontend/govuk/all';
+@import "lib/hmrc-frontend/hmrc/all";
