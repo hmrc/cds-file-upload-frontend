@@ -44,6 +44,21 @@ notifications {
 }
 ```
 
+### Accessibility Statement
+
+As a developer we rarely have the need to test it locally, therefore we should not add the 
+[Accessibility Statement Frontend](https://github.com/hmrc/accessibility-statement-frontend) microservice to our service
+profile, as it will consume more memory and CPU.
+
+If we need to test and/or update our accessibility statement then ensure the current service profile has started and 
+run the following:
+
+```
+# Start the microservice
+sm --start ACCESSIBILITY_STATEMENT_FRONTEND
+```
+
+It is then accessible [here](http://localhost:12346/accessibility-statement/cds-file-upload). 
 
 ### License
 

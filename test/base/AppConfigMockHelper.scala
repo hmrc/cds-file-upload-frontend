@@ -48,7 +48,6 @@ object AppConfigMockHelper extends MockitoSugar {
     notifications: Notifications = mock[Notifications],
     feedback: Feedback = mock[Feedback],
     proxy: Proxy = mock[Proxy],
-    accessibilityLinkUrl: String = "",
     answersRepository: AnswersRepository = mock[AnswersRepository],
     trackingConsentFrontend: TrackingConsentFrontend = mock[TrackingConsentFrontend],
     platform: Platform = mock[Platform]
@@ -62,7 +61,6 @@ object AppConfigMockHelper extends MockitoSugar {
     notifications,
     feedback,
     proxy,
-    accessibilityLinkUrl,
     answersRepository,
     trackingConsentFrontend,
     platform

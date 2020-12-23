@@ -130,53 +130,6 @@ cds.error.heading=Sorry, there is a problem with the service
 cds.error.message=Please try again later.
 cds.error.helpSupport=Help and support
 
-# accessibility
-fuf.accessibility.statement.title=Accessibility statement for File Upload Service for Customs Declarations Service (CDS)
-fuf.accessibility.statement.h1=Accessibility statement for File Upload Service for Customs Declarations Service (CDS)
-fuf.accessibility.statement.intro.p1=This accessibility statement explains how accessible this service is, what to do if you have difficulty using it, and how to report accessibility problems with the service.
-fuf.accessibility.statement.intro.p2=This service is part of the wider GOV.UK website. There is a separate <a href="https://www.gov.uk/help/accessibility">accessibility statement</a> for the main GOV.UK website.
-fuf.accessibility.statement.intro.p3=This page only contains information about the access your financials records for CDS service, available at tax.service.gov.uk/cds-file-upload-service
-
-fuf.accessibility.statement.using.heading=Using this service
-fuf.accessibility.statement.using.p1=This service allows you to upload files when requested by the Customs Declarations Service.
-fuf.accessibility.statement.using.p2=This service is run by HM Revenue and Customs (HMRC). We want as many people as possible to be able to use this service. This means you should be able to:
-fuf.accessibility.statement.using.l1=change colours, contrast levels and fonts
-fuf.accessibility.statement.using.l2=zoom in up to 300% without the text spilling off the screen
-fuf.accessibility.statement.using.l3=get from the start of the service to the end using just a keyboard
-fuf.accessibility.statement.using.l4=get from the start of the service to the end using speech recognition software
-fuf.accessibility.statement.using.l5=listen to the service using a screen reader (including the most recent versions of JAWS, NVDA and VoiceOver)
-fuf.accessibility.statement.using.p3=We have also made the text in the service as simple as possible to understand.
-fuf.accessibility.statement.using.p4=<a class="govuk-link" href="https://mcmw.abilitynet.org.uk/">AbilityNet</a> has advice on making your device easier to use if you have a disability.
-
-fuf.accessibility.statement.accessible.heading=How accessible this service is
-fuf.accessibility.statement.accessible.p1=This service is fully compliant with the <a class="govuk-link" href="https://www.w3.org/TR/WCAG21/">Web Content Accessibility Guidelines version 2.1 AA standard</a>.
-fuf.accessibility.statement.accessible.awareness=We are not aware of any accessibility issues.
-
-fuf.accessibility.statement.whattodo.heading=What to do if you have difficulty using this service
-fuf.accessibility.statement.whattodo.p1=If you have difficulty using this service, contact us by:
-fuf.accessibility.statement.whattodo.l1=call 03000 588454 for imports
-fuf.accessibility.statement.whattodo.l2=call 03000 588401 for exports
-
-fuf.accessibility.statement.reporting.heading=Reporting accessibility problems with this service
-fuf.accessibility.statement.reporting.p1=We are always looking to improve the accessibility of this service. If you find any problems that are not listed on this page or think we are not meeting accessibility requirements, report the <a href="https://www.tax.service.gov.uk/contact/beta-feedback-unauthenticated?service=CDS-FIN">accessibility problem</a>.
-
-fuf.accessibility.statement.enforcement.heading=What to do if you are not happy with how we respond to your complaint
-fuf.accessibility.statement.enforcement.p1=The Equality and Human Rights Commission (EHRC) is responsible for enforcing the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018 (the ‘accessibility regulations’). If you are not happy with how we respond to your complaint, <a href="https://www.equalityadvisoryservice.com/">contact the Equality Advisory and Support Service</a> (EASS), or the <a href="https://www.equalityni.org/Home">Equality Commission for Northern Ireland</a> (ECNI) if you live in Northern Ireland.
-
-fuf.accessibility.statement.contacting.heading=Contacting us by phone or getting a visit from us in person
-fuf.accessibility.statement.contacting.p1=We provide a text relay service if you are deaf, hearing impaired or have a speech impediment.
-fuf.accessibility.statement.contacting.p2=We can provide a British Sign Language (BSL) interpreter, or you can arrange a visit from an HMRC advisor to help you complete the service.
-fuf.accessibility.statement.contacting.p3=Find out how to <a href="https://www.gov.uk/dealing-hmrc-additional-needs">contact us</a>.
-
-fuf.accessibility.statement.technical.heading=Technical information about this service’s accessibility
-fuf.accessibility.statement.technical.p1=HMRC is committed to making this service accessible, in accordance with the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018.
-fuf.accessibility.statement.technical.p2=This service is fully compliant with the <a href="https://www.w3.org/TR/WCAG21/">Web Content Accessibility Guidelines version 2.1 AA standard</a>
-
-fuf.accessibility.statement.howtested.heading=How we tested this service
-fuf.accessibility.statement.howtested.p1=The service was last tested on 30 May 2019 and was checked for compliance with WCAG 2.1 AA.
-fuf.accessibility.statement.howtested.p2=The service was built using parts that were tested by the <a href="http://www.digitalaccessibilitycentre.org/">Digital Accessibility Centre</a>. The full service was tested by HMRC.
-fuf.accessibility.statement.howtested.p3=This page was prepared on 16 September 2019. It was last updated on 16 September 2019.
-
 feedback.header = Tell us what you think
 feedback.line.1 = This is a new service and we want to know what you think of it.
 feedback.line.2 = {0}. Your thoughts and ideas will help us to make improvements.

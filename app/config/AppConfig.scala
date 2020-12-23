@@ -29,7 +29,6 @@ case class AppConfig(
   notifications: Notifications,
   feedback: Feedback,
   proxy: Proxy,
-  accessibilityLinkUrl: String,
   answersRepository: AnswersRepository,
   trackingConsentFrontend: TrackingConsentFrontend,
   platform: Platform
