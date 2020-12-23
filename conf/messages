@@ -18,7 +18,7 @@ common.button.startNow=Start now
 
 startPage.title=Upload a customs document
 startPage.heading=Upload a customs document
-startPage.paragraph2=You should only use this service when HMRC requests that you submit supporting customs documents. You will need to know how many files you want to upload before you start uploading them. This is not the same as the number of documents. You can submit a maximum of 10 documents, with a total file size of 10 Megabytes (MB).
+startPage.paragraph2=You will need to know how many files you want to upload before you start uploading them. You can submit a maximum of 10 files, and each file can be up to 10 Megabytes (MB).
 startPage.paragraph3= {0} - if you have two photos of an invoice saved as separate jpegs, this is two files.
 startPage.paragraph3.bold= Example 1
 startPage.paragraph4= {0} - if you have a bill of lading, an invoice, and a licence saved in a single Word document, this is one file.
