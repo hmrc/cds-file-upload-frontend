@@ -82,17 +82,17 @@
     @paragraphBody(message = messages("fileUploadReceiptPage.paragraph1"))
     @bulletList(
         elements = Seq(
-            messages("fileUploadReceiptPage.listitem1"),
-            messages("fileUploadReceiptPage.listitem2"),
-            messages("fileUploadReceiptPage.listitem3")
+            Html(messages("fileUploadReceiptPage.listitem1")),
+            Html(messages("fileUploadReceiptPage.listitem2")),
+            Html(messages("fileUploadReceiptPage.listitem3"))
         )
     )
 
     @paragraphBody(message = messages("fileUploadReceiptPage.paragraph2"))
     @bulletList(
         elements = Seq(
-            messages("fileUploadReceiptPage.listitem4"),
-            listItemWithLink.toString()
+            Html(messages("fileUploadReceiptPage.listitem4")),
+            Html(listItemWithLink.toString())
         )
     )
 

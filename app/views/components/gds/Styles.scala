@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,20 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import views.html.components.gds._
+package views.components.gds
 
-@this(paragraphBody: paragraphBody)
+object Styles {
 
-@(elements: Seq[Html])(implicit messages: Messages)
-
-<nav>
-    <ul class="govuk-list govuk-list--bullet">
-        @elements.map { element =>
-            <li class="dashed-list-item">
-                @element
-            </li>
-        }
-    </ul>
-</nav>
+  val gdsPageLegend = "govuk-fieldset__legend--xl"
+  val gdsPageHeading = "govuk-heading-xl"
+  val gdsPageLabel = "govuk-label--xl"
+}

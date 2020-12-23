@@ -16,40 +16,48 @@
 
 package views
 
+import base.SpecBase
+import play.api.test.FakeRequest
+import play.twirl.api.Html
 import views.html.unauthorised
+import utils.FakeRequestCSRFSupport._
+import views.matchers.ViewMatchers
 
-class UnauthorisedSpec extends DomAssertions {
+class UnauthorisedSpec extends SpecBase with ViewMatchers {
 
-  val page = instanceOf[unauthorised]
+  private implicit val request = FakeRequest().withCSRFToken
 
-  lazy val view = page()(fakeRequest, messages).toString
+  private val unauthorisedPage = instanceOf[unauthorised]
+  private def view: Html = unauthorisedPage()(request, messages)
 
-  "view" should {
+  "Unauthorised Page view" should {
 
-    "include header" in {
-      view must include(messages("unauthorised.heading"))
-      assertH1EqualsMessage(asDocument(view), "unauthorised.heading")
-    }
-
-    "include title" in {
-      view must include(messages("unauthorised.title"))
+    "display page header" in {
+      view.getElementsByTag("h1").first() must containMessage("unauthorised.heading")
     }
 
     "display get EORI link" in {
-      assertContainsLink(asDocument(view), messages("unauthorised.how.paragraph1.link"), "https://www.gov.uk/eori")
+      val link = view.getElementById("get_eori_link")
+
+      link must containMessage("unauthorised.paragraph.1.bullet.1.link")
+      link must haveHref("https://www.gov.uk/eori")
+      link.attr("target") mustBe "_self"
     }
 
     "display access CDS link" in {
-      assertContainsLink(asDocument(view), messages("unauthorised.how.paragraph2.link"), "https://www.tax.service.gov.uk/customs/register-for-cds")
+      val link = view.getElementById("access_cds_link")
+
+      link must containMessage("unauthorised.paragraph.1.bullet.2.link")
+      link must haveHref("https://www.gov.uk/guidance/get-access-to-the-customs-declaration-service")
+      link.attr("target") mustBe "_self"
     }
 
-    "display check CDS status link" in {
-      assertContainsLink(
-        asDocument(view),
-        messages("unauthorised.applied.paragraph1.link"),
-        "https://www.tax.service.gov.uk/customs/register-for-cds/match"
-      )
-    }
+    "display check CDS application status link" in {
+      val link = view.getElementById("check_cds_application_status_link")
 
+      link must containMessage("unauthorised.paragraph.2.link")
+      link must haveHref("https://www.tax.service.gov.uk/customs/register-for-cds/are-you-based-in-uk")
+      link.attr("target") mustBe "_self"
+    }
   }
 }
