@@ -27,5 +27,3 @@ GET         /upload/:ref                        controllers.UpscanStatusControll
 
 GET         /upload/upscan-error/               controllers.UpscanStatusController.error()
 GET         /upload/upscan-success/:id          controllers.UpscanStatusController.success(id: String)
-
-GET         /help/accessibility                 controllers.StaticPagesController.accessibility
