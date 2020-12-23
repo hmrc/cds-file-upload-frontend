@@ -19,9 +19,9 @@
 @import uk.gov.hmrc.hmrcfrontend.views.html.components.HmrcReportTechnicalIssue
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.reporttechnicalissue.ReportTechnicalIssue
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.language.{En, Cy}
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.hmrcStandardFooter
 @import views.Title
 @import models.requests.AuthenticatedRequest
-@import scala.collection.immutable.Seq
 @import config.AppConfig
 
 @this(
@@ -33,6 +33,7 @@
   phaseBanner: components.gds.phaseBanner,
   hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet,
   hmrcReportTechnicalIssue: HmrcReportTechnicalIssue,
+  hmrcFooter: hmrcStandardFooter,
   appConfig: AppConfig
 )
 
@@ -56,6 +57,8 @@
 @scripts = {
     <script src="@routes.Assets.versioned("javascripts/show-hide-content.js")" type="text/javascript"></script>
     <script src='@routes.Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
+    <script src='@routes.Assets.versioned("lib/hmrc-frontend/hmrc/all.js")'></script>
+    <script>window.HMRCFrontend.initAll();</script>
     <script>window.GOVUKFrontend.initAll();</script>
 }
 
@@ -73,15 +76,6 @@
   )
 }
 
-@footer = @{
-    Seq(
-        FooterItem(href = Some("/help/cookies"), text = Some("Cookies")),
-        FooterItem(href = Some("/accessibility-statement/cds-file-upload"), text = Some("Accessibility statement")),
-        FooterItem(href = Some("/help/privacy"), text = Some("Privacy Policy")),
-        FooterItem(href = Some("/help/terms-and-conditions"), text = Some("Terms and conditions")),
-        FooterItem(href = Some("www.gov.uk/help"), text = Some("Help using GOV.UK"))
-)}
-
 @if(useCustomContentWidth) {
   @govukFlexibleLayout(
     pageTitle = Some(title.toString),
@@ -90,7 +84,7 @@
     bodyEndBlock = None,
     scriptsBlock = Some(scripts),
     headerBlock = Some(siteHeader()),
-    footerItems = footer
+    footerBlock = Some(hmrcFooter())
   )(content)
 } else {
   @govukLayout(
@@ -100,7 +94,7 @@
     bodyEndBlock = None,
     scriptsBlock = Some(scripts),
     headerBlock = Some(siteHeader()),
-    footerItems = footer
+    footerBlock = Some(hmrcFooter())
   )(content)
 }
 
