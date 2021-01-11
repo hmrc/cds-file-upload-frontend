@@ -18,9 +18,9 @@ package controllers
 
 import base.SfusMetricsMock
 import connectors.CdsFileUploadConnector
-import controllers.actions.{DataRetrievalAction, FileUploadResponseRequiredAction}
 import models.{FileUpload, FileUploadResponse, Notification, UserAnswers}
 import org.mockito.ArgumentMatchers._
+import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
 import org.scalacheck.Arbitrary.arbitrary
 import play.api.test.Helpers._
@@ -36,16 +36,18 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
   val page = mock[upload_your_files_receipt]
   val eori: String = arbitrary[String].sample.get
 
-  def controller(getData: DataRetrievalAction) =
+  def controller(maybeUserAnswers: Option[UserAnswers]) = {
+    when(mockAnswersConnector.findByEori(meq(eori))).thenReturn(Future.successful(maybeUserAnswers))
+
     new UploadYourFilesReceiptController(
       new FakeAuthAction(),
       new FakeEORIAction(eori),
-      getData,
-      new FileUploadResponseRequiredAction(),
       cdsFileUploadConnector,
       sfusMetrics,
-      page
+      page,
+      mockAnswersConnector
     )(mcc, executionContext)
+  }
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
@@ -54,7 +56,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
   }
 
   override protected def afterEach(): Unit = {
-    reset(page)
+    reset(page, mockAnswersConnector)
 
     super.afterEach()
   }
@@ -74,21 +76,24 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
           }
 
           val answers = UserAnswers(eori, fileUploadResponse = Some(response))
-          val result = controller(fakeDataRetrievalAction(answers)).onPageLoad()(fakeRequest)
+          val result = controller(Some(answers)).onPageLoad()(fakeRequest)
 
           status(result) mustBe OK
+          result.map(_ => verify(mockAnswersConnector).removeByEori(any()))
         }
       }
     }
 
-    "redirect to error page" when {
+    "redirect to start page" when {
 
       "no responses are in the cache" in {
 
-        val result = controller(new FakeDataRetrievalAction(None)).onPageLoad()(fakeRequest)
+        val result = controller(None).onPageLoad()(fakeRequest)
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.ErrorPageController.error().url)
+        redirectLocation(result) mustBe Some(routes.StartController.displayStartPage().url)
+
+        result.map(_ => verify(mockAnswersConnector).removeByEori(any()))
       }
     }
   }

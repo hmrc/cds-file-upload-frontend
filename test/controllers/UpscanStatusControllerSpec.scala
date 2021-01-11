@@ -101,7 +101,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
   }
 
   override protected def afterEach(): Unit = {
-    reset(mockAuditConnector, cdsFileUploadConnector, uploadYourFiles, uploadError)
+    reset(mockAuditConnector, cdsFileUploadConnector, uploadYourFiles, uploadError, mockAnswersConnector)
 
     super.afterEach()
   }
@@ -186,6 +186,8 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
 
       val result = controller(new FakeDataRetrievalAction(None)).success("someRef")(fakeRequest)
 
+      result.map(_ => verify(mockAnswersConnector).removeByEori(any()))
+
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(routes.ErrorPageController.error().url)
     }
@@ -197,6 +199,8 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
 
           val answers = UserAnswers(eori, fileUploadResponse = Some(response))
           val result = controller(fakeDataRetrievalAction(answers)).success(ref)(fakeRequest)
+
+          result.map(_ => verify(mockAnswersConnector).removeByEori(any()))
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some(routes.ErrorPageController.error().url)
@@ -324,6 +328,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
         .thenReturn(Future.successful(Some(Notification("fileRef3", "SUCCESS", "file3.gif"))))
 
       val result = controller(fakeDataRetrievalAction(answers)).success(lastFile.reference)(fakeRequest)
+      result.map(_ => verify(mockAnswersConnector).removeByEori(any()))
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(routes.ErrorPageController.uploadError().url)
     }
@@ -348,6 +353,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
         .thenReturn(Future.successful(None))
 
       val result = controller(fakeDataRetrievalAction(answers)).success(lastFile.reference)(fakeRequest)
+      result.map(_ => verify(mockAnswersConnector).removeByEori(any()))
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(routes.ErrorPageController.uploadError().url)
     }
