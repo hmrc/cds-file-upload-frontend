@@ -131,6 +131,7 @@ class UpscanStatusController @Inject()(
           case ns if ns.exists(failedUpload) =>
             logger.warn("Failed notification received for an upload.")
             logger.warn(s"Notifications: ${prettyPrint(ns)}")
+            clearUserCache(req.request.eori)
             Future.successful(Redirect(routes.ErrorPageController.uploadError()))
 
           case ns if ns.length == uploads.length =>
@@ -146,6 +147,7 @@ class UpscanStatusController @Inject()(
           case ns =>
             logger.warn(s"Maximum number of retries exceeded. Retrieved ${ns.length} of ${uploads.length} notifications.")
             logger.warn(s"Notifications: ${prettyPrint(ns)}")
+            clearUserCache(req.request.eori)
             Future.successful(Redirect(routes.ErrorPageController.uploadError()))
         }
       }
@@ -153,6 +155,8 @@ class UpscanStatusController @Inject()(
 
     retrieveNotifications()
   }
+
+  private def clearUserCache(eori: String) = answersConnector.removeByEori(eori)
 
   private def auditUploadSuccess()(implicit req: FileUploadResponseRequest[_]): Unit = {
     def auditDetails: Map[String, String] = {

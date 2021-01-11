@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions.{AnswersDeleteAction, AuthAction, EORIRequiredAction}
+import controllers.actions.{AuthAction, EORIRequiredAction}
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -24,19 +24,14 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.start
 
 @Singleton
-class StartController @Inject()(
-  authenticate: AuthAction,
-  requireEori: EORIRequiredAction,
-  clearAnswers: AnswersDeleteAction,
-  mcc: MessagesControllerComponents,
-  start: start
-) extends FrontendController(mcc) with I18nSupport {
+class StartController @Inject()(authenticate: AuthAction, requireEori: EORIRequiredAction, mcc: MessagesControllerComponents, start: start)
+    extends FrontendController(mcc) with I18nSupport {
 
   val displayStartPage: Action[AnyContent] = Action { implicit req =>
     Ok(start())
   }
 
-  def onStart: Action[AnyContent] = (authenticate andThen requireEori andThen clearAnswers) { _ =>
+  def onStart: Action[AnyContent] = (authenticate andThen requireEori) { _ =>
     Redirect(controllers.routes.ContactDetailsController.onPageLoad())
   }
 

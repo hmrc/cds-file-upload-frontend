@@ -61,9 +61,4 @@ trait FakeActions extends Generators {
     override protected def refine[A](request: ContactDetailsRequest[A]): Future[Either[Result, MrnRequest[A]]] =
       Future.successful(Right(MrnRequest(request, request.userAnswers, mrn)))
   }
-
-  class FakeAnswersDeleteAction extends AnswersDeleteAction {
-    override protected def filter[A](request: EORIRequest[A]): Future[Option[Result]] = Future.successful(None)
-    override protected def executionContext: ExecutionContext = ExecutionContext.global
-  }
 }
