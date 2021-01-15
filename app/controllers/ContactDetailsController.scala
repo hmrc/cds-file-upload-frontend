@@ -17,13 +17,13 @@
 package controllers
 
 import com.google.inject.Singleton
-import connectors.AnswersConnector
 import controllers.actions._
 import forms.mappings.ContactDetailsMapping._
 import javax.inject.Inject
 import play.api.data.Form
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.AnswersService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.contact_details
 
@@ -34,7 +34,7 @@ class ContactDetailsController @Inject()(
   authenticate: AuthAction,
   requireEori: EORIRequiredAction,
   getData: DataRetrievalAction,
-  answersConnector: AnswersConnector,
+  answersConnector: AnswersService,
   mcc: MessagesControllerComponents,
   contactDetails: contact_details
 )(implicit ec: ExecutionContext)

@@ -17,12 +17,12 @@
 package controllers
 
 import com.google.inject.Singleton
-import connectors.AnswersConnector
 import controllers.actions._
 import forms.MRNFormProvider
 import javax.inject.Inject
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.AnswersService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.mrn_entry
 
@@ -35,7 +35,7 @@ class MrnEntryController @Inject()(
   requireContactDetails: ContactDetailsRequiredAction,
   getData: DataRetrievalAction,
   formProvider: MRNFormProvider,
-  answersConnector: AnswersConnector,
+  answersConnector: AnswersService,
   mcc: MessagesControllerComponents,
   mrnEntry: mrn_entry
 )(implicit ec: ExecutionContext)

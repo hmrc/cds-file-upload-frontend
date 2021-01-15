@@ -19,13 +19,13 @@ package controllers
 import java.net.URLEncoder
 
 import base.SpecBase
-import connectors.AnswersConnector
 import controllers.actions.{ContactDetailsRequiredAction, DataRetrievalAction, FakeActions}
 import models.requests.SignedInUser
 import models.{ContactDetails, UserAnswers}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, verify, when}
+import services.AnswersService
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
@@ -35,7 +35,7 @@ import scala.concurrent.Future
 abstract class ControllerSpecBase extends SpecBase with FakeActions {
 
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
-  val mockAnswersConnector: AnswersConnector = mock[AnswersConnector]
+  val mockAnswersConnector: AnswersService = mock[AnswersService]
 
   def withSignedInUser(user: SignedInUser)(test: => Unit): Unit = {
     when(

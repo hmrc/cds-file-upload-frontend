@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package connectors
+package services
 
 import javax.inject.Inject
 import models.UserAnswers
@@ -25,7 +25,7 @@ import repositories.AnswersRepository
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AnswersConnector @Inject()(val repository: AnswersRepository)(implicit ec: ExecutionContext) {
+class AnswersService @Inject()(val repository: AnswersRepository)(implicit ec: ExecutionContext) {
 
   private val logger = Logger(this.getClass)
 

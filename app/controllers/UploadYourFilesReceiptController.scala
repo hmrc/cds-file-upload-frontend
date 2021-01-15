@@ -17,15 +17,15 @@
 package controllers
 
 import com.google.inject.Singleton
-import connectors.{AnswersConnector, CdsFileUploadConnector}
+import connectors.CdsFileUploadConnector
 import controllers.actions._
-
 import javax.inject.Inject
 import metrics.SfusMetrics
 import metrics.MetricIdentifiers._
 import models.FileUpload
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
+import services.AnswersService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.upload_your_files_receipt
@@ -39,7 +39,7 @@ class UploadYourFilesReceiptController @Inject()(
   cdsFileUploadConnector: CdsFileUploadConnector,
   metrics: SfusMetrics,
   uploadYourFilesReceipt: upload_your_files_receipt,
-  answersConnector: AnswersConnector
+  answersConnector: AnswersService
 )(implicit mcc: MessagesControllerComponents, ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 

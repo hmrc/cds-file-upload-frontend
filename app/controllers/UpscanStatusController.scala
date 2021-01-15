@@ -17,7 +17,7 @@
 package controllers
 
 import config.AppConfig
-import connectors.{AnswersConnector, CdsFileUploadConnector}
+import connectors.CdsFileUploadConnector
 import controllers.actions.{AuthAction, DataRetrievalAction, EORIRequiredAction, FileUploadResponseRequiredAction}
 import javax.inject.Inject
 import metrics.MetricIdentifiers.fetchNotificationMetric
@@ -27,6 +27,7 @@ import models.requests.FileUploadResponseRequest
 import play.api.Logger
 import play.api.i18n.I18nSupport
 import play.api.mvc._
+import services.AnswersService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -41,7 +42,7 @@ class UpscanStatusController @Inject()(
   requireEori: EORIRequiredAction,
   getData: DataRetrievalAction,
   requireResponse: FileUploadResponseRequiredAction,
-  answersConnector: AnswersConnector,
+  answersConnector: AnswersService,
   auditConnector: AuditConnector,
   cdsFileUploadConnector: CdsFileUploadConnector,
   implicit val appConfig: AppConfig,

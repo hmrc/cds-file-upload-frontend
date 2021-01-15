@@ -18,108 +18,108 @@ package controllers
 
 import controllers.actions.ContactDetailsRequiredAction
 import forms.MRNFormProvider
-import models.requests.SignedInUser
-import models.{ContactDetails, MRN}
-import org.mockito.ArgumentMatchers._
+import models.{MRN, UserAnswers}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
-import org.scalacheck.Arbitrary._
-import play.api.test.Helpers.{status, _}
+import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
+import services.MrnDisValidator
+import testdata.CommonTestData._
 import views.html.mrn_entry
 
 class MrnEntryControllerSpec extends ControllerSpecBase {
 
-  val form = new MRNFormProvider()()
+  private val contactDetailsRequiredGen = new FakeContactDetailsRequiredAction(contactDetails)
 
-  val contactDetailsRequiredGen =
-    for {
-      contactDetails <- arbitrary[ContactDetails]
-    } yield {
-      fakeContactDetailsRequiredAction(contactDetails)
-    }
+  val mrnDisValidator: MrnDisValidator = mock[MrnDisValidator]
+  private val page = mock[mrn_entry]
 
-  val page = mock[mrn_entry]
+  private val validAnswers = UserAnswers(eori, contactDetails = Some(contactDetails))
 
-  def controller(signedInUser: SignedInUser, eori: String, requireContactDetails: ContactDetailsRequiredAction) =
+  private def mrnEntryController(requireContactDetails: ContactDetailsRequiredAction, answers: UserAnswers = validAnswers) =
     new MrnEntryController(
-      new FakeAuthAction(signedInUser),
+      new FakeAuthAction(),
       new FakeEORIAction(eori),
       requireContactDetails,
-      new FakeDataRetrievalAction(None),
+      new FakeDataRetrievalAction(Some(answers)),
       new MRNFormProvider,
       mockAnswersConnector,
       mcc,
       page
     )(executionContext)
 
-  override protected def beforeEach(): Unit = {
+  override def beforeEach(): Unit = {
     super.beforeEach()
 
+    reset(page)
     when(page.apply(any())(any(), any())).thenReturn(HtmlFormat.empty)
   }
 
-  override protected def afterEach(): Unit = {
+  override def afterEach(): Unit = {
     reset(page)
 
     super.afterEach()
   }
 
-  "Mrn Entry Page" must {
-    "load the correct page when user is logged in " in {
+  "MrnEntryController on onPageLoad" should {
 
-      forAll(arbitrary[SignedInUser], arbitrary[String], contactDetailsRequiredGen) { (user, eori, fakeContactDetails) =>
-        val result = controller(user, eori, fakeContactDetails).onPageLoad(fakeRequest)
+    "return Ok (200) response" when {
 
-        status(result) mustBe OK
-      }
-    }
+      "cache is empty" in {
 
-    "mrn should be displayed if it exist on the cache" in {
-
-      forAll(arbitrary[SignedInUser], arbitrary[String], arbitrary[MRN]) { (user, eori, mrn) =>
-        val fakeContactDetails =
-          new FakeContactDetailsRequiredAction(ContactDetails("", "", "", ""))
-        val result = controller(user, eori, fakeContactDetails).onPageLoad(fakeRequest)
+        val controller = mrnEntryController(contactDetailsRequiredGen)
+        val result = controller.onPageLoad(fakeRequest)
 
         status(result) mustBe OK
       }
-    }
 
-    "return an ok when valid data is submitted" in {
+      "cache contains MRN data" in {
 
-      forAll(arbitrary[SignedInUser], arbitrary[String], arbitrary[MRN], contactDetailsRequiredGen) { (user, eori, mrn, fakeContactDetails) =>
-        val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn.value)
-        val result = controller(user, eori, fakeContactDetails).onSubmit(postRequest)
+        val controller = mrnEntryController(contactDetailsRequiredGen, validAnswers.copy(mrn = MRN(mrn)))
+        val result = controller.onPageLoad(fakeRequest)
 
-        status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.HowManyFilesUploadController.onPageLoad().url)
-      }
-    }
-
-    "return a bad request when invalid data is submitted" in {
-
-      forAll(arbitrary[SignedInUser], arbitrary[String], arbitrary[String], contactDetailsRequiredGen) { (user, eori, mrn, fakeContactDetails) =>
-        whenever(!mrn.matches(MRN.validRegex)) {
-
-          val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn)
-
-          val result = controller(user, eori, fakeContactDetails).onSubmit(postRequest)
-
-          status(result) mustBe BAD_REQUEST
-        }
-      }
-    }
-
-    "save data in cache when valid" in {
-
-      forAll(arbitrary[SignedInUser], arbitrary[String], arbitrary[MRN]) { (user, eori, mrn) =>
-        resetAnswersConnector()
-        val fakeContactDetails = new FakeContactDetailsRequiredAction(ContactDetails("", "", "", ""))
-        val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn.value)
-        await(controller(user, eori, fakeContactDetails).onSubmit(postRequest))
-
-        theSavedUserAnswers.mrn mustBe MRN(mrn.value)
+        status(result) mustBe OK
       }
     }
   }
+
+  "MrnEntryController on onSubmit" when {
+
+    val controller = mrnEntryController(contactDetailsRequiredGen)
+
+    "provided with incorrect data" should {
+
+      "return BadRequest (400) response" in {
+
+        val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "Invalid MRN")
+
+        val result = controller.onSubmit(postRequest)
+
+        status(result) mustBe BAD_REQUEST
+      }
+    }
+
+    "provided with correct data" should {
+
+      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn)
+
+      "call AnswersConnector" in {
+
+        controller.onSubmit(postRequest).futureValue
+
+        val upsertedUserAnswers = theSavedUserAnswers
+        upsertedUserAnswers.mrn mustBe defined
+        upsertedUserAnswers.mrn.get mustBe MRN(mrn).get
+      }
+
+      "return SeeOther (303) response" in {
+
+        val result = controller.onSubmit(postRequest)
+
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).get mustBe routes.HowManyFilesUploadController.onPageLoad().url
+      }
+    }
+  }
+
 }
