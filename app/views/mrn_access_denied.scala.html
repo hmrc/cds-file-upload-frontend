@@ -1,0 +1,53 @@
+@*
+ * Copyright 2021 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import models.MRN
+@import views.Title
+@import views.html.components.gds._
+@import views.html.components._
+
+
+@this(
+  mainTemplate: gdsMainTemplate,
+  pageTitle: pageTitle,
+  paragraphBody: paragraphBody,
+  linkButton: link_button,
+  link: link
+)
+
+@(mrn: MRN)(implicit request: Request[_], messages: Messages)
+
+@mainTemplate(title = Title("mrnAccessDenied.heading", mrn.value)) {
+
+  @pageTitle(messages("mrnAccessDenied.heading", mrn.value))
+
+  @paragraphBody(messages("mrnAccessDenied.paragraph.1"))
+
+  @paragraphBody(messages("mrnAccessDenied.paragraph.2"))
+
+  @linkButton(
+    messageKey = "cds.sign.out",
+    call = controllers.routes.SignOutController.signOut()
+  )
+
+  <div class="govuk-!-margin-bottom-5">
+    @link(
+      text = messages("mrnAccessDenied.link.enterDifferentMrn"),
+      call = controllers.routes.MrnEntryController.onPageLoad()
+    )
+  </div>
+
+}

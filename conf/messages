@@ -28,13 +28,20 @@ startPage.listItem1=a Government Gateway account
 startPage.listItem2=a Customs Declaration Service (CDS) enrolment
 startPage.listItem3=the movement reference number (MRN) of your declaration
 
-# MRN Entry Page
+## MRN Entry Page
 
 mrnEntryPage.title=What is your movement reference number (MRN)?
 mrnEntryPage.heading=What is your movement reference number (MRN)?
 mrnEntryPage.hint1=This is 18 digits long, and is made up of letters and numbers.
 mrnEntryPage.hint2=You were given this when you submitted your declaration.
 mrn.invalid=The MRN you have entered doesn't follow CDS rules, please check your declaration MRN and re-enter
+
+## MRN access denied page
+
+mrnAccessDenied.heading=You do not have access to any declaration with MRN {0}
+mrnAccessDenied.paragraph.1=If the MRN is correct and current, this may mean the documents need to be uploaded by the same person that made the declaration.
+mrnAccessDenied.paragraph.2=The documents can also be uploaded by another person from the same business, using a Gateway ID that has been given access to the Customs Declaration Service by that business.
+mrnAccessDenied.link.enterDifferentMrn=Enter a different MRN
 
 ## Contact details page
 

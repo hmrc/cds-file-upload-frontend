@@ -48,7 +48,7 @@ class UploadErrorSpec extends ViewBehaviours with ViewMatchers {
     }
 
     "have a button that links to start page" in {
-      val button = asDocument(view()).getElementById("startAgainButton")
+      val button = asDocument(view()).getElementsByClass("govuk-button").first()
 
       button must containMessage("uploadError.button")
       button must haveHref(controllers.routes.StartController.displayStartPage())
