@@ -18,7 +18,7 @@ package models
 
 import play.api.libs.json._
 
-sealed abstract case class MRN(value: String)
+case class MRN(value: String)
 
 object MRN {
 

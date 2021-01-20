@@ -25,14 +25,17 @@ import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
 import services.MrnDisValidator
 import testdata.CommonTestData._
-import views.html.mrn_entry
+import views.html.{mrn_access_denied, mrn_entry}
+
+import scala.concurrent.Future
 
 class MrnEntryControllerSpec extends ControllerSpecBase {
 
   private val contactDetailsRequiredGen = new FakeContactDetailsRequiredAction(contactDetails)
 
-  val mrnDisValidator: MrnDisValidator = mock[MrnDisValidator]
-  private val page = mock[mrn_entry]
+  private val mrnDisValidator = mock[MrnDisValidator]
+  private val mrnEntryPage = mock[mrn_entry]
+  private val mrnAccessDeniedPage = mock[mrn_access_denied]
 
   private val validAnswers = UserAnswers(eori, contactDetails = Some(contactDetails))
 
@@ -45,18 +48,21 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
       new MRNFormProvider,
       mockAnswersConnector,
       mcc,
-      page
+      mrnEntryPage,
+      mrnDisValidator,
+      mrnAccessDeniedPage
     )(executionContext)
 
   override def beforeEach(): Unit = {
     super.beforeEach()
 
-    reset(page)
-    when(page.apply(any())(any(), any())).thenReturn(HtmlFormat.empty)
+    reset(mrnEntryPage, mrnAccessDeniedPage, mrnDisValidator)
+    when(mrnEntryPage.apply(any())(any(), any())).thenReturn(HtmlFormat.empty)
+    when(mrnAccessDeniedPage.apply(any())(any(), any())).thenReturn(HtmlFormat.empty)
   }
 
   override def afterEach(): Unit = {
-    reset(page)
+    reset(mrnEntryPage, mrnAccessDeniedPage, mrnDisValidator)
 
     super.afterEach()
   }
@@ -87,7 +93,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
 
     val controller = mrnEntryController(contactDetailsRequiredGen)
 
-    "provided with incorrect data" should {
+    "provided with incorrect MRN" should {
 
       "return BadRequest (400) response" in {
 
@@ -99,25 +105,47 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
       }
     }
 
-    "provided with correct data" should {
+    "provided with correct MRN" which {
 
-      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn)
+      "fails MRN DIS validation" should {
 
-      "call AnswersConnector" in {
+        val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn)
 
-        controller.onSubmit(postRequest).futureValue
+        "return BadRequest (400) response" in {
 
-        val upsertedUserAnswers = theSavedUserAnswers
-        upsertedUserAnswers.mrn mustBe defined
-        upsertedUserAnswers.mrn.get mustBe MRN(mrn).get
+          when(mrnDisValidator.validate(any(), any())(any())).thenReturn(Future.successful(false))
+
+          val result = controller.onSubmit(postRequest)
+
+          status(result) mustBe BAD_REQUEST
+          verify(mrnAccessDeniedPage).apply(any())(any(), any())
+        }
       }
 
-      "return SeeOther (303) response" in {
+      "passes MRN DIS validation" should {
 
-        val result = controller.onSubmit(postRequest)
+        val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn)
 
-        status(result) mustBe SEE_OTHER
-        redirectLocation(result).get mustBe routes.HowManyFilesUploadController.onPageLoad().url
+        "call AnswersConnector" in {
+
+          when(mrnDisValidator.validate(any(), any())(any())).thenReturn(Future.successful(true))
+
+          controller.onSubmit(postRequest).futureValue
+
+          val upsertedUserAnswers = theSavedUserAnswers
+          upsertedUserAnswers.mrn mustBe defined
+          upsertedUserAnswers.mrn.get mustBe MRN(mrn).get
+        }
+
+        "return SeeOther (303) response" in {
+
+          when(mrnDisValidator.validate(any(), any())(any())).thenReturn(Future.successful(true))
+
+          val result = controller.onSubmit(postRequest)
+
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).get mustBe routes.HowManyFilesUploadController.onPageLoad().url
+        }
       }
     }
   }
