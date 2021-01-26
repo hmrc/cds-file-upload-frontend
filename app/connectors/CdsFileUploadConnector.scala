@@ -18,10 +18,10 @@ package connectors
 
 import config.{AppConfig, CDSFileUpload}
 import javax.inject.Inject
-import models.Notification
+import models.{MRN, Notification}
 import play.api.Logger
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -43,4 +43,8 @@ class CdsFileUploadConnector @Inject()(appConfig: AppConfig, httpClient: HttpCli
         }
         notificationOpt
       }
+
+  def getDeclarationStatus(mrn: MRN)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+    httpClient.GET[HttpResponse](cdsFileUploadConfig.fetchDeclarationStatusEndpoint(mrn.value))
+
 }

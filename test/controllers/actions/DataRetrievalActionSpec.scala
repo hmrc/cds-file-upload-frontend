@@ -16,19 +16,19 @@
 
 package controllers.actions
 
-import connectors.AnswersConnector
 import controllers.ControllerSpecBase
 import generators.SignedInUserGen
 import models.UserAnswers
 import models.requests.{AuthenticatedRequest, DataRequest, EORIRequest, SignedInUser}
 import org.mockito.ArgumentMatchers.{eq => eqTo}
 import org.mockito.Mockito._
+import services.AnswersService
 
 import scala.concurrent.Future
 
 class DataRetrievalActionSpec extends ControllerSpecBase with SignedInUserGen {
 
-  class Harness(answersConnector: AnswersConnector) extends DataRetrievalActionImpl(answersConnector, mcc) {
+  class Harness(answersConnector: AnswersService) extends DataRetrievalActionImpl(answersConnector, mcc) {
     def callTransform[A](request: EORIRequest[A]): Future[DataRequest[A]] = transform(request)
   }
 
@@ -38,7 +38,7 @@ class DataRetrievalActionSpec extends ControllerSpecBase with SignedInUserGen {
 
         forAll { (user: SignedInUser, eori: String) =>
           val answers = UserAnswers(eori)
-          val answersConnector = mock[AnswersConnector]
+          val answersConnector = mock[AnswersService]
           when(answersConnector.findOrCreate(eqTo(eori))) thenReturn Future.successful(answers)
           val action = new Harness(answersConnector)
           val request = EORIRequest(AuthenticatedRequest(fakeRequest, user), eori)

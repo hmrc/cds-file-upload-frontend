@@ -45,7 +45,8 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
   implicit val arbitraryUserInfo: Arbitrary[UserInfo] = Arbitrary(zip(userGen, arbitrary[String]))
   val eori: String = arbitrary[String].sample.get
   val mrn: MRN = arbitraryMrn.arbitrary.sample.get
-  val validAnswers = UserAnswers(eori, mrn = Some(mrn), fileUploadCount = FileUploadCount(7))
+  private val fileUploadCount = FileUploadCount(7)
+  val validAnswers = UserAnswers(eori, mrn = Some(mrn), fileUploadCount = fileUploadCount)
 
   implicit val arbitraryContactDetailsActions: Arbitrary[ContactDetailsRequiredAction] =
     Arbitrary(arbitrary[FakeContactDetailsRequiredAction].map(_.asInstanceOf[ContactDetailsRequiredAction]))
@@ -111,7 +112,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       val result = controller(updatedAction).onPageLoad(fakeRequest.withCSRFToken)
 
       val doc = asDocument(contentAsString(result))
-      doc.select("#value").`val` mustEqual "7"
+      doc.select("#value").`val` mustEqual fileUploadCount.get.value.toString
     }
 
     "redirect to error page when no data is found in the cache on page load" in {

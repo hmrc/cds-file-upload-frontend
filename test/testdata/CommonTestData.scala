@@ -14,28 +14,17 @@
  * limitations under the License.
  */
 
-package models
+package testdata
 
-import play.api.libs.json._
+import models.ContactDetails
 
-case class MRN(value: String)
+object CommonTestData {
 
-object MRN {
+  val mrn = "18GB9JLC3CU1LFGVR1"
+  val mrn_2 = "18GB9JLC3CU1LFGVR2"
+  val eori = "GB123456789012000"
+  val eori_2 = "GB123456789012001"
+  val ucr = "20GBAKZ81EQJ2WXYZ"
 
-  def validRegex: String = "\\d{2}[a-zA-Z]{2}[a-zA-Z0-9]{14}"
-
-  def apply(value: String): Option[MRN] =
-    if (value.matches(validRegex)) Some(new MRN(value) {})
-    else None
-
-  implicit val reads: Reads[MRN] =
-    __.read[String]
-      .map(MRN(_))
-      .collect(JsonValidationError("MRN did not pass validation")) {
-        case Some(mrn) => mrn
-      }
-
-  implicit val writes: Writes[MRN] = Writes {
-    case MRN(value) => JsString(value)
-  }
+  val contactDetails = ContactDetails(name = "name", companyName = "company name", phoneNumber = "0123456789", email = "email@mail.org")
 }

@@ -18,7 +18,7 @@ package views
 
 import play.api.i18n.Messages
 
-case class Title(headingKey: String) {
+case class Title(headingKey: String, headingArgs: String*) {
 
-  def toString(implicit messages: Messages): String = messages(headingKey)
+  def toString(implicit messages: Messages): String = messages(headingKey, headingArgs: _*)
 }

@@ -16,7 +16,7 @@
 
 package controllers
 
-import connectors.{AnswersConnector, UpscanConnector}
+import connectors.UpscanConnector
 import controllers.actions._
 import forms.FileUploadCountProvider
 import javax.inject.{Inject, Singleton}
@@ -25,7 +25,7 @@ import models.requests.MrnRequest
 import play.api.Logger
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.CustomsDeclarationsService
+import services.{AnswersService, CustomsDeclarationsService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.how_many_files_upload
@@ -40,7 +40,7 @@ class HowManyFilesUploadController @Inject()(
   requireMrn: MrnRequiredAction,
   requireContactDetails: ContactDetailsRequiredAction,
   formProvider: FileUploadCountProvider,
-  answersConnector: AnswersConnector,
+  answersConnector: AnswersService,
   upscanConnector: UpscanConnector,
   customsDeclarationsService: CustomsDeclarationsService,
   mcc: MessagesControllerComponents,

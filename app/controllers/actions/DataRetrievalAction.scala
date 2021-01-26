@@ -16,14 +16,14 @@
 
 package controllers.actions
 
-import connectors.AnswersConnector
 import javax.inject.Inject
 import models.requests.{DataRequest, EORIRequest}
 import play.api.mvc.{ActionTransformer, MessagesControllerComponents}
+import services.AnswersService
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class DataRetrievalActionImpl @Inject()(val answersConnector: AnswersConnector, mcc: MessagesControllerComponents) extends DataRetrievalAction {
+class DataRetrievalActionImpl @Inject()(val answersConnector: AnswersService, mcc: MessagesControllerComponents) extends DataRetrievalAction {
 
   implicit val executionContext: ExecutionContext = mcc.executionContext
 

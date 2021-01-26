@@ -67,9 +67,12 @@ case class CDSFileUploadFrontend(protocol: Option[String], host: String, port: O
   val uri: String = s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}"
 }
 
-case class CDSFileUpload(protocol: Option[String], host: String, port: Option[Int], fetchNotificationUri: String) {
+case class CDSFileUpload(protocol: Option[String], host: String, port: Option[Int], fetchNotificationUri: String, fetchDeclarationStatus: String) {
   def fetchNotificationEndpoint(reference: String): String =
     s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$fetchNotificationUri/$reference"
+
+  def fetchDeclarationStatusEndpoint(mrn: String): String =
+    s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$fetchDeclarationStatus/$mrn"
 }
 
 case class Keystore(protocol: String = "https", host: String, port: Int, defaultSource: String, domain: String) {

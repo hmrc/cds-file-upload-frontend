@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@(messageKey: String = "", href: String, id: String = "link")(implicit messages: Messages)
+package models.dis
 
-<div class="section">
-    <a href="@href" role="button" class="button" id="@id">@messages(messageKey)</a>
-</div>
+import play.api.libs.json.{Json, OFormat}
+
+case class PreviousDocument(id: String, typeCode: String)
+
+object PreviousDocument {
+  implicit val formats: OFormat[PreviousDocument] = Json.format[PreviousDocument]
+}

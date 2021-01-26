@@ -17,14 +17,15 @@
 package controllers
 
 import com.google.inject.Singleton
-import connectors.AnswersConnector
 import controllers.actions._
 import forms.MRNFormProvider
 import javax.inject.Inject
+import models.EORI
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.{AnswersService, MrnDisValidator}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import views.html.mrn_entry
+import views.html.{mrn_access_denied, mrn_entry}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -35,9 +36,11 @@ class MrnEntryController @Inject()(
   requireContactDetails: ContactDetailsRequiredAction,
   getData: DataRetrievalAction,
   formProvider: MRNFormProvider,
-  answersConnector: AnswersConnector,
+  answersConnector: AnswersService,
   mcc: MessagesControllerComponents,
-  mrnEntry: mrn_entry
+  mrnEntry: mrn_entry,
+  mrnDisValidator: MrnDisValidator,
+  mrnAccessDenied: mrn_access_denied
 )(implicit ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
@@ -53,9 +56,13 @@ class MrnEntryController @Inject()(
       .bindFromRequest()
       .fold(
         errorForm => Future.successful(BadRequest(mrnEntry(errorForm))),
-        value => {
-          answersConnector.upsert(req.userAnswers.copy(mrn = Some(value))).map { _ =>
-            Redirect(routes.HowManyFilesUploadController.onPageLoad())
+        mrn => {
+          mrnDisValidator.validate(mrn, EORI(req.request.eori)).flatMap {
+            case false => Future.successful(BadRequest(mrnAccessDenied(mrn)))
+            case true =>
+              answersConnector.upsert(req.userAnswers.copy(mrn = Some(mrn))).map { _ =>
+                Redirect(routes.HowManyFilesUploadController.onPageLoad())
+              }
           }
         }
       )
