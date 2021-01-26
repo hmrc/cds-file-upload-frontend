@@ -23,7 +23,7 @@ import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
-import play.mvc.Http.Status.{NOT_FOUND, OK}
+import play.mvc.Http.Status.{INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
 import testdata.CommonTestData
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
@@ -110,6 +110,18 @@ class CdsFileUploadConnectorSpec extends UnitSpec with BeforeAndAfterEach with I
       "response has NotFound (404) status" in {
 
         val httpResponse = HttpResponse(status = NOT_FOUND, body = "")
+
+        when(httpClient.GET[HttpResponse](anyString())(any(), any(), any()))
+          .thenReturn(Future.successful(httpResponse))
+
+        val result = cdsFileUploadConnector.getDeclarationStatus(MRN(CommonTestData.mrn).get)(hc).futureValue
+
+        result mustBe httpResponse
+      }
+
+      "response has InternalServerError (500) status" in {
+
+        val httpResponse = HttpResponse(status = INTERNAL_SERVER_ERROR, body = "")
 
         when(httpClient.GET[HttpResponse](anyString())(any(), any(), any()))
           .thenReturn(Future.successful(httpResponse))
