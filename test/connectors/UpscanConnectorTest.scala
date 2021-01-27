@@ -51,11 +51,10 @@ class UpscanConnectorTest extends PlaySpec with MockitoSugar with SpecBase with 
       val connector = new UpscanConnector(appConfig, wsClient, sfusMetrics)
       when(wsRequest.withFollowRedirects(any())).thenReturn(wsRequest)
       when(wsClient.url(eqTo(uploadUrl))).thenReturn(wsRequest)
-      val response = new AhcWSResponse(
-        new Response.ResponseBuilder()
-          .accumulate(new CacheableHttpResponseStatus(Uri.create(uploadUrl), 303, "Everything is fine", "protocols"))
-          .build()
-      )
+
+      val rb = new Response.ResponseBuilder()
+      rb.accumulate(new CacheableHttpResponseStatus(Uri.create(uploadUrl), 303, "Everything is fine", "protocols"))
+      val response = new AhcWSResponse(rb.build())
       when(wsRequest.post[Source[MultipartFormData.Part[Source[ByteString, _]], _]](any())(any())).thenReturn(Future.successful(response))
 
       val uploadRequest = UploadRequest(href = uploadUrl, fields = Map("key" -> "value"))

@@ -16,6 +16,7 @@
 
 package base
 
+import base.UnitViewSpec.realMessagesApi
 import com.codahale.metrics.SharedMetricRegistries
 import config.AppConfig
 import generators.Generators
@@ -67,6 +68,9 @@ trait SpecBase
 }
 
 private class AllMessageKeysAreMandatoryMessages(msg: Messages) extends Messages {
+
+  override def asJava: play.i18n.Messages = new play.i18n.MessagesImpl(lang.asJava, realMessagesApi.asJava)
+
   override def messages: Messages = msg.messages
 
   override def lang: Lang = msg.lang
