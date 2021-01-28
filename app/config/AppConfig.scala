@@ -17,7 +17,7 @@
 package config
 
 import pureconfig.generic.ProductHint
-import pureconfig.{CamelCase, ConfigFieldMapping, KebabCase}
+import pureconfig.{CamelCase, KebabCase}
 
 case class AppConfig(
   appName: String,
@@ -35,12 +35,13 @@ case class AppConfig(
 )
 
 object AppConfig {
-  implicit val appNameHint: ProductHint[AppConfig] = ProductHint(new ConfigFieldMapping {
-    def apply(fieldName: String): String = fieldName match {
-      case "appName" | "developerHubClientId" => fieldName
-      case _                                  => KebabCase.fromTokens(CamelCase.toTokens(fieldName))
+  implicit val appNameHint: ProductHint[AppConfig] = ProductHint(
+    (fieldName: String) =>
+      fieldName match {
+        case "appName" | "developerHubClientId" => fieldName
+        case _                                  => KebabCase.fromTokens(CamelCase.toTokens(fieldName))
     }
-  })
+  )
 }
 
 case class Assets(version: String, url: String) {

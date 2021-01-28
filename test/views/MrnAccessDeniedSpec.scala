@@ -51,7 +51,7 @@ class MrnAccessDeniedSpec extends SpecBase with ViewMatchers {
     "display additional 'Sign out' button" in {
       val signOutButton = testView.getElementsByClass("govuk-button").first()
 
-      signOutButton must containMessage("cds.sign.out")
+      signOutButton must containMessage("signOut.link")
       signOutButton must haveHref(controllers.routes.SignOutController.signOut())
     }
 

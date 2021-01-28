@@ -2,7 +2,6 @@
 common.service.name=Upload a customs document
 common.phase=Beta
 common.continue=Continue
-cds.sign.out=Sign out
 
 common.feedback=This is a new service - your {0} will help us to improve it.
 common.feedback.link=feedback
@@ -27,6 +26,16 @@ startPage.p.youWillNeed=You will need:
 startPage.listItem1=a Government Gateway account
 startPage.listItem2=a Customs Declaration Service (CDS) enrolment
 startPage.listItem3=the movement reference number (MRN) of your declaration
+
+## Sign-out
+
+signOut.link = Sign out
+signedOut.title = You have been signed out
+signedOut.heading = You have been signed out
+signedOut.session.timeout.heading = For your security, we have signed you out
+signedOut.information = To use the service again, you will need to {0}.
+signedOut.startPageLink = return to the start page and sign in
+signedOut.backToGovUk = Back to GOV.UK
 
 ## MRN Entry Page
 

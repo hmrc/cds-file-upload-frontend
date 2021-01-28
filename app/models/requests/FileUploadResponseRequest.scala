@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,12 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@this(mainTemplate: main_template)
+package models.requests
 
-@()(implicit request: Request[_], messages: Messages)
+import models._
+import play.api.mvc.WrappedRequest
 
-@mainTemplate(title = "File Size Form") {
-    <h1 class="heading-xlarge">File Size Form</h1>
-}
+case class FileUploadResponseRequest[A](request: EORIRequest[A], userAnswers: UserAnswers, fileUploadResponse: FileUploadResponse)
+    extends WrappedRequest[A](request) with Authenticated

@@ -15,6 +15,7 @@
  *@
 
 @import config.AppConfig
+@import models.requests.Authenticated
 @import play.twirl.api.HtmlFormat
 @import uk.gov.hmrc.play.views.html.helpers.ReportAProblemLink
 @import uk.gov.hmrc.play.views.html.layouts.{Head, HeaderNav, Footer, FooterLinks, MainContentHeader, MainContent}
@@ -46,65 +47,69 @@
 @head = {
     @head_di(
         linkElem = None,
-        headScripts = None)
-        <meta name="format-detection" content="telephone=no" />
-        <script src='@routes.Assets.versioned("javascripts/analytics.js")'> </script>
-    }
+        headScripts = None
+    )
+    <meta name="format-detection" content="telephone=no" />
+    <script src='@routes.Assets.versioned("javascripts/analytics.js")'> </script>
+}
 
-    @headerNavLinks = {
-        @if(request.cookies.get("mdtp").fold(false)(cookie => cookie.value.contains("authToken=Bearer+"))) {
-            <li>
-                <a id="signOut" href="@controllers.routes.SignOutController.signOut.url" data-journey-click="primary-navigation:Click:Sign out">@messages("cds.sign.out")</a>
-            </li>
-        }
+@headerNavLinks = {
+    @if(request.isInstanceOf[Authenticated]) {
+        <li>
+            <a id="signOut" href="@routes.SignOutController.signOut.url"
+               data-journey-click="primary-navigation:Click:Sign out">@messages("signOut.link")</a>
+        </li>
     }
+}
 
-    @insideHeader = {
+@insideHeader = {
     @header_nav_di(
         navTitle = Some(messages("common.service.name")),
         navTitleLink = None,
         showBetaLink = false,
-        navLinks = Some(headerNavLinks))
-    }
+        navLinks = Some(headerNavLinks)
+    )
+}
 
-    @afterHeader = {}
+@afterHeader = {}
 
-    @bodyEnd = {
+@bodyEnd = {
     @footer_di(
         analyticsToken = Some(appConfig.googleAnalytics.token),
         analyticsHost = appConfig.googleAnalytics.host,
         ssoUrl = None,
         scriptElem = scriptElem,
-        gaCalls = None)
+        gaCalls = None
+    )
 
-        <script src='@routes.Assets.versioned("javascripts/cdsfileuploadfrontend-app.min.js")'> </script>
+    <script src='@routes.Assets.versioned("javascripts/cdsfileuploadfrontend-app.min.js")'> </script>
+}
+
+@footerTop = {}
+
+@footerLinks = {
+    @footer_links_di()
+}
+
+@serviceInfo = {}
+
+@mainContentHeader = {
+    <div id="global-header-bar"></div>
+
+    @phaseBanner("beta")
+
+    @if(contentHeader.isDefined) {
+        @main_content_header_di(contentHeader = contentHeader.get)
     }
+}
 
-    @footerTop = {}
-
-    @footerLinks = {
-        @footer_links_di()
-    }
-
-    @serviceInfo = {}
-
-    @mainContentHeader = {
-        <div id="global-header-bar"></div>
-
-        @phaseBanner("beta")
-
-        @if(contentHeader.isDefined) {
-            @main_content_header_di(contentHeader = contentHeader.get)
-        }
-    }
-
-    @content = {
-        <!--[if !IE]>-->
-            <script type="text/javascript"
-                src="@{appConfig.trackingConsentFrontend.url}"
-                id="tracking-consent-script-tag"
-                data-gtm-container="@{appConfig.trackingConsentFrontend.gtm.container}"></script>
-        <!--<![endif]-->
+@content = {
+    <!--[if !IE]>-->
+        <script type="text/javascript"
+            src="@{appConfig.trackingConsentFrontend.url}"
+            id="tracking-consent-script-tag"
+            data-gtm-container="@{appConfig.trackingConsentFrontend.gtm.container}"></script>
+    <!--<![endif]-->
 
     @main_content_di(
         article = mainContent,
@@ -112,7 +117,8 @@
         mainDataAttributes = mainDataAttributes,
         mainContentHeader = mainContentHeader,
         serviceInfo = serviceInfo,
-        sidebar = sidebar)
-    }
+        sidebar = sidebar
+    )
+}
 
-    @hmrc_gov_uk_template(Some(title), bodyClasses)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(footerLinks), true)(content)
+@hmrc_gov_uk_template(Some(title), bodyClasses)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(footerLinks), true)(content)

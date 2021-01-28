@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-sbt clean test scalafmt::test test:scalafmt::test
+sbt clean scalafmt test:scalafmt test scalafmt::test test:scalafmt::test

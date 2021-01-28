@@ -16,12 +16,13 @@
 
 package views
 
+import scala.collection.JavaConverters._
+
 import base.SpecBase
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import play.twirl.api.Html
-
-import scala.collection.JavaConverters._
+import org.scalatest.Assertion
+import play.twirl.api.{Html, HtmlFormat}
 
 trait DomAssertions extends SpecBase {
 
@@ -114,4 +115,7 @@ trait DomAssertions extends SpecBase {
       case _    => assert(!radio.hasAttr("checked") && radio.attr("checked") != "checked", s"\n\nElement $id is checked")
     }
   }
+
+  def assertSignoutLinkIsIncluded(view: HtmlFormat.Appendable): Assertion =
+    assertContainsLink(asDocument(view), messages("signOut.link"), controllers.routes.SignOutController.signOut.url)
 }

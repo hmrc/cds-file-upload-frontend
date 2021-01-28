@@ -19,6 +19,7 @@ package views
 import forms.mappings.ContactDetailsMapping._
 import generators.Generators
 import models.ContactDetails
+import models.requests.{AuthenticatedRequest, SignedInUser}
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.data.Form
 import play.twirl.api.Html
@@ -31,7 +32,7 @@ class ContactDetailsSpec extends DomAssertions with ViewBehaviours with ScalaChe
 
   val form: Form[ContactDetails] = Form(contactDetailsMapping)
 
-  val page = instanceOf[contact_details]
+  val page: contact_details = instanceOf[contact_details]
 
   val simpleView: () => Html = () => page(form)(fakeRequest.withCSRFToken, messages)
 
@@ -44,6 +45,13 @@ class ContactDetailsSpec extends DomAssertions with ViewBehaviours with ScalaChe
   "Contact details page" must {
 
     behave like normalPage(simpleView, messagePrefix)
+
+    "include the 'Sign out' link if the user is authorised" in {
+      forAll { user: SignedInUser =>
+        val view = page(form)(AuthenticatedRequest(fakeRequest.withCSRFToken, user), messages)
+        assertSignoutLinkIsIncluded(view)
+      }
+    }
 
     "display name input" in {
 

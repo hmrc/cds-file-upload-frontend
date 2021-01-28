@@ -60,7 +60,6 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
         val result = controller(user, eori).onPageLoad(fakeRequest)
 
         status(result) mustBe OK
-        contentAsString(result) mustBe view(form)
       }
     }
 
