@@ -16,10 +16,10 @@
 
 package models
 
-import play.api.Logger
-import play.api.libs.json._
-
 import scala.xml.Elem
+
+import play.api.Logging
+import play.api.libs.json._
 
 case class UploadRequest(href: String, fields: Map[String, String])
 
@@ -35,13 +35,13 @@ object FileUpload {
 
 abstract case class FileUploadResponse(uploads: List[FileUpload])
 
-object FileUploadResponse {
+object FileUploadResponse extends Logging {
   implicit val format = Json.format[FileUploadResponse]
 
   def apply(files: List[FileUpload]): FileUploadResponse = new FileUploadResponse(files.sortBy(_.reference)) {}
 
   def fromXml(xml: Elem): FileUploadResponse = {
-    Logger.info("File Upload Response " + xml)
+    logger.info("File Upload Response " + xml)
     val files: List[FileUpload] = (xml \ "Files" \ "_").theSeq.collect {
       case file =>
         val reference = (file \ "Reference").text.trim

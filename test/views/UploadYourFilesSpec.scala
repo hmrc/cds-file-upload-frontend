@@ -18,6 +18,7 @@ package views
 
 import generators.Generators
 import models._
+import models.requests.{AuthenticatedRequest, SignedInUser}
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.twirl.api.Html
 import views.behaviours.ViewBehaviours
@@ -27,7 +28,9 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCh
 
   val page = instanceOf[upload_your_files]
 
-  def view(pos: Position): Html = page(UploadRequest("", Map.empty), pos)(fakeRequest, messages, fakeRequest.flash)
+  val uploadRequest = UploadRequest("", Map.empty)
+
+  def view(pos: Position): Html = page(uploadRequest, pos)(fakeRequest, messages, fakeRequest.flash)
 
   val view: () => Html = () => view(First(3))
 
@@ -36,6 +39,14 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCh
   "Upload your files page" must {
 
     behave like pageWithoutHeading(view, messagePrefix, "p.fileNeedsToBe", "listItem1", "listItem2", "listItem3", "listItem4", "listItem5")
+
+    "include the 'Sign out' link if the user is authorised" in {
+      forAll { user: SignedInUser =>
+        val request = AuthenticatedRequest(fakeRequest, user)
+        val view = page(uploadRequest, First(3))(request, messages, request.flash)
+        assertSignoutLinkIsIncluded(view)
+      }
+    }
 
     "show title" when {
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import models.requests.Authenticated
 @import uk.gov.hmrc.hmrcfrontend.views.html.components.HmrcHeader
 @import uk.gov.hmrc.hmrcfrontend.views.html.components.Header
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.language
@@ -27,5 +28,6 @@
     serviceName = Some(messages("common.service.name")),
     serviceUrl = controllers.routes.StartController.displayStartPage.url,
     language = language.En,
-    containerClasses = "govuk-width-container"
+    containerClasses = "govuk-width-container",
+    signOutHref = if (request.isInstanceOf[Authenticated]) Some(routes.SignOutController.signOut.url) else None
 ))

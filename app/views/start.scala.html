@@ -22,19 +22,18 @@
 
 @mainTemplate(title = messages("startPage.title")) {
 
-<div class="form-group">
-    <h1 class="heading-xlarge">@messages("startPage.heading")</h1>
+    <div class="form-group">
+        <h1 class="heading-xlarge">@messages("startPage.heading")</h1>
 
-    <p>@messages("startPage.paragraph2")</p>
-    <p>@Html(messages("startPage.paragraph3", bold(messages("startPage.paragraph3.bold"))))</p>
-    <p>@Html(messages("startPage.paragraph4", bold(messages("startPage.paragraph4.bold"))))</p>
+        <p>@messages("startPage.paragraph2")</p>
+        <p>@Html(messages("startPage.paragraph3", bold(messages("startPage.paragraph3.bold"))))</p>
+        <p>@Html(messages("startPage.paragraph4", bold(messages("startPage.paragraph4.bold"))))</p>
 
 
-    @helper.form(action = routes.StartController.onStart()) {
-        @helper.CSRF.formField
+        @helper.form(action = routes.StartController.onStart()) {
+            @helper.CSRF.formField
 
-        @components.submit_button("common.button.startNow")
-    }
-</div>
-
+            @components.submit_button("common.button.startNow")
+        }
+    </div>
 }

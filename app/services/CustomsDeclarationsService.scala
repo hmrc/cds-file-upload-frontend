@@ -16,25 +16,25 @@
 
 package services
 
-import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
+
 import config.AppConfig
 import connectors.CustomsDeclarationsConnector
-import metrics.SfusMetrics
+import javax.inject.Inject
 import metrics.MetricIdentifiers.fileUploadRequestMetric
+import metrics.SfusMetrics
 import models._
-import play.api.Logger
+import play.api.Logging
 import uk.gov.hmrc.http.HeaderCarrier
-
-import scala.concurrent.{ExecutionContext, Future}
 
 class CustomsDeclarationsService @Inject()(customsDeclarationsConnector: CustomsDeclarationsConnector, appConfig: AppConfig, metrics: SfusMetrics)(
   implicit ec: ExecutionContext
-) {
+) extends Logging {
 
   def batchFileUpload(eori: String, mrn: MRN, fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier): Future[FileUploadResponse] = {
 
     val uploadUrl = appConfig.microservice.services.cdsFileUploadFrontend.uri
-    Logger.warn(s"uploadUrl: $uploadUrl")
+    logger.warn(s"uploadUrl: $uploadUrl")
     val files = for (i <- 1 to fileUploadCount.value + 1) yield FileUploadFile(i, "", uploadUrl)
     val fileSeq = files.flatten
 

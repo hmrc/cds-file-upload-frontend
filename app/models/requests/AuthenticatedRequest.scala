@@ -21,6 +21,8 @@ import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.auth.core.{AffinityGroup, Enrolment, Enrolments}
 
+trait Authenticated
+
 case class SignedInUser(
   credentials: Credentials,
   name: Name,
@@ -40,9 +42,4 @@ object SignedInUser {
 
 }
 
-case class AuthenticatedRequest[A](request: Request[A], user: SignedInUser) extends WrappedRequest[A](request)
-
-case class EORIRequest[A](request: AuthenticatedRequest[A], eori: String) extends WrappedRequest[A](request) {
-
-  val user = request.user
-}
+case class AuthenticatedRequest[A](request: Request[A], user: SignedInUser) extends WrappedRequest[A](request) with Authenticated

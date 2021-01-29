@@ -18,6 +18,7 @@ package views
 
 import forms.MRNFormProvider
 import models.MRN
+import models.requests.{AuthenticatedRequest, SignedInUser}
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.data.Form
 import play.twirl.api.{Html, HtmlFormat}
@@ -39,6 +40,14 @@ class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with Sca
 
   "MRN Entry Page" must {
     behave like normalPage(view, messagePrefix)
+
     behave like stringPage(createViewUsingForm, "value", messagePrefix, List("mrnEntryPage.hint1", "mrnEntryPage.hint2"))
+
+    "include the 'Sign out' link if the user is authorised" in {
+      forAll { user: SignedInUser =>
+        val view = page(form)(AuthenticatedRequest(fakeRequest.withCSRFToken, user), messages)
+        assertSignoutLinkIsIncluded(view)
+      }
+    }
   }
 }

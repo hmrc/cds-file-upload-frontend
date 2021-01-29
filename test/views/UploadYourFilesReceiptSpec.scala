@@ -17,6 +17,7 @@
 package views
 
 import generators.Generators
+import models.requests.{AuthenticatedRequest, SignedInUser}
 import models.{FileUpload, MRN}
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.twirl.api.Html
@@ -49,6 +50,13 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
       "listitem3",
       "listitem4"
     )
+
+    "include the 'Sign out' link if the user is authorised" in {
+      forAll { (fileUploads: List[FileUpload], user: SignedInUser) =>
+        val view = page(fileUploads, Some(mrn))(AuthenticatedRequest(fakeRequest, user), messages)
+        assertSignoutLinkIsIncluded(view)
+      }
+    }
 
     "have title" in {
 

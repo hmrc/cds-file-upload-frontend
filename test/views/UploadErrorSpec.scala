@@ -16,6 +16,7 @@
 
 package views
 
+import models.requests.{AuthenticatedRequest, SignedInUser}
 import utils.FakeRequestCSRFSupport._
 import views.behaviours.ViewBehaviours
 import views.html.upload_error
@@ -32,6 +33,13 @@ class UploadErrorSpec extends ViewBehaviours with ViewMatchers {
   "Upload Error page" should {
 
     behave like normalPage(view, messageKeyPrefix)
+
+    "include the 'Sign out' link if the user is authorised" in {
+      forAll { user: SignedInUser =>
+        val view = page()(AuthenticatedRequest(fakeRequest.withCSRFToken, user), messages)
+        assertSignoutLinkIsIncluded(view)
+      }
+    }
 
     "have a paragraph" in {
       val paragraph = asDocument(view()).getElementsByTag("p").get(2)
