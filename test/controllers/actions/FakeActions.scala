@@ -34,7 +34,7 @@ trait FakeActions extends Generators {
       Future.successful(Right(AuthenticatedRequest(request, user)))
   }
 
-  class FakeEORIAction(eori: String = arbitrary[String].sample.get) extends EORIRequiredAction {
+  class FakeEORIAction(eori: String = eoriString.sample.get) extends EORIRequiredAction {
     protected def executionContext = ExecutionContext.global
     def parser = stubBodyParser()
     override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, EORIRequest[A]]] =

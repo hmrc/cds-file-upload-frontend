@@ -16,25 +16,23 @@
 
 package controllers
 
+import scala.concurrent.Future
+
 import base.SfusMetricsMock
 import connectors.CdsFileUploadConnector
 import models.{FileUpload, FileUploadResponse, Notification, UserAnswers}
-import org.mockito.ArgumentMatchers._
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
-import org.scalacheck.Arbitrary.arbitrary
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
 import views.html.upload_your_files_receipt
-
-import scala.concurrent.Future
 
 class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusMetricsMock {
 
   implicit val ac = appConfig
   val cdsFileUploadConnector = mock[CdsFileUploadConnector]
   val page = mock[upload_your_files_receipt]
-  val eori: String = arbitrary[String].sample.get
+  val eori: String = eoriString.sample.get
 
   def controller(maybeUserAnswers: Option[UserAnswers]) = {
     when(mockAnswersConnector.findByEori(meq(eori))).thenReturn(Future.successful(maybeUserAnswers))

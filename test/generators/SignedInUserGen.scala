@@ -17,34 +17,34 @@
 package generators
 
 import models.requests.SignedInUser
-import org.scalacheck.Arbitrary.arbitrary
-import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Gen.{listOf, option}
+import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Individual, Organisation}
-import uk.gov.hmrc.auth.core.{AffinityGroup, Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, Name}
+import uk.gov.hmrc.auth.core.{AffinityGroup, Enrolment, EnrolmentIdentifier, Enrolments}
 
 trait SignedInUserGen {
+  self: Generators =>
 
   implicit lazy val arbitraryUser: Arbitrary[SignedInUser] = Arbitrary(userGen)
 
   lazy val userGen: Gen[SignedInUser] = for {
     credentials <- credentialsGen
     name <- nameGen
-    email <- option(arbitrary[String])
+    email <- option(emailString)
     affinityGroup <- option(affinityGroupGen)
-    internalId <- arbitrary[String]
+    internalId <- alphaNumString()
     enrolments <- enrolmentsGen
   } yield SignedInUser(credentials, name, email, affinityGroup, internalId, enrolments)
 
   val credentialsGen: Gen[Credentials] = for {
-    providerId <- arbitrary[String]
-    providerType <- arbitrary[String]
+    providerId <- alphaNumString()
+    providerType <- alphaNumString()
   } yield Credentials(providerId, providerType)
 
   val nameGen: Gen[Name] = for {
-    name <- option(arbitrary[String])
-    lastName <- option(arbitrary[String])
+    name <- option(alphaNumString())
+    lastName <- option(alphaNumString())
   } yield Name(name, lastName)
 
   val affinityGroupGen: Gen[AffinityGroup] =
@@ -72,9 +72,10 @@ trait SignedInUserGen {
 
   case class EORIEnrolment(enrolment: Enrolment)
 
-  val eoriEnrolmentGen: Gen[EORIEnrolment] =
-    arbitrary[String].suchThat(_.nonEmpty).map { eori =>
+  val eoriEnrolmentGen: Gen[EORIEnrolment] = {
+    eoriString.map { eori =>
       val eoriIdentifier = EnrolmentIdentifier("EORINumber", eori)
       EORIEnrolment(Enrolment("HMRC-CUS-ORG", Seq(eoriIdentifier), ""))
     }
+  }
 }

@@ -17,10 +17,8 @@
 package generators
 
 import models.ContactDetails
-import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen._
 import org.scalacheck.{Arbitrary, Gen, Shrink}
-import wolfendale.scalacheck.regexp.RegexpGen
 
 trait Generators extends ModelGenerators with JsonGenerators {
 
@@ -30,25 +28,18 @@ trait Generators extends ModelGenerators with JsonGenerators {
 
   def intsAboveValue(value: Int): Gen[Int] = Gen.choose(value + 1, Int.MaxValue)
 
-  def nonEmptyString: Gen[String] = arbitrary[String] suchThat (_.nonEmpty)
+  def alphaString(minLength: Int = 1, maxLength: Int = 35): Gen[String] =
+    Gen.choose(minLength, maxLength).flatMap(Gen.listOfN(_, alphaChar)).map(_.mkString)
 
-  def stringsWithMaxLength(maxLength: Int): Gen[String] =
-    for {
-      length <- choose(1, maxLength)
-      chars <- listOfN(length, arbitrary[Char])
-    } yield chars.mkString
+  def alphaNumString(minLength: Int = 1, maxLength: Int = 35): Gen[String] =
+    Gen.choose(minLength, maxLength).flatMap(Gen.listOfN(_, alphaNumChar)).map(_.mkString)
 
-  def saneString: Gen[String] =
-    for {
-      length <- choose(1, 100)
-      chars <- listOfN(length, alphaChar)
-    } yield chars.mkString
+  def numString(minLength: Int = 1, maxLength: Int = 15): Gen[String] =
+    Gen.choose(minLength, maxLength).flatMap(Gen.listOfN(_, numChar)).map(_.mkString)
 
-  def minStringLength(length: Int): Gen[String] =
-    for {
-      i <- choose(length, length + 500)
-      n <- listOfN(i, arbitrary[Char])
-    } yield n.mkString
+  def stringsWithMaxLength(maxLength: Int): Gen[String] = alphaNumString(1, maxLength)
+
+  def minStringLength(length: Int): Gen[String] = alphaNumString(length, length + 500)
 
   def oneOf[T](xs: Seq[Gen[T]]): Gen[T] =
     if (xs.isEmpty) {
@@ -58,16 +49,21 @@ trait Generators extends ModelGenerators with JsonGenerators {
       choose(0, vector.size - 1).flatMap(vector(_))
     }
 
-  private val validEmailGen: Gen[String] = RegexpGen.from("[a-zA-Z0-9\\.!#$%&'*+/=?^_`{|}~-]{1,25}@[a-zA-Z0-9-.]{1,25}")
+  def eoriString: Gen[String] = alphaNumString(12)
 
-  private val validPhoneNumberGen: Gen[String] = RegexpGen.from("[\\d\\s\\+()\\-/]{1,15}")
+  def emailString: Gen[String] =
+    for {
+      name <- alphaNumString(2, 12).map(_.mkString)
+      domain <- alphaNumString(2, 12).map(_.mkString)
+      suffix <- Gen.oneOf("com", "net", "co.uk")
+    } yield s"$name@$domain.$suffix"
 
   implicit val arbitraryContactDetails: Arbitrary[ContactDetails] = Arbitrary {
     for {
-      name <- nonEmptyString.map(_.take(35))
-      companyName <- nonEmptyString.map(_.take(35))
-      phoneNumber <- validPhoneNumberGen
-      email <- validEmailGen.map(_.take(50))
+      name <- alphaNumString()
+      companyName <- alphaNumString()
+      phoneNumber <- numString()
+      email <- emailString
     } yield ContactDetails(name, companyName, phoneNumber, email)
   }
 }

@@ -19,11 +19,10 @@ package filters
 import akka.stream.Materializer
 import com.typesafe.config.ConfigException
 import generators.Generators
-import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
+import org.scalatest.{FreeSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import org.scalatest.{FreeSpec, MustMatchers}
 import play.api.Configuration
 import play.api.mvc.Call
 
@@ -33,7 +32,7 @@ class AllowListFilterSpec extends FreeSpec with MustMatchers with ScalaCheckProp
 
   val otherConfigGen = Gen.mapOf[String, String](for {
     key <- Gen.alphaNumStr suchThat (_.nonEmpty)
-    value <- arbitrary[String]
+    value <- alphaNumString()
   } yield (key, value))
 
   "the list of allowListed IP addresses" - {
@@ -42,7 +41,7 @@ class AllowListFilterSpec extends FreeSpec with MustMatchers with ScalaCheckProp
 
       "when the underlying config value is not there" in {
 
-        forAll(otherConfigGen, arbitrary[String], arbitrary[String]) { (otherConfig, destination, excluded) =>
+        forAll(otherConfigGen, alphaNumString(), alphaNumString()) { (otherConfig, destination, excluded) =>
           whenever(!otherConfig.contains("filters.allowList.ips")) {
 
             val config = Configuration(
@@ -63,7 +62,7 @@ class AllowListFilterSpec extends FreeSpec with MustMatchers with ScalaCheckProp
 
       "when the underlying config value is empty" in {
 
-        forAll(otherConfigGen, arbitrary[String], arbitrary[String]) { (otherConfig, destination, excluded) =>
+        forAll(otherConfigGen, alphaNumString(), alphaNumString()) { (otherConfig, destination, excluded) =>
           val config = Configuration(
             (otherConfig +
               ("filters.allowList.destination" -> destination) +
@@ -84,7 +83,7 @@ class AllowListFilterSpec extends FreeSpec with MustMatchers with ScalaCheckProp
 
         val gen = Gen.nonEmptyListOf(Gen.alphaNumStr suchThat (_.nonEmpty))
 
-        forAll(gen, otherConfigGen, arbitrary[String], arbitrary[String]) { (ips, otherConfig, destination, excluded) =>
+        forAll(gen, otherConfigGen, alphaNumString(), alphaNumString()) { (ips, otherConfig, destination, excluded) =>
           val ipString = ips.mkString(",")
 
           val config = Configuration(
@@ -108,7 +107,7 @@ class AllowListFilterSpec extends FreeSpec with MustMatchers with ScalaCheckProp
 
       "when the underlying config value is not there" in {
 
-        forAll(otherConfigGen, arbitrary[String], arbitrary[String]) { (otherConfig, destination, excluded) =>
+        forAll(otherConfigGen, alphaNumString(), alphaNumString()) { (otherConfig, destination, excluded) =>
           whenever(!otherConfig.contains("filters.allowList.destination")) {
 
             val config = Configuration(
@@ -127,7 +126,7 @@ class AllowListFilterSpec extends FreeSpec with MustMatchers with ScalaCheckProp
 
     "must return a Call to the destination" in {
 
-      forAll(otherConfigGen, arbitrary[String], arbitrary[String], arbitrary[String]) { (otherConfig, ips, destination, excluded) =>
+      forAll(otherConfigGen, alphaNumString(), alphaNumString(), alphaNumString()) { (otherConfig, ips, destination, excluded) =>
         val config = Configuration(
           (otherConfig +
             ("filters.allowList.ips" -> destination) +
@@ -148,7 +147,7 @@ class AllowListFilterSpec extends FreeSpec with MustMatchers with ScalaCheckProp
 
       "when the underlying config value is not there" in {
 
-        forAll(otherConfigGen, arbitrary[String], arbitrary[String]) { (otherConfig, destination, excluded) =>
+        forAll(otherConfigGen, alphaNumString(), alphaNumString()) { (otherConfig, destination, excluded) =>
           whenever(!otherConfig.contains("filters.allowList.excluded")) {
 
             val config = Configuration(
@@ -171,7 +170,7 @@ class AllowListFilterSpec extends FreeSpec with MustMatchers with ScalaCheckProp
 
         val gen = Gen.nonEmptyListOf(Gen.alphaNumStr suchThat (_.nonEmpty))
 
-        forAll(gen, otherConfigGen, arbitrary[String], arbitrary[String]) { (excludedPaths, otherConfig, destination, ips) =>
+        forAll(gen, otherConfigGen, alphaNumString(), alphaNumString()) { (excludedPaths, otherConfig, destination, ips) =>
           val excludedPathString = excludedPaths.mkString(",")
 
           val config = Configuration(

@@ -29,7 +29,7 @@ trait JsonGenerators {
     }
 
   implicit val arbitraryJsonString: Arbitrary[JsString] =
-    Arbitrary(arbitrary[String].map(JsString))
+    Arbitrary(alphaNumString().map(JsString))
 
   implicit val arbitraryJsonNumber: Arbitrary[JsNumber] =
     Arbitrary(arbitrary[BigDecimal].map(JsNumber))

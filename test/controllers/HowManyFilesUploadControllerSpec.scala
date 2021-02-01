@@ -42,8 +42,8 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
   def zip[A, B](ga: Gen[A], gb: Gen[B]): Gen[(A, B)] =
     ga.flatMap(a => gb.map(b => (a, b)))
 
-  implicit val arbitraryUserInfo: Arbitrary[UserInfo] = Arbitrary(zip(userGen, arbitrary[String]))
-  val eori: String = arbitrary[String].sample.get
+  implicit val arbitraryUserInfo: Arbitrary[UserInfo] = Arbitrary(zip(userGen, alphaNumString()))
+  val eori: String = eoriString.sample.get
   val mrn: MRN = arbitraryMrn.arbitrary.sample.get
   private val fileUploadCount = FileUploadCount(7)
   val validAnswers = UserAnswers(eori, mrn = Some(mrn), fileUploadCount = fileUploadCount)
