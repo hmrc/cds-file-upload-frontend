@@ -24,8 +24,6 @@ trait Generators extends ModelGenerators with JsonGenerators {
 
   implicit val dontShrink: Shrink[String] = Shrink.shrinkAny
 
-  val emailRegex = """^[a-zA-Z0-9\.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-.]+$"""
-
   def intsAboveValue(value: Int): Gen[Int] = Gen.choose(value + 1, Int.MaxValue)
 
   def alphaString(minLength: Int = 1, maxLength: Int = 35): Gen[String] =
@@ -49,7 +47,11 @@ trait Generators extends ModelGenerators with JsonGenerators {
       choose(0, vector.size - 1).flatMap(vector(_))
     }
 
-  def eoriString: Gen[String] = alphaNumString(12)
+  def eoriString: Gen[String] =
+    for {
+      country <- alphaString(2, 2).map(_.mkString)
+      code <- numString(10, 10).map(_.mkString)
+    } yield s"$country$code"
 
   def emailString: Gen[String] =
     for {

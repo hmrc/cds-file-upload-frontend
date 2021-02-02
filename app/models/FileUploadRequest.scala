@@ -30,7 +30,7 @@ final case class FileUploadRequest(declarationId: MRN, files: Seq[FileUploadFile
     </FileUploadRequest>
 }
 
-sealed case class FileUploadFile(fileSequenceNo: Int, documentType: String, serviceUrl: String) {
+case class FileUploadFile(fileSequenceNo: Int, documentType: String, serviceUrl: String) {
   private val uuid = UUID.randomUUID()
   val successRedirect = serviceUrl + "/cds-file-upload-service/upload/upscan-success/" + uuid
   val errorRedirect = serviceUrl + "/cds-file-upload-service/upload/upscan-error/" + uuid

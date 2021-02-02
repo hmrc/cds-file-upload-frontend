@@ -33,6 +33,8 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
   private val form = Form(contactDetailsMapping)
   val page = mock[contact_details]
 
+  val emailRegex = """^[a-zA-Z0-9\.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-.]+$"""
+
   def view(form: Form[ContactDetails] = form): String = page(form)(fakeRequest, messages).toString
 
   def controller(signedInUser: SignedInUser, eori: String, dataRetrieval: DataRetrievalAction = new FakeDataRetrievalAction(None)) =
