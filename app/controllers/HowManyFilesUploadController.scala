@@ -53,7 +53,7 @@ class HowManyFilesUploadController @Inject()(
   val form = formProvider()
 
   def onPageLoad: Action[AnyContent] =
-    (authenticate andThen requireEori andThen getData andThen requireContactDetails andThen requireMrn) { implicit req =>
+    (authenticate andThen requireEori andThen getData andThen requireMrn andThen requireContactDetails) { implicit req =>
       val populatedForm =
         req.userAnswers.fileUploadCount.fold(form)(form.fill)
 
@@ -61,7 +61,7 @@ class HowManyFilesUploadController @Inject()(
     }
 
   def onSubmit: Action[AnyContent] =
-    (authenticate andThen requireEori andThen getData andThen requireContactDetails andThen requireMrn).async { implicit req =>
+    (authenticate andThen requireEori andThen getData andThen requireMrn andThen requireContactDetails).async { implicit req =>
       form
         .bindFromRequest()
         .fold(

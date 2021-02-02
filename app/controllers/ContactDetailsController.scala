@@ -34,6 +34,7 @@ class ContactDetailsController @Inject()(
   authenticate: AuthAction,
   requireEori: EORIRequiredAction,
   getData: DataRetrievalAction,
+  requireMrn: MrnRequiredAction,
   answersConnector: AnswersService,
   mcc: MessagesControllerComponents,
   contactDetails: contact_details
@@ -42,19 +43,19 @@ class ContactDetailsController @Inject()(
 
   private val form = Form(contactDetailsMapping)
 
-  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData) { implicit req =>
+  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireMrn) { implicit req =>
     val populatedForm = req.userAnswers.contactDetails.fold(form)(form.fill)
     Ok(contactDetails(populatedForm))
   }
 
-  def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen getData).async { implicit req =>
+  def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireMrn).async { implicit req =>
     form
       .bindFromRequest()
       .fold(
         errorForm => Future.successful(BadRequest(contactDetails(errorForm))),
         contactDetails => {
           answersConnector.upsert(req.userAnswers.copy(contactDetails = Some(contactDetails))).map { _ =>
-            Redirect(routes.MrnEntryController.onPageLoad())
+            Redirect(routes.HowManyFilesUploadController.onPageLoad())
           }
         }
       )

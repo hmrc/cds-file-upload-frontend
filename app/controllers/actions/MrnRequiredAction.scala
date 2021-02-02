@@ -18,7 +18,7 @@ package controllers.actions
 
 import controllers.routes
 import javax.inject.{Inject, Singleton}
-import models.requests.{ContactDetailsRequest, MrnRequest}
+import models.requests.{ContactDetailsRequest, DataRequest, MrnRequest}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Result}
 
@@ -34,4 +34,4 @@ class MrnRequiredActionImpl @Inject()(mcc: MessagesControllerComponents) extends
     Future.successful(request.userAnswers.mrn.map(mrn => MrnRequest(request, request.userAnswers, mrn)).toRight(onError))
 }
 
-trait MrnRequiredAction extends ActionRefiner[ContactDetailsRequest, MrnRequest]
+trait MrnRequiredAction extends ActionRefiner[DataRequest, MrnRequest]
