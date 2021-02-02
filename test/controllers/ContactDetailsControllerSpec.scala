@@ -33,6 +33,8 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
   private val form = Form(contactDetailsMapping)
   val page = mock[contact_details]
 
+  val emailRegex = """^[a-zA-Z0-9\.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-.]+$"""
+
   def view(form: Form[ContactDetails] = form): String = page(form)(fakeRequest, messages).toString
 
   def controller(signedInUser: SignedInUser, eori: String, dataRetrieval: DataRetrievalAction = new FakeDataRetrievalAction(None)) =
@@ -88,17 +90,16 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
 
     "return a bad request when invalid data is submitted" in {
 
-      forAll(arbitrary[SignedInUser], arbitrary[String], arbitrary[ContactDetails], minStringLength(36)) {
-        (user, eori, contactDetails, invalidName) =>
-          val badData = contactDetails.copy(name = invalidName)
+      forAll(arbitrary[SignedInUser], eoriString, arbitrary[ContactDetails], minStringLength(36)) { (user, eori, contactDetails, invalidName) =>
+        val badData = contactDetails.copy(name = invalidName)
 
-          val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(badData): _*)
-          val badForm = form.fillAndValidate(badData)
+        val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(badData): _*)
+        val badForm = form.fillAndValidate(badData)
 
-          val result = controller(user, eori).onSubmit(postRequest)
+        val result = controller(user, eori).onSubmit(postRequest)
 
-          status(result) mustBe BAD_REQUEST
-          contentAsString(result) mustBe view(badForm)
+        status(result) mustBe BAD_REQUEST
+        contentAsString(result) mustBe view(badForm)
       }
     }
 

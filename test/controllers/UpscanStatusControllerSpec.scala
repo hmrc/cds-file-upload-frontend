@@ -41,7 +41,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
   val uploadYourFiles = mock[upload_your_files]
   val uploadError = mock[upload_error]
   val cdsFileUploadConnector = mock[CdsFileUploadConnector]
-  val eori: String = arbitrary[String].sample.get
+  val eori: String = eoriString.sample.get
 
   val controller = new UpscanStatusController(
     new FakeAuthAction(),
