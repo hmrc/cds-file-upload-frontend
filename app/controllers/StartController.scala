@@ -32,7 +32,7 @@ class StartController @Inject()(authenticate: AuthAction, requireEori: EORIRequi
   }
 
   def onStart: Action[AnyContent] = (authenticate andThen requireEori) { _ =>
-    Redirect(routes.MrnEntryController.onPageLoad())
+    Redirect(controllers.routes.MrnEntryController.onPageLoad())
   }
 
 }
