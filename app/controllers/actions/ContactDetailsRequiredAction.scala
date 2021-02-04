@@ -29,10 +29,10 @@ class ContactDetailsRequiredActionImpl @Inject()(val mcc: MessagesControllerComp
   implicit val executionContext: ExecutionContext = mcc.executionContext
   private val onError = Redirect(routes.ErrorPageController.error())
 
-  override protected def refine[A](request: DataRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] = {
+  override protected def refine[A](request: MrnRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] = {
     val req = for {
       response <- request.userAnswers.contactDetails
-    } yield ContactDetailsRequest(request.request, request.userAnswers, response)
+    } yield ContactDetailsRequest(request, request.userAnswers, response)
 
     Future.successful(req.toRight(onError))
   }

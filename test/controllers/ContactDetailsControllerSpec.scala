@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions.DataRetrievalAction
+import controllers.actions.{DataRetrievalAction, MrnRequiredActionImpl}
 import forms.mappings.ContactDetailsMapping._
 import models._
 import models.requests.SignedInUser
@@ -34,13 +34,20 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
   val page = mock[contact_details]
 
   val emailRegex = """^[a-zA-Z0-9\.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-.]+$"""
+  val mrn: MRN = arbitraryMrn.arbitrary.sample.get
 
   def view(form: Form[ContactDetails] = form): String = page(form)(fakeRequest, messages).toString
 
   def controller(signedInUser: SignedInUser, eori: String, dataRetrieval: DataRetrievalAction = new FakeDataRetrievalAction(None)) =
-    new ContactDetailsController(new FakeAuthAction(signedInUser), new FakeEORIAction(eori), dataRetrieval, mockAnswersConnector, mcc, page)(
-      mcc.executionContext
-    )
+    new ContactDetailsController(
+      new FakeAuthAction(signedInUser),
+      new FakeEORIAction(eori),
+      dataRetrieval,
+      new MrnRequiredActionImpl(mcc),
+      mockAnswersConnector,
+      mcc,
+      page
+    )(mcc.executionContext)
 
   override protected def beforeEach(): Unit = {
     super.beforeEach
@@ -59,7 +66,8 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
     "load the correct page when user is logged in" in {
 
       forAll { (user: SignedInUser, eori: String) =>
-        val result = controller(user, eori).onPageLoad(fakeRequest)
+        val answers = UserAnswers(eori, mrn = Some(mrn))
+        val result = controller(user, eori, fakeDataRetrievalAction(answers)).onPageLoad(fakeRequest)
 
         status(result) mustBe OK
       }
@@ -68,7 +76,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
     "contact details should be displayed if they exist in the cache" in {
 
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
-        val answers = UserAnswers(eori, contactDetails = Some(contactDetails))
+        val answers = UserAnswers(eori, mrn = Some(mrn), contactDetails = Some(contactDetails))
         val result = controller(user, eori, fakeDataRetrievalAction(answers)).onPageLoad(fakeRequest)
 
         contentAsString(result) mustBe view(form.fill(contactDetails))
@@ -80,10 +88,11 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
         whenever(contactDetails.email.matches(emailRegex)) {
           val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
-          val result = controller(user, eori).onSubmit(postRequest)
+          val answers = UserAnswers(eori, mrn = Some(mrn))
+          val result = controller(user, eori, fakeDataRetrievalAction(answers)).onSubmit(postRequest)
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(routes.MrnEntryController.onPageLoad().url)
+          redirectLocation(result) mustBe Some(routes.HowManyFilesUploadController.onPageLoad().url)
         }
       }
     }
@@ -92,11 +101,12 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
 
       forAll(arbitrary[SignedInUser], eoriString, arbitrary[ContactDetails], minStringLength(36)) { (user, eori, contactDetails, invalidName) =>
         val badData = contactDetails.copy(name = invalidName)
+        val answers = UserAnswers(eori, mrn = Some(mrn))
 
         val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(badData): _*)
         val badForm = form.fillAndValidate(badData)
 
-        val result = controller(user, eori).onSubmit(postRequest)
+        val result = controller(user, eori, fakeDataRetrievalAction(answers)).onSubmit(postRequest)
 
         status(result) mustBe BAD_REQUEST
         contentAsString(result) mustBe view(badForm)
@@ -109,7 +119,9 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
         whenever(contactDetails.email.matches(emailRegex)) {
           resetAnswersConnector()
           val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
-          await(controller(user, eori).onSubmit(postRequest))
+          val answers = UserAnswers(eori, mrn = Some(mrn))
+
+          await(controller(user, eori, fakeDataRetrievalAction(answers)).onSubmit(postRequest))
 
           theSavedUserAnswers.contactDetails mustBe Some(contactDetails)
         }

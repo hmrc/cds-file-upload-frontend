@@ -19,8 +19,7 @@ package models.requests
 import models._
 import play.api.mvc.WrappedRequest
 
-case class MrnRequest[A](request: ContactDetailsRequest[A], userAnswers: UserAnswers, mrn: MRN)
-    extends WrappedRequest[A](request) with Authenticated {
+case class MrnRequest[A](request: EORIRequest[A], userAnswers: UserAnswers, mrn: MRN) extends WrappedRequest[A](request) with Authenticated {
 
-  def eori: String = request.request.eori
+  def eori: String = request.eori
 }

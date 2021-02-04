@@ -22,8 +22,8 @@ import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
 case class UserAnswers(
   eori: String,
-  contactDetails: Option[ContactDetails] = None,
   mrn: Option[MRN] = None,
+  contactDetails: Option[ContactDetails] = None,
   fileUploadCount: Option[FileUploadCount] = None,
   fileUploadResponse: Option[FileUploadResponse] = None,
   updated: DateTime = DateTime.now.withZone(DateTimeZone.UTC)
