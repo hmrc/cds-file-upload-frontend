@@ -16,19 +16,21 @@
 
 package controllers
 
-import controllers.actions.{DataRetrievalAction, MrnRequiredActionImpl}
+import controllers.actions.{DataRetrievalAction, MrnRequiredAction}
 import forms.mappings.ContactDetailsMapping._
 import models._
 import models.requests.SignedInUser
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.{reset, when}
 import org.scalacheck.Arbitrary._
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.data.Form
 import play.api.test.Helpers._
+import play.api.test.Injecting
 import play.twirl.api.HtmlFormat
 import views.html.contact_details
 
-class ContactDetailsControllerSpec extends ControllerSpecBase {
+class ContactDetailsControllerSpec extends ControllerSpecBase with GuiceOneAppPerSuite with Injecting {
 
   private val form = Form(contactDetailsMapping)
   val page = mock[contact_details]
@@ -43,7 +45,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
       new FakeAuthAction(signedInUser),
       new FakeEORIAction(eori),
       dataRetrieval,
-      new MrnRequiredActionImpl(mcc),
+      inject[MrnRequiredAction],
       mockAnswersConnector,
       mcc,
       page
