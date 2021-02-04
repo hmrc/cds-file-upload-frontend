@@ -10,11 +10,11 @@ GET         /upload-error                       controllers.ErrorPageController.
 
 GET         /unauthorised                       controllers.UnauthorisedController.onPageLoad
 
-GET         /contact-details                    controllers.ContactDetailsController.onPageLoad
-POST        /contact-details                    controllers.ContactDetailsController.onSubmit
-
 GET         /mrn-entry                          controllers.MrnEntryController.onPageLoad
 POST        /mrn-entry                          controllers.MrnEntryController.onSubmit
+
+GET         /contact-details                    controllers.ContactDetailsController.onPageLoad
+POST        /contact-details                    controllers.ContactDetailsController.onSubmit
 
 GET         /how-many-files-upload              controllers.HowManyFilesUploadController.onPageLoad
 POST        /how-many-files-upload              controllers.HowManyFilesUploadController.onSubmit
