@@ -53,21 +53,21 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCh
       "first file upload is shown" in {
 
         forAll { total: Int =>
-          assertEqualsMessage(asDocument(view(First(total))), "title", s"$messagePrefix.title.first")
+          assertEqualsMessage(asDocument(view(First(total))), "title", s"$messagePrefix.heading.first")
         }
       }
 
       "a middle file upload is shown" in {
 
         forAll { (index: Int, total: Int) =>
-          assertEqualsMessage(asDocument(view(Middle(index, total))), "title", s"$messagePrefix.title.middle")
+          assertEqualsMessage(asDocument(view(Middle(index, total))), "title", s"$messagePrefix.heading.middle")
         }
       }
 
       "the last file upload is shown" in {
 
         forAll { total: Int =>
-          assertEqualsMessage(asDocument(view(Last(total))), "title", s"$messagePrefix.title.last")
+          assertEqualsMessage(asDocument(view(Last(total))), "title", s"$messagePrefix.heading.last")
         }
       }
     }

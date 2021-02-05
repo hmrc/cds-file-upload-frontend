@@ -20,7 +20,7 @@
 
 @(form: Form[MRN])(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = s"${errorPrefix(form)} ${messages("mrnEntryPage.title")}") {
+@mainTemplate(title = s"${errorPrefix(form)} ${messages("mrnEntryPage.heading")}") {
 
 <div class="form-group">
     @components.error_summary(form.errors)

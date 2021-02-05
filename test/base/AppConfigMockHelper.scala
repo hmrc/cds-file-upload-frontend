@@ -24,6 +24,7 @@ import config.{
   CDSFileUploadFrontend,
   ContactFrontend,
   CustomsDeclarations,
+  CustomsEmailFrontend,
   Feedback,
   FileFormats,
   GoogleAnalytics,
@@ -71,6 +72,7 @@ object AppConfigMockHelper extends MockitoSugar {
     cdsFileUploadFrontend: CDSFileUploadFrontend = mock[CDSFileUploadFrontend],
     cdsFileUpload: CDSFileUpload = mock[CDSFileUpload],
     keystore: Keystore = mock[Keystore],
-    contactFrontend: ContactFrontend = mock[ContactFrontend]
-  ) = Services(customsDeclarations, cdsFileUploadFrontend, cdsFileUpload, keystore, contactFrontend)
+    contactFrontend: ContactFrontend = mock[ContactFrontend],
+    customsEmailFrontend: CustomsEmailFrontend = mock[CustomsEmailFrontend]
+  ) = Services(customsDeclarations, cdsFileUploadFrontend, cdsFileUpload, keystore, contactFrontend, customsEmailFrontend)
 }

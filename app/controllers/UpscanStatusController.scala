@@ -18,7 +18,8 @@ package controllers
 
 import config.AppConfig
 import connectors.CdsFileUploadConnector
-import controllers.actions.{AuthAction, DataRetrievalAction, EORIRequiredAction, FileUploadResponseRequiredAction}
+import controllers.actions.{AuthAction, DataRetrievalAction, EORIRequiredAction, FileUploadResponseRequiredAction, VerifiedEmailAction}
+
 import javax.inject.Inject
 import metrics.MetricIdentifiers.fetchNotificationMetric
 import metrics.SfusMetrics
@@ -41,6 +42,7 @@ class UpscanStatusController @Inject()(
   authenticate: AuthAction,
   requireEori: EORIRequiredAction,
   getData: DataRetrievalAction,
+  verifiedEmail: VerifiedEmailAction,
   requireResponse: FileUploadResponseRequiredAction,
   answersConnector: AnswersService,
   auditConnector: AuditConnector,
@@ -61,7 +63,7 @@ class UpscanStatusController @Inject()(
   private val notificationsRetryPause = appConfig.notifications.retryPauseMillis
 
   def onPageLoad(ref: String): Action[AnyContent] =
-    (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
+    (authenticate andThen requireEori andThen verifiedEmail andThen getData andThen requireResponse).async { implicit req =>
       val references = req.fileUploadResponse.uploads.map(_.reference)
       val refPosition = getPosition(ref, references)
 
@@ -83,7 +85,7 @@ class UpscanStatusController @Inject()(
     }
 
   def success(id: String): Action[AnyContent] =
-    (authenticate andThen requireEori andThen getData andThen requireResponse).async { implicit req =>
+    (authenticate andThen requireEori andThen verifiedEmail andThen getData andThen requireResponse).async { implicit req =>
       val uploads = req.fileUploadResponse.uploads
       uploads.find(_.id == id) match {
         case Some(upload) =>
@@ -132,7 +134,7 @@ class UpscanStatusController @Inject()(
           case ns if ns.exists(failedUpload) =>
             logger.warn("Failed notification received for an upload.")
             logger.warn(s"Notifications: ${prettyPrint(ns)}")
-            clearUserCache(req.request.eori)
+            clearUserCache(req.eori)
             Future.successful(Redirect(routes.ErrorPageController.uploadError()))
 
           case ns if ns.length == uploads.length =>
@@ -148,7 +150,7 @@ class UpscanStatusController @Inject()(
           case ns =>
             logger.warn(s"Maximum number of retries exceeded. Retrieved ${ns.length} of ${uploads.length} notifications.")
             logger.warn(s"Notifications: ${prettyPrint(ns)}")
-            clearUserCache(req.request.eori)
+            clearUserCache(req.eori)
             Future.successful(Redirect(routes.ErrorPageController.uploadError()))
         }
       }
@@ -165,7 +167,7 @@ class UpscanStatusController @Inject()(
         .fold(Map.empty[String, String])(
           cd => Map("fullName" -> cd.name, "companyName" -> cd.companyName, "emailAddress" -> cd.email, "telephoneNumber" -> cd.phoneNumber)
         )
-      val eori = Map("eori" -> req.request.eori)
+      val eori = Map("eori" -> req.eori)
       val mrn = req.userAnswers.mrn.fold(Map.empty[String, String])(m => Map("mrn" -> m.value))
       val numberOfFiles = req.userAnswers.fileUploadCount.fold(Map.empty[String, String])(n => Map("numberOfFiles" -> s"${n.value}"))
       val files = req.fileUploadResponse.uploads

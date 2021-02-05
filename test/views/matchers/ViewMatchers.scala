@@ -40,7 +40,7 @@ trait ViewMatchers {
 
   implicit class PageComplexChecks(document: Document) extends MustMatchers {
     def checkErrorsSummary(): Unit = {
-      document.getElementById("error-summary-heading").text() mustBe "error.summary.title"
+      document.getElementById("error-summary-heading").text() mustBe "error.summary.heading"
       document.select("div.error-summary.error-summary--show>p").text() must be("error.summary.text")
     }
   }

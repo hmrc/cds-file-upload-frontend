@@ -27,7 +27,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class ContactDetailsRequiredActionImpl @Inject()(val mcc: MessagesControllerComponents) extends ContactDetailsRequiredAction {
 
   implicit val executionContext: ExecutionContext = mcc.executionContext
-  private val onError = Redirect(routes.ErrorPageController.error())
+  private lazy val onError = Redirect(routes.ErrorPageController.error())
 
   override protected def refine[A](request: MrnRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] = {
     val req = for {

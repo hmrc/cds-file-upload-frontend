@@ -38,10 +38,9 @@ class AppConfigSpec extends PlaySpec {
     "have a correct configuration for CDS File Upload" in {
       val cdsFileUpload = config.microservice.services.cdsFileUpload
 
-      val fileReference = "reference"
-      val expectedUrl = "http://localhost:6795/cds-file-upload/notification/reference"
-
-      cdsFileUpload.fetchNotificationEndpoint(fileReference) mustBe expectedUrl
+      cdsFileUpload.fetchNotificationEndpoint("reference") mustBe "http://localhost:6795/cds-file-upload/notification/reference"
+      cdsFileUpload.fetchDeclarationStatusEndpoint("sampleMrn") mustBe "http://localhost:6795/cds-file-upload/declaration-information/sampleMrn"
+      cdsFileUpload.fetchVerifiedEmailEndpoint("sampleEori") mustBe "http://localhost:6795/cds-file-upload/eori-email/sampleEori"
     }
 
     "have gtm container" in {
@@ -61,6 +60,10 @@ class AppConfigSpec extends PlaySpec {
       val expectedUrl = "http://localhost:9250/contact/beta-feedback-unauthenticated?service=SFUS"
 
       config.microservice.services.contactFrontend.giveFeedbackLink mustBe expectedUrl
+    }
+
+    "have a correct configuration for Customs Email Frontend" in {
+      config.microservice.services.customsEmailFrontend.getRedirectionLink mustBe "http://localhost:9898/manage-email-cds/service/cds-file-upload"
     }
   }
 }

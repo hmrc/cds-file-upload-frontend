@@ -28,7 +28,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class EORIRequiredActionImpl @Inject()(mcc: MessagesControllerComponents) extends EORIRequiredAction {
 
   implicit val executionContext: ExecutionContext = mcc.executionContext
-  private val onError = Redirect(routes.UnauthorisedController.onPageLoad())
+  private lazy val onError = Redirect(routes.UnauthorisedController.onPageLoad())
 
   override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, EORIRequest[A]]] = {
     val req = for {

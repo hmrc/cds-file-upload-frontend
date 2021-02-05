@@ -44,7 +44,7 @@ trait FakeActions extends Generators {
   class FakeDataRetrievalAction(answers: Option[UserAnswers] = None) extends DataRetrievalAction {
     protected def executionContext = ExecutionContext.global
     def parser = stubBodyParser()
-    override protected def transform[A](request: EORIRequest[A]): Future[DataRequest[A]] =
+    override protected def transform[A](request: VerifiedEmailRequest[A]): Future[DataRequest[A]] =
       Future.successful(DataRequest(request, answers.getOrElse(UserAnswers(request.eori))))
   }
 
@@ -59,6 +59,13 @@ trait FakeActions extends Generators {
   class FakeMrnRequiredAction(val mrn: MRN = arbitraryMrn.arbitrary.sample.get) extends MrnRequiredAction {
     protected def executionContext = ExecutionContext.global
     override protected def refine[A](request: DataRequest[A]): Future[Either[Result, MrnRequest[A]]] =
-      Future.successful(Right(MrnRequest(request.request, request.userAnswers, mrn)))
+      Future.successful(Right(MrnRequest(request.request.request, request.userAnswers, mrn)))
+  }
+
+  class FakeVerifiedEmailAction(email: String = emailString.sample.get) extends VerifiedEmailAction {
+    protected def executionContext = ExecutionContext.global
+    def parser = stubBodyParser()
+    override protected def refine[A](request: EORIRequest[A]): Future[Either[Result, VerifiedEmailRequest[A]]] =
+      Future.successful(Right(VerifiedEmailRequest[A](request, email)))
   }
 }

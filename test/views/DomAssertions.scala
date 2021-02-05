@@ -118,4 +118,15 @@ trait DomAssertions extends SpecBase {
 
   def assertSignoutLinkIsIncluded(view: HtmlFormat.Appendable): Assertion =
     assertContainsLink(asDocument(view), messages("signOut.link"), controllers.routes.SignOutController.signOut.url)
+
+  def assertBulletList(doc: Document, bulletText: String*) = {
+    val bullets = doc.select("li").asScala
+
+    val itemsWithExpected = bullets.zip(bulletText)
+
+    itemsWithExpected.foreach { itemWithExpected =>
+      val (item, expectedContent) = itemWithExpected
+      assert(item.text() == expectedContent)
+    }
+  }
 }

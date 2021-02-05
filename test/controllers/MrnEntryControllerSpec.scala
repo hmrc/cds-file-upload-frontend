@@ -41,6 +41,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
       new FakeAuthAction(),
       new FakeEORIAction(eori),
       new FakeDataRetrievalAction(Some(answers)),
+      new FakeVerifiedEmailAction(),
       new MRNFormProvider,
       mockAnswersConnector,
       mcc,
