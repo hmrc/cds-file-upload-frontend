@@ -16,7 +16,6 @@
 
 package controllers
 
-import controllers.actions.ContactDetailsRequiredAction
 import forms.MRNFormProvider
 import models.{MRN, UserAnswers}
 import org.mockito.ArgumentMatchers.any
@@ -31,19 +30,16 @@ import scala.concurrent.Future
 
 class MrnEntryControllerSpec extends ControllerSpecBase {
 
-  private val contactDetailsRequiredGen = new FakeContactDetailsRequiredAction(contactDetails)
-
   private val mrnDisValidator = mock[MrnDisValidator]
   private val mrnEntryPage = mock[mrn_entry]
   private val mrnAccessDeniedPage = mock[mrn_access_denied]
 
   private val validAnswers = UserAnswers(eori, contactDetails = Some(contactDetails))
 
-  private def mrnEntryController(requireContactDetails: ContactDetailsRequiredAction, answers: UserAnswers = validAnswers) =
+  private def mrnEntryController(answers: UserAnswers = validAnswers) =
     new MrnEntryController(
       new FakeAuthAction(),
       new FakeEORIAction(eori),
-      requireContactDetails,
       new FakeDataRetrievalAction(Some(answers)),
       new MRNFormProvider,
       mockAnswersConnector,
@@ -73,7 +69,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
 
       "cache is empty" in {
 
-        val controller = mrnEntryController(contactDetailsRequiredGen)
+        val controller = mrnEntryController()
         val result = controller.onPageLoad(fakeRequest)
 
         status(result) mustBe OK
@@ -81,7 +77,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
 
       "cache contains MRN data" in {
 
-        val controller = mrnEntryController(contactDetailsRequiredGen, validAnswers.copy(mrn = MRN(mrn)))
+        val controller = mrnEntryController(validAnswers.copy(mrn = MRN(mrn)))
         val result = controller.onPageLoad(fakeRequest)
 
         status(result) mustBe OK
@@ -91,7 +87,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
 
   "MrnEntryController on onSubmit" when {
 
-    val controller = mrnEntryController(contactDetailsRequiredGen)
+    val controller = mrnEntryController()
 
     "provided with incorrect MRN" should {
 
@@ -144,7 +140,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
           val result = controller.onSubmit(postRequest)
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).get mustBe routes.HowManyFilesUploadController.onPageLoad().url
+          redirectLocation(result).get mustBe routes.ContactDetailsController.onPageLoad().url
         }
       }
     }

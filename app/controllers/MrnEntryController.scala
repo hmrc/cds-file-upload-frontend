@@ -33,7 +33,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class MrnEntryController @Inject()(
   authenticate: AuthAction,
   requireEori: EORIRequiredAction,
-  requireContactDetails: ContactDetailsRequiredAction,
   getData: DataRetrievalAction,
   formProvider: MRNFormProvider,
   answersConnector: AnswersService,
@@ -46,12 +45,12 @@ class MrnEntryController @Inject()(
 
   val form = formProvider()
 
-  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireContactDetails) { implicit req =>
+  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData) { implicit req =>
     val populatedForm = req.userAnswers.mrn.fold(form)(form.fill)
     Ok(mrnEntry(populatedForm))
   }
 
-  def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen getData andThen requireContactDetails).async { implicit req =>
+  def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen getData).async { implicit req =>
     form
       .bindFromRequest()
       .fold(
@@ -61,7 +60,7 @@ class MrnEntryController @Inject()(
             case false => Future.successful(BadRequest(mrnAccessDenied(mrn)))
             case true =>
               answersConnector.upsert(req.userAnswers.copy(mrn = Some(mrn))).map { _ =>
-                Redirect(routes.HowManyFilesUploadController.onPageLoad())
+                Redirect(routes.ContactDetailsController.onPageLoad())
               }
           }
         }

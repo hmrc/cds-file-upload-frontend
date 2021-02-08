@@ -21,7 +21,7 @@ import controllers.actions._
 import forms.FileUploadCountProvider
 import javax.inject.{Inject, Singleton}
 import models._
-import models.requests.MrnRequest
+import models.requests.ContactDetailsRequest
 import play.api.Logger
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -53,7 +53,7 @@ class HowManyFilesUploadController @Inject()(
   val form = formProvider()
 
   def onPageLoad: Action[AnyContent] =
-    (authenticate andThen requireEori andThen getData andThen requireContactDetails andThen requireMrn) { implicit req =>
+    (authenticate andThen requireEori andThen getData andThen requireMrn andThen requireContactDetails) { implicit req =>
       val populatedForm =
         req.userAnswers.fileUploadCount.fold(form)(form.fill)
 
@@ -61,7 +61,7 @@ class HowManyFilesUploadController @Inject()(
     }
 
   def onSubmit: Action[AnyContent] =
-    (authenticate andThen requireEori andThen getData andThen requireContactDetails andThen requireMrn).async { implicit req =>
+    (authenticate andThen requireEori andThen getData andThen requireMrn andThen requireContactDetails).async { implicit req =>
       form
         .bindFromRequest()
         .fold(
@@ -79,7 +79,7 @@ class HowManyFilesUploadController @Inject()(
         )
     }
 
-  private def uploadContactDetails(req: MrnRequest[AnyContent], fileUploadCount: FileUploadCount)(
+  private def uploadContactDetails(req: ContactDetailsRequest[AnyContent], fileUploadCount: FileUploadCount)(
     implicit hc: HeaderCarrier
   ): Future[Either[Throwable, List[FileUpload]]] = {
     def saveRemainingFileUploadsToCache(fileUploadResponse: FileUploadResponse): Future[List[FileUpload]] = {
@@ -100,7 +100,7 @@ class HowManyFilesUploadController @Inject()(
     initiateUpload(req, fileUploadCount).flatMap { fileUploadResponse =>
       firstUploadFile(fileUploadResponse) match {
         case Right((_, uploadRequest)) =>
-          upscanConnector.upload(uploadRequest, req.request.contactDetails).flatMap { res =>
+          upscanConnector.upload(uploadRequest, req.contactDetails).flatMap { res =>
             logger.info(s"Upload contact details successful: $res")
             logger.info(s"Upload contact details headers: ${res.header("Location")}")
             val isSuccessRedirect = res.header("Location").exists(_.contains("upscan-success"))
@@ -119,8 +119,10 @@ class HowManyFilesUploadController @Inject()(
     }
   }
 
-  private def initiateUpload(req: MrnRequest[AnyContent], fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier): Future[FileUploadResponse] =
-    customsDeclarationsService.batchFileUpload(req.eori, req.mrn, fileUploadCount)
+  private def initiateUpload(req: ContactDetailsRequest[AnyContent], fileUploadCount: FileUploadCount)(
+    implicit hc: HeaderCarrier
+  ): Future[FileUploadResponse] =
+    customsDeclarationsService.batchFileUpload(req.request.eori, req.request.mrn, fileUploadCount)
 
   private def firstUploadFile(response: FileUploadResponse): Either[Throwable, (FileUpload, UploadRequest)] =
     response.uploads.headOption map { case f @ FileUpload(_, Waiting(u), _, _) => Right((f, u)) } getOrElse Left(

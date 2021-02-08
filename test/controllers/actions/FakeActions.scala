@@ -52,13 +52,13 @@ trait FakeActions extends Generators {
       extends ContactDetailsRequiredAction {
     protected def executionContext = ExecutionContext.global
     def parser = stubBodyParser()
-    override protected def refine[A](request: DataRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] =
-      Future.successful(Right(ContactDetailsRequest(request.request, request.userAnswers, contactDetails)))
+    override protected def refine[A](request: MrnRequest[A]): Future[Either[Result, ContactDetailsRequest[A]]] =
+      Future.successful(Right(ContactDetailsRequest(request, request.userAnswers, contactDetails)))
   }
 
   class FakeMrnRequiredAction(val mrn: MRN = arbitraryMrn.arbitrary.sample.get) extends MrnRequiredAction {
     protected def executionContext = ExecutionContext.global
-    override protected def refine[A](request: ContactDetailsRequest[A]): Future[Either[Result, MrnRequest[A]]] =
-      Future.successful(Right(MrnRequest(request, request.userAnswers, mrn)))
+    override protected def refine[A](request: DataRequest[A]): Future[Either[Result, MrnRequest[A]]] =
+      Future.successful(Right(MrnRequest(request.request, request.userAnswers, mrn)))
   }
 }
