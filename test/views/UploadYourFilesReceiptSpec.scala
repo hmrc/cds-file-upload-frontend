@@ -63,7 +63,7 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
       forAll { fileUploads: List[FileUpload] =>
         val doc = asDocument(view(fileUploads))
 
-        assertEqualsMessage(doc, "title", s"$pagePrefix.title")
+        assertEqualsMessage(doc, "title", s"$pagePrefix.heading")
       }
     }
 

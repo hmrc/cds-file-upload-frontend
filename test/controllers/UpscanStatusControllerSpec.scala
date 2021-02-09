@@ -43,21 +43,6 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
   val cdsFileUploadConnector = mock[CdsFileUploadConnector]
   val eori: String = eoriString.sample.get
 
-  val controller = new UpscanStatusController(
-    new FakeAuthAction(),
-    new FakeEORIAction(eori),
-    fakeDataRetrievalAction(),
-    new FileUploadResponseRequiredAction(),
-    mockAnswersConnector,
-    auditConnector,
-    cdsFileUploadConnector,
-    appConfig,
-    mcc,
-    sfusMetrics,
-    uploadYourFiles,
-    uploadError
-  )(executionContext)
-
   private val mockAuditConnector = mock[AuditConnector]
 
   private val responseGen: Gen[(FileUpload, FileUploadResponse)] =
@@ -77,11 +62,12 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       }
   }
 
-  def controller(getData: DataRetrievalAction) =
+  def controller(getData: DataRetrievalAction = fakeDataRetrievalAction()) =
     new UpscanStatusController(
       new FakeAuthAction(),
       new FakeEORIAction(eori),
       getData,
+      new FakeVerifiedEmailAction(),
       new FileUploadResponseRequiredAction(),
       mockAnswersConnector,
       mockAuditConnector,
@@ -109,7 +95,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
   "Upscan Status error" should {
 
     "return error page" in {
-      val result = controller.error()(fakeRequest)
+      val result = controller().error()(fakeRequest)
 
       status(result) mustBe OK
       verify(uploadError).apply()(any(), any())

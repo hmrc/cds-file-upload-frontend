@@ -20,7 +20,7 @@
 
 @(form: Form[FileUploadCount])(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = s"${errorPrefix(form)} ${messages("howManyFilesUpload.title")}") {
+@mainTemplate(title = s"${errorPrefix(form)} ${messages("howManyFilesUpload.heading")}") {
 
 <div class="form-group">
     @components.error_summary(form.errors)
@@ -31,7 +31,7 @@
 
         @components.input_text(
             form("value"),
-            messages("howManyFilesUpload.title"),
+            messages("howManyFilesUpload.heading"),
             labelClass = Some("visually-hidden")
         )
 

@@ -73,6 +73,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       new FakeDataRetrievalAction(answers),
       new MrnRequiredActionImpl(mcc),
       contactDetailsRequiredAction,
+      new FakeVerifiedEmailAction(),
       new FileUploadCountProvider,
       mockAnswersConnector,
       mockUpscanConnector,

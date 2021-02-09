@@ -19,4 +19,4 @@ package models.requests
 import models._
 import play.api.mvc.WrappedRequest
 
-case class DataRequest[A](request: EORIRequest[A], userAnswers: UserAnswers) extends WrappedRequest[A](request) with Authenticated
+case class DataRequest[A](request: VerifiedEmailRequest[A], userAnswers: UserAnswers) extends WrappedRequest[A](request) with Authenticated

@@ -7,15 +7,14 @@ common.feedback=This is a new service - your {0} will help us to improve it.
 common.feedback.link=feedback
 
 ## errors
-error.browser.title.prefix=Error:
-error.summary.title=There is a problem
+error.browser.heading.prefix=Error:
+error.summary.heading=There is a problem
 
 ## common buttons with shared labels
 common.button.startNow=Start now
 
 ## start page
 
-startPage.title=Upload a customs document
 startPage.heading=Upload a customs document
 startPage.paragraph2=You will need to know how many files you want to upload before you start uploading them. You can submit a maximum of 10 files, and each file can be up to 10 Megabytes (MB).
 startPage.paragraph3= {0} - if you have two photos of an invoice saved as separate jpegs, this is two files.
@@ -30,7 +29,6 @@ startPage.listItem3=the movement reference number (MRN) of your declaration
 ## Sign-out
 
 signOut.link = Sign out
-signedOut.title = You have been signed out
 signedOut.heading = You have been signed out
 signedOut.session.timeout.heading = For your security, we have signed you out
 signedOut.information = To use the service again, you will need to {0}.
@@ -39,7 +37,6 @@ signedOut.backToGovUk = Back to GOV.UK
 
 ## MRN Entry Page
 
-mrnEntryPage.title=What is your movement reference number (MRN)?
 mrnEntryPage.heading=What is your movement reference number (MRN)?
 mrnEntryPage.hint1=This is 18 digits long, and is made up of letters and numbers.
 mrnEntryPage.hint2=You were given this when you submitted your declaration.
@@ -52,9 +49,19 @@ mrnAccessDenied.paragraph.1=If the MRN is correct and current, this may mean the
 mrnAccessDenied.paragraph.2=The documents can also be uploaded by another person from the same business, using a Gateway ID that has been given access to the Customs Declaration Service by that business.
 mrnAccessDenied.link.enterDifferentMrn=Enter a different MRN
 
+## Unverified email waring page
+
+emailUnverified.heading=You need to verify your email address for the Customs Declaration Service
+emailUnverified.paragraph1=This will be the only email address we use for:
+emailUnverified.bullets.item1=urgent updates about goods in customs
+emailUnverified.bullets.item2=notifications about import and export declarations
+emailUnverified.bullets.item3=import VAT and duty deferment statements
+emailUnverified.bullets.item4=duty deferment Direct Debit notices
+emailUnverified.bullets.item5=updates about changes to the service
+emailUnverified.link=Verify your email address
+
 ## Contact details page
 
-contactDetails.title=Your contact details
 contactDetails.heading=Your contact details
 contactDetails.name=Name
 contactDetails.companyName=Company name
@@ -70,7 +77,6 @@ contactDetails.paragraph1=Provide these details so we can contact you if there a
 
 ## file warning page
 
-fileWarning.title=Count your files
 fileWarning.heading=Count your files
 fileWarning.paragraph1=HMRC need to know how many files you want to upload before you start uploading them.
 fileWarning.paragraph2=This is not the same as the number of documents.
@@ -79,13 +85,9 @@ fileWarning.button=I understand
 
 ## How many files do you need to upload page
 
-howManyFilesUpload.title=How many files do you need to upload?
 howManyFilesUpload.heading=How many files do you need to upload?
 howManyFilesUpload.invalid=You have entered an invalid number of files, you can upload 1 or more files up to a maximum number of 10 files. Re-enter the number of files you wish to upload.
 
-fileUploadPage.title.first=Upload your first file
-fileUploadPage.title.middle=Upload your next file
-fileUploadPage.title.last=Upload your last file
 fileUploadPage.heading.first=Upload your first file
 fileUploadPage.heading.middle=Upload your next file
 fileUploadPage.heading.last=Upload your last file
@@ -103,7 +105,6 @@ fileUploadPage.validation.filesize=The file you have chosen is bigger than {0}MB
 fileUploadPage.paragraph1=Ensure that you select the correct documents as requested by HMRC.
 fileUploadPage.button=Upload a document
 
-fileUploadReceiptPage.title=Uploaded files receipt
 fileUploadReceiptPage.heading=Files have been uploaded and sent to HMRC
 fileUploadReceiptPage.mrn=Movement Reference Number:
 fileUploadReceiptPage.tableTitle=Uploaded files
@@ -132,7 +133,6 @@ unauthorised.paragraph.2 = If you’ve already applied for an EORI number, you c
 unauthorised.paragraph.2.link = check the status of your application
 
 ## Errors
-uploadError.title=One of your files has been rejected
 uploadError.heading=One of your files has been rejected
 uploadError.paragraph=At least one of your files may be:
 uploadError.bullet.1=larger than 10MB
@@ -141,7 +141,6 @@ uploadError.bullet.3=corrupted, or contain a virus
 uploadError.button=Start your upload again
 uploadError.guidance=You may be asked to check or re-enter the contact details.
 
-cds.error.title=Sorry, there is a problem with the service
 cds.error.heading=Sorry, there is a problem with the service
 cds.error.message=Please try again later.
 cds.error.helpSupport=Help and support

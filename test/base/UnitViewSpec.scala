@@ -38,7 +38,7 @@ class UnitViewSpec extends UnitSpec with ViewMatchers {
   val realMessagesApi = UnitViewSpec.realMessagesApi
 
   def checkErrorsSummary(view: Document): Assertion = {
-    view.getElementById("error-summary-heading").text() must be("error.summary.title")
+    view.getElementById("error-summary-heading").text() must be("error.summary.heading")
     view.getElementsByClass("error-summary error-summary--show").get(0).getElementsByTag("p").text() must be("error.summary.text")
   }
 }

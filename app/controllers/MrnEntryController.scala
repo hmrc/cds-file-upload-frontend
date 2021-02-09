@@ -19,7 +19,6 @@ package controllers
 import com.google.inject.Singleton
 import controllers.actions._
 import forms.MRNFormProvider
-import javax.inject.Inject
 import models.EORI
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -27,6 +26,7 @@ import services.{AnswersService, MrnDisValidator}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.{mrn_access_denied, mrn_entry}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -34,6 +34,7 @@ class MrnEntryController @Inject()(
   authenticate: AuthAction,
   requireEori: EORIRequiredAction,
   getData: DataRetrievalAction,
+  verifiedEmail: VerifiedEmailAction,
   formProvider: MRNFormProvider,
   answersConnector: AnswersService,
   mcc: MessagesControllerComponents,
@@ -45,12 +46,12 @@ class MrnEntryController @Inject()(
 
   val form = formProvider()
 
-  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen getData) { implicit req =>
+  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen verifiedEmail andThen getData) { implicit req =>
     val populatedForm = req.userAnswers.mrn.fold(form)(form.fill)
     Ok(mrnEntry(populatedForm))
   }
 
-  def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen getData).async { implicit req =>
+  def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen verifiedEmail andThen getData).async { implicit req =>
     form
       .bindFromRequest()
       .fold(

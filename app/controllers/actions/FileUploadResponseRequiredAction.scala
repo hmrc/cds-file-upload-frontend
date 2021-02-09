@@ -28,7 +28,7 @@ class FileUploadResponseRequiredAction @Inject()(implicit mcc: MessagesControlle
     extends ActionRefiner[DataRequest, FileUploadResponseRequest] {
 
   implicit override val executionContext: ExecutionContext = mcc.executionContext
-  private val onError = Redirect(routes.ErrorPageController.error())
+  private lazy val onError = Redirect(routes.ErrorPageController.error())
 
   override protected def refine[A](request: DataRequest[A]): Future[Either[Result, FileUploadResponseRequest[A]]] = {
 
