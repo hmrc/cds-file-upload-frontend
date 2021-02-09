@@ -29,7 +29,7 @@ trait IntViewBehaviours[A] extends QuestionViewBehaviours[A] {
 
         "contain a label for the value" in {
           val doc = asDocument(createView(form))
-          assertContainsLabel(doc, fieldName, messages(s"$messageKeyPrefix.title"))
+          assertContainsLabel(doc, fieldName, messages(s"$messageKeyPrefix.heading"))
         }
 
         "contain an input for the value" in {
@@ -60,7 +60,7 @@ trait IntViewBehaviours[A] extends QuestionViewBehaviours[A] {
 
         "show an error prefix in the browser title" in {
           val doc = asDocument(createView(form.withError(error)))
-          assertPageTitleEquals(doc, s"""${messages("error.browser.title.prefix")} ${messages(s"$messageKeyPrefix.title")}""")
+          assertPageTitleEquals(doc, s"""${messages("error.browser.heading.prefix")} ${messages(s"$messageKeyPrefix.heading")}""")
         }
       }
     }

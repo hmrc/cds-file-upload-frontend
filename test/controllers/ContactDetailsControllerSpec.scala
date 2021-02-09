@@ -44,6 +44,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
       new FakeEORIAction(eori),
       dataRetrieval,
       new FakeMrnRequiredAction,
+      new FakeVerifiedEmailAction(),
       mockAnswersConnector,
       mcc,
       page

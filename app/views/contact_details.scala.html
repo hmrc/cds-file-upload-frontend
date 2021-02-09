@@ -20,7 +20,7 @@
 
 @(form: Form[ContactDetails])(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = s"${errorPrefix(form)} ${messages("contactDetails.title")}") {
+@mainTemplate(title = s"${errorPrefix(form)} ${messages("contactDetails.heading")}") {
 
     <div class="form-group">
         <h1 class="heading-large">@messages("contactDetails.heading")</h1>

@@ -23,7 +23,7 @@ import play.twirl.api.Html
 object Utils {
 
   def errorPrefix(form: Form[_])(implicit messages: Messages): String =
-    if (form.hasErrors || form.hasGlobalErrors) messages("error.browser.title.prefix") else ""
+    if (form.hasErrors || form.hasGlobalErrors) messages("error.browser.heading.prefix") else ""
 
   def multiline(values: String*): Html =
     Html(values.toList.mkString("<br />"))

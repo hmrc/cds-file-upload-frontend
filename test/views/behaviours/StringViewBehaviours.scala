@@ -63,7 +63,7 @@ trait StringViewBehaviours[A] extends QuestionViewBehaviours[A] {
 
         "show an error prefix in the browser title" in {
           val doc = asDocument(createView(form.withError(error)))
-          assertContainsValue(doc, "title", messages("error.browser.title.prefix"))
+          assertContainsValue(doc, "title", messages("error.browser.heading.prefix"))
         }
       }
     }

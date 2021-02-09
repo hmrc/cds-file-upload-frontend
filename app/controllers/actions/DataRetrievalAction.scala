@@ -16,19 +16,19 @@
 
 package controllers.actions
 
-import javax.inject.Inject
-import models.requests.{DataRequest, EORIRequest}
+import models.requests.{DataRequest, VerifiedEmailRequest}
 import play.api.mvc.{ActionTransformer, MessagesControllerComponents}
 import services.AnswersService
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class DataRetrievalActionImpl @Inject()(val answersConnector: AnswersService, mcc: MessagesControllerComponents) extends DataRetrievalAction {
 
   implicit val executionContext: ExecutionContext = mcc.executionContext
 
-  override protected def transform[A](request: EORIRequest[A]): Future[DataRequest[A]] =
+  override protected def transform[A](request: VerifiedEmailRequest[A]): Future[DataRequest[A]] =
     answersConnector.findOrCreate(request.eori).map(DataRequest(request, _))
 }
 
-trait DataRetrievalAction extends ActionTransformer[EORIRequest, DataRequest]
+trait DataRetrievalAction extends ActionTransformer[VerifiedEmailRequest, DataRequest]

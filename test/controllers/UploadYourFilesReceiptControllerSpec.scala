@@ -40,6 +40,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
     new UploadYourFilesReceiptController(
       new FakeAuthAction(),
       new FakeEORIAction(eori),
+      new FakeVerifiedEmailAction(),
       cdsFileUploadConnector,
       sfusMetrics,
       page,

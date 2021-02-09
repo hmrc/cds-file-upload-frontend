@@ -57,7 +57,8 @@ case class Services(
   cdsFileUploadFrontend: CDSFileUploadFrontend,
   cdsFileUpload: CDSFileUpload,
   keystore: Keystore,
-  contactFrontend: ContactFrontend
+  contactFrontend: ContactFrontend,
+  customsEmailFrontend: CustomsEmailFrontend
 )
 
 case class CustomsDeclarations(protocol: Option[String], host: String, port: Option[Int], batchUploadUri: String, apiVersion: String) {
@@ -68,12 +69,22 @@ case class CDSFileUploadFrontend(protocol: Option[String], host: String, port: O
   val uri: String = s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}"
 }
 
-case class CDSFileUpload(protocol: Option[String], host: String, port: Option[Int], fetchNotificationUri: String, fetchDeclarationStatus: String) {
+case class CDSFileUpload(
+  protocol: Option[String],
+  host: String,
+  port: Option[Int],
+  fetchNotificationUri: String,
+  fetchDeclarationStatus: String,
+  fetchVerifiedEmail: String
+) {
   def fetchNotificationEndpoint(reference: String): String =
     s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$fetchNotificationUri/$reference"
 
   def fetchDeclarationStatusEndpoint(mrn: String): String =
     s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$fetchDeclarationStatus/$mrn"
+
+  def fetchVerifiedEmailEndpoint(eori: String): String =
+    s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$fetchVerifiedEmail/$eori"
 }
 
 case class Keystore(protocol: String = "https", host: String, port: Int, defaultSource: String, domain: String) {
@@ -82,6 +93,10 @@ case class Keystore(protocol: String = "https", host: String, port: Int, default
 
 case class ContactFrontend(url: String, serviceId: String) {
   lazy val giveFeedbackLink: String = s"$url?service=$serviceId"
+}
+
+case class CustomsEmailFrontend(protocol: String = "https", host: String, port: Int) {
+  lazy val getRedirectionLink: String = s"$protocol://$host:$port/manage-email-cds/service/cds-file-upload"
 }
 
 case class FileFormats(maxFileSizeMb: Int, approvedFileTypes: String, approvedFileExtensions: String)

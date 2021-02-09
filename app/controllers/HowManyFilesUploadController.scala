@@ -19,9 +19,8 @@ package controllers
 import connectors.UpscanConnector
 import controllers.actions._
 import forms.FileUploadCountProvider
-import javax.inject.{Inject, Singleton}
 import models._
-import models.requests.ContactDetailsRequest
+import models.requests.{ContactDetailsRequest, MrnRequest}
 import play.api.Logger
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -30,6 +29,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.how_many_files_upload
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -39,6 +39,7 @@ class HowManyFilesUploadController @Inject()(
   getData: DataRetrievalAction,
   requireMrn: MrnRequiredAction,
   requireContactDetails: ContactDetailsRequiredAction,
+  verifiedEmail: VerifiedEmailAction,
   formProvider: FileUploadCountProvider,
   answersConnector: AnswersService,
   upscanConnector: UpscanConnector,
@@ -53,7 +54,7 @@ class HowManyFilesUploadController @Inject()(
   val form = formProvider()
 
   def onPageLoad: Action[AnyContent] =
-    (authenticate andThen requireEori andThen getData andThen requireMrn andThen requireContactDetails) { implicit req =>
+    (authenticate andThen requireEori andThen verifiedEmail andThen getData andThen requireMrn andThen requireContactDetails) { implicit req =>
       val populatedForm =
         req.userAnswers.fileUploadCount.fold(form)(form.fill)
 
@@ -61,7 +62,7 @@ class HowManyFilesUploadController @Inject()(
     }
 
   def onSubmit: Action[AnyContent] =
-    (authenticate andThen requireEori andThen getData andThen requireMrn andThen requireContactDetails).async { implicit req =>
+    (authenticate andThen requireEori andThen verifiedEmail andThen getData andThen requireMrn andThen requireContactDetails).async { implicit req =>
       form
         .bindFromRequest()
         .fold(
@@ -122,7 +123,7 @@ class HowManyFilesUploadController @Inject()(
   private def initiateUpload(req: ContactDetailsRequest[AnyContent], fileUploadCount: FileUploadCount)(
     implicit hc: HeaderCarrier
   ): Future[FileUploadResponse] =
-    customsDeclarationsService.batchFileUpload(req.request.eori, req.request.mrn, fileUploadCount)
+    customsDeclarationsService.batchFileUpload(req.eori, req.request.mrn, fileUploadCount)
 
   private def firstUploadFile(response: FileUploadResponse): Either[Throwable, (FileUpload, UploadRequest)] =
     response.uploads.headOption map { case f @ FileUpload(_, Waiting(u), _, _) => Right((f, u)) } getOrElse Left(

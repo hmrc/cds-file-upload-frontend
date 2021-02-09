@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,21 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@this(mainTemplate: main_template)
+package config
 
-@()(implicit request: Request[_], messages: Messages)
+import features.Feature
 
-@mainTemplate(title = messages("cds.error.heading")) {
+import javax.inject.{Inject, Singleton}
 
-    <h1 class="heading-xlarge">@messages("cds.error.heading")</h1>
-    <p>@messages("cds.error.message")</p>
-    <div>
-        <h2 class="heading-medium">@messages("cds.error.helpSupport")</h2>
+@Singleton
+class SecureMessagingConfig @Inject()(featureSwitchConfig: FeatureSwitchConfig) {
 
-        <div class="section">
-            <p>@messages("helpline.generic")</p>
-        </div>
-    </div>
+  val isSecureMessagingEnabled: Boolean = featureSwitchConfig.isFeatureOn(Feature.secureMessaging)
 }

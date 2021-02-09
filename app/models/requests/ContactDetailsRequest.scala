@@ -20,4 +20,6 @@ import models._
 import play.api.mvc.WrappedRequest
 
 case class ContactDetailsRequest[A](request: MrnRequest[A], userAnswers: UserAnswers, contactDetails: ContactDetails)
-    extends WrappedRequest[A](request) with Authenticated
+    extends WrappedRequest[A](request) with Authenticated {
+  val eori = request.eori
+}
