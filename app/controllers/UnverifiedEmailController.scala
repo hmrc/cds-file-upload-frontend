@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.AppConfig
+import config.{AppConfig, ExternalServicesConfig}
 import controllers.actions.{AuthAction, EORIRequiredAction}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -31,11 +31,11 @@ class UnverifiedEmailController @Inject()(
   requireEori: EORIRequiredAction,
   mcc: MessagesControllerComponents,
   unverified_email: unverified_email,
-  appConfig: AppConfig
+  config: ExternalServicesConfig
 ) extends FrontendController(mcc) with I18nSupport {
 
   val informUser: Action[AnyContent] = (authenticate andThen requireEori) { implicit req =>
-    val redirectUrl = appConfig.microservice.services.customsEmailFrontend.getRedirectionLink
+    val redirectUrl = config.emailFrontendUrl
     Ok(unverified_email(redirectUrl))
   }
 }

@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.ExternalServicesConfig
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.{reset, when}
 import play.api.test.Helpers._
@@ -25,11 +26,12 @@ import views.html.unverified_email
 class UnverifiedEmailControllerSpec extends ControllerSpecBase {
 
   val page = mock[unverified_email]
+  val config = instanceOf[ExternalServicesConfig]
 
   def view(): String = page("")(fakeRequest, messages).toString
 
   def controller() =
-    new UnverifiedEmailController(new FakeAuthAction(), new FakeEORIAction(), mcc, page, appConfig)
+    new UnverifiedEmailController(new FakeAuthAction(), new FakeEORIAction(), mcc, page, config)
 
   override protected def beforeEach(): Unit = {
     super.beforeEach

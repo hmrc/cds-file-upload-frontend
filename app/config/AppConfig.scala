@@ -57,8 +57,7 @@ case class Services(
   cdsFileUploadFrontend: CDSFileUploadFrontend,
   cdsFileUpload: CDSFileUpload,
   keystore: Keystore,
-  contactFrontend: ContactFrontend,
-  customsEmailFrontend: CustomsEmailFrontend
+  contactFrontend: ContactFrontend
 )
 
 case class CustomsDeclarations(protocol: Option[String], host: String, port: Option[Int], batchUploadUri: String, apiVersion: String) {
@@ -93,10 +92,6 @@ case class Keystore(protocol: String = "https", host: String, port: Int, default
 
 case class ContactFrontend(url: String, serviceId: String) {
   lazy val giveFeedbackLink: String = s"$url?service=$serviceId"
-}
-
-case class CustomsEmailFrontend(protocol: String = "https", host: String, port: Int) {
-  lazy val getRedirectionLink: String = s"$protocol://$host:$port/manage-email-cds/service/cds-file-upload"
 }
 
 case class FileFormats(maxFileSizeMb: Int, approvedFileTypes: String, approvedFileExtensions: String)
