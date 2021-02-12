@@ -61,9 +61,5 @@ class AppConfigSpec extends PlaySpec {
 
       config.microservice.services.contactFrontend.giveFeedbackLink mustBe expectedUrl
     }
-
-    "have a correct configuration for Customs Email Frontend" in {
-      config.microservice.services.customsEmailFrontend.getRedirectionLink mustBe "http://localhost:9898/manage-email-cds/service/cds-file-upload"
-    }
   }
 }
