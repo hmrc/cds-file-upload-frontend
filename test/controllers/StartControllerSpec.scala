@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.SecureMessagingConfig
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.{reset, when}
 import play.api.test.Helpers._
@@ -24,35 +25,49 @@ import views.html.start
 
 class StartControllerSpec extends ControllerSpecBase {
 
-  val page = mock[start]
+  private val page = mock[start]
+  private val secureMessagingConfig = mock[SecureMessagingConfig]
 
-  def view(): String = page()(fakeRequest, messages).toString
-
-  def controller() =
-    new StartController(new FakeAuthAction(), new FakeEORIAction(), mcc, page)
+  private def controller() =
+    new StartController(new FakeAuthAction(), new FakeEORIAction(), mcc, page, secureMessagingConfig)
 
   override protected def beforeEach(): Unit = {
-    super.beforeEach
+    super.beforeEach()
 
+    reset(page, secureMessagingConfig)
     when(page.apply()(any(), any())).thenReturn(HtmlFormat.empty)
   }
 
   override protected def afterEach(): Unit = {
-    reset(page)
+    reset(page, secureMessagingConfig)
 
     super.afterEach()
   }
 
-  "Start controller" should {
+  "StartController on onStart" when {
 
-    "redirect to first page of journey" in {
+    "SecureMessaging feature is enabled" should {
 
-      val result = controller().onStart(fakeRequest)
+      "redirect to Choice page" in {
+        when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(true)
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.MrnEntryController.onPageLoad().url)
+        val result = controller().onStart(fakeRequest)
 
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result) mustBe Some(routes.ChoiceController.displayPage().url)
+      }
     }
 
+    "SecureMessaging feature is disabled" should {
+
+      "redirect to MRN Entry page" in {
+        when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(false)
+
+        val result = controller().onStart(fakeRequest)
+
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result) mustBe Some(routes.MrnEntryController.onPageLoad().url)
+      }
+    }
   }
 }

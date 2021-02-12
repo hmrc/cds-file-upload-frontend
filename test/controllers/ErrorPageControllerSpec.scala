@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.ErrorHandler
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, verify, when}
 import play.api.test.Helpers._
@@ -25,19 +26,19 @@ import views.html._
 class ErrorPageControllerSpec extends ControllerSpecBase {
 
   val uploadErrorPage = mock[upload_error]
-  val genericErrorPage = mock[generic_error]
+  val errorHandler = mock[ErrorHandler]
 
-  val controller = new ErrorPageController(mcc, uploadErrorPage, genericErrorPage)
+  val controller = new ErrorPageController(mcc, uploadErrorPage, errorHandler)
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
 
     when(uploadErrorPage()(any(), any())).thenReturn(HtmlFormat.empty)
-    when(genericErrorPage()(any(), any())).thenReturn(HtmlFormat.empty)
+    when(errorHandler.internalServerErrorTemplate(any())).thenReturn(HtmlFormat.empty)
   }
 
   override protected def afterEach(): Unit = {
-    reset(uploadErrorPage, genericErrorPage)
+    reset(uploadErrorPage, errorHandler)
 
     super.afterEach()
   }
@@ -52,12 +53,12 @@ class ErrorPageControllerSpec extends ControllerSpecBase {
       verify(uploadErrorPage).apply()(any(), any())
     }
 
-    "return the correct view for generic error" in {
+    "call ErrorHandler.internalServerErrorTemplate for generic error" in {
       val result = controller.error()(fakeRequest)
 
       status(result) mustBe OK
 
-      verify(genericErrorPage).apply()(any(), any())
+      verify(errorHandler).internalServerErrorTemplate(any())
     }
   }
 }

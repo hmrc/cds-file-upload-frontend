@@ -9,6 +9,7 @@ common.feedback.link=feedback
 ## errors
 error.browser.heading.prefix=Error:
 error.summary.heading=There is a problem
+error.required = Please enter a value.
 
 ## common buttons with shared labels
 common.button.startNow=Start now
@@ -34,6 +35,15 @@ signedOut.session.timeout.heading = For your security, we have signed you out
 signedOut.information = To use the service again, you will need to {0}.
 signedOut.startPageLink = return to the start page and sign in
 signedOut.backToGovUk = Back to GOV.UK
+
+## Choice Page
+
+choicePage.heading = What do you want to do?
+choicePage.input.messageInbox = View messages about your declarations
+choicePage.input.documentUpload = Attach documents to a declaration
+choicePage.input.error.empty = Select what you would like to do
+choicePage.input.error.incorrect = Select what you would like to do
+
 
 ## MRN Entry Page
 
@@ -132,6 +142,10 @@ unauthorised.paragraph.1.bullet.2.link = get access to the Customs Declaration S
 unauthorised.paragraph.2 = If you’ve already applied for an EORI number, you can {0}.
 unauthorised.paragraph.2.link = check the status of your application
 
+notImplemented.heading = This page has not been implemented yet
+notImplemented.message = We are working hard to make it available to you. Please come back later.
+
+
 ## Errors
 uploadError.heading=One of your files has been rejected
 uploadError.paragraph=At least one of your files may be:
@@ -140,10 +154,6 @@ uploadError.bullet.2=not an accepted file type
 uploadError.bullet.3=corrupted, or contain a virus
 uploadError.button=Start your upload again
 uploadError.guidance=You may be asked to check or re-enter the contact details.
-
-cds.error.heading=Sorry, there is a problem with the service
-cds.error.message=Please try again later.
-cds.error.helpSupport=Help and support
 
 feedback.header = Tell us what you think
 feedback.line.1 = This is a new service and we want to know what you think of it.
