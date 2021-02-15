@@ -147,4 +147,57 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
     }
   }
 
+  "MrnEntryController on autoFill" when {
+    val controller = mrnEntryController()
+
+    "provided with incorrect MRN" should {
+
+      "return BadRequest (400) response" in {
+
+        val result = controller.autoFill("badMrn")(fakeRequest)
+
+        status(result) mustBe BAD_REQUEST
+        verify(mrnAccessDeniedPage).apply(any())(any(), any())
+      }
+    }
+
+    "provided with correct MRN" which {
+
+      "fails MRN DIS validation" should {
+
+        "return BadRequest (400) response" in {
+
+          when(mrnDisValidator.validate(any(), any())(any())).thenReturn(Future.successful(false))
+
+          val result = controller.autoFill(mrn)(fakeRequest)
+
+          status(result) mustBe BAD_REQUEST
+          verify(mrnAccessDeniedPage).apply(any())(any(), any())
+        }
+      }
+
+      "passes MRN DIS validation" should {
+        "call AnswersConnector" in {
+
+          when(mrnDisValidator.validate(any(), any())(any())).thenReturn(Future.successful(true))
+
+          controller.autoFill(mrn)(fakeRequest).futureValue
+
+          val upsertedUserAnswers = theSavedUserAnswers
+          upsertedUserAnswers.mrn mustBe defined
+          upsertedUserAnswers.mrn.get mustBe MRN(mrn).get
+        }
+
+        "return SeeOther (303) response" in {
+
+          when(mrnDisValidator.validate(any(), any())(any())).thenReturn(Future.successful(true))
+
+          val result = controller.autoFill(mrn)(fakeRequest)
+
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).get mustBe routes.ContactDetailsController.onPageLoad().url
+        }
+      }
+    }
+  }
 }

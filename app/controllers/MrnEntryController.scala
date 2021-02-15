@@ -19,10 +19,12 @@ package controllers
 import com.google.inject.Singleton
 import controllers.actions._
 import forms.MRNFormProvider
-import models.EORI
+import models.{EORI, MRN}
+import models.requests.DataRequest
 import play.api.i18n.I18nSupport
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import services.{AnswersService, MrnDisValidator}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.{mrn_access_denied, mrn_entry}
 
@@ -54,17 +56,24 @@ class MrnEntryController @Inject()(
   def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen verifiedEmail andThen getData).async { implicit req =>
     form
       .bindFromRequest()
-      .fold(
-        errorForm => Future.successful(BadRequest(mrnEntry(errorForm))),
-        mrn => {
-          mrnDisValidator.validate(mrn, EORI(req.request.eori)).flatMap {
-            case false => Future.successful(BadRequest(mrnAccessDenied(mrn)))
-            case true =>
-              answersConnector.upsert(req.userAnswers.copy(mrn = Some(mrn))).map { _ =>
-                Redirect(routes.ContactDetailsController.onPageLoad())
-              }
-          }
-        }
-      )
+      .fold(errorForm => Future.successful(BadRequest(mrnEntry(errorForm))), mrn => checkMrnExistenceAndOwnership(mrn))
   }
+
+  def autoFill(mrn: String): Action[AnyContent] = (authenticate andThen requireEori andThen verifiedEmail andThen getData).async { implicit req =>
+    MRN(mrn)
+      .map(checkMrnExistenceAndOwnership(_))
+      .getOrElse(invalidMrnResponse(mrn))
+  }
+
+  private def checkMrnExistenceAndOwnership(mrn: MRN)(implicit hc: HeaderCarrier, req: DataRequest[AnyContent]): Future[Result] =
+    mrnDisValidator.validate(mrn, EORI(req.request.eori)).flatMap {
+      case false => invalidMrnResponse(mrn.value)
+      case true =>
+        answersConnector.upsert(req.userAnswers.copy(mrn = Some(mrn))).map { _ =>
+          Redirect(routes.ContactDetailsController.onPageLoad())
+        }
+    }
+
+  private def invalidMrnResponse(mrn: String)(implicit req: DataRequest[AnyContent]) =
+    Future.successful(BadRequest(mrnAccessDenied(mrn)))
 }

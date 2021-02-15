@@ -17,7 +17,6 @@
 package views
 
 import base.SpecBase
-import models.MRN
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 import testdata.CommonTestData
@@ -30,11 +29,11 @@ class MrnAccessDeniedSpec extends SpecBase with ViewMatchers {
   private implicit val request = FakeRequest().withCSRFToken
 
   private val mrnAccessDeniedPage = instanceOf[mrn_access_denied]
-  private def view(mrn: MRN): Html = mrnAccessDeniedPage(mrn)(request, messages)
+  private def view(mrn: String): Html = mrnAccessDeniedPage(mrn)(request, messages)
 
   "MrnAccessDenied page" should {
 
-    val testView = view(MRN(CommonTestData.mrn).get)
+    val testView = view(CommonTestData.mrn)
 
     "display page header with provided MRN" in {
       testView.getElementsByTag("h1").first() must containMessage("mrnAccessDenied.heading", CommonTestData.mrn)
