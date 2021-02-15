@@ -69,7 +69,7 @@ class ContactDetailsMappingSpec extends SpecBase with MustMatchers with ScalaChe
 
       "Phone number is invalid" in {
 
-        forAll(arbitrary[ContactDetails], alphaNumString()) { (contactDetails, invalidPhoneNumber) =>
+        forAll(arbitrary[ContactDetails], alphaString()) { (contactDetails, invalidPhoneNumber) =>
           val badData = contactDetails.copy(phoneNumber = invalidPhoneNumber.take(15))
 
           Form(contactDetailsMapping)
