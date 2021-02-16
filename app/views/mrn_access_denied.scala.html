@@ -28,11 +28,11 @@
   link: link
 )
 
-@(mrn: MRN)(implicit request: Request[_], messages: Messages)
+@(mrn: String)(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = Title("mrnAccessDenied.heading", mrn.value)) {
+@mainTemplate(title = Title("mrnAccessDenied.heading", mrn)) {
 
-  @pageTitle(messages("mrnAccessDenied.heading", mrn.value))
+  @pageTitle(messages("mrnAccessDenied.heading", mrn))
 
   @paragraphBody(messages("mrnAccessDenied.paragraph.1"))
 
@@ -49,5 +49,4 @@
       call = controllers.routes.MrnEntryController.onPageLoad()
     )
   </div>
-
 }

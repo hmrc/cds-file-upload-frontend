@@ -20,7 +20,7 @@ import connectors.UpscanConnector
 import controllers.actions._
 import forms.FileUploadCountProvider
 import models._
-import models.requests.{ContactDetailsRequest, MrnRequest}
+import models.requests.ContactDetailsRequest
 import play.api.Logger
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}

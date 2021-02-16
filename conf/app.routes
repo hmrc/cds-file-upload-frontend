@@ -12,6 +12,7 @@ GET         /unauthorised                       controllers.UnauthorisedControll
 
 GET         /mrn-entry                          controllers.MrnEntryController.onPageLoad
 POST        /mrn-entry                          controllers.MrnEntryController.onSubmit
+GET         /mrn-entry/:mrn                     controllers.MrnEntryController.autoFill(mrn)
 
 GET         /contact-details                    controllers.ContactDetailsController.onPageLoad
 POST        /contact-details                    controllers.ContactDetailsController.onSubmit
