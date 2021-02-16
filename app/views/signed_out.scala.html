@@ -29,7 +29,7 @@
 
 @()(implicit request: Request[_], messages: Messages)
 
-@startPageLink = {<a href="@routes.StartController.displayStartPage()">@messages("signedOut.startPageLink")</a>}
+@startPageLink = {<a href="@routes.RootController.displayPage()">@messages("signedOut.startPageLink")</a>}
 
 @gdsMainTemplate(title = Title("signedOut.heading")) {
 
