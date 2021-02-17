@@ -42,7 +42,7 @@ class SignedOutSpec extends DomAssertions with ViewBehaviours {
 
     "display information and link to the Start page" in {
       assertContainsText(document, messages("signedOut.information", messages("signedOut.startPageLink")))
-      assertContainsLink(document, messages("signedOut.startPageLink"), routes.StartController.displayStartPage.url)
+      assertContainsLink(document, messages("signedOut.startPageLink"), routes.RootController.displayPage.url)
     }
 
     "display feedback-related information" in {
