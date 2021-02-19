@@ -38,7 +38,7 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCh
 
   "Upload your files page" must {
 
-    behave like pageWithoutHeading(view, messagePrefix, "p.fileNeedsToBe", "listItem1", "listItem2", "listItem3")
+    behave like pageWithoutHeading(view, messagePrefix, "p.fileNeedsToBe", "listItem1", "listItem2", "listItem3", "listItem4")
 
     "include the 'Sign out' link if the user is authorised" in {
       forAll { user: SignedInUser =>
