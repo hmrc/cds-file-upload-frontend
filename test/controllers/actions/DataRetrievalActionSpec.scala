@@ -17,39 +17,48 @@
 package controllers.actions
 
 import controllers.ControllerSpecBase
-import generators.SignedInUserGen
 import models.UserAnswers
-import models.requests.{AuthenticatedRequest, DataRequest, EORIRequest, SignedInUser, VerifiedEmailRequest}
+import models.requests.{AuthenticatedRequest, DataRequest, VerifiedEmailRequest}
 import org.mockito.ArgumentMatchers.{eq => eqTo}
 import org.mockito.Mockito._
 import services.AnswersService
+import testdata.CommonTestData._
 
 import scala.concurrent.Future
 
-class DataRetrievalActionSpec extends ControllerSpecBase with SignedInUserGen {
+class DataRetrievalActionSpec extends ControllerSpecBase {
 
-  class Harness(answersConnector: AnswersService) extends DataRetrievalActionImpl(answersConnector, mcc) {
-    def callTransform[A](request: VerifiedEmailRequest[A]): Future[DataRequest[A]] = transform(request)
+  private val answersConnector: AnswersService = mock[AnswersService]
+  private val action: ActionTestWrapper = new ActionTestWrapper(answersConnector)
+
+  private val answers = UserAnswers(eori)
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+
+    reset(answersConnector)
+    when(answersConnector.findOrCreate(eqTo(eori))) thenReturn Future.successful(answers)
+  }
+
+  override def afterEach(): Unit = {
+    reset(answersConnector)
+    super.afterEach()
   }
 
   "Data Retrieval Action" when {
     "the connector finds data" must {
       "build a userAnswers object and add it to the request" in {
 
-        forAll { (user: SignedInUser, eori: String, email: String) =>
-          val answers = UserAnswers(eori)
-          val answersConnector = mock[AnswersService]
-          when(answersConnector.findOrCreate(eqTo(eori))) thenReturn Future.successful(answers)
-          val action = new Harness(answersConnector)
-          val request = VerifiedEmailRequest(EORIRequest(AuthenticatedRequest(fakeRequest, user), eori), email)
+        val request = VerifiedEmailRequest(AuthenticatedRequest(fakeRequest, signedInUser), verifiedEmail)
 
-          val futureResult = action.callTransform(request)
+        val result = action.callTransform(request).futureValue
 
-          whenReady(futureResult) { result =>
-            result.userAnswers mustBe answers
-          }
-        }
+        result.userAnswers mustBe answers
       }
     }
+  }
+
+  class ActionTestWrapper(answersConnector: AnswersService) extends DataRetrievalActionImpl(answersConnector, mcc) {
+    def callTransform[A](request: VerifiedEmailRequest[A]): Future[DataRequest[A]] = transform(request)
   }
 }

@@ -26,8 +26,10 @@ import org.mockito.Mockito._
 import org.scalacheck.Arbitrary._
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.data.Form
 import play.api.libs.ws.WSResponse
 import play.api.test.Helpers._
+import play.twirl.api.HtmlFormat
 import services.CustomsDeclarationsService
 import utils.FakeRequestCSRFSupport._
 import views.DomAssertions
@@ -64,12 +66,14 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
   private val mockCustomsDeclarationsService = mock[CustomsDeclarationsService]
   private val mockUpscanConnector = mock[UpscanConnector]
 
-  private val page = app.injector.instanceOf[how_many_files_upload]
+  private val page = mock[how_many_files_upload]
 
-  private def controller(contactDetailsRequiredAction: ContactDetailsRequiredAction, answers: Option[UserAnswers] = Some(validAnswers)) =
+  private def controller(
+    contactDetailsRequiredAction: ContactDetailsRequiredAction = new FakeContactDetailsRequiredAction(),
+    answers: Option[UserAnswers] = Some(validAnswers)
+  ) =
     new HowManyFilesUploadController(
       new FakeAuthAction(),
-      new FakeEORIAction(eori),
       new FakeDataRetrievalAction(answers),
       new MrnRequiredActionImpl(mcc),
       contactDetailsRequiredAction,
@@ -85,11 +89,14 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
   override protected def beforeEach(): Unit = {
     super.beforeEach()
 
+    reset(mockCustomsDeclarationsService, mockUpscanConnector, page)
+
     when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(FileUploadResponse(List())))
+    when(page(any[Form[FileUploadCount]])(any(), any())).thenReturn(HtmlFormat.empty)
   }
 
   override protected def afterEach(): Unit = {
-    reset(mockCustomsDeclarationsService, mockUpscanConnector)
+    reset(mockCustomsDeclarationsService, mockUpscanConnector, page)
 
     super.afterEach()
   }
@@ -98,22 +105,20 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
 
     "load correct page when user is logged in " in {
 
-      forAll { action: ContactDetailsRequiredAction =>
-        val result = controller(action).onPageLoad(fakeRequest.withCSRFToken)
+      val result = controller().onPageLoad(fakeRequest.withCSRFToken)
 
-        status(result) mustBe OK
-        val doc = asDocument(contentAsString(result))
-        doc.title mustEqual "How many files do you need to upload?"
-      }
+      status(result) mustBe OK
+      verify(page).apply(any[Form[FileUploadCount]])(any(), any())
+
     }
 
-    "display file count if it exist in the cache" in {
+    "provide view template with correct file count if it exist in the cache" in {
       val updatedAction = new FakeContactDetailsRequiredAction(fakeContactDetailsRequiredAction.contactDetails)
 
-      val result = controller(updatedAction).onPageLoad(fakeRequest.withCSRFToken)
+      controller(updatedAction).onPageLoad(fakeRequest.withCSRFToken).futureValue
 
-      val doc = asDocument(contentAsString(result))
-      doc.select("#value").`val` mustEqual fileUploadCount.get.value.toString
+      val expectedForm = (new FileUploadCountProvider)().fill(fileUploadCount.get)
+      verify(page).apply(eqTo(expectedForm))(any(), any())
     }
 
     "redirect to error page when no data is found in the cache on page load" in {

@@ -16,10 +16,6 @@
 
 package forms.validators
 
-import java.util.regex.Pattern
-
-import scala.util.{Success, Try}
-
 object FieldValidator {
 
   implicit class PredicateOpsForFunctions[A](first: A => Boolean) {

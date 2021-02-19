@@ -17,15 +17,15 @@
 package controllers.actions
 
 import com.google.inject.ProvidedBy
-import javax.inject.{Inject, Provider}
 import controllers.routes
+import javax.inject.{Inject, Provider}
+import models.requests.SignedInUser._
 import models.requests.{AuthenticatedRequest, SignedInUser}
 import play.api.mvc.Results.Redirect
 import play.api.mvc._
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
-import uk.gov.hmrc.auth.core.retrieve.~
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, Enrolments, NoActiveSession}
+import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.allEnrolments
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
@@ -43,41 +43,32 @@ class AuthActionImpl @Inject()(
   implicit override val executionContext: ExecutionContext = mcc.executionContext
   override val parser: BodyParser[AnyContent] = mcc.parsers.defaultBodyParser
 
-  lazy val loginUrl = config.getOptional[String]("urls.login").getOrElse(throw new Exception("Missing login url configuration"))
-  lazy val continueLoginUrl =
+  private lazy val loginUrl = config.getOptional[String]("urls.login").getOrElse(throw new Exception("Missing login url configuration"))
+  private lazy val continueLoginUrl =
     config.getOptional[String]("urls.loginContinue").getOrElse(throw new Exception("Missing continue login url configuration"))
 
   override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
     authorised(SignedInUser.authorisationPredicate)
-      .retrieve(
-        credentials and
-          name and
-          email and
-          affinityGroup and
-          internalId and
-          allEnrolments
-      ) {
+      .retrieve(allEnrolments) { allEnrolments: Enrolments =>
+        val eoriOpt: Option[EnrolmentIdentifier] = allEnrolments.getEnrolment(cdsEnrolmentName).flatMap(_.getIdentifier(eoriIdentifierKey))
 
-        case Some(credentials) ~ Some(name) ~ email ~ affinityGroup ~ Some(identifier) ~ enrolments if isEoriAllowListed(enrolments) =>
-          val signedInUser = SignedInUser(credentials, name, email, affinityGroup, identifier, enrolments)
-          Future.successful(Right(AuthenticatedRequest(request, signedInUser)))
+        if (eoriOpt.isDefined) {
 
-        case _ =>
-          //TODO Change this msg
-          throw new UnauthorizedException("Unable to retrieve internal Id")
-
-      } recover {
-      case _: NoActiveSession => Left(Redirect(loginUrl, Map("continue" -> Seq(continueLoginUrl))))
-      case _                  => Left(Redirect(routes.UnauthorisedController.onPageLoad()))
-    }
-  }
-
-  private def isEoriAllowListed(enrolments: Enrolments): Boolean = {
-    val eoriOpt = enrolments.getEnrolment("HMRC-CUS-ORG").flatMap(_.getIdentifier("EORINumber"))
-
-    eoriOpt.exists(eori => eoriAllowList.allows(eori.value))
+          if (eoriOpt.exists(eori => eoriAllowList.allows(eori.value))) {
+            val signedInUser = SignedInUser(eoriOpt.get.value, allEnrolments)
+            Future.successful(Right(AuthenticatedRequest(request, signedInUser)))
+          } else {
+            throw new UnauthorizedException("User is not authorized to use this service")
+          }
+        } else
+          throw InsufficientEnrolments()
+      }
+      .recover {
+        case _: NoActiveSession => Left(Redirect(loginUrl, Map("continue" -> Seq(continueLoginUrl))))
+        case _                  => Left(Redirect(routes.UnauthorisedController.onPageLoad()))
+      }
   }
 }
 

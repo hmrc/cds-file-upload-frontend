@@ -16,41 +16,36 @@
 
 package controllers
 
-import scala.concurrent.Future
-
 import base.SfusMetricsMock
 import connectors.CdsFileUploadConnector
-import models.{FileUpload, FileUploadResponse, Notification, UserAnswers}
-import org.mockito.ArgumentMatchers.{eq => meq, _}
+import models.{FileUploadResponse, Notification, UserAnswers}
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
+import testdata.CommonTestData.eori
 import views.html.upload_your_files_receipt
+
+import scala.concurrent.Future
 
 class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusMetricsMock {
 
-  implicit val ac = appConfig
-  val cdsFileUploadConnector = mock[CdsFileUploadConnector]
-  val page = mock[upload_your_files_receipt]
-  val eori: String = eoriString.sample.get
+  private val cdsFileUploadConnector = mock[CdsFileUploadConnector]
+  private val page = mock[upload_your_files_receipt]
 
-  def controller(maybeUserAnswers: Option[UserAnswers]) = {
-    when(mockAnswersConnector.findByEori(meq(eori))).thenReturn(Future.successful(maybeUserAnswers))
-
-    new UploadYourFilesReceiptController(
-      new FakeAuthAction(),
-      new FakeEORIAction(eori),
-      new FakeVerifiedEmailAction(),
-      cdsFileUploadConnector,
-      sfusMetrics,
-      page,
-      mockAnswersConnector
-    )(mcc, executionContext)
-  }
+  private val controller = new UploadYourFilesReceiptController(
+    new FakeAuthAction(),
+    new FakeVerifiedEmailAction(),
+    cdsFileUploadConnector,
+    sfusMetrics,
+    page,
+    mockAnswersConnector
+  )(mcc, executionContext)
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
 
+    when(mockAnswersConnector.findByEori(anyString())).thenReturn(Future.successful(None))
     when(page.apply(any(), any())(any(), any())).thenReturn(HtmlFormat.empty)
   }
 
@@ -59,8 +54,6 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
 
     super.afterEach()
   }
-
-  def addFilenames(uploads: List[FileUpload]): List[FileUpload] = uploads.map(u => u.copy(filename = "someFile.pdf"))
 
   "onPageLoad" should {
 
@@ -75,7 +68,9 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
           }
 
           val answers = UserAnswers(eori, fileUploadResponse = Some(response))
-          val result = controller(Some(answers)).onPageLoad()(fakeRequest)
+          when(mockAnswersConnector.findByEori(anyString())).thenReturn(Future.successful(Some(answers)))
+
+          val result = controller.onPageLoad()(fakeRequest)
 
           status(result) mustBe OK
           result.map(_ => verify(mockAnswersConnector).removeByEori(any()))
@@ -87,7 +82,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
 
       "no responses are in the cache" in {
 
-        val result = controller(None).onPageLoad()(fakeRequest)
+        val result = controller.onPageLoad()(fakeRequest)
 
         status(result) mustBe SEE_OTHER
         redirectLocation(result) mustBe Some(routes.StartController.displayStartPage().url)

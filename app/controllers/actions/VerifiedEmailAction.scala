@@ -18,25 +18,25 @@ package controllers.actions
 
 import connectors.CdsFileUploadConnector
 import controllers.routes
-import models.requests.{EORIRequest, VerifiedEmailRequest}
+import javax.inject.{Inject, Singleton}
 import models.EORI
-import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Result}
+import models.requests.{AuthenticatedRequest, VerifiedEmailRequest}
 import play.api.mvc.Results.Redirect
+import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Result}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-trait VerifiedEmailAction extends ActionRefiner[EORIRequest, VerifiedEmailRequest]
+trait VerifiedEmailAction extends ActionRefiner[AuthenticatedRequest, VerifiedEmailRequest]
 
 @Singleton
 class VerifiedEmailActionImpl @Inject()(backendConnector: CdsFileUploadConnector, mcc: MessagesControllerComponents) extends VerifiedEmailAction {
 
   implicit val executionContext: ExecutionContext = mcc.executionContext
-  private lazy val onError = Redirect(routes.UnverifiedEmailController.informUser)
+  private lazy val onError = Redirect(routes.UnverifiedEmailController.informUser())
 
-  override protected def refine[A](request: EORIRequest[A]): Future[Either[Result, VerifiedEmailRequest[A]]] = {
+  override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, VerifiedEmailRequest[A]]] = {
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 

@@ -23,12 +23,14 @@ import generators.Generators
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import org.scalatestplus.play.PlaySpec
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
+import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
+
 import scala.concurrent.ExecutionContext
 
 trait SpecBase
@@ -38,7 +40,7 @@ trait SpecBase
 
   implicit lazy val messagesApi: MessagesApi = instanceOf[MessagesApi]
   implicit lazy val appConfig: AppConfig = instanceOf[AppConfig]
-  implicit val mcc: MessagesControllerComponents = instanceOf[MessagesControllerComponents]
+  implicit val mcc: MessagesControllerComponents = stubMessagesControllerComponents()
 
   lazy val fakeRequest = FakeRequest("", "")
 

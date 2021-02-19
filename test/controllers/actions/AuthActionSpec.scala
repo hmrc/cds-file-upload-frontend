@@ -17,14 +17,13 @@
 package controllers.actions
 
 import controllers.ControllerSpecBase
-import models.requests.SignedInUser
 import play.api.mvc.{Action, AnyContent}
 import play.api.test.Helpers._
 import play.api.test._
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.auth.core.AffinityGroup.Individual
+import testdata.CommonTestData
+import testdata.CommonTestData.eori
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.{Credentials, Name}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.Future
@@ -42,14 +41,7 @@ class AuthActionSpec extends ControllerSpecBase {
 
     "return authenticated user" in {
 
-      val user = SignedInUser(
-        Credentials("providerId", "providerType"),
-        Name(Some("John"), Some("Doe")),
-        Some("john@doe.com"),
-        Some(Individual),
-        "internalID",
-        Enrolments(Set(Enrolment("HMRC-CUS-ORG", Seq(EnrolmentIdentifier("EORINumber", "GB1234567890")), "")))
-      )
+      val user = CommonTestData.signedInUser
 
       withSignedInUser(user) {
 
@@ -72,32 +64,38 @@ class AuthActionSpec extends ControllerSpecBase {
       }
     }
 
-    "redirect to Unauthorised when authorisation fails" in {
+    "redirect to Unauthorised" when {
 
-      withAuthError(InsufficientEnrolments("")) {
+      "authorisation fails" in {
 
-        val response = authController().action(FakeRequest())
+        withAuthError(InsufficientEnrolments("")) {
 
-        status(response) mustBe SEE_OTHER
-        redirectLocation(response) mustBe Some(controllers.routes.UnauthorisedController.onPageLoad().url)
+          val response = authController().action(FakeRequest())
+
+          status(response) mustBe SEE_OTHER
+          redirectLocation(response) mustBe Some(controllers.routes.UnauthorisedController.onPageLoad().url)
+        }
+      }
+
+      "user does not have an eori number" in {
+
+        val user = CommonTestData.signedInUser
+
+        withUserWithoutEori(user) {
+
+          val response = authController().action(FakeRequest())
+
+          status(response) mustBe SEE_OTHER
+          redirectLocation(response) mustBe Some(controllers.routes.UnauthorisedController.onPageLoad().url)
+        }
       }
     }
-  }
-
-  "Auth action" should {
 
     "allow access" when {
 
       "allowListing doesn't have any eori and user has eori" in {
 
-        val user = SignedInUser(
-          Credentials("providerId", "providerType"),
-          Name(Some("John"), Some("Doe")),
-          Some("john@doe.com"),
-          Some(Individual),
-          "internalID",
-          Enrolments(Set(Enrolment("HMRC-CUS-ORG", Seq(EnrolmentIdentifier("EORINumber", "GB1234567890")), "")))
-        )
+        val user = CommonTestData.signedInUser
 
         withSignedInUser(user) {
           val response = authController().action(FakeRequest())
@@ -108,17 +106,10 @@ class AuthActionSpec extends ControllerSpecBase {
 
       "allowListing contains eori and user has allowed eori" in {
 
-        val user = SignedInUser(
-          Credentials("providerId", "providerType"),
-          Name(Some("John"), Some("Doe")),
-          Some("john@doe.com"),
-          Some(Individual),
-          "internalID",
-          Enrolments(Set(Enrolment("HMRC-CUS-ORG", Seq(EnrolmentIdentifier("EORINumber", "GB1234567890")), "")))
-        )
+        val user = CommonTestData.signedInUser
 
         withSignedInUser(user) {
-          val response = authController(Seq("GB1234567890")).action(FakeRequest())
+          val response = authController(Seq(eori)).action(FakeRequest())
 
           status(response) mustBe OK
         }
@@ -129,14 +120,7 @@ class AuthActionSpec extends ControllerSpecBase {
 
       "user has not allowListed eori" in {
 
-        val user = SignedInUser(
-          Credentials("providerId", "providerType"),
-          Name(Some("John"), Some("Doe")),
-          Some("john@doe.com"),
-          Some(Individual),
-          "internalID",
-          Enrolments(Set(Enrolment("HMRC-CUS-ORG", Seq(EnrolmentIdentifier("EORINumber", "GB1234567890")), "")))
-        )
+        val user = CommonTestData.signedInUser
 
         withSignedInUser(user) {
           val response = authController(Seq("GB1111231")).action(FakeRequest())

@@ -19,6 +19,7 @@ package controllers
 import connectors.UpscanConnector
 import controllers.actions._
 import forms.FileUploadCountProvider
+import javax.inject.{Inject, Singleton}
 import models._
 import models.requests.ContactDetailsRequest
 import play.api.Logger
@@ -29,13 +30,11 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.how_many_files_upload
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class HowManyFilesUploadController @Inject()(
   authenticate: AuthAction,
-  requireEori: EORIRequiredAction,
   getData: DataRetrievalAction,
   requireMrn: MrnRequiredAction,
   requireContactDetails: ContactDetailsRequiredAction,
@@ -54,7 +53,7 @@ class HowManyFilesUploadController @Inject()(
   val form = formProvider()
 
   def onPageLoad: Action[AnyContent] =
-    (authenticate andThen requireEori andThen verifiedEmail andThen getData andThen requireMrn andThen requireContactDetails) { implicit req =>
+    (authenticate andThen verifiedEmail andThen getData andThen requireMrn andThen requireContactDetails) { implicit req =>
       val populatedForm =
         req.userAnswers.fileUploadCount.fold(form)(form.fill)
 
@@ -62,7 +61,7 @@ class HowManyFilesUploadController @Inject()(
     }
 
   def onSubmit: Action[AnyContent] =
-    (authenticate andThen requireEori andThen verifiedEmail andThen getData andThen requireMrn andThen requireContactDetails).async { implicit req =>
+    (authenticate andThen verifiedEmail andThen getData andThen requireMrn andThen requireContactDetails).async { implicit req =>
       form
         .bindFromRequest()
         .fold(

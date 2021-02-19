@@ -18,6 +18,6 @@ package models.requests
 
 import play.api.mvc.WrappedRequest
 
-case class VerifiedEmailRequest[A](request: EORIRequest[A], email: String) extends WrappedRequest[A](request) with Authenticated {
-  val eori = request.eori
+case class VerifiedEmailRequest[A](request: AuthenticatedRequest[A], email: String) extends WrappedRequest[A](request) with Authenticated {
+  val eori: String = request.eori
 }
