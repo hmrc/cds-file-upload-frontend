@@ -50,14 +50,14 @@ class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
     super.beforeEach()
 
     reset(choicePage, notImplementedPage)
-    secureMessagingFeatureAction.reset
+    secureMessagingFeatureAction.reset()
     when(choicePage.apply(any[Form[ChoiceForm]])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
     when(notImplementedPage.apply()(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
   }
 
   override def afterEach(): Unit = {
     reset(choicePage, notImplementedPage)
-    secureMessagingFeatureAction.reset
+    secureMessagingFeatureAction.reset()
 
     super.afterEach()
   }
@@ -67,7 +67,7 @@ class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
     "feature flag for SecureMessaging is disabled" should {
 
       "throw InvalidFeatureStateException$" in {
-        secureMessagingFeatureAction.disableSecureMessagingFeature
+        secureMessagingFeatureAction.disableSecureMessagingFeature()
 
         an[InvalidFeatureStateException] mustBe thrownBy {
           await(controller.displayPage()(fakeRequest))
@@ -78,7 +78,7 @@ class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
     "feature flag for SecureMessaging is enabled" should {
 
       "return Ok (200) response" in {
-        secureMessagingFeatureAction.enableSecureMessagingFeature
+        secureMessagingFeatureAction.enableSecureMessagingFeature()
 
         val result = controller.displayPage()(fakeRequest)
 
@@ -86,7 +86,7 @@ class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
       }
 
       "call choice_page template" in {
-        secureMessagingFeatureAction.enableSecureMessagingFeature
+        secureMessagingFeatureAction.enableSecureMessagingFeature()
 
         controller.displayPage()(fakeRequest).futureValue
 
@@ -100,7 +100,7 @@ class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
     "feature flag for SecureMessaging is disabled" should {
 
       "return NotFound (404) response" in {
-        secureMessagingFeatureAction.disableSecureMessagingFeature
+        secureMessagingFeatureAction.disableSecureMessagingFeature()
         val request = postRequest(Json.obj("choice" -> "Test Choice"))
 
         an[InvalidFeatureStateException] mustBe thrownBy { await(controller.submitChoice()(request)) }
@@ -114,7 +114,7 @@ class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
         val request = postRequest(Json.obj("choice" -> "Incorrect Choice"))
 
         "return BadRequest (400)" in {
-          secureMessagingFeatureAction.enableSecureMessagingFeature
+          secureMessagingFeatureAction.enableSecureMessagingFeature()
 
           val result = controller.submitChoice()(request)
 
@@ -122,7 +122,7 @@ class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
         }
 
         "call choicePage passing form with errors" in {
-          secureMessagingFeatureAction.enableSecureMessagingFeature
+          secureMessagingFeatureAction.enableSecureMessagingFeature()
 
           controller.submitChoice()(request).futureValue
 
@@ -136,7 +136,7 @@ class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
         val request = postRequest(Json.obj("choice" -> ""))
 
         "return BadRequest (400)" in {
-          secureMessagingFeatureAction.enableSecureMessagingFeature
+          secureMessagingFeatureAction.enableSecureMessagingFeature()
 
           val result = controller.submitChoice()(request)
 
@@ -144,7 +144,7 @@ class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
         }
 
         "call choicePage passing form with errors" in {
-          secureMessagingFeatureAction.enableSecureMessagingFeature
+          secureMessagingFeatureAction.enableSecureMessagingFeature()
 
           controller.submitChoice()(request).futureValue
 
@@ -160,7 +160,7 @@ class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
           val request = postRequest(Json.obj("choice" -> ChoiceForm.AllowedChoiceValues.SecureMessageInbox))
 
           "return Ok (200)" in {
-            secureMessagingFeatureAction.enableSecureMessagingFeature
+            secureMessagingFeatureAction.enableSecureMessagingFeature()
 
             val result = controller.submitChoice()(request)
 
@@ -168,7 +168,7 @@ class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
           }
 
           "call placeholder page" in {
-            secureMessagingFeatureAction.enableSecureMessagingFeature
+            secureMessagingFeatureAction.enableSecureMessagingFeature()
 
             controller.submitChoice()(request).futureValue
 
@@ -181,7 +181,7 @@ class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
           val request = postRequest(Json.obj("choice" -> ChoiceForm.AllowedChoiceValues.DocumentUpload))
 
           "return SeeOther (303)" in {
-            secureMessagingFeatureAction.enableSecureMessagingFeature
+            secureMessagingFeatureAction.enableSecureMessagingFeature()
 
             val result = controller.submitChoice()(request)
 
@@ -189,7 +189,7 @@ class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
           }
 
           "redirect to /mrn-entry" in {
-            secureMessagingFeatureAction.enableSecureMessagingFeature
+            secureMessagingFeatureAction.enableSecureMessagingFeature()
 
             val result = controller.submitChoice()(request)
 

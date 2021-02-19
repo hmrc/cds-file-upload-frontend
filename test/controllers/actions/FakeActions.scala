@@ -74,24 +74,16 @@ trait FakeActions extends Generators with MockitoSugar {
       Future.successful(Right(VerifiedEmailRequest[A](request, email)))
   }
 
-//  case object SecureMessagingFeatureActionEnabled extends SecureMessagingFeatureAction(mock[SecureMessagingConfig]) {
-//    override def invokeBlock[A](request: EORIRequest[A], block: EORIRequest[A] => Future[Result]): Future[Result] = block(request)
-//  }
-//
-//  case object SecureMessagingFeatureActionDisabled extends SecureMessagingFeatureAction(mock[SecureMessagingConfig]) {
-//    override def invokeBlock[A](request: EORIRequest[A], block: EORIRequest[A] => Future[Result]): Future[Result] = throw InvalidFeatureStateException
-//  }
-
   class SecureMessagingFeatureActionMock(private val secureMessagingConfig: SecureMessagingConfig = mock[SecureMessagingConfig])
       extends SecureMessagingFeatureAction(secureMessagingConfig) {
 
-    def enableSecureMessagingFeature: Unit =
+    def enableSecureMessagingFeature(): Unit =
       Mockito.when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(true)
 
-    def disableSecureMessagingFeature: Unit =
+    def disableSecureMessagingFeature(): Unit =
       Mockito.when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(false)
 
-    def reset: Unit = Mockito.reset(secureMessagingConfig)
+    def reset(): Unit = Mockito.reset(secureMessagingConfig)
   }
 
 }
