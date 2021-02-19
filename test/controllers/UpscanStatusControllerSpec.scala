@@ -203,7 +203,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val response = FileUploadResponse(List(fileUpload))
 
       when(cdsFileUploadConnector.getNotification(any())(any()))
-        .thenReturn(Future.successful(Some(Notification("ref", "SUCCESS", "myfile.xls"))))
+        .thenReturn(Future.successful(Some(Notification("ref", "SUCCESS", "myfile.pdf"))))
 
       val answers = UserAnswers(eori, fileUploadResponse = Some(response))
       await(controller(fakeDataRetrievalAction(answers)).success("ref")(fakeRequest))
