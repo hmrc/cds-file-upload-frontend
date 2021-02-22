@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.SecureMessagingConfig
 import controllers.actions.{AuthAction, EORIRequiredAction}
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
@@ -24,15 +25,23 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.start
 
 @Singleton
-class StartController @Inject()(authenticate: AuthAction, requireEori: EORIRequiredAction, mcc: MessagesControllerComponents, start: start)
-    extends FrontendController(mcc) with I18nSupport {
+class StartController @Inject()(
+  authenticate: AuthAction,
+  requireEori: EORIRequiredAction,
+  mcc: MessagesControllerComponents,
+  start: start,
+  secureMessagingConfig: SecureMessagingConfig
+) extends FrontendController(mcc) with I18nSupport {
 
   val displayStartPage: Action[AnyContent] = Action { implicit req =>
     Ok(start())
   }
 
   def onStart: Action[AnyContent] = (authenticate andThen requireEori) { _ =>
-    Redirect(controllers.routes.MrnEntryController.onPageLoad())
+    if (secureMessagingConfig.isSecureMessagingEnabled)
+      Redirect(controllers.routes.ChoiceController.displayPage())
+    else
+      Redirect(controllers.routes.MrnEntryController.onPageLoad())
   }
 
 }

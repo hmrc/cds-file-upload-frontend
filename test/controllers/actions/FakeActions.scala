@@ -16,16 +16,21 @@
 
 package controllers.actions
 
+import config.SecureMessagingConfig
 import generators.Generators
+import models.exceptions.InvalidFeatureStateException
 import models.requests._
 import models.{ContactDetails, MRN, UserAnswers}
+import org.mockito.Mockito
 import org.scalacheck.Arbitrary._
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.{Request, Result}
 import play.api.test.Helpers.stubBodyParser
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-trait FakeActions extends Generators {
+trait FakeActions extends Generators with MockitoSugar {
 
   class FakeAuthAction(user: SignedInUser = arbitrary[SignedInUser].sample.get) extends AuthAction {
     protected def executionContext = ExecutionContext.global
@@ -68,4 +73,19 @@ trait FakeActions extends Generators {
     override protected def refine[A](request: EORIRequest[A]): Future[Either[Result, VerifiedEmailRequest[A]]] =
       Future.successful(Right(VerifiedEmailRequest[A](request, email)))
   }
+
+  class SecureMessagingFeatureActionMock(private val secureMessagingConfig: SecureMessagingConfig = mock[SecureMessagingConfig])
+      extends SecureMessagingFeatureAction(secureMessagingConfig) {
+
+    def enableSecureMessagingFeature(): Unit =
+      Mockito.when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(true)
+
+    def disableSecureMessagingFeature(): Unit =
+      Mockito.when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(false)
+
+    def reset(): Unit = Mockito.reset(secureMessagingConfig)
+  }
+
 }
+
+object FakeActions extends FakeActions

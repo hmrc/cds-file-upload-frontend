@@ -52,7 +52,7 @@ class CdsFileUploadConnector @Inject()(appConfig: AppConfig, httpClient: HttpCli
       .GET[Option[VerifiedEmailAddress]](cdsFileUploadConfig.fetchVerifiedEmailEndpoint(eori.value))
       .map { maybeVerifiedEmail =>
         maybeVerifiedEmail match {
-          case Some(verifiedEmailAddress) =>
+          case Some(_) =>
             logger.debug(s"Found verified email for eori: $eori")
           case None =>
             logger.info(s"No verified email for eori: $eori")
