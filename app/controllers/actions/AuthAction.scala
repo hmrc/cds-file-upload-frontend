@@ -52,18 +52,15 @@ class AuthActionImpl @Inject()(
 
     authorised(SignedInUser.authorisationPredicate)
       .retrieve(allEnrolments) { allEnrolments: Enrolments =>
-        val eoriOpt: Option[EnrolmentIdentifier] = allEnrolments.getEnrolment(cdsEnrolmentName).flatMap(_.getIdentifier(eoriIdentifierKey))
+        allEnrolments.getEnrolment(cdsEnrolmentName).flatMap(_.getIdentifier(eoriIdentifierKey)) match {
 
-        if (eoriOpt.isDefined) {
-
-          if (eoriOpt.exists(eori => eoriAllowList.allows(eori.value))) {
-            val signedInUser = SignedInUser(eoriOpt.get.value, allEnrolments)
+          case Some(eori) if eoriAllowList.allows(eori.value) =>
+            val signedInUser = SignedInUser(eori.value, allEnrolments)
             Future.successful(Right(AuthenticatedRequest(request, signedInUser)))
-          } else {
-            throw new UnauthorizedException("User is not authorized to use this service")
-          }
-        } else
-          throw InsufficientEnrolments()
+
+          case Some(_) => throw new UnauthorizedException("User is not authorized to use this service")
+          case None    => throw InsufficientEnrolments()
+        }
       }
       .recover {
         case _: NoActiveSession => Left(Redirect(loginUrl, Map("continue" -> Seq(continueLoginUrl))))
