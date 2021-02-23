@@ -17,29 +17,9 @@
 package models.requests
 
 import play.api.mvc.{Request, WrappedRequest}
-import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve._
-import uk.gov.hmrc.auth.core.{AffinityGroup, Enrolment, Enrolments}
 
 trait Authenticated
 
-case class SignedInUser(
-  credentials: Credentials,
-  name: Name,
-  email: Option[String],
-  affinityGroup: Option[AffinityGroup],
-  internalId: String,
-  enrolments: Enrolments
-)
-
-object SignedInUser {
-
-  val cdsEnrolmentName: String = "HMRC-CUS-ORG"
-
-  val eoriIdentifierKey: String = "EORINumber"
-
-  val authorisationPredicate: Predicate = Enrolment(cdsEnrolmentName)
-
+case class AuthenticatedRequest[A](request: Request[A], user: SignedInUser) extends WrappedRequest[A](request) with Authenticated {
+  val eori: String = user.eori
 }
-
-case class AuthenticatedRequest[A](request: Request[A], user: SignedInUser) extends WrappedRequest[A](request) with Authenticated

@@ -16,9 +16,14 @@
 
 package models.requests
 
-import play.api.mvc.WrappedRequest
+import uk.gov.hmrc.auth.core.authorise.Predicate
+import uk.gov.hmrc.auth.core.{Enrolment, Enrolments}
 
-case class EORIRequest[A](request: AuthenticatedRequest[A], eori: String) extends WrappedRequest[A](request) with Authenticated {
+case class SignedInUser(eori: String, enrolments: Enrolments)
 
-  val user = request.user
+object SignedInUser {
+
+  val cdsEnrolmentName: String = "HMRC-CUS-ORG"
+  val eoriIdentifierKey: String = "EORINumber"
+  val authorisationPredicate: Predicate = Enrolment(cdsEnrolmentName)
 }

@@ -34,7 +34,6 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class MrnEntryController @Inject()(
   authenticate: AuthAction,
-  requireEori: EORIRequiredAction,
   getData: DataRetrievalAction,
   verifiedEmail: VerifiedEmailAction,
   formProvider: MRNFormProvider,
@@ -48,18 +47,18 @@ class MrnEntryController @Inject()(
 
   val form = formProvider()
 
-  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen verifiedEmail andThen getData) { implicit req =>
+  def onPageLoad: Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData) { implicit req =>
     val populatedForm = req.userAnswers.mrn.fold(form)(form.fill)
     Ok(mrnEntry(populatedForm))
   }
 
-  def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen verifiedEmail andThen getData).async { implicit req =>
+  def onSubmit: Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData).async { implicit req =>
     form
       .bindFromRequest()
       .fold(errorForm => Future.successful(BadRequest(mrnEntry(errorForm))), mrn => checkMrnExistenceAndOwnership(mrn))
   }
 
-  def autoFill(mrn: String): Action[AnyContent] = (authenticate andThen requireEori andThen verifiedEmail andThen getData).async { implicit req =>
+  def autoFill(mrn: String): Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData).async { implicit req =>
     MRN(mrn)
       .map(checkMrnExistenceAndOwnership(_))
       .getOrElse(invalidMrnResponse(mrn))

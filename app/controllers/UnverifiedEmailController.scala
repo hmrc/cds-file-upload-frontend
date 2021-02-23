@@ -17,24 +17,22 @@
 package controllers
 
 import config.ExternalServicesConfig
-import controllers.actions.{AuthAction, EORIRequiredAction}
+import controllers.actions.AuthAction
+import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.unverified_email
 
-import javax.inject.{Inject, Singleton}
-
 @Singleton
 class UnverifiedEmailController @Inject()(
   authenticate: AuthAction,
-  requireEori: EORIRequiredAction,
   mcc: MessagesControllerComponents,
   unverified_email: unverified_email,
   config: ExternalServicesConfig
 ) extends FrontendController(mcc) with I18nSupport {
 
-  val informUser: Action[AnyContent] = (authenticate andThen requireEori) { implicit req =>
+  val informUser: Action[AnyContent] = authenticate { implicit req =>
     val redirectUrl = config.emailFrontendUrl
     Ok(unverified_email(redirectUrl))
   }

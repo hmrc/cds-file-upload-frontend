@@ -29,7 +29,7 @@ class StartControllerSpec extends ControllerSpecBase {
   private val secureMessagingConfig = mock[SecureMessagingConfig]
 
   private def controller() =
-    new StartController(new FakeAuthAction(), new FakeEORIAction(), mcc, page, secureMessagingConfig)
+    new StartController(new FakeAuthAction(), mcc, page, secureMessagingConfig)
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()

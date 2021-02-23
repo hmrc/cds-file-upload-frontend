@@ -27,7 +27,6 @@ import play.api.libs.json.Json
 import play.api.mvc.Request
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
-import testdata.CommonTestData.eori
 import views.html.{choice_page, not_implemented}
 
 class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
@@ -37,14 +36,7 @@ class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
   private val secureMessagingFeatureAction = new SecureMessagingFeatureActionMock()
 
   private val controller =
-    new ChoiceController(
-      stubMessagesControllerComponents(),
-      new FakeAuthAction(),
-      new FakeEORIAction(eori),
-      secureMessagingFeatureAction,
-      choicePage,
-      notImplementedPage
-    )
+    new ChoiceController(stubMessagesControllerComponents(), new FakeAuthAction(), secureMessagingFeatureAction, choicePage, notImplementedPage)
 
   override def beforeEach(): Unit = {
     super.beforeEach()

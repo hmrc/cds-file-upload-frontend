@@ -17,7 +17,7 @@
 package controllers
 
 import config.SecureMessagingConfig
-import controllers.actions.{AuthAction, EORIRequiredAction}
+import controllers.actions.AuthAction
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -27,7 +27,6 @@ import views.html.start
 @Singleton
 class StartController @Inject()(
   authenticate: AuthAction,
-  requireEori: EORIRequiredAction,
   mcc: MessagesControllerComponents,
   start: start,
   secureMessagingConfig: SecureMessagingConfig
@@ -37,7 +36,7 @@ class StartController @Inject()(
     Ok(start())
   }
 
-  def onStart: Action[AnyContent] = (authenticate andThen requireEori) { _ =>
+  def onStart: Action[AnyContent] = authenticate { _ =>
     if (secureMessagingConfig.isSecureMessagingEnabled)
       Redirect(controllers.routes.ChoiceController.displayPage())
     else

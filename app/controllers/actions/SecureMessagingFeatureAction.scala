@@ -17,17 +17,18 @@
 package controllers.actions
 
 import config.SecureMessagingConfig
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.exceptions.InvalidFeatureStateException
-import models.requests.EORIRequest
+import models.requests.AuthenticatedRequest
 import play.api.mvc.{ActionFunction, Result}
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class SecureMessagingFeatureAction @Inject()(secureMessagingConfig: SecureMessagingConfig)(implicit ec: ExecutionContext)
-    extends ActionFunction[EORIRequest, EORIRequest] {
+    extends ActionFunction[AuthenticatedRequest, AuthenticatedRequest] {
 
-  override def invokeBlock[A](request: EORIRequest[A], block: EORIRequest[A] => Future[Result]): Future[Result] =
+  override def invokeBlock[A](request: AuthenticatedRequest[A], block: AuthenticatedRequest[A] => Future[Result]): Future[Result] =
     if (secureMessagingConfig.isSecureMessagingEnabled) block(request) else throw InvalidFeatureStateException
 
   override protected def executionContext: ExecutionContext = ec

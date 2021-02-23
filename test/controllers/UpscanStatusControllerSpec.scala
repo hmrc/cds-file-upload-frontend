@@ -28,6 +28,7 @@ import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
+import testdata.CommonTestData.{eori, signedInUser}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
@@ -41,7 +42,6 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
   val uploadYourFiles = mock[upload_your_files]
   val uploadError = mock[upload_error]
   val cdsFileUploadConnector = mock[CdsFileUploadConnector]
-  val eori: String = eoriString.sample.get
 
   private val mockAuditConnector = mock[AuditConnector]
 
@@ -64,8 +64,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
 
   def controller(getData: DataRetrievalAction = fakeDataRetrievalAction()) =
     new UpscanStatusController(
-      new FakeAuthAction(),
-      new FakeEORIAction(eori),
+      new FakeAuthAction(signedInUser),
       getData,
       new FakeVerifiedEmailAction(),
       new FileUploadResponseRequiredAction(),

@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions.{AuthAction, EORIRequiredAction, SecureMessagingFeatureAction}
+import controllers.actions.{AuthAction, SecureMessagingFeatureAction}
 import forms.ChoiceForm
 import forms.ChoiceForm.AllowedChoiceValues._
 import javax.inject.{Inject, Singleton}
@@ -25,24 +25,20 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.{choice_page, not_implemented}
 
-import scala.concurrent.ExecutionContext
-
 @Singleton
 class ChoiceController @Inject()(
   mcc: MessagesControllerComponents,
   authenticate: AuthAction,
-  requireEori: EORIRequiredAction,
   secureMessagingFeatureAction: SecureMessagingFeatureAction,
   choicePage: choice_page,
   notImplementedPage: not_implemented
-)(implicit ec: ExecutionContext)
-    extends FrontendController(mcc) with I18nSupport {
+) extends FrontendController(mcc) with I18nSupport {
 
-  def displayPage(): Action[AnyContent] = (authenticate andThen requireEori andThen secureMessagingFeatureAction) { implicit request =>
+  def displayPage(): Action[AnyContent] = (authenticate andThen secureMessagingFeatureAction) { implicit request =>
     Ok(choicePage(ChoiceForm.form))
   }
 
-  def submitChoice(): Action[AnyContent] = (authenticate andThen requireEori andThen secureMessagingFeatureAction) { implicit request =>
+  def submitChoice(): Action[AnyContent] = (authenticate andThen secureMessagingFeatureAction) { implicit request =>
     ChoiceForm.form
       .bindFromRequest()
       .fold(

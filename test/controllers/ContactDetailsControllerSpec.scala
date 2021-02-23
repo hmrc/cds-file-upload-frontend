@@ -41,7 +41,6 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
   def controller(signedInUser: SignedInUser, eori: String, dataRetrieval: DataRetrievalAction = new FakeDataRetrievalAction(None)) =
     new ContactDetailsController(
       new FakeAuthAction(signedInUser),
-      new FakeEORIAction(eori),
       dataRetrieval,
       new FakeMrnRequiredAction,
       new FakeVerifiedEmailAction(),

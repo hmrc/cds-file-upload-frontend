@@ -16,34 +16,34 @@
 
 package controllers.actions
 
+import java.time.ZonedDateTime
+
 import connectors.CdsFileUploadConnector
 import controllers.ControllerSpecBase
-import generators.SignedInUserGen
+import models.requests.{AuthenticatedRequest, VerifiedEmailRequest}
 import models.{EORI, VerifiedEmailAddress}
-import models.requests.{AuthenticatedRequest, EORIRequest, SignedInUser, VerifiedEmailRequest}
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.{BeforeAndAfterEach, Inside}
-import play.api.{Configuration, Environment}
 import play.api.mvc.{MessagesControllerComponents, Result}
 import play.api.test.FakeRequest
+import play.api.{Configuration, Environment}
+import testdata.CommonTestData._
 
-import java.time.ZonedDateTime
 import scala.concurrent.Future
 
-class VerifiedEmailActionSpec extends ControllerSpecBase with SignedInUserGen with BeforeAndAfterEach with Inside {
+class VerifiedEmailActionSpec extends ControllerSpecBase with BeforeAndAfterEach with Inside {
 
   lazy val conf = instanceOf[Configuration]
   lazy val env = instanceOf[Environment]
-  lazy val user = mock[SignedInUser]
   lazy val backendConnector = mock[CdsFileUploadConnector]
 
   lazy val action = new ActionTestWrapper(backendConnector, mcc)
 
   lazy val sampleEmailAddress = "example@example.com"
-  lazy val sampleEori = EORI("12345")
+  lazy val sampleEori = EORI(eori)
   lazy val verifiedEmail = VerifiedEmailAddress(sampleEmailAddress, ZonedDateTime.now())
-  lazy val authenticatedRequest = AuthenticatedRequest[Any](FakeRequest("GET", "requestPath"), user)
+  lazy val authenticatedRequest = AuthenticatedRequest[Any](FakeRequest("GET", "requestPath"), signedInUser)
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -55,7 +55,7 @@ class VerifiedEmailActionSpec extends ControllerSpecBase with SignedInUserGen wi
       "user has a verified email address" in {
         when(backendConnector.getVerifiedEmailAddress(meq(sampleEori))(any())).thenReturn(Future.successful(Some(verifiedEmail)))
 
-        val request = EORIRequest(authenticatedRequest, sampleEori.value)
+        val request = AuthenticatedRequest(authenticatedRequest, signedInUser)
 
         whenReady(action.testRefine(request)) { result =>
           result mustBe Right(VerifiedEmailRequest(request, sampleEmailAddress))
@@ -67,7 +67,7 @@ class VerifiedEmailActionSpec extends ControllerSpecBase with SignedInUserGen wi
       "user has no verified email address" in {
         when(backendConnector.getVerifiedEmailAddress(meq(sampleEori))(any())).thenReturn(Future.successful(None))
 
-        val request = EORIRequest(authenticatedRequest, sampleEori.value)
+        val request = AuthenticatedRequest(authenticatedRequest, signedInUser)
 
         whenReady(action.testRefine(request)) { result =>
           result must be('left)
@@ -79,7 +79,7 @@ class VerifiedEmailActionSpec extends ControllerSpecBase with SignedInUserGen wi
       "connector fails" in {
         when(backendConnector.getVerifiedEmailAddress(meq(sampleEori))(any())).thenReturn(Future.failed(new Exception("Some unhappy response")))
 
-        val request = EORIRequest(authenticatedRequest, sampleEori.value)
+        val request = AuthenticatedRequest(authenticatedRequest, signedInUser)
         val result = action.testRefine(request)
 
         assert(result.failed.futureValue.isInstanceOf[Exception])
@@ -89,7 +89,7 @@ class VerifiedEmailActionSpec extends ControllerSpecBase with SignedInUserGen wi
 
   class ActionTestWrapper(backendConnector: CdsFileUploadConnector, mcc: MessagesControllerComponents)
       extends VerifiedEmailActionImpl(backendConnector, mcc) {
-    def testRefine[A](request: EORIRequest[A]): Future[Either[Result, VerifiedEmailRequest[A]]] =
+    def testRefine[A](request: AuthenticatedRequest[A]): Future[Either[Result, VerifiedEmailRequest[A]]] =
       refine(request)
   }
 }

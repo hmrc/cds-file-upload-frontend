@@ -27,8 +27,7 @@ import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, verify, when}
 import services.AnswersService
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
-import uk.gov.hmrc.auth.core.retrieve.~
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException}
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException, Enrolments}
 
 import scala.concurrent.Future
 
@@ -38,17 +37,15 @@ abstract class ControllerSpecBase extends SpecBase with FakeActions {
   val mockAnswersConnector: AnswersService = mock[AnswersService]
 
   def withSignedInUser(user: SignedInUser)(test: => Unit): Unit = {
-    when(
-      mockAuthConnector
-        .authorise(any(), eqTo(credentials and name and email and affinityGroup and internalId and allEnrolments))(any(), any())
-    ).thenReturn(
-      Future.successful(
-        new ~(
-          new ~(new ~(new ~(new ~(Some(user.credentials), Some(user.name)), user.email), user.affinityGroup), Some(user.internalId)),
-          user.enrolments
-        )
-      )
-    )
+    when(mockAuthConnector.authorise(any(), eqTo(allEnrolments))(any(), any()))
+      .thenReturn(Future.successful(user.enrolments))
+
+    test
+  }
+
+  def withUserWithoutEori(user: SignedInUser)(test: => Unit): Unit = {
+    when(mockAuthConnector.authorise(any(), eqTo(allEnrolments))(any(), any()))
+      .thenReturn(Future.successful(Enrolments(Set())))
 
     test
   }

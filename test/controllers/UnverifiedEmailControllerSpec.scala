@@ -31,7 +31,7 @@ class UnverifiedEmailControllerSpec extends ControllerSpecBase {
   def view(): String = page("")(fakeRequest, messages).toString
 
   def controller() =
-    new UnverifiedEmailController(new FakeAuthAction(), new FakeEORIAction(), mcc, page, config)
+    new UnverifiedEmailController(new FakeAuthAction(), mcc, page, config)
 
   override protected def beforeEach(): Unit = {
     super.beforeEach

@@ -18,8 +18,7 @@ package controllers
 
 import config.AppConfig
 import connectors.CdsFileUploadConnector
-import controllers.actions.{AuthAction, DataRetrievalAction, EORIRequiredAction, FileUploadResponseRequiredAction, VerifiedEmailAction}
-
+import controllers.actions.{AuthAction, DataRetrievalAction, FileUploadResponseRequiredAction, VerifiedEmailAction}
 import javax.inject.Inject
 import metrics.MetricIdentifiers.fetchNotificationMetric
 import metrics.SfusMetrics
@@ -40,7 +39,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class UpscanStatusController @Inject()(
   authenticate: AuthAction,
-  requireEori: EORIRequiredAction,
   getData: DataRetrievalAction,
   verifiedEmail: VerifiedEmailAction,
   requireResponse: FileUploadResponseRequiredAction,
@@ -63,7 +61,7 @@ class UpscanStatusController @Inject()(
   private val notificationsRetryPause = appConfig.notifications.retryPauseMillis
 
   def onPageLoad(ref: String): Action[AnyContent] =
-    (authenticate andThen requireEori andThen verifiedEmail andThen getData andThen requireResponse).async { implicit req =>
+    (authenticate andThen verifiedEmail andThen getData andThen requireResponse).async { implicit req =>
       val references = req.fileUploadResponse.uploads.map(_.reference)
       val refPosition = getPosition(ref, references)
 
@@ -79,13 +77,12 @@ class UpscanStatusController @Inject()(
       }
     }
 
-  def error(): Action[AnyContent] =
-    (authenticate andThen requireEori) { implicit req =>
-      Ok(uploadError())
-    }
+  def error(): Action[AnyContent] = authenticate { implicit req =>
+    Ok(uploadError())
+  }
 
   def success(id: String): Action[AnyContent] =
-    (authenticate andThen requireEori andThen verifiedEmail andThen getData andThen requireResponse).async { implicit req =>
+    (authenticate andThen verifiedEmail andThen getData andThen requireResponse).async { implicit req =>
       val uploads = req.fileUploadResponse.uploads
       uploads.find(_.id == id) match {
         case Some(upload) =>

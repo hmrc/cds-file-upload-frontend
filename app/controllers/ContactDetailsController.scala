@@ -32,7 +32,6 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class ContactDetailsController @Inject()(
   authenticate: AuthAction,
-  requireEori: EORIRequiredAction,
   getData: DataRetrievalAction,
   requireMrn: MrnRequiredAction,
   verifiedEmail: VerifiedEmailAction,
@@ -44,22 +43,21 @@ class ContactDetailsController @Inject()(
 
   private val form = Form(contactDetailsMapping)
 
-  def onPageLoad: Action[AnyContent] = (authenticate andThen requireEori andThen verifiedEmail andThen getData andThen requireMrn) { implicit req =>
+  def onPageLoad: Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData andThen requireMrn) { implicit req =>
     val populatedForm = req.userAnswers.contactDetails.fold(form)(form.fill)
     Ok(contactDetails(populatedForm))
   }
 
-  def onSubmit: Action[AnyContent] = (authenticate andThen requireEori andThen verifiedEmail andThen getData andThen requireMrn).async {
-    implicit req =>
-      form
-        .bindFromRequest()
-        .fold(
-          errorForm => Future.successful(BadRequest(contactDetails(errorForm))),
-          contactDetails => {
-            answersConnector.upsert(req.userAnswers.copy(contactDetails = Some(contactDetails))).map { _ =>
-              Redirect(routes.HowManyFilesUploadController.onPageLoad())
-            }
+  def onSubmit: Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData andThen requireMrn).async { implicit req =>
+    form
+      .bindFromRequest()
+      .fold(
+        errorForm => Future.successful(BadRequest(contactDetails(errorForm))),
+        contactDetails => {
+          answersConnector.upsert(req.userAnswers.copy(contactDetails = Some(contactDetails))).map { _ =>
+            Redirect(routes.HowManyFilesUploadController.onPageLoad())
           }
-        )
+        }
+      )
   }
 }

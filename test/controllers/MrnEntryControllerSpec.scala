@@ -39,7 +39,6 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
   private def mrnEntryController(answers: UserAnswers = validAnswers) =
     new MrnEntryController(
       new FakeAuthAction(),
-      new FakeEORIAction(eori),
       new FakeDataRetrievalAction(Some(answers)),
       new FakeVerifiedEmailAction(),
       new MRNFormProvider,

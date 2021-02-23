@@ -18,7 +18,6 @@ package controllers.actions
 
 import config.SecureMessagingConfig
 import generators.Generators
-import models.exceptions.InvalidFeatureStateException
 import models.requests._
 import models.{ContactDetails, MRN, UserAnswers}
 import org.mockito.Mockito
@@ -37,13 +36,6 @@ trait FakeActions extends Generators with MockitoSugar {
     def parser = stubBodyParser()
     override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] =
       Future.successful(Right(AuthenticatedRequest(request, user)))
-  }
-
-  class FakeEORIAction(eori: String = eoriString.sample.get) extends EORIRequiredAction {
-    protected def executionContext = ExecutionContext.global
-    def parser = stubBodyParser()
-    override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, EORIRequest[A]]] =
-      Future.successful(Right(EORIRequest[A](request, eori)))
   }
 
   class FakeDataRetrievalAction(answers: Option[UserAnswers] = None) extends DataRetrievalAction {
@@ -70,7 +62,7 @@ trait FakeActions extends Generators with MockitoSugar {
   class FakeVerifiedEmailAction(email: String = emailString.sample.get) extends VerifiedEmailAction {
     protected def executionContext = ExecutionContext.global
     def parser = stubBodyParser()
-    override protected def refine[A](request: EORIRequest[A]): Future[Either[Result, VerifiedEmailRequest[A]]] =
+    override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, VerifiedEmailRequest[A]]] =
       Future.successful(Right(VerifiedEmailRequest[A](request, email)))
   }
 

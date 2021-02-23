@@ -32,7 +32,6 @@ class Module extends AbstractModule {
   override def configure(): Unit = {
     // Bind the actions for DI
     bind(classOf[AuthAction]).to(classOf[AuthActionImpl]).asEagerSingleton()
-    bind(classOf[EORIRequiredAction]).to(classOf[EORIRequiredActionImpl]).asEagerSingleton()
     bind(classOf[VerifiedEmailAction]).to(classOf[VerifiedEmailActionImpl]).asEagerSingleton()
     bind(classOf[ContactDetailsRequiredAction]).to(classOf[ContactDetailsRequiredActionImpl]).asEagerSingleton()
     bind(classOf[MrnRequiredAction]).to(classOf[MrnRequiredActionImpl]).asEagerSingleton()

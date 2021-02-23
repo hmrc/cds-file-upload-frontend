@@ -17,11 +17,9 @@
 package generators
 
 import models.requests.SignedInUser
-import org.scalacheck.Gen.{listOf, option}
+import org.scalacheck.Gen.listOf
 import org.scalacheck.{Arbitrary, Gen}
-import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Individual, Organisation}
-import uk.gov.hmrc.auth.core.retrieve.{Credentials, Name}
-import uk.gov.hmrc.auth.core.{AffinityGroup, Enrolment, EnrolmentIdentifier, Enrolments}
+import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 
 trait SignedInUserGen {
   self: Generators =>
@@ -29,26 +27,9 @@ trait SignedInUserGen {
   implicit lazy val arbitraryUser: Arbitrary[SignedInUser] = Arbitrary(userGen)
 
   lazy val userGen: Gen[SignedInUser] = for {
-    credentials <- credentialsGen
-    name <- nameGen
-    email <- option(emailString)
-    affinityGroup <- option(affinityGroupGen)
-    internalId <- alphaNumString()
+    eori <- eoriString
     enrolments <- enrolmentsGen
-  } yield SignedInUser(credentials, name, email, affinityGroup, internalId, enrolments)
-
-  val credentialsGen: Gen[Credentials] = for {
-    providerId <- alphaNumString()
-    providerType <- alphaNumString()
-  } yield Credentials(providerId, providerType)
-
-  val nameGen: Gen[Name] = for {
-    name <- option(alphaNumString())
-    lastName <- option(alphaNumString())
-  } yield Name(name, lastName)
-
-  val affinityGroupGen: Gen[AffinityGroup] =
-    Gen.oneOf(Individual, Organisation, Agent)
+  } yield SignedInUser(eori, enrolments)
 
   val enrolmentGen: Gen[Enrolment] = Gen
     .oneOf(
@@ -67,8 +48,6 @@ trait SignedInUserGen {
 
   val enrolmentsGen: Gen[Enrolments] =
     listOf(enrolmentGen).map(es => Enrolments(es.toSet))
-
-  implicit lazy val arbitraryEORIEnrolment: Arbitrary[EORIEnrolment] = Arbitrary(eoriEnrolmentGen)
 
   case class EORIEnrolment(enrolment: Enrolment)
 

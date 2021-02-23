@@ -18,7 +18,7 @@ package config
 
 import javax.inject.{Inject, Singleton}
 import models.exceptions.InvalidFeatureStateException
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Results.NotFound
 import play.api.mvc.{Request, RequestHeader, Result}
 import play.twirl.api.Html

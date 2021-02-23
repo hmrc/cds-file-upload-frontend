@@ -19,7 +19,7 @@ package controllers.actions
 import base.UnitSpec
 import config.SecureMessagingConfig
 import models.exceptions.InvalidFeatureStateException
-import models.requests.EORIRequest
+import models.requests.AuthenticatedRequest
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.BeforeAndAfterEach
@@ -32,8 +32,8 @@ import scala.concurrent.Future
 class SecureMessagingFeatureActionSpec extends UnitSpec with BeforeAndAfterEach with ScalaFutures {
 
   private val secureMessagingConfig = mock[SecureMessagingConfig]
-  private val request = mock[EORIRequest[_]]
-  private val functionBlock = mock[EORIRequest[_] => Future[Result]]
+  private val request = mock[AuthenticatedRequest[_]]
+  private val functionBlock = mock[AuthenticatedRequest[_] => Future[Result]]
   private val controllerResult = mock[Result]
 
   private val secureMessagingFeatureAction = new SecureMessagingFeatureAction(secureMessagingConfig)
