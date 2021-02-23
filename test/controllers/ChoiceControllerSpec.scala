@@ -27,28 +27,33 @@ import play.api.libs.json.Json
 import play.api.mvc.Request
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
-import views.html.{choice_page, not_implemented}
+import testdata.CommonTestData.eori
+import views.html.choice_page
 
 class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
 
   private val choicePage = mock[choice_page]
-  private val notImplementedPage = mock[not_implemented]
   private val secureMessagingFeatureAction = new SecureMessagingFeatureActionMock()
 
   private val controller =
-    new ChoiceController(stubMessagesControllerComponents(), new FakeAuthAction(), secureMessagingFeatureAction, choicePage, notImplementedPage)
+    new ChoiceController(
+      stubMessagesControllerComponents(),
+      new FakeAuthAction(),
+      new FakeVerifiedEmailAction(),
+      secureMessagingFeatureAction,
+      choicePage
+    )
 
   override def beforeEach(): Unit = {
     super.beforeEach()
 
-    reset(choicePage, notImplementedPage)
+    reset(choicePage)
     secureMessagingFeatureAction.reset()
     when(choicePage.apply(any[Form[ChoiceForm]])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
-    when(notImplementedPage.apply()(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
   }
 
   override def afterEach(): Unit = {
-    reset(choicePage, notImplementedPage)
+    reset(choicePage)
     secureMessagingFeatureAction.reset()
 
     super.afterEach()
@@ -156,15 +161,15 @@ class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
 
             val result = controller.submitChoice()(request)
 
-            status(result) mustBe OK
+            status(result) mustBe SEE_OTHER
           }
 
           "call placeholder page" in {
             secureMessagingFeatureAction.enableSecureMessagingFeature()
 
-            controller.submitChoice()(request).futureValue
+            val result = controller.submitChoice()(request)
 
-            verify(notImplementedPage).apply()(any[Request[_]], any[Messages])
+            redirectLocation(result) mustBe Some(controllers.routes.SecureMessagingController.displayConversations().url)
           }
         }
 

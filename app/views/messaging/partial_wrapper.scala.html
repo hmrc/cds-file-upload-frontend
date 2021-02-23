@@ -15,20 +15,14 @@
  *@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import views.html.components.gds._
+@import views.html.components.gds.gdsMainTemplate
 @import views.Title
+@import play.twirl.api.HtmlFormat
 
-@this(
-  mainTemplate: gdsMainTemplate,
-  pageTitle: pageTitle,
-  paragraphBody: paragraphBody
-)
+@this(govukLayout: gdsMainTemplate, govukAccordion : GovukAccordion, govukBackLink : GovukBackLink)
 
-@()(implicit request: Request[_], messages: Messages)
+@(partial: HtmlFormat.Appendable)(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = Title("notImplemented.heading")) {
-
-  @pageTitle(messages("notImplemented.heading"))
-
-  @paragraphBody(messages("notImplemented.message"))
+@govukLayout(title = Title("conversations.heading")) {
+  @partial
 }

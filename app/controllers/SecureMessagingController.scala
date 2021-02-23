@@ -16,41 +16,32 @@
 
 package controllers
 
+import connectors.SecureMessageFrontendConnector
 import controllers.actions.{AuthAction, SecureMessagingFeatureAction, VerifiedEmailAction}
-import forms.ChoiceForm
-import forms.ChoiceForm.AllowedChoiceValues._
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import views.html.choice_page
+import views.html.messaging.partial_wrapper
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-@Singleton
-class ChoiceController @Inject()(
-  mcc: MessagesControllerComponents,
+class SecureMessagingController @Inject()(
   authenticate: AuthAction,
   verifiedEmail: VerifiedEmailAction,
   secureMessagingFeatureAction: SecureMessagingFeatureAction,
-  choicePage: choice_page
+  messageConnector: SecureMessageFrontendConnector,
+  mcc: MessagesControllerComponents,
+  partial_wrapper: partial_wrapper
 )(implicit ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
-  def displayPage(): Action[AnyContent] = (authenticate andThen verifiedEmail andThen secureMessagingFeatureAction) { implicit request =>
-    Ok(choicePage(ChoiceForm.form))
-  }
-
-  def submitChoice(): Action[AnyContent] = (authenticate andThen verifiedEmail andThen secureMessagingFeatureAction) { implicit request =>
-    ChoiceForm.form
-      .bindFromRequest()
-      .fold(
-        formWithErrors => BadRequest(choicePage(formWithErrors)),
-        validChoice =>
-          validChoice.choice match {
-            case SecureMessageInbox => Redirect(controllers.routes.SecureMessagingController.displayConversations())
-            case DocumentUpload     => Redirect(controllers.routes.MrnEntryController.onPageLoad())
-        }
-      )
+  def displayConversations: Action[AnyContent] = (authenticate andThen verifiedEmail andThen secureMessagingFeatureAction).async { implicit req =>
+    messageConnector
+      .retrieveConversationsPartial()
+      .map { partial =>
+        Ok(partial_wrapper(HtmlFormat.raw(partial.body)))
+      }
   }
 }

@@ -61,5 +61,12 @@ class AppConfigSpec extends PlaySpec {
 
       config.microservice.services.contactFrontend.giveFeedbackLink mustBe expectedUrl
     }
+
+    "have a correct configuration for secure-message-frontend" in {
+
+      val secureMessaging = config.microservice.services.secureMessaging
+
+      secureMessaging.fetchInboxEndpoint mustBe "http://localhost:9055/secure-message-frontend/cds-file-upload-service/conversations"
+    }
   }
 }

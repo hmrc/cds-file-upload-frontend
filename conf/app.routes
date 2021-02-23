@@ -1,41 +1,43 @@
 # microservice specific routes
 
-GET         /assets/*file                       controllers.Assets.versioned(path="/public", file: Asset)
+GET         /assets/*file                           controllers.Assets.versioned(path="/public", file: Asset)
 
-GET         /                                   controllers.RootController.displayPage
+GET         /                                       controllers.RootController.displayPage
 
-GET         /start                              controllers.StartController.displayStartPage
-POST        /start                              controllers.StartController.onStart
+GET         /start                                  controllers.StartController.displayStartPage
+POST        /start                                  controllers.StartController.onStart
 
-GET         /error                              controllers.ErrorPageController.error
-GET         /upload-error                       controllers.ErrorPageController.uploadError
+GET         /error                                  controllers.ErrorPageController.error
+GET         /upload-error                           controllers.ErrorPageController.uploadError
 
-GET         /unauthorised                       controllers.UnauthorisedController.onPageLoad
+GET         /unauthorised                           controllers.UnauthorisedController.onPageLoad
 
-GET         /what-do-you-want-to-do             controllers.ChoiceController.displayPage()
-POST        /what-do-you-want-to-do             controllers.ChoiceController.submitChoice()
+GET         /what-do-you-want-to-do                 controllers.ChoiceController.displayPage()
+POST        /what-do-you-want-to-do                 controllers.ChoiceController.submitChoice()
 
-GET         /mrn-entry                          controllers.MrnEntryController.onPageLoad
-POST        /mrn-entry                          controllers.MrnEntryController.onSubmit
-GET         /mrn-entry/:mrn                     controllers.MrnEntryController.autoFill(mrn)
+GET         /conversations                          controllers.SecureMessagingController.displayConversations
 
-GET         /contact-details                    controllers.ContactDetailsController.onPageLoad
-POST        /contact-details                    controllers.ContactDetailsController.onSubmit
+GET         /mrn-entry                              controllers.MrnEntryController.onPageLoad
+POST        /mrn-entry                              controllers.MrnEntryController.onSubmit
+GET         /mrn-entry/:mrn                         controllers.MrnEntryController.autoFill(mrn)
 
-GET         /how-many-files-upload              controllers.HowManyFilesUploadController.onPageLoad
-POST        /how-many-files-upload              controllers.HowManyFilesUploadController.onSubmit
+GET         /contact-details                        controllers.ContactDetailsController.onPageLoad
+POST        /contact-details                        controllers.ContactDetailsController.onSubmit
 
-GET         /upload/receipt                     controllers.UploadYourFilesReceiptController.onPageLoad
+GET         /how-many-files-upload                  controllers.HowManyFilesUploadController.onPageLoad
+POST        /how-many-files-upload                  controllers.HowManyFilesUploadController.onSubmit
 
-GET         /upload/:ref                        controllers.UpscanStatusController.onPageLoad(ref: String)
+GET         /upload/receipt                         controllers.UploadYourFilesReceiptController.onPageLoad
 
-GET         /upload/upscan-error/               controllers.UpscanStatusController.error()
-GET         /upload/upscan-success/:id          controllers.UpscanStatusController.success(id: String)
+GET         /upload/:ref                            controllers.UpscanStatusController.onPageLoad(ref: String)
 
-GET         /unverified-email                   controllers.UnverifiedEmailController.informUser
+GET         /upload/upscan-error/                   controllers.UpscanStatusController.error()
+GET         /upload/upscan-success/:id              controllers.UpscanStatusController.success(id: String)
+
+GET         /unverified-email                       controllers.UnverifiedEmailController.informUser
 
 # Sign out
-GET         /sign-out                           controllers.SignOutController.signOut
+GET         /sign-out                               controllers.SignOutController.signOut
 
 # Session Timeout
-GET         /session-timeout                    controllers.SignOutController.sessionTimeout
+GET         /session-timeout                        controllers.SignOutController.sessionTimeout
