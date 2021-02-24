@@ -26,7 +26,6 @@ import play.api.i18n.Messages
 import play.api.mvc.Request
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
-import testdata.CommonTestData.eori
 import views.html.messaging.partial_wrapper
 
 import scala.concurrent.Future
@@ -54,9 +53,6 @@ class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests
     secureMessagingFeatureAction.reset()
     when(partialWrapperPage.apply(any[HtmlFormat.Appendable])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
   }
-
-  override def afterEach(): Unit =
-    super.afterEach()
 
   "SecureMessagingController displayConversations is called" when {
     "feature flag for SecureMessaging is disabled" should {

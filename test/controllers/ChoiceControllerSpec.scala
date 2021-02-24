@@ -27,7 +27,6 @@ import play.api.libs.json.Json
 import play.api.mvc.Request
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
-import testdata.CommonTestData.eori
 import views.html.choice_page
 
 class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
