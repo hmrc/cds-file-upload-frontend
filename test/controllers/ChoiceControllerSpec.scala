@@ -168,7 +168,7 @@ class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
 
             val result = controller.submitChoice()(request)
 
-            redirectLocation(result) mustBe Some(controllers.routes.SecureMessagingController.displayConversations().url)
+            redirectLocation(result) mustBe Some(controllers.routes.SecureMessagingController.displayInbox().url)
           }
         }
 
@@ -195,5 +195,4 @@ class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
       }
     }
   }
-
 }

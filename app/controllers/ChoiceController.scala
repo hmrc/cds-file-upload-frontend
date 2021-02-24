@@ -46,7 +46,7 @@ class ChoiceController @Inject()(
         formWithErrors => BadRequest(choicePage(formWithErrors)),
         validChoice =>
           validChoice.choice match {
-            case SecureMessageInbox => Redirect(controllers.routes.SecureMessagingController.displayConversations())
+            case SecureMessageInbox => Redirect(controllers.routes.SecureMessagingController.displayInbox())
             case DocumentUpload     => Redirect(controllers.routes.MrnEntryController.onPageLoad())
         }
       )

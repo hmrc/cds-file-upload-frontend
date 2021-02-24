@@ -18,20 +18,20 @@ package views.messaging
 
 import org.jsoup.nodes.Document
 import play.twirl.api.HtmlFormat
-import views.html.messaging.partial_wrapper
+import views.html.messaging.conversation_wrapper
 import views.matchers.ViewMatchers
 import views.DomAssertions
 
-class PartialWrapperSpec extends DomAssertions with ViewMatchers {
+class ConversationWrapperSpec extends DomAssertions with ViewMatchers {
 
-  private val partialWrapperPage = instanceOf[partial_wrapper]
+  private val partialWrapperPage = instanceOf[conversation_wrapper]
   private val partialContent = "Partial Content"
   private val view: Document = partialWrapperPage(HtmlFormat.raw(partialContent))(fakeRequest, messages)
 
-  "Choice page" should {
+  "Conversation Wrapper page" should {
 
     "display page header" in {
-      view.getElementsByTag("title").first() must containMessage("conversations.heading")
+      view.getElementsByTag("title").first() must containMessage("conversation.heading")
     }
 
     "display partial contents" in {

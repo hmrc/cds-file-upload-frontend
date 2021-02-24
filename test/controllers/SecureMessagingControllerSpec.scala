@@ -19,20 +19,21 @@ package controllers
 import base.TestRequests
 import connectors.SecureMessageFrontendConnector
 import models.exceptions.InvalidFeatureStateException
-import models.InboxPartial
+import models.{ConversationPartial, InboxPartial}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, when}
 import play.api.i18n.Messages
 import play.api.mvc.Request
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
-import views.html.messaging.partial_wrapper
+import views.html.messaging.{conversation_wrapper, inbox_wrapper}
 
 import scala.concurrent.Future
 
 class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests {
 
-  private val partialWrapperPage = mock[partial_wrapper]
+  private val partialWrapperPage = mock[inbox_wrapper]
+  private val conversation_wrapper = mock[conversation_wrapper]
   private val connector = mock[SecureMessageFrontendConnector]
   private val secureMessagingFeatureAction = new SecureMessagingFeatureActionMock()
 
@@ -43,7 +44,8 @@ class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests
       secureMessagingFeatureAction,
       connector,
       mcc,
-      partialWrapperPage
+      partialWrapperPage,
+      conversation_wrapper
     )
 
   override def beforeEach(): Unit = {
@@ -52,16 +54,17 @@ class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests
     reset(partialWrapperPage)
     secureMessagingFeatureAction.reset()
     when(partialWrapperPage.apply(any[HtmlFormat.Appendable])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
+    when(conversation_wrapper.apply(any[HtmlFormat.Appendable])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
   }
 
-  "SecureMessagingController displayConversations is called" when {
+  "SecureMessagingController displayInbox is called" when {
     "feature flag for SecureMessaging is disabled" should {
 
       "throw InvalidFeatureStateException$" in {
         secureMessagingFeatureAction.disableSecureMessagingFeature()
 
         an[InvalidFeatureStateException] mustBe thrownBy {
-          await(controller.displayConversations()(fakeRequest))
+          await(controller.displayInbox()(fakeRequest))
         }
       }
     }
@@ -74,9 +77,9 @@ class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests
 
           "wrap the partial in the inbox display wrapper" in {
             secureMessagingFeatureAction.enableSecureMessagingFeature()
-            when(connector.retrieveConversationsPartial()(any(), any())).thenReturn(Future.successful(InboxPartial("")))
+            when(connector.retrieveInboxPartial()(any(), any())).thenReturn(Future.successful(InboxPartial("")))
 
-            val result = controller.displayConversations()(fakeRequest)
+            val result = controller.displayInbox()(fakeRequest)
 
             status(result) mustBe OK
           }
@@ -87,9 +90,58 @@ class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests
           "display the 'Sorry' page to the user" in {
             secureMessagingFeatureAction.enableSecureMessagingFeature()
 
-            when(connector.retrieveConversationsPartial()(any(), any())).thenReturn(Future.failed(new Exception("Whoopse")))
+            when(connector.retrieveInboxPartial()(any(), any())).thenReturn(Future.failed(new Exception("Whoopse")))
 
-            an[Exception] mustBe thrownBy { await(controller.displayConversations()(fakeRequest)) }
+            an[Exception] mustBe thrownBy {
+              await(controller.displayInbox()(fakeRequest))
+            }
+          }
+        }
+      }
+    }
+  }
+
+  "SecureMessagingController displayConversation is called" when {
+    val clientId = "clientId"
+    val conversationId = "conversationId"
+
+    "feature flag for SecureMessaging is disabled" should {
+
+      "throw InvalidFeatureStateException$" in {
+        secureMessagingFeatureAction.disableSecureMessagingFeature()
+
+        an[InvalidFeatureStateException] mustBe thrownBy {
+          await(controller.displayConversation(clientId, conversationId)(fakeRequest))
+        }
+      }
+    }
+
+    "feature flag for SecureMessaging is enabled" should {
+
+      "call secure message connector" when {
+
+        "successfully returns a ConversationPartial" should {
+
+          "wrap the partial in the conversation display wrapper" in {
+            secureMessagingFeatureAction.enableSecureMessagingFeature()
+            when(connector.retrieveConversationPartial(any(), any())(any(), any())).thenReturn(Future.successful(ConversationPartial("")))
+
+            val result = controller.displayConversation(clientId, conversationId)(fakeRequest)
+
+            status(result) mustBe OK
+          }
+        }
+
+        "unsuccessfully returns a failed Future" should {
+
+          "display the 'Sorry' page to the user" in {
+            secureMessagingFeatureAction.enableSecureMessagingFeature()
+
+            when(connector.retrieveConversationPartial(any(), any())(any(), any())).thenReturn(Future.failed(new Exception("Whoopse")))
+
+            an[Exception] mustBe thrownBy {
+              await(controller.displayConversation(clientId, conversationId)(fakeRequest))
+            }
           }
         }
       }

@@ -51,7 +51,7 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
           when(httpClient.GET[HttpResponse](anyString())(any(), any(), any()))
             .thenReturn(Future.successful(httpResponse))
 
-          val result = connector.retrieveConversationsPartial().futureValue
+          val result = connector.retrieveInboxPartial().futureValue
 
           result mustBe InboxPartial(partialContent)
         }
@@ -65,9 +65,19 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
             .thenReturn(Future.successful(httpResponse))
 
           an[Exception] mustBe thrownBy {
-            connector.retrieveConversationsPartial().futureValue
+            connector.retrieveInboxPartial().futureValue
           }
         }
+      }
+    }
+
+    "retrieveMessagePartial is called" which {
+      "receives a 200 response" should {
+        "return a populated InboxPartial" ignore {} //TODO: implement when connector talks to real secure-message-frontend service
+      }
+
+      "receives a non 200 response" should {
+        "return a failed Future" ignore {} //TODO: implement when connector talks to real secure-message-frontend service
       }
     }
   }
