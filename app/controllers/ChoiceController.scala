@@ -16,39 +16,39 @@
 
 package controllers
 
-import controllers.actions.{AuthAction, SecureMessagingFeatureAction}
+import controllers.actions.{AuthAction, SecureMessagingFeatureAction, VerifiedEmailAction}
 import forms.ChoiceForm
 import forms.ChoiceForm.AllowedChoiceValues._
-import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import views.html.{choice_page, not_implemented}
+import views.html.choice_page
+
+import javax.inject.{Inject, Singleton}
 
 @Singleton
 class ChoiceController @Inject()(
   mcc: MessagesControllerComponents,
   authenticate: AuthAction,
+  verifiedEmail: VerifiedEmailAction,
   secureMessagingFeatureAction: SecureMessagingFeatureAction,
-  choicePage: choice_page,
-  notImplementedPage: not_implemented
+  choicePage: choice_page
 ) extends FrontendController(mcc) with I18nSupport {
 
-  def displayPage(): Action[AnyContent] = (authenticate andThen secureMessagingFeatureAction) { implicit request =>
+  def displayPage(): Action[AnyContent] = (authenticate andThen verifiedEmail andThen secureMessagingFeatureAction) { implicit request =>
     Ok(choicePage(ChoiceForm.form))
   }
 
-  def submitChoice(): Action[AnyContent] = (authenticate andThen secureMessagingFeatureAction) { implicit request =>
+  def submitChoice(): Action[AnyContent] = (authenticate andThen verifiedEmail andThen secureMessagingFeatureAction) { implicit request =>
     ChoiceForm.form
       .bindFromRequest()
       .fold(
         formWithErrors => BadRequest(choicePage(formWithErrors)),
         validChoice =>
           validChoice.choice match {
-            case SecureMessageInbox => Ok(notImplementedPage())
+            case SecureMessageInbox => Redirect(controllers.routes.SecureMessagingController.displayConversations())
             case DocumentUpload     => Redirect(controllers.routes.MrnEntryController.onPageLoad())
         }
       )
   }
-
 }

@@ -32,6 +32,7 @@ import config.{
   Notifications,
   Platform,
   Proxy,
+  SecureMessaging,
   Services,
   TrackingConsentFrontend
 }
@@ -72,5 +73,6 @@ object AppConfigMockHelper extends MockitoSugar {
     cdsFileUpload: CDSFileUpload = mock[CDSFileUpload],
     keystore: Keystore = mock[Keystore],
     contactFrontend: ContactFrontend = mock[ContactFrontend],
-  ) = Services(customsDeclarations, cdsFileUploadFrontend, cdsFileUpload, keystore, contactFrontend)
+    secureMessaging: SecureMessaging = mock[SecureMessaging]
+  ) = Services(customsDeclarations, cdsFileUploadFrontend, cdsFileUpload, keystore, contactFrontend, secureMessaging)
 }

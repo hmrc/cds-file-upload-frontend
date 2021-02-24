@@ -44,6 +44,9 @@ choicePage.input.documentUpload = Attach documents to a declaration
 choicePage.input.error.empty = Select what you would like to do
 choicePage.input.error.incorrect = Select what you would like to do
 
+## Secure Messaging Inbox page
+
+conversations.heading = Conversation Inbox
 
 ## MRN Entry Page
 

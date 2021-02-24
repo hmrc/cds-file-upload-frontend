@@ -57,7 +57,8 @@ case class Services(
   cdsFileUploadFrontend: CDSFileUploadFrontend,
   cdsFileUpload: CDSFileUpload,
   keystore: Keystore,
-  contactFrontend: ContactFrontend
+  contactFrontend: ContactFrontend,
+  secureMessaging: SecureMessaging
 )
 
 case class CustomsDeclarations(protocol: Option[String], host: String, port: Option[Int], batchUploadUri: String, apiVersion: String) {
@@ -111,3 +112,7 @@ case class TrackingConsentFrontend(gtm: Gtm, url: String)
 case class Platform(frontend: Frontend)
 
 case class Frontend(host: Option[String])
+
+case class SecureMessaging(protocol: Option[String], host: String, port: Option[Int], fetchInbox: String) {
+  lazy val fetchInboxEndpoint: String = s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$fetchInbox"
+}
