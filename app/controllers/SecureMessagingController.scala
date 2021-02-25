@@ -22,7 +22,7 @@ import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import views.html.messaging.partial_wrapper
+import views.html.messaging.{conversation_wrapper, inbox_wrapper}
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
@@ -33,15 +33,25 @@ class SecureMessagingController @Inject()(
   secureMessagingFeatureAction: SecureMessagingFeatureAction,
   messageConnector: SecureMessageFrontendConnector,
   mcc: MessagesControllerComponents,
-  partial_wrapper: partial_wrapper
+  inbox_wrapper: inbox_wrapper,
+  conversation_wrapper: conversation_wrapper
 )(implicit ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
-  def displayConversations: Action[AnyContent] = (authenticate andThen verifiedEmail andThen secureMessagingFeatureAction).async { implicit req =>
+  def displayInbox: Action[AnyContent] = (authenticate andThen verifiedEmail andThen secureMessagingFeatureAction).async { implicit req =>
     messageConnector
-      .retrieveConversationsPartial()
+      .retrieveInboxPartial()
       .map { partial =>
-        Ok(partial_wrapper(HtmlFormat.raw(partial.body)))
+        Ok(inbox_wrapper(HtmlFormat.raw(partial.body)))
       }
   }
+
+  def displayConversation(client: String, conversationId: String): Action[AnyContent] =
+    (authenticate andThen verifiedEmail andThen secureMessagingFeatureAction).async { implicit req =>
+      messageConnector
+        .retrieveConversationPartial(client, conversationId)
+        .map { partial =>
+          Ok(conversation_wrapper(HtmlFormat.raw(partial.body)))
+        }
+    }
 }

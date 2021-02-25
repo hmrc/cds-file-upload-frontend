@@ -46,7 +46,11 @@ choicePage.input.error.incorrect = Select what you would like to do
 
 ## Secure Messaging Inbox page
 
-conversations.heading = Conversation Inbox
+inbox.heading = Conversation Inbox
+
+## Secure Messaging Read Conversation page
+
+conversation.heading = View conversation
 
 ## MRN Entry Page
 

@@ -113,6 +113,9 @@ case class Platform(frontend: Frontend)
 
 case class Frontend(host: Option[String])
 
-case class SecureMessaging(protocol: Option[String], host: String, port: Option[Int], fetchInbox: String) {
+case class SecureMessaging(protocol: Option[String], host: String, port: Option[Int], fetchInbox: String, fetchMessage: String) {
   lazy val fetchInboxEndpoint: String = s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$fetchInbox"
+
+  def fetchMessageEndpoint(client: String, conversationId: String): String =
+    s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$fetchMessage/$client/$conversationId"
 }
