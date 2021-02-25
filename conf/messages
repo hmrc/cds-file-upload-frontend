@@ -44,6 +44,14 @@ choicePage.input.documentUpload = Attach documents to a declaration
 choicePage.input.error.empty = Select what you would like to do
 choicePage.input.error.incorrect = Select what you would like to do
 
+## Secure Messaging Inbox Choice Page
+
+inboxChoicePage.heading = View messages
+inboxChoicePage.input.exportsMessages = Exports messages
+inboxChoicePage.input.importsMessages = Imports messages
+inboxChoicePage.input.error.empty = Select what messages you would like to view
+inboxChoicePage.input.error.incorrect = Select what messages you would like to view
+
 ## Secure Messaging Inbox page
 
 inbox.heading = Conversation Inbox

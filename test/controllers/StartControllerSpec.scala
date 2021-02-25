@@ -54,7 +54,7 @@ class StartControllerSpec extends ControllerSpecBase {
         val result = controller().onStart(fakeRequest)
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.ChoiceController.displayPage().url)
+        redirectLocation(result) mustBe Some(routes.ChoiceController.onPageLoad().url)
       }
     }
 

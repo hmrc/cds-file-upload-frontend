@@ -38,7 +38,7 @@ class StartController @Inject()(
 
   def onStart: Action[AnyContent] = authenticate { _ =>
     if (secureMessagingConfig.isSecureMessagingEnabled)
-      Redirect(controllers.routes.ChoiceController.displayPage())
+      Redirect(controllers.routes.ChoiceController.onPageLoad())
     else
       Redirect(controllers.routes.MrnEntryController.onPageLoad())
   }
