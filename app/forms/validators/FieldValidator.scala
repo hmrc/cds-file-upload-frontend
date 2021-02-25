@@ -42,9 +42,6 @@ object FieldValidator {
     def or(second: Boolean): Boolean = first || second
   }
 
-  private val zerosOnlyRegexValue = "[0]+"
-  private val noMoreDecimalPlacesThanRegexValue: Int => String =
-    (decimalPlaces: Int) => s"^([0-9]*)([\\.]{0,1}[0-9]{0,$decimalPlaces})$$"
   private val allowedSpecialChars = Set(',', '.', '-', '\'', '/', ' ')
 
   val isEmpty: String => Boolean = (input: String) => input.isEmpty

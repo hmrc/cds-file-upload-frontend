@@ -14,9 +14,9 @@
  * limitations under the License.
  *@
 
-@import forms.ChoiceForm
-@import forms.ChoiceForm._
-@import forms.ChoiceForm.AllowedChoiceValues._
+@import forms.InboxChoiceForm
+@import forms.InboxChoiceForm.InboxChoiceKey
+@import forms.InboxChoiceForm.Values.{ExportsMessages, ImportsMessages}
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.html.components.gds._
 @import views.Title
@@ -31,35 +31,35 @@
   formHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
 )
 
-@(form: Form[ChoiceForm])(implicit request: Request[_], messages: Messages)
+@(form: Form[InboxChoiceForm])(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = Title("choicePage.heading")) {
+@mainTemplate(title = Title("inboxChoicePage.heading")) {
 
-  @formHelper(action = routes.ChoiceController.onSubmit(), 'autoComplete -> "off") {
+  @formHelper(action = routes.InboxChoiceController.onSubmit, 'autoComplete -> "off") {
 
     @errorSummary(form.errors)
 
     @govukRadios(Radios(
-      name = ChoiceKey,
+      name = InboxChoiceKey,
       fieldset = Some(Fieldset(
         legend = Some(Legend(
-          content = Text(messages("choicePage.heading")),
+          content = Text(messages("inboxChoicePage.heading")),
           isPageHeading = true,
           classes = gdsPageLegend
         ))
       )),
       items = Seq(
         RadioItem(
-          id = Some(SecureMessageInbox),
-          value = Some(SecureMessageInbox),
-          content = Text(messages("choicePage.input.messageInbox")),
-          checked = form(ChoiceKey).value.contains(SecureMessageInbox)
+          id = Some(ExportsMessages),
+          value = Some(ExportsMessages),
+          content = Text(messages("inboxChoicePage.input.exportsMessages")),
+          checked = form(InboxChoiceKey).value.contains(ExportsMessages)
         ),
         RadioItem(
-          id = Some(DocumentUpload),
-          value = Some(DocumentUpload),
-          content = Text(messages("choicePage.input.documentUpload")),
-          checked = form(ChoiceKey).value.contains(DocumentUpload)
+          id = Some(ImportsMessages),
+          value = Some(ImportsMessages),
+          content = Text(messages("inboxChoicePage.input.importsMessages")),
+          checked = form(InboxChoiceKey).value.contains(ImportsMessages)
         )
       )
     ))

@@ -12,8 +12,11 @@ GET         /upload-error                           controllers.ErrorPageControl
 
 GET         /unauthorised                           controllers.UnauthorisedController.onPageLoad
 
-GET         /what-do-you-want-to-do                 controllers.ChoiceController.displayPage()
-POST        /what-do-you-want-to-do                 controllers.ChoiceController.submitChoice()
+GET         /what-do-you-want-to-do                 controllers.ChoiceController.onPageLoad
+POST        /what-do-you-want-to-do                 controllers.ChoiceController.onSubmit
+
+GET         /what-messages-to-view                  controllers.InboxChoiceController.onPageLoad
+POST        /what-messages-to-view                  controllers.InboxChoiceController.onSubmit
 
 GET         /messages                               controllers.SecureMessagingController.displayInbox
 GET         /conversation/:client/:conversationId   controllers.SecureMessagingController.displayConversation(client, conversationId)

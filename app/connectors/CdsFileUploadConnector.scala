@@ -16,18 +16,16 @@
 
 package connectors
 
-import config.{AppConfig, CDSFileUpload}
-import models.{EORI, MRN, Notification, VerifiedEmailAddress}
-import play.api.Logger
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
-import uk.gov.hmrc.http.HttpReads.Implicits._
-
-import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class CdsFileUploadConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) {
+import config.{AppConfig, CDSFileUpload}
+import javax.inject.Inject
+import models.{EORI, MRN, Notification, VerifiedEmailAddress}
+import play.api.Logging
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
-  private val logger = Logger(this.getClass)
+class CdsFileUploadConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) extends Logging {
 
   private val cdsFileUploadConfig: CDSFileUpload = appConfig.microservice.services.cdsFileUpload
 
