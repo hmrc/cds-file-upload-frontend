@@ -16,79 +16,142 @@
 
 package controllers
 
-import base.SfusMetricsMock
+import base.{FilesUploadedSpec, SfusMetricsMock}
 import connectors.CdsFileUploadConnector
-import models.{FileUploadResponse, Notification, UserAnswers}
+import models._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import play.api.i18n.Messages
+import play.api.mvc.Request
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
 import testdata.CommonTestData.eori
-import views.html.upload_your_files_receipt
+import views.html.{upload_your_files_confirmation, upload_your_files_receipt}
 
 import scala.concurrent.Future
 
-class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusMetricsMock {
+class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusMetricsMock with FilesUploadedSpec {
 
   private val cdsFileUploadConnector = mock[CdsFileUploadConnector]
-  private val page = mock[upload_your_files_receipt]
+  private val originalConfirmationPage = mock[upload_your_files_receipt]
+  private val secureMessagingConfirmationPage = mock[upload_your_files_confirmation]
 
   private val controller = new UploadYourFilesReceiptController(
     new FakeAuthAction(),
     new FakeVerifiedEmailAction(),
     cdsFileUploadConnector,
     sfusMetrics,
-    page,
-    mockAnswersConnector
+    originalConfirmationPage,
+    secureMessagingConfirmationPage,
+    mockAnswersConnector,
+    secureMessageConfig
   )(mcc, executionContext)
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
 
-    when(mockAnswersConnector.findByEori(anyString())).thenReturn(Future.successful(None))
-    when(page.apply(any(), any())(any(), any())).thenReturn(HtmlFormat.empty)
+    reset(cdsFileUploadConnector, originalConfirmationPage, secureMessagingConfirmationPage)
   }
 
-  override protected def afterEach(): Unit = {
-    reset(page, mockAnswersConnector)
+  "UploadYourFilesReceiptController onPageLoad" should {
 
-    super.afterEach()
-  }
+    "load the original confirmation view" when {
+      "the Secure Messaging flag is disabled" in {
+        withSecureMessagingEnabled(false) {
+          withSingleFileSuccessfullyUploaded {
 
-  "onPageLoad" should {
+            when(originalConfirmationPage.apply(any(), any())(any(), any()))
+              .thenReturn(HtmlFormat.empty)
 
-    "load the view" when {
+            val result = controller.onPageLoad()(fakeRequest)
 
-      "request file exists in response" in {
-
-        forAll { response: FileUploadResponse =>
-          response.uploads.foreach { u =>
-            when(cdsFileUploadConnector.getNotification(any())(any()))
-              .thenReturn(Future.successful(Option(Notification(u.reference, "SUCCESS", "someFile.pdf"))))
+            status(result) mustBe OK
+            verify(originalConfirmationPage).apply(any(), any())(any[Request[_]], any[Messages])
           }
+        }
+      }
+    }
 
-          val answers = UserAnswers(eori, fileUploadResponse = Some(response))
-          when(mockAnswersConnector.findByEori(anyString())).thenReturn(Future.successful(Some(answers)))
+    "load the secure messaging confirmation view" when {
+      "the Secure Messaging flag is enabled" in {
+        withSecureMessagingEnabled(true) {
+          withSingleFileSuccessfullyUploaded {
 
-          val result = controller.onPageLoad()(fakeRequest)
+            when(secureMessagingConfirmationPage.apply(any(), any(), any())(any(), any()))
+              .thenReturn(HtmlFormat.empty)
 
-          status(result) mustBe OK
-          result.map(_ => verify(mockAnswersConnector).removeByEori(any()))
+            val result = controller.onPageLoad()(fakeRequest)
+
+            status(result) mustBe OK
+            verify(secureMessagingConfirmationPage).apply(any(), any(), any())(any[Request[_]], any[Messages])
+          }
         }
       }
     }
 
     "redirect to start page" when {
+      "no user answers are in the cache" in {
+        when(mockAnswersConnector.findByEori(anyString()))
+          .thenReturn(Future.successful(None))
 
-      "no responses are in the cache" in {
+        val result = controller.onPageLoad()(fakeRequest).futureValue
 
-        val result = controller.onPageLoad()(fakeRequest)
-
-        status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.StartController.displayStartPage().url)
-
-        result.map(_ => verify(mockAnswersConnector).removeByEori(any()))
+        result.header.status mustBe SEE_OTHER
+        result.header.headers.get(LOCATION) mustBe Some(routes.StartController.displayStartPage().url)
       }
     }
+
+    "clear the answers cache" when {
+      "the Secure Messaging flag is enabled" in {
+        withSecureMessagingEnabled(true) {
+          withSingleFileSuccessfullyUploaded {
+            when(secureMessagingConfirmationPage.apply(any(), any(), any())(any(), any()))
+              .thenReturn(HtmlFormat.empty)
+
+            val result = controller.onPageLoad()(fakeRequest).futureValue
+
+            result.header.status mustBe OK
+
+            verify(mockAnswersConnector).removeByEori(any())
+          }
+        }
+      }
+
+      "the Secure Messaging flag is disabled" in {
+        withSecureMessagingEnabled(false) {
+          withSingleFileSuccessfullyUploaded {
+
+            when(originalConfirmationPage.apply(any(), any())(any(), any()))
+              .thenReturn(HtmlFormat.empty)
+
+            val result = controller.onPageLoad()(fakeRequest)
+
+            status(result) mustBe OK
+            verify(mockAnswersConnector).removeByEori(any())
+          }
+        }
+      }
+
+      "user is redirect to start page" in {
+        when(mockAnswersConnector.findByEori(anyString()))
+          .thenReturn(Future.successful(None))
+
+        val result = controller.onPageLoad()(fakeRequest).futureValue
+
+        result.header.status mustBe SEE_OTHER
+        verify(mockAnswersConnector).removeByEori(any())
+      }
+    }
+  }
+
+  def withSingleFileSuccessfullyUploaded(test: => Unit): Unit = {
+    when(cdsFileUploadConnector.getNotification(any())(any()))
+      .thenReturn(Future.successful(Option(Notification(sampleFileUpload.reference, "SUCCESS", "someFile.pdf"))))
+
+    val answers = UserAnswers(eori, fileUploadResponse = Some(sampleFileUploadResponse))
+    when(mockAnswersConnector.findByEori(anyString()))
+      .thenReturn(Future.successful(Some(answers)))
+
+    test
   }
 }

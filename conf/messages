@@ -148,6 +148,25 @@ fileUploadReceiptPage.uploadAnother=Upload documents for another declaration
 fileUploadReceiptPage.paragraph3=You only need to add documents that are required by HMRC: this will show in the status of the declaration or in a message to you from HMRC.
 fileUploadReceiptPage.finalButton.text=Upload documents for another declaration
 
+fileUploadConfirmationPage.heading=Files have been uploaded and sent to HMRC
+fileUploadConfirmationPage.mrn=Movement Reference Number:
+fileUploadConfirmationPage.tableTitle=Uploaded files
+fileUploadConfirmationPage.fileName=File name
+fileUploadConfirmationPage.receipt=Receipt
+fileUploadConfirmationPage.printPage=Save or print this page for your records (opens in new tab).
+fileUploadConfirmationPage.section1.title=What happens next?
+fileUploadConfirmationPage.section1.paragraph1=As long as you have provided the documents that customs needs to clear your goods, they should be cleared within these time limits from arriving goods or uploading documents (whichever is later):
+fileUploadConfirmationPage.section1.listitem1=2 hours for air freight imports, road freight imports, all exports
+fileUploadConfirmationPage.section1.listitem2=3 hours if received between 8am and 3pm - for maritime freight imports
+fileUploadConfirmationPage.section1.listitem3=by 8am the following day if received after 3pm - for maritime freight imports
+fileUploadConfirmationPage.section1.paragraph2=If the status of your declaration has not changed within the specified time, you should {0}
+fileUploadConfirmationPage.section1.paragraph2.linkText=contact the National Clearance Hub
+fileUploadConfirmationPage.section2.title=If a query is raised
+fileUploadConfirmationPage.section2.paragraph1=If a query is raised, or if you get further replies, you will be notified via {0}
+fileUploadConfirmationPage.section2.paragraph2=If you uploaded documents in response to a query from a case worker on this service, you should now {0}.
+fileUploadConfirmationPage.section2.paragraph2.linkText=reply to the message to tell customs authorities your documents are ready to check
+fileUploadConfirmationPage.finalButton.text=Back to start
+
 unauthorised.heading = To continue, you need to get access to the Customs Declaration Service (CDS)
 unauthorised.paragraph.1 = To use this service, you’ll need to:
 unauthorised.paragraph.1.bullet.1 = {0} if you do not have one

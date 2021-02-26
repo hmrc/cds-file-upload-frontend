@@ -48,7 +48,8 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
       "listitem1",
       "listitem2",
       "listitem3",
-      "listitem4"
+      "listitem4",
+      "listitem5"
     )
 
     "include the 'Sign out' link if the user is authorised" in {

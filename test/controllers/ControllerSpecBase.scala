@@ -17,8 +17,8 @@
 package controllers
 
 import java.net.URLEncoder
-
 import base.SpecBase
+import config.SecureMessagingConfig
 import controllers.actions.{ContactDetailsRequiredAction, DataRetrievalAction, FakeActions}
 import models.requests.SignedInUser
 import models.{ContactDetails, UserAnswers}
@@ -35,6 +35,13 @@ abstract class ControllerSpecBase extends SpecBase with FakeActions {
 
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
   val mockAnswersConnector: AnswersService = mock[AnswersService]
+  val secureMessageConfig: SecureMessagingConfig = mock[SecureMessagingConfig]
+
+  def withSecureMessagingEnabled(enabled: Boolean)(test: => Unit): Unit = {
+    when(secureMessageConfig.isSecureMessagingEnabled).thenReturn(enabled)
+
+    test
+  }
 
   def withSignedInUser(user: SignedInUser)(test: => Unit): Unit = {
     when(mockAuthConnector.authorise(any(), eqTo(allEnrolments))(any(), any()))
@@ -57,8 +64,10 @@ abstract class ControllerSpecBase extends SpecBase with FakeActions {
     test
   }
 
-  override protected def beforeEach(): Unit =
+  override protected def beforeEach(): Unit = {
     resetAnswersConnector()
+    reset(secureMessageConfig)
+  }
 
   def resetAnswersConnector() = {
     reset(mockAnswersConnector)

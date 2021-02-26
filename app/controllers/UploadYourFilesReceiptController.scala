@@ -17,18 +17,22 @@
 package controllers
 
 import com.google.inject.Singleton
+import config.SecureMessagingConfig
 import connectors.CdsFileUploadConnector
 import controllers.actions._
+
 import javax.inject.Inject
 import metrics.MetricIdentifiers._
 import metrics.SfusMetrics
-import models.FileUpload
+import models.{FileUpload, MRN}
+import models.requests.VerifiedEmailRequest
 import play.api.i18n.I18nSupport
 import play.api.mvc._
+import play.twirl.api.Html
 import services.AnswersService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import views.html.upload_your_files_receipt
+import views.html.{upload_your_files_confirmation, upload_your_files_receipt}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -39,21 +43,21 @@ class UploadYourFilesReceiptController @Inject()(
   cdsFileUploadConnector: CdsFileUploadConnector,
   metrics: SfusMetrics,
   uploadYourFilesReceipt: upload_your_files_receipt,
-  answersConnector: AnswersService
+  uploadYourFilesConfirmation: upload_your_files_confirmation,
+  answersService: AnswersService,
+  secureMessagingConfig: SecureMessagingConfig
 )(implicit mcc: MessagesControllerComponents, ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (authenticate andThen verifiedEmail).async { implicit req =>
-    answersConnector.findByEori(req.eori).flatMap { maybeUserAnswers =>
+    answersService.findByEori(req.eori).flatMap { maybeUserAnswers =>
+      answersService.removeByEori(req.eori)
+
       val result = for {
         userAnswers <- getOrRedirect(maybeUserAnswers, routes.StartController.displayStartPage())
         fileUploads <- getOrRedirect(userAnswers.fileUploadResponse, routes.ErrorPageController.error())
       } yield {
-        answersConnector.removeByEori(req.eori)
-
-        addFilenames(fileUploads.uploads).map { uploads =>
-          Ok(uploadYourFilesReceipt(uploads, userAnswers.mrn))
-        }
+        composeSuccessResult(fileUploads.uploads, userAnswers.mrn).map(Ok(_))
       }
 
       result match {
@@ -62,6 +66,17 @@ class UploadYourFilesReceiptController @Inject()(
       }
     }
   }
+
+  private def composeSuccessResult(
+    uploads: List[FileUpload],
+    maybeMrn: Option[MRN]
+  )(implicit hc: HeaderCarrier, req: VerifiedEmailRequest[AnyContent]): Future[Html] =
+    addFilenames(uploads).map { uploads =>
+      if (secureMessagingConfig.isSecureMessagingEnabled)
+        uploadYourFilesConfirmation(uploads, maybeMrn, req.email)
+      else
+        uploadYourFilesReceipt(uploads, maybeMrn)
+    }
 
   private def getOrRedirect[A](option: Option[A], errorAction: Call): Either[Future[Result], A] =
     option.fold[Either[Future[Result], A]](Left(Future.successful(Redirect(errorAction))))(Right(_))
