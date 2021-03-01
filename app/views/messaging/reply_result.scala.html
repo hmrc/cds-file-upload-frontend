@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package models
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import views.html.components.gds.gdsMainTemplate
+@import views.Title
+@import play.twirl.api.HtmlFormat
 
-trait SecureMessagePartial {
-  val body: String
+@this(govukLayout: gdsMainTemplate, govukAccordion : GovukAccordion, govukBackLink : GovukBackLink)
+
+@(partial: HtmlFormat.Appendable)(implicit request: Request[_], messages: Messages)
+
+@govukLayout(title = Title("replyResult.heading")) {
+  @partial
 }
-
-case class InboxPartial(body: String) extends SecureMessagePartial
-
-case class ConversationPartial(body: String) extends SecureMessagePartial
-
-case class ReplyResultPartial(body: String) extends SecureMessagePartial

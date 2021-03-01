@@ -23,7 +23,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import views.html.inbox_choice_page
+import views.html.messaging.inbox_choice
 
 @Singleton
 class InboxChoiceController @Inject()(
@@ -31,19 +31,19 @@ class InboxChoiceController @Inject()(
   authenticate: AuthAction,
   verifiedEmail: VerifiedEmailAction,
   secureMessagingFeatureAction: SecureMessagingFeatureAction,
-  inboxChoicePage: inbox_choice_page
+  inboxChoice: inbox_choice
 ) extends FrontendController(mcc) with I18nSupport {
 
   val actions = authenticate andThen verifiedEmail andThen secureMessagingFeatureAction
 
   val onPageLoad: Action[AnyContent] = actions { implicit request =>
-    Ok(inboxChoicePage(InboxChoiceForm.form))
+    Ok(inboxChoice(InboxChoiceForm.form))
   }
 
   val onSubmit: Action[AnyContent] = actions { implicit request =>
     InboxChoiceForm.form
       .bindFromRequest()
-      .fold(formWithErrors => BadRequest(inboxChoicePage(formWithErrors)), _.choice match {
+      .fold(formWithErrors => BadRequest(inboxChoice(formWithErrors)), _.choice match {
         case Values.ExportsMessages => Redirect(controllers.routes.SecureMessagingController.displayInbox)
         case Values.ImportsMessages => Redirect(controllers.routes.SecureMessagingController.displayInbox)
       })

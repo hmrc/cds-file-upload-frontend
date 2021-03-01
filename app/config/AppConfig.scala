@@ -113,9 +113,26 @@ case class Platform(frontend: Frontend)
 
 case class Frontend(host: Option[String])
 
-case class SecureMessaging(protocol: Option[String], host: String, port: Option[Int], fetchInbox: String, fetchMessage: String) {
+case class SecureMessaging(
+  protocol: Option[String],
+  host: String,
+  port: Option[Int],
+  fetchInbox: String,
+  fetchMessage: String,
+  replyResult: String,
+  submitReply: String
+) {
   lazy val fetchInboxEndpoint: String = s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$fetchInbox"
 
   def fetchMessageEndpoint(client: String, conversationId: String): String =
     s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$fetchMessage/$client/$conversationId"
+
+  lazy val replyResultSection2Replace = "CLIENT_ID/CONVERSATION_ID"
+
+  def replyResultEndpoint(client: String, conversationId: String): String =
+    s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$replyResult"
+      .replace(replyResultSection2Replace, s"$client/$conversationId")
+
+  def submitReplyEndpoint(client: String, conversationId: String): String =
+    s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$submitReply/$client/$conversationId"
 }

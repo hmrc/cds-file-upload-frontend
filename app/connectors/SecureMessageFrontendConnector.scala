@@ -16,20 +16,21 @@
 
 package connectors
 
-import com.google.inject.Inject
-import config.AppConfig
-import models.{ConversationPartial, InboxPartial}
-import play.api.Logging
-import play.api.http.Status
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
-
 import scala.concurrent.{ExecutionContext, Future}
 
-class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: AppConfig) extends Logging with Status {
+import com.google.inject.Inject
+import config.AppConfig
+import forms.ReplyToMessage
+import models.{ConversationPartial, InboxPartial, ReplyResultPartial}
+import play.api.Logging
+import play.api.http.Status
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 
-  def retrieveInboxPartial()(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[InboxPartial] =
+class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: AppConfig)(implicit ec: ExecutionContext) extends Logging with Status {
+
+  def retrieveInboxPartial()(implicit hc: HeaderCarrier): Future[InboxPartial] =
     //TODO: reinstate 'Future.failed' and remove fakeInboxResponse once secure-message service is stable
-    SecureMessageFrontendConnector.fakeInboxResponse
+    SecureMessageFrontendConnector.fakeInboxPartial
 
   /*httpClient
       .GET[HttpResponse](config.microservice.services.secureMessaging.fetchInboxEndpoint)
@@ -49,12 +50,9 @@ class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: A
           Future.failed(exc)
       }*/
 
-  def retrieveConversationPartial(
-    client: String,
-    conversationId: String
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[ConversationPartial] =
+  def retrieveConversationPartial(client: String, conversationId: String)(implicit hc: HeaderCarrier): Future[ConversationPartial] =
     //TODO: reinstate httpClient call and remove fakeInboxResponse once secure-message service is stable
-    SecureMessageFrontendConnector.fakeConversationResponse
+    SecureMessageFrontendConnector.fakeConversationPartial
 
   /*httpClient
       .GET[HttpResponse](config.microservice.services.secureMessaging.fetchMessageEndpoint(client, conversationId))
@@ -70,12 +68,47 @@ class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: A
           logger.warn(s"Received a ${exc.statusCode} response from secure-messaging-frontend service while retrieving a user's conversation with params '$client/$conversationId' . ${exc.message}")
           Future.failed(exc)
       }*/
+
+  def retrieveReplyResult(client: String, conversationId: String)(implicit hc: HeaderCarrier): Future[ReplyResultPartial] =
+    SecureMessageFrontendConnector.fakeReplyResultPartial
+  /*httpClient
+      .GET[HttpResponse](config.microservice.services.secureMessaging.replyResultEndpoint(client, conversationId))
+      .flatMap { response =>
+        response.status match {
+          case OK => Future.successful(ReplyPartial(response.body))
+          case statusCode =>
+            Future.failed(UpstreamErrorResponse("Unhappy response retrieving the Reply result a conversation!", statusCode))
+        }
+      }
+      .recoverWith {
+        case exc: UpstreamErrorResponse =>
+          logger.warn(s"Received a ${exc.statusCode} response from secure-messaging-frontend service while retrieving the result of '$client/$conversationId''s reply . ${exc.message}")
+          Future.failed(exc)
+      }*/
+
+  def submitReply(client: String, conversationId: String, reply: ReplyToMessage)(implicit hc: HeaderCarrier): Future[Unit] =
+    Future.successful(())
+  /*
+    httpClient
+      .doPost(
+        config.microservice.services.secureMessaging.submitReplyEndpoint(client, conversationId),
+        Json.obj("reply-to-message" -> reply.messageReply)
+      )
+      .map(_ => ())
+      .recoverWith {
+        case exc: UpstreamErrorResponse =>
+          logger.warn(s"Received a ${exc.statusCode} response from secure-messaging-frontend service while submitting a message reply for '$client/$conversationId'. ${exc.message}")
+          Future.failed(exc)
+      }
+ */
 }
 
 object SecureMessageFrontendConnector {
-  lazy val fakeInboxResponse: Future[InboxPartial] = Future.successful(InboxPartial(inboxPartial))
+  lazy val fakeInboxPartial: Future[InboxPartial] = Future.successful(InboxPartial(inboxPartial))
 
-  lazy val fakeConversationResponse: Future[ConversationPartial] = Future.successful(ConversationPartial(conversationPartial))
+  lazy val fakeConversationPartial: Future[ConversationPartial] = Future.successful(ConversationPartial(conversationPartial))
+
+  lazy val fakeReplyResultPartial: Future[ReplyResultPartial] = Future.successful(ReplyResultPartial(replyResultPartial))
 
   lazy val inboxPartial =
     """
@@ -151,19 +184,38 @@ object SecureMessageFrontendConnector {
      |
      |      <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
      |
-     |      <h2 class="govuk-heading-m !-margin-bottom-9">Reply to this message</h2>
-     |      <form class="form" action="single-message-answer" method="post" novalidate="">
-     |        <div class="govuk-form-group">
-     |          <label class="govuk-label" for="previous-message-reply">
-     |            Your message (optional)
-     |          </label>
+     |      <div class="form-group">
+     |        <h2 class="govuk-heading-m !-margin-bottom-9">Reply to this message</h2>
+     |        <form class="form" action="/cds-file-upload-service/conversation/cdcm/D-80542-20201122" method="POST">
+     |          <input type="hidden" name="csrfToken" value="[CSRF_TOKEN_TO_REPLACE]"/>
+     |          <div class="govuk-form-group">
+     |            <label class="govuk-label" for="messageReply">Your message (optional)</label>
      |
-     |          <textarea class="govuk-textarea" id="previous-message-reply" name="previous-message-reply-1" rows="10" aria-describedby="previous-message-reply-hint"></textarea>
-     |        </div>
-     |        <input type="hidden" name="dec-previousMessageReplies" value="1">
-     |        <input type="hidden" name="upload-mrn" value="20GB00004112345678001111">
+     |            <textarea class="govuk-textarea" id="messageReply" name="messageReply" rows="10"></textarea>
+     |          </div>
+     |          <input type="hidden" name="dec-previousMessageReplies" value="1">
+     |          <input type="hidden" name="upload-mrn" value="20GB00004112345678001111">
      |
-     |        <a href="/version39/messages/message-confirmation3" class="govuk-button">Reply</a>
-     |      </form>
+     |          <button id="submit" class="button">Reply</button>
+     |        </form>
+     |      </div>
      |""".stripMargin
+
+  lazy val replyResultPartial =
+    s"""<div class="govuk-panel govuk-panel--confirmation">
+       |  <h1 class="govuk-panel__title">Message sent</h1>
+       |
+       |  <div class="govuk-panel__body">
+       |    We have received your message and will reply within 2 hours
+       |  </div>
+       |</div>
+       |
+       |<p class="govuk-body">We have also sent you an email confirmation.</p>
+       |
+       |<h2 class="govuk-heading-m">What happens next</h2>
+       |<p class="govuk-body">You do not need to do anything now.</p>
+       |<p class="govuk-body govuk-!-margin-bottom-6">We will contact you if we need more information.</p>
+       |
+       |<a href="declaration-messages" class="govuk-button">Back to your messages</a>
+       |""".stripMargin
 }

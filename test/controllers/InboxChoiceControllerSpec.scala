@@ -28,11 +28,11 @@ import play.api.libs.json.Json
 import play.api.mvc.Request
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
-import views.html.inbox_choice_page
+import views.html.messaging.inbox_choice
 
 class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
 
-  private val inboxChoicePage = mock[inbox_choice_page]
+  private val inboxChoice = mock[inbox_choice]
   private val secureMessagingFeatureAction = new SecureMessagingFeatureActionMock()
 
   private val controller =
@@ -41,15 +41,15 @@ class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
       new FakeAuthAction(),
       new FakeVerifiedEmailAction(),
       secureMessagingFeatureAction,
-      inboxChoicePage
+      inboxChoice
     )
 
   override def beforeEach(): Unit = {
     super.beforeEach()
 
-    reset(inboxChoicePage)
+    reset(inboxChoice)
     secureMessagingFeatureAction.reset()
-    when(inboxChoicePage.apply(any[Form[InboxChoiceForm]])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
+    when(inboxChoice.apply(any[Form[InboxChoiceForm]])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
   }
 
   "InboxChoiceController on onPageLoad" when {
@@ -80,7 +80,7 @@ class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
 
         controller.onPageLoad()(fakeRequest).futureValue
 
-        verify(inboxChoicePage).apply(any[Form[InboxChoiceForm]])(any[Request[_]], any[Messages])
+        verify(inboxChoice).apply(any[Form[InboxChoiceForm]])(any[Request[_]], any[Messages])
       }
     }
   }
@@ -112,13 +112,13 @@ class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
           status(result) mustBe BAD_REQUEST
         }
 
-        "call inboxChoicePage passing a form with errors" in {
+        "call the inbox_choice page passing a form with errors" in {
           secureMessagingFeatureAction.enableSecureMessagingFeature()
 
           controller.onSubmit()(request).futureValue
 
           val expectedFormWithErrors = InboxChoiceForm.form.bind(Map(InboxChoiceKey -> "Incorrect Choice"))
-          verify(inboxChoicePage).apply(eqTo(expectedFormWithErrors))(any[Request[_]], any[Messages])
+          verify(inboxChoice).apply(eqTo(expectedFormWithErrors))(any[Request[_]], any[Messages])
         }
       }
 
@@ -134,13 +134,13 @@ class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
           status(result) mustBe BAD_REQUEST
         }
 
-        "call inboxChoicePage passing a form with errors" in {
+        "call the inbox_choice page passing a form with errors" in {
           secureMessagingFeatureAction.enableSecureMessagingFeature()
 
           controller.onSubmit()(request).futureValue
 
           val expectedFormWithErrors = InboxChoiceForm.form.bind(Map(InboxChoiceKey -> ""))
-          verify(inboxChoicePage).apply(eqTo(expectedFormWithErrors))(any[Request[_]], any[Messages])
+          verify(inboxChoice).apply(eqTo(expectedFormWithErrors))(any[Request[_]], any[Messages])
         }
       }
 

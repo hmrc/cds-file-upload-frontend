@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package models
+package forms
 
-trait SecureMessagePartial {
-  val body: String
+import play.api.data.Form
+import play.api.data.Forms.{mapping, nonEmptyText}
+
+case class ReplyToMessage(messageReply: String)
+
+object ReplyToMessage {
+
+  val form: Form[ReplyToMessage] = Form(mapping("messageReply" -> nonEmptyText)(ReplyToMessage.apply)(ReplyToMessage.unapply))
 }
-
-case class InboxPartial(body: String) extends SecureMessagePartial
-
-case class ConversationPartial(body: String) extends SecureMessagePartial
-
-case class ReplyResultPartial(body: String) extends SecureMessagePartial
