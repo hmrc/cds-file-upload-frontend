@@ -19,10 +19,18 @@
 @import views.Title
 @import play.twirl.api.HtmlFormat
 
-@this(govukLayout: gdsMainTemplate, govukAccordion : GovukAccordion, govukBackLink : GovukBackLink)
+@this(mainTemplate: gdsMainTemplate, govukAccordion : GovukAccordion, govukBackLink : GovukBackLink)
 
 @(partial: HtmlFormat.Appendable)(implicit request: Request[_], messages: Messages)
 
-@govukLayout(title = Title("inbox.heading")) {
-  @partial
+@mainTemplate(
+  title = Title("inbox.heading"),
+  useCustomContentWidth = true
+) {
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      @partial
+    </div>
+  </div>
 }
