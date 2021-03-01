@@ -52,6 +52,10 @@ class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers wi
       }
     }
 
+    "display navigation banner" in {
+      view must containElementWithID("navigation-banner")
+    }
+
     "display the file receipts table" in {
       forAll { (fileUploads: List[FileUpload], user: SignedInUser) =>
         val view = page(fileUploads, Some(mrn), email)(AuthenticatedRequest(fakeRequest, user), messages)

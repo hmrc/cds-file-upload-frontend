@@ -34,6 +34,10 @@ class ConversationWrapperSpec extends DomAssertions with ViewMatchers {
       view.getElementsByTag("title").first() must containMessage("conversation.heading")
     }
 
+    "display navigation banner" in {
+      view must containElementWithID("navigation-banner")
+    }
+
     "display partial contents" in {
       view must containText(partialContent)
     }

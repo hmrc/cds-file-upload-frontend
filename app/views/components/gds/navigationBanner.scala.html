@@ -15,19 +15,13 @@
  *@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import views.html.components.gds.gdsMainTemplate
-@import views.Title
-@import play.twirl.api.HtmlFormat
 
-@this(mainTemplate: gdsMainTemplate, govukAccordion : GovukAccordion, govukBackLink : GovukBackLink)
+@this(link: link)
 
-@(partial: HtmlFormat.Appendable)(implicit request: Request[_], messages: Messages)
+@()(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(
- title = Title("conversation.heading"),
- withNavigationBanner = true
-) {
- <div class="govuk-grid-column-full">
-  @partial
- </div>
-}
+<div id="navigation-banner" class="govuk-!-padding-bottom-3 govuk-!-padding-top-3">
+  @link(text = messages("common.navigation.messages"), call = controllers.routes.InboxChoiceController.onPageLoad, classes="govuk-link govuk-link--no-visited-state right-margin--30")
+  @link(text = messages("common.navigation.uploadFiles"), call = controllers.routes.MrnEntryController.onPageLoad)
+</div>
+<hr class="govuk-section-break govuk-section-break--visible">

@@ -6,6 +6,9 @@ common.continue=Continue
 common.feedback=This is a new service - your {0} will help us to improve it.
 common.feedback.link=feedback
 
+common.navigation.messages = Messages
+common.navigation.uploadFiles = Upload files
+
 ## errors
 error.browser.heading.prefix=Error:
 error.summary.title=There is a problem
