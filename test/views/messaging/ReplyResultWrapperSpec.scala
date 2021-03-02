@@ -19,14 +19,14 @@ package views.messaging
 import org.jsoup.nodes.Document
 import play.twirl.api.HtmlFormat
 import views.DomAssertions
-import views.html.messaging.reply_result
+import views.html.messaging.reply_result_wrapper
 import views.matchers.ViewMatchers
 
-class ReplyResultSpec extends DomAssertions with ViewMatchers {
+class ReplyResultWrapperSpec extends DomAssertions with ViewMatchers {
 
-  private val partialWrapperPage = instanceOf[reply_result]
+  private val page = instanceOf[reply_result_wrapper]
   private val partialContent = "Partial Content"
-  private val view: Document = partialWrapperPage(HtmlFormat.raw(partialContent))(fakeRequest, messages)
+  private val view: Document = page(HtmlFormat.raw(partialContent))(fakeRequest, messages)
 
   "The Reply Result page" should {
 

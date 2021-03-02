@@ -29,7 +29,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
 import play.filters.csrf.CSRF
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import views.html.messaging.{conversation_wrapper, inbox_wrapper, reply_result}
+import views.html.messaging.{conversation_wrapper, inbox_wrapper, reply_result_wrapper}
 
 class SecureMessagingController @Inject()(
   authenticate: AuthAction,
@@ -39,7 +39,7 @@ class SecureMessagingController @Inject()(
   mcc: MessagesControllerComponents,
   inbox_wrapper: inbox_wrapper,
   conversation_wrapper: conversation_wrapper,
-  reply_result: reply_result
+  reply_result_wrapper: reply_result_wrapper
 )(implicit ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
@@ -62,7 +62,7 @@ class SecureMessagingController @Inject()(
   def displayReplyResult(client: String, conversationId: String): Action[AnyContent] = actions.async { implicit request =>
     messageConnector
       .retrieveReplyResult(client, conversationId)
-      .map(partial => Ok(reply_result(HtmlFormat.raw(partial.body))))
+      .map(partial => Ok(reply_result_wrapper(HtmlFormat.raw(partial.body))))
   }
 
   def submitReply(client: String, conversationId: String): Action[AnyContent] = actions.async { implicit request =>
