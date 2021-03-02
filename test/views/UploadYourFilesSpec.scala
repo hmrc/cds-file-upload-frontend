@@ -27,10 +27,10 @@ import views.html.upload_your_files
 class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCheckPropertyChecks with Generators {
 
   val page = instanceOf[upload_your_files]
-
+  val mrn: MRN = arbitraryMrn.arbitrary.sample.get
   val uploadRequest = UploadRequest("", Map.empty)
 
-  def view(pos: Position): Html = page(uploadRequest, pos)(fakeRequest, messages, fakeRequest.flash)
+  def view(pos: Position): Html = page(uploadRequest, pos, mrn)(fakeRequest, messages, fakeRequest.flash)
 
   val view: () => Html = () => view(First(3))
 
@@ -43,7 +43,7 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCh
     "include the 'Sign out' link if the user is authorised" in {
       forAll { user: SignedInUser =>
         val request = AuthenticatedRequest(fakeRequest, user)
-        val view = page(uploadRequest, First(3))(request, messages, request.flash)
+        val view = page(uploadRequest, First(3), mrn)(request, messages, request.flash)
         assertSignoutLinkIsIncluded(view)
       }
     }

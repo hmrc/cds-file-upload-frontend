@@ -1,0 +1,88 @@
+/*
+====================================
+CSS to support GovUK Accessible autocomplete Dropdown
+Context: The component is not 100% compatible with GDS design system, more
+specifically the z-index where we need to make sure the 'govuk-template__body'
+needs to be behind the dropdown arrow.
+====================================
+*/
+.govuk-template__body {
+  margin: 0;
+  background-color: #fff;
+  position: relative;
+  z-index: 0;
+}
+
+/*
+====================================
+CSS to support GDS Design System Ordered lists inside table cells
+Context: Each item may have multiple packages and so we need to render
+a list within the table cell.
+====================================
+*/
+.govuk-table__cell ol {
+  list-style-type: none;
+}
+
+
+/*
+====================================
+In same pages we wrap all the input fields inside a fieldset, this means that the bottom margin of the H1 is not applied
+to these pages. This is to ensure the margin-bottom stays consistent across pages.
+====================================
+*/
+.govuk-fieldset__legend {
+  margin-bottom: 30px;
+}
+
+/*
+====================================
+CSS to support print media.  Hides all links (including sign-out link on the header), removes the footer section
+from the view and the page (url/page number, etc.)
+====================================
+*/
+@media print {
+  @page { margin: 10px }
+  .govuk-section-break { page-break-inside : avoid }
+  .govuk-link { display: none; }
+  footer { display: none; }
+  @-moz-document url-prefix() {
+    .govuk-summary-list__key { width: 40%; }
+  }
+}
+
+/*
+====================================
+CSS to support moving back-link into the main-content block (for keyboard navigation)
+Removes the padding at the top of the standard govuk-main-wrapper and creates a new
+govuk-back-link-div class to add that space below (or instead of) the back-link
+====================================
+*/
+.govuk-main-wrapper {
+  padding-top: 0px;
+}
+.govuk-back-link-div {
+  margin-bottom: 40px;
+}
+
+
+/*
+====================================
+CSS to support browser font sizes for auto-complete component
+====================================
+*/
+.autocomplete__hint,
+.autocomplete__input,
+.autocomplete__option {
+  font-size: 1.1875rem;
+  line-height: 1.31579;
+}
+
+/*
+====================================
+CSS to improve behaviour of table cells with large non-breaking content
+====================================
+*/
+.govuk-table__cell_break-all {
+  word-break: break-all;
+}

@@ -14,26 +14,37 @@
  * limitations under the License.
  *@
 
-@import views.helpers.Utils.bold
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import views.html.components.gds._
+@import views.Title
 
-@this(mainTemplate: main_template)
+@this(
+        mainTemplate: gdsMainTemplate,
+        errorSummary: errorSummary,
+        formHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+        govukButton: GovukButton,
+        pageTitle: pageTitle,
+        paragraphBody: paragraphBody
+)
 
 @()(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = messages("startPage.heading")) {
+@mainTemplate(title = Title("startPage.heading")) {
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+        <div class="govuk-form-group">
+            @pageTitle(text = messages("startPage.heading"))
 
-    <div class="form-group">
-        <h1 class="heading-xlarge">@messages("startPage.heading")</h1>
+            @paragraphBody(messages("startPage.paragraph2"))
+            @paragraphBody(messages("startPage.paragraph3", <strong>{messages("startPage.paragraph3.bold")}</strong>))
+            @paragraphBody(messages("startPage.paragraph4", <strong>{messages("startPage.paragraph4.bold")}</strong>))
 
-        <p>@messages("startPage.paragraph2")</p>
-        <p>@Html(messages("startPage.paragraph3", bold(messages("startPage.paragraph3.bold"))))</p>
-        <p>@Html(messages("startPage.paragraph4", bold(messages("startPage.paragraph4.bold"))))</p>
+            @formHelper(action = routes.StartController.onStart(), 'autoComplete -> "off") {
+                @helper.CSRF.formField
 
-
-        @helper.form(action = routes.StartController.onStart()) {
-            @helper.CSRF.formField
-
-            @components.submit_button("common.button.startNow")
-        }
+                @govukButton(Button(content = Text(messages("common.button.startNow")), attributes = Map("id" -> "submit", "name" -> "continue")))
+            }
+        </div>
     </div>
+</div>
 }

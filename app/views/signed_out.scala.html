@@ -14,10 +14,10 @@
  * limitations under the License.
  *@
 
-@import config.AppConfig
 @import views.Title
-@import views.html.components.{feedback_section, link_button}
+@import views.html.components.feedback_section
 @import views.html.components.gds._
+
 
 @this(
     gdsMainTemplate: gdsMainTemplate,
@@ -35,12 +35,11 @@
 
     @pageTitle(messages("signedOut.heading"))
 
-    <p class="govuk-body">
-        @Html(messages("signedOut.information", startPageLink))
-    </p>
+    @paragraphBody(messages("signedOut.information", startPageLink))
 
     @feedbackSection()
 
+    @paragraphBody(messages("signedOut.information", startPageLink))
     <p class="govuk-body govuk-!-margin-top-9">
         @link(id = Some("govuk-link"), text = messages("signedOut.backToGovUk"), call = Call("GET", "https://www.gov.uk/"))
     </p>

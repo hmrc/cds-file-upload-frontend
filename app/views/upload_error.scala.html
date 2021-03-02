@@ -15,33 +15,41 @@
  *@
 
 @import views.html.components._
+@import views.html.components.gds._
+@import views.Title
 
 @this(
-  mainTemplate: main_template,
-  linkButton: link_button
+    mainTemplate: gdsMainTemplate,
+    linkButton: link_button,
+    paragraphBody: paragraphBody,
+    pageTitle: pageTitle
 )
 
 @()(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = messages("uploadError.heading")) {
+@mainTemplate(title = Title("uploadError.heading")) {
 
-  <h1 class="heading-xlarge">@messages("uploadError.heading")</h1>
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+        <div class="govuk-form-group">
+            @pageTitle(text = messages("uploadError.heading"))
 
-  <p>@messages("uploadError.paragraph")</p>
+            @paragraphBody(messages("uploadError.paragraph"))
 
-  <nav>
-    <ul class="list list-bullet">
-      <li>@messages("uploadError.bullet.1")</li>
-      <li>@messages("uploadError.bullet.2")</li>
-      <li>@messages("uploadError.bullet.3")</li>
-    </ul>
-  </nav>
+            <ul class="list list-bullet">
+                <li class="govuk-body">@messages("uploadError.bullet.1")</li>
+                <li class="govuk-body">@messages("uploadError.bullet.2")</li>
+                <li class="govuk-body">@messages("uploadError.bullet.3")</li>
+            </ul>
+            </br>
 
-  @linkButton(
-    messageKey = "uploadError.button",
-    call = controllers.routes.StartController.displayStartPage()
-  )
+            @linkButton(
+                messageKey = "uploadError.button",
+                call = controllers.routes.StartController.displayStartPage()
+            )
 
-  <p>@messages("uploadError.guidance")</p>
-
+            @paragraphBody(messages("uploadError.guidance"))
+        </div>
+    </div>
+</div>
 }

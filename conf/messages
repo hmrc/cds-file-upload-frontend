@@ -8,7 +8,7 @@ common.feedback.link=feedback
 
 ## errors
 error.browser.heading.prefix=Error:
-error.summary.heading=There is a problem
+error.summary.title=There is a problem
 error.required = Please enter a value.
 
 ## common buttons with shared labels
@@ -63,8 +63,7 @@ conversation.heading = View conversation
 ## MRN Entry Page
 
 mrnEntryPage.heading=What is your movement reference number (MRN)?
-mrnEntryPage.hint1=This is 18 digits long, and is made up of letters and numbers.
-mrnEntryPage.hint2=You were given this when you submitted your declaration.
+mrnEntryPage.hint=This is 18 digits long, and is made up of letters and numbers.</br> You were given this when you submitted your declaration.
 mrn.invalid=The MRN you have entered doesn't follow CDS rules, please check your declaration MRN and re-enter
 
 ## MRN access denied page

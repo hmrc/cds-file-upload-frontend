@@ -36,7 +36,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
   val emailRegex = """^[a-zA-Z0-9\.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-.]+$"""
   val mrn: MRN = arbitraryMrn.arbitrary.sample.get
 
-  def view(form: Form[ContactDetails] = form): String = page(form)(fakeRequest, messages).toString
+  def view(form: Form[ContactDetails] = form): String = page(form, mrn)(fakeRequest, messages).toString
 
   def controller(signedInUser: SignedInUser, eori: String, dataRetrieval: DataRetrievalAction = new FakeDataRetrievalAction(None)) =
     new ContactDetailsController(
@@ -52,7 +52,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
   override protected def beforeEach(): Unit = {
     super.beforeEach
 
-    when(page.apply(any())(any(), any())).thenReturn(HtmlFormat.empty)
+    when(page.apply(any(), any())(any(), any())).thenReturn(HtmlFormat.empty)
   }
 
   override protected def afterEach(): Unit = {

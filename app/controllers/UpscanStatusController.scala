@@ -18,7 +18,8 @@ package controllers
 
 import config.AppConfig
 import connectors.CdsFileUploadConnector
-import controllers.actions.{AuthAction, DataRetrievalAction, FileUploadResponseRequiredAction, VerifiedEmailAction}
+import controllers.actions.{AuthAction, DataRetrievalAction, FileUploadResponseRequiredAction, MrnRequiredAction, VerifiedEmailAction}
+
 import javax.inject.Inject
 import metrics.MetricIdentifiers.fetchNotificationMetric
 import metrics.SfusMetrics
@@ -40,6 +41,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class UpscanStatusController @Inject()(
   authenticate: AuthAction,
   getData: DataRetrievalAction,
+  requireMrn: MrnRequiredAction,
   verifiedEmail: VerifiedEmailAction,
   requireResponse: FileUploadResponseRequiredAction,
   answersConnector: AnswersService,
@@ -61,14 +63,14 @@ class UpscanStatusController @Inject()(
   private val notificationsRetryPause = appConfig.notifications.retryPauseMillis
 
   def onPageLoad(ref: String): Action[AnyContent] =
-    (authenticate andThen verifiedEmail andThen getData andThen requireResponse).async { implicit req =>
+    (authenticate andThen verifiedEmail andThen getData andThen requireMrn andThen requireResponse).async { implicit req =>
       val references = req.fileUploadResponse.uploads.map(_.reference)
       val refPosition = getPosition(ref, references)
 
       req.fileUploadResponse.uploads.find(_.reference == ref) match {
         case Some(upload) =>
           upload.state match {
-            case Waiting(ur) => Future.successful(Ok(uploadYourFiles(ur, refPosition)))
+            case Waiting(ur) => Future.successful(Ok(uploadYourFiles(ur, refPosition, req.request.mrn)))
             case _           => nextPage(upload.reference, req.fileUploadResponse.uploads)
           }
 
@@ -82,7 +84,7 @@ class UpscanStatusController @Inject()(
   }
 
   def success(id: String): Action[AnyContent] =
-    (authenticate andThen verifiedEmail andThen getData andThen requireResponse).async { implicit req =>
+    (authenticate andThen verifiedEmail andThen getData andThen requireMrn andThen requireResponse).async { implicit req =>
       val uploads = req.fileUploadResponse.uploads
       uploads.find(_.id == id) match {
         case Some(upload) =>

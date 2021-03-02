@@ -52,18 +52,13 @@ trait StringViewBehaviours[A] extends QuestionViewBehaviours[A] {
 
         "show an error summary" in {
           val doc = asDocument(createView(form.withError(error)))
-          assertRenderedById(doc, "error-summary-heading")
+          assertRenderedByClass(doc, "govuk-error-summary")
         }
 
         "show an error in the value field's label" in {
           val doc = asDocument(createView(form.withError(FormError(fieldName, errorMessage))))
-          val errorSpan = doc.getElementsByClass("error-message").first
-          errorSpan.text mustBe messages(errorMessage)
-        }
-
-        "show an error prefix in the browser title" in {
-          val doc = asDocument(createView(form.withError(error)))
-          assertContainsValue(doc, "title", messages("error.browser.heading.prefix"))
+          val errorSpan = doc.getElementsByClass("govuk-error-message").first
+          errorSpan.text mustBe s"Error: ${messages(errorMessage)}"
         }
       }
     }

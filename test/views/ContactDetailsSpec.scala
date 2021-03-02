@@ -18,25 +18,26 @@ package views
 
 import forms.mappings.ContactDetailsMapping._
 import generators.Generators
-import models.ContactDetails
+import models.{ContactDetails, MRN}
 import models.requests.{AuthenticatedRequest, SignedInUser}
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.data.Form
 import play.twirl.api.Html
 import utils.FakeRequestCSRFSupport._
 import views.behaviours.ViewBehaviours
-import views.html.components.input_text
+import views.html.components.gds.exportsInputText
 import views.html.contact_details
 
 class ContactDetailsSpec extends DomAssertions with ViewBehaviours with ScalaCheckPropertyChecks with Generators {
 
   val form: Form[ContactDetails] = Form(contactDetailsMapping)
-
+  val mrn: MRN = arbitraryMrn.arbitrary.sample.get
   val page: contact_details = instanceOf[contact_details]
+  val exportsInputText = instanceOf[exportsInputText]
 
-  val simpleView: () => Html = () => page(form)(fakeRequest.withCSRFToken, messages)
+  val simpleView: () => Html = () => page(form, mrn)(fakeRequest.withCSRFToken, messages)
 
-  def view(form: Form[ContactDetails] = form): String = page(form)(fakeRequest.withCSRFToken, messages).toString()
+  def view(form: Form[ContactDetails] = form): String = page(form, mrn)(fakeRequest.withCSRFToken, messages).toString()
 
   val messagePrefix = "contactDetails"
 
@@ -48,7 +49,7 @@ class ContactDetailsSpec extends DomAssertions with ViewBehaviours with ScalaChe
 
     "include the 'Sign out' link if the user is authorised" in {
       forAll { user: SignedInUser =>
-        val view = page(form)(AuthenticatedRequest(fakeRequest.withCSRFToken, user), messages)
+        val view = page(form, mrn)(AuthenticatedRequest(fakeRequest.withCSRFToken, user), messages)
         assertSignoutLinkIsIncluded(view)
       }
     }
@@ -57,9 +58,9 @@ class ContactDetailsSpec extends DomAssertions with ViewBehaviours with ScalaChe
 
       forAll { contactDetails: ContactDetails =>
         val popForm = form.fillAndValidate(contactDetails)
-        val input = input_text(popForm("name"), getMessage("name")).toString()
+        val input = exportsInputText(field = popForm("name"), labelKey = "contactDetails.name", labelClasses = "govuk-label")
 
-        view(popForm) must include(input)
+        view(popForm) must include(input.toString())
       }
     }
 
@@ -67,9 +68,9 @@ class ContactDetailsSpec extends DomAssertions with ViewBehaviours with ScalaChe
 
       forAll { contactDetails: ContactDetails =>
         val popForm = form.fillAndValidate(contactDetails)
-        val input = input_text(popForm("companyName"), getMessage("companyName")).toString()
+        val input = exportsInputText(field = popForm("companyName"), labelKey = "contactDetails.companyName", labelClasses = "govuk-label")
 
-        view(popForm) must include(input)
+        view(popForm) must include(input.toString())
       }
     }
 
@@ -77,9 +78,9 @@ class ContactDetailsSpec extends DomAssertions with ViewBehaviours with ScalaChe
 
       forAll { contactDetails: ContactDetails =>
         val popForm = form.fillAndValidate(contactDetails)
-        val input = input_text(popForm("phoneNumber"), getMessage("phoneNumber")).toString()
+        val input = exportsInputText(field = popForm("phoneNumber"), labelKey = "contactDetails.phoneNumber", labelClasses = "govuk-label")
 
-        view(popForm) must include(input)
+        view(popForm) must include(input.toString())
       }
     }
 
@@ -87,9 +88,9 @@ class ContactDetailsSpec extends DomAssertions with ViewBehaviours with ScalaChe
 
       forAll { contactDetails: ContactDetails =>
         val popForm = form.fillAndValidate(contactDetails)
-        val input = input_text(popForm("email"), getMessage("email")).toString()
+        val input = exportsInputText(field = popForm("email"), labelKey = "contactDetails.email", labelClasses = "govuk-label")
 
-        view(popForm) must include(input)
+        view(popForm) must include(input.toString())
       }
     }
   }

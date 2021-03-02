@@ -18,23 +18,23 @@ package controllers.actions
 
 import javax.inject.Inject
 import controllers.routes
-import models.requests.{DataRequest, FileUploadResponseRequest}
+import models.requests.{DataRequest, FileUploadResponseRequest, MrnRequest}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Result}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class FileUploadResponseRequiredAction @Inject()(implicit mcc: MessagesControllerComponents)
-    extends ActionRefiner[DataRequest, FileUploadResponseRequest] {
+    extends ActionRefiner[MrnRequest, FileUploadResponseRequest] {
 
   implicit override val executionContext: ExecutionContext = mcc.executionContext
   private lazy val onError = Redirect(routes.ErrorPageController.error())
 
-  override protected def refine[A](request: DataRequest[A]): Future[Either[Result, FileUploadResponseRequest[A]]] = {
+  override protected def refine[A](request: MrnRequest[A]): Future[Either[Result, FileUploadResponseRequest[A]]] = {
 
     val req = for {
       response <- request.userAnswers.fileUploadResponse
-    } yield FileUploadResponseRequest(request.request, request.userAnswers, response)
+    } yield FileUploadResponseRequest(request, request.userAnswers, response)
 
     Future.successful(req.toRight(onError))
   }

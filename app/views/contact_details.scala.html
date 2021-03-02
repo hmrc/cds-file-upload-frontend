@@ -14,28 +14,66 @@
  * limitations under the License.
  *@
 
-@import views.helpers.Utils._
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import views.html.components.gds._
+@import views.Title
 
-@this(mainTemplate: main_template)
+@this(
+        mainTemplate: gdsMainTemplate,
+        errorSummary: errorSummary,
+        formHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+        exportsInputText: exportsInputText,
+        govukButton: GovukButton,
+        pageTitle: pageTitle,
+        paragraphBody: paragraphBody
+)
 
-@(form: Form[ContactDetails])(implicit request: Request[_], messages: Messages)
+@(form: Form[ContactDetails], mrn: MRN)(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = s"${errorPrefix(form)} ${messages("contactDetails.heading")}") {
+@mainTemplate(title = Title("contactDetails.heading")) {
 
-    <div class="form-group">
-        <h1 class="heading-large">@messages("contactDetails.heading")</h1>
-        <p>@messages("contactDetails.paragraph1")</p>
-        @components.error_summary(form.errors)
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+            <div class="govuk-form-group">
 
-        @helper.form(action = routes.ContactDetailsController.onSubmit()) {
-            @helper.CSRF.formField
+            @formHelper(action = routes.ContactDetailsController.onSubmit(), 'autoComplete -> "off") {
 
-            @components.input_text(form("name"), messages("contactDetails.name"))
-            @components.input_text(form("companyName"), messages("contactDetails.companyName"))
-            @components.input_text(form("phoneNumber"), messages("contactDetails.phoneNumber"))
-            @components.input_text(form("email"), messages("contactDetails.email"))
+                @errorSummary(form.errors)
 
-            @components.submit_button()
-        }
+                <span class="govuk-caption-l">@{mrn.value}</span>
+                @pageTitle(text = messages("contactDetails.heading"))
+
+                @paragraphBody(messages("contactDetails.paragraph1"))
+
+                @exportsInputText(
+                    field = form("name"),
+                    labelKey = "contactDetails.name",
+                    labelClasses = "govuk-label",
+                )
+
+                @exportsInputText(
+                    field = form("companyName"),
+                    labelKey = "contactDetails.companyName",
+                    labelClasses = "govuk-label",
+                )
+
+                @exportsInputText(
+                    field = form("phoneNumber"),
+                    labelKey = "contactDetails.phoneNumber",
+                    labelClasses = "govuk-label",
+                )
+
+                @exportsInputText(
+                    field = form("email"),
+                    labelKey = "contactDetails.email",
+                    labelClasses = "govuk-label",
+                )
+
+                </br>
+
+                @govukButton(Button(content = Text(messages("common.continue")), attributes = Map("id" -> "submit", "name" -> "continue")))
+            }
+            </div>
+        </div>
     </div>
 }

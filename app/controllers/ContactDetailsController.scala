@@ -45,14 +45,14 @@ class ContactDetailsController @Inject()(
 
   def onPageLoad: Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData andThen requireMrn) { implicit req =>
     val populatedForm = req.userAnswers.contactDetails.fold(form)(form.fill)
-    Ok(contactDetails(populatedForm))
+    Ok(contactDetails(populatedForm, req.mrn))
   }
 
   def onSubmit: Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData andThen requireMrn).async { implicit req =>
     form
       .bindFromRequest()
       .fold(
-        errorForm => Future.successful(BadRequest(contactDetails(errorForm))),
+        errorForm => Future.successful(BadRequest(contactDetails(errorForm, req.mrn))),
         contactDetails => {
           answersConnector.upsert(req.userAnswers.copy(contactDetails = Some(contactDetails))).map { _ =>
             Redirect(routes.HowManyFilesUploadController.onPageLoad())
