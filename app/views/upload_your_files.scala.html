@@ -16,11 +16,22 @@
 
 @import config.AppConfig
 @import uk.gov.hmrc.play.views.html.helpers.ErrorInline
-@import views.helpers.Utils._
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import views.html.components.gds._
+@import views.Title
 
-@this(mainTemplate: main_template, errorInline: ErrorInline, appConfig: AppConfig)
+@this(
+        mainTemplate: gdsMainTemplate,
+        formHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+        exportsInputText: exportsInputText,
+        govukButton: GovukButton,
+        pageTitle: pageTitle,
+        errorInline: ErrorInline,
+        paragraphBody: paragraphBody,
+        appConfig: AppConfig
+)
 
-@(uploadRequest: UploadRequest, refPosition: Position)(implicit request: Request[_], messages: Messages, flash: Flash)
+@(uploadRequest: UploadRequest, refPosition: Position, mrn: MRN)(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @positionModifier = @{
     refPosition match {
@@ -30,63 +41,67 @@
     }
 }
 
-@mainTemplate(title = messages(s"fileUploadPage.heading.$positionModifier")) {
+@mainTemplate(title = Title(s"fileUploadPage.heading.$positionModifier")) {
 
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+        <div class="govuk-form-group">
 
-    <h1 class="heading-large">
-        @messages(s"fileUploadPage.heading.$positionModifier")
-    </h1>
+            <span class="govuk-caption-l">@{mrn.value}</span>
+            @pageTitle(text = messages(s"fileUploadPage.heading.$positionModifier"))
 
-            <p>@messages("fileUploadPage.paragraph1")</p>
-            <p>@messages("fileUploadPage.p.fileNeedsToBeSize", appConfig.fileFormats.maxFileSizeMb)</p>
-            <p>@messages("fileUploadPage.p.fileNeedsToBe")</p>
+            @paragraphBody(messages("fileUploadPage.paragraph1"))
+            @paragraphBody(messages("fileUploadPage.p.fileNeedsToBeSize", appConfig.fileFormats.maxFileSizeMb))
+            @paragraphBody(messages("fileUploadPage.p.fileNeedsToBe"))
 
             <ul class="list list-bullet">
-                <li>@messages("fileUploadPage.listItem1")</li>
-                <li>@messages("fileUploadPage.listItem2")</li>
-                <li>@messages("fileUploadPage.listItem3")</li>
-                <li>@messages("fileUploadPage.listItem4")</li>
+                <li class="govuk-body">@messages("fileUploadPage.listItem1")</li>
+                <li class="govuk-body">@messages("fileUploadPage.listItem2")</li>
+                <li class="govuk-body">@messages("fileUploadPage.listItem3")</li>
+                <li class="govuk-body">@messages("fileUploadPage.listItem4")</li>
             </ul>
 
-    @{
-        Some(refPosition).collect {
-            case Middle(index, total) => messages("fileUploadPage.filesUploaded", index - 1, total)
-            case Last(total) => messages("fileUploadPage.filesUploaded", total - 1, total)
-        }.map(msg => paragraph(bold(msg)))
-    }
+            @{
+                Some(refPosition).collect {
+                    case Middle(index, total) => messages("fileUploadPage.filesUploaded", index - 1, total)
+                    case Last(total) => messages("fileUploadPage.filesUploaded", total - 1, total)
+                }.map(msg => <p class="govuk-body"><strong>{msg}</strong></p>)
+            }
 
+            <form action="@uploadRequest.href" method="POST" enctype="multipart/form-data" class="js-form">
+                <div class="form-group">
+                    @uploadRequest.fields.map { case (key, value) =>
+                        <input type="hidden" name="@key" value="@value"/>
+                    }
 
+                    <div class="form-field-group">
 
-    <form action="@uploadRequest.href" method="POST" enctype="multipart/form-data" class="js-form">
-        <div class="form-group">
-            @uploadRequest.fields.map { case (key, value) =>
-            <input type="hidden" name="@key" value="@value"/>
-    }
+                    @errorInline(
+                    errorKey = "upload-file",
+                    errorMessage = "",
+                    classes = List("error-message")
+                    )
 
-        <div class="form-field-group">
-            @errorInline(
-            errorKey = "upload-file",
-            errorMessage = "",
-            classes = List("error-message")
-            )
+                        <label class="govuk-label" for="upload-file">Upload a file</label>
+                        <input
+                            id="upload-file"
+                            type="file"
+                            name="file"
+                            required
+                            file-extensions="@appConfig.fileFormats.approvedFileExtensions"
+                            filesize="@appConfig.fileFormats.maxFileSizeMb"
+                            accept="@appConfig.fileFormats.approvedFileTypes"
+                            data-msg-required="@messages("fileUploadPage.validation.required")"
+                            data-msg-filesize="@messages("fileUploadPage.validation.filesize")"
+                            data-msg-accept="@messages("fileUploadPage.validation.accept")"/>
+                    </div>
 
-    <label class="form-label" for="upload-file">Upload a file</label>
-            <input
-            id="upload-file"
-            type="file"
-            name="file"
-            required
-            file-extensions="@appConfig.fileFormats.approvedFileExtensions"
-            filesize="@appConfig.fileFormats.maxFileSizeMb"
-            accept="@appConfig.fileFormats.approvedFileTypes"
-            data-msg-required="@messages("fileUploadPage.validation.required")"
-    data-msg-filesize="@messages("fileUploadPage.validation.filesize")"
-    data-msg-accept="@messages("fileUploadPage.validation.accept")"
-  />
+                    </br>
+
+                    @govukButton(Button(content = Text(messages("fileUploadPage.button")), attributes = Map("id" -> "submit", "name" -> "continue")))
+                </div>
+            </form>
         </div>
-    <button id="submit" class="button">@messages("fileUploadPage.button")</button>
-
     </div>
-    </form>
-
+</div>
 }

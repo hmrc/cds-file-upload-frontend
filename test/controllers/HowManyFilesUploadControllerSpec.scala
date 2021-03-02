@@ -92,7 +92,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
     reset(mockCustomsDeclarationsService, mockUpscanConnector, page)
 
     when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(FileUploadResponse(List())))
-    when(page(any[Form[FileUploadCount]])(any(), any())).thenReturn(HtmlFormat.empty)
+    when(page(any[Form[FileUploadCount]], any())(any(), any())).thenReturn(HtmlFormat.empty)
   }
 
   override protected def afterEach(): Unit = {
@@ -108,7 +108,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       val result = controller().onPageLoad(fakeRequest.withCSRFToken)
 
       status(result) mustBe OK
-      verify(page).apply(any[Form[FileUploadCount]])(any(), any())
+      verify(page).apply(any[Form[FileUploadCount]], any())(any(), any())
 
     }
 
@@ -118,7 +118,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       controller(updatedAction).onPageLoad(fakeRequest.withCSRFToken).futureValue
 
       val expectedForm = (new FileUploadCountProvider)().fill(fileUploadCount.get)
-      verify(page).apply(eqTo(expectedForm))(any(), any())
+      verify(page).apply(eqTo(expectedForm), any())(any(), any())
     }
 
     "redirect to error page when no data is found in the cache on page load" in {

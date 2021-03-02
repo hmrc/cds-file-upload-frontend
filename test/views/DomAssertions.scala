@@ -78,6 +78,9 @@ trait DomAssertions extends SpecBase {
   def assertRenderedById(doc: Document, id: String) =
     assert(doc.getElementById(id) != null, "\n\nElement " + id + " was not rendered on the page.\n")
 
+  def assertRenderedByClass(doc: Document, cssClass: String) =
+    assert(doc.getElementsByClass(cssClass) != null, "\n\nElement " + cssClass + " was not rendered on the page.\n")
+
   def assertNotRenderedById(doc: Document, id: String) =
     assert(doc.getElementById(id) == null, "\n\nElement " + id + " was rendered on the page.\n")
 

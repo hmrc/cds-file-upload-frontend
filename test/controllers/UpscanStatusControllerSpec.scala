@@ -66,6 +66,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
     new UpscanStatusController(
       new FakeAuthAction(signedInUser),
       getData,
+      new FakeMrnRequiredAction(),
       new FakeVerifiedEmailAction(),
       new FileUploadResponseRequiredAction(),
       mockAnswersConnector,
@@ -81,7 +82,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
   override protected def beforeEach(): Unit = {
     super.beforeEach()
 
-    when(uploadYourFiles.apply(any(), any())(any(), any(), any())).thenReturn(HtmlFormat.empty)
+    when(uploadYourFiles.apply(any(), any(), any())(any(), any(), any())).thenReturn(HtmlFormat.empty)
     when(uploadError.apply()(any(), any())).thenReturn(HtmlFormat.empty)
   }
 

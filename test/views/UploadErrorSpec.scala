@@ -42,7 +42,7 @@ class UploadErrorSpec extends ViewBehaviours with ViewMatchers {
     }
 
     "have a paragraph" in {
-      val paragraph = asDocument(view()).getElementsByTag("p").get(2)
+      val paragraph = asDocument(view()).getElementsByTag("p").get(1)
 
       paragraph must containMessage("uploadError.paragraph")
     }
@@ -63,7 +63,7 @@ class UploadErrorSpec extends ViewBehaviours with ViewMatchers {
     }
 
     "have a guidance" in {
-      val guidance = asDocument(view()).getElementsByTag("p").get(3)
+      val guidance = asDocument(view()).getElementsByTag("p").get(2)
 
       guidance must containMessage("uploadError.guidance")
     }

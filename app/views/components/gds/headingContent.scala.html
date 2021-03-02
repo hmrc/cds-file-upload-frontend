@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,13 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package views.components.gds
+@this(sectionHeader: sectionHeader)
 
-object Styles {
+@(pageHeading: String, sectionHeading: Option[String], classes: String = "govuk-fieldset__heading")
 
-  val gdsPageLegend = "govuk-fieldset__legend--xl"
-  val gdsPageHeading = "govuk-fieldset__legend govuk-fieldset__legend--xl"
-  val gdsPageLabel = "govuk-label--xl"
-}
+
+@sectionHeading.map(
+ sectionHeader(_)
+)
+
+<h1 class="@classes">
+ @pageHeading
+</h1>

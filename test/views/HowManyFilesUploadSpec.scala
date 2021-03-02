@@ -17,7 +17,7 @@
 package views
 
 import forms.FileUploadCountProvider
-import models.FileUploadCount
+import models.{FileUploadCount, MRN}
 import models.requests.{AuthenticatedRequest, SignedInUser}
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.data.Form
@@ -29,14 +29,14 @@ import views.html.how_many_files_upload
 class HowManyFilesUploadSpec extends DomAssertions with IntViewBehaviours[FileUploadCount] with ScalaCheckPropertyChecks {
 
   val form = new FileUploadCountProvider()()
-
+  val mrn: MRN = arbitraryMrn.arbitrary.sample.get
   val page = instanceOf[how_many_files_upload]
-  val view: () => Html = () => page(form)(fakeRequest.withCSRFToken, messages)
+  val view: () => Html = () => page(form, mrn)(fakeRequest.withCSRFToken, messages)
 
   val messagePrefix = "howManyFilesUpload"
 
   def createViewUsingForm: Form[FileUploadCount] => HtmlFormat.Appendable =
-    form => page(form)(fakeRequest.withCSRFToken, messages)
+    form => page(form, mrn)(fakeRequest.withCSRFToken, messages)
 
   "How Many Files Upload Page" must {
     behave like normalPage(view, messagePrefix)
@@ -45,7 +45,7 @@ class HowManyFilesUploadSpec extends DomAssertions with IntViewBehaviours[FileUp
 
     "include the 'Sign out' link if the user is authorised" in {
       forAll { user: SignedInUser =>
-        val view = page(form)(AuthenticatedRequest(fakeRequest.withCSRFToken, user), messages)
+        val view = page(form, mrn)(AuthenticatedRequest(fakeRequest.withCSRFToken, user), messages)
         assertSignoutLinkIsIncluded(view)
       }
     }

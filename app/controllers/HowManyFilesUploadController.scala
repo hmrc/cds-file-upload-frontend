@@ -57,7 +57,7 @@ class HowManyFilesUploadController @Inject()(
       val populatedForm =
         req.userAnswers.fileUploadCount.fold(form)(form.fill)
 
-      Ok(howManyFilesUpload(populatedForm))
+      Ok(howManyFilesUpload(populatedForm, req.request.mrn))
     }
 
   def onSubmit: Action[AnyContent] =
@@ -65,7 +65,7 @@ class HowManyFilesUploadController @Inject()(
       form
         .bindFromRequest()
         .fold(
-          errorForm => Future.successful(BadRequest(howManyFilesUpload(errorForm))),
+          errorForm => Future.successful(BadRequest(howManyFilesUpload(errorForm, req.request.mrn))),
           fileUploadCount => {
             uploadContactDetails(req, fileUploadCount) map {
               case Right(firstUpload :: _) =>
