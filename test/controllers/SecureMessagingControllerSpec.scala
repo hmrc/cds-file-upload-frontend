@@ -20,7 +20,6 @@ import scala.concurrent.Future
 
 import base.TestRequests
 import connectors.SecureMessageFrontendConnector
-import forms.ReplyToMessage
 import models.exceptions.InvalidFeatureStateException
 import models.{ConversationPartial, InboxPartial, ReplyResultPartial}
 import org.mockito.ArgumentMatchers.any
@@ -223,24 +222,17 @@ class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests
 
     "feature flag for SecureMessaging is enabled" should {
 
-      "return a bad request when no reply was entered by the user" in {
-        secureMessagingFeatureAction.enableSecureMessagingFeature()
-        val postRequest = fakeRequest.withFormUrlEncodedBody("messageReply" -> "").withCSRFToken
-        val result = controller.submitReply(clientId, conversationId)(postRequest)
-        status(result) mustBe BAD_REQUEST
-      }
-
       "call secure message connector" when {
         "a reply was entered by the user" in {
           secureMessagingFeatureAction.enableSecureMessagingFeature()
-          when(connector.submitReply(any[String], any[String], any[ReplyToMessage])(any[HeaderCarrier]))
+          when(connector.submitReply(any[String], any[String], any[Map[String, Seq[String]]])(any[HeaderCarrier]))
             .thenReturn(Future.successful(()))
 
           val postRequest = fakeRequest.withFormUrlEncodedBody("messageReply" -> "BlaBla").withCSRFToken
           val result = controller.submitReply(clientId, conversationId)(postRequest)
 
           status(result) mustBe SEE_OTHER
-          verify(connector).submitReply(any[String], any[String], any[ReplyToMessage])(any[HeaderCarrier])
+          verify(connector).submitReply(any[String], any[String], any[Map[String, Seq[String]]])(any[HeaderCarrier])
         }
       }
     }

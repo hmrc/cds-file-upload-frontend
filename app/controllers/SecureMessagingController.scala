@@ -19,9 +19,7 @@ package controllers
 import scala.concurrent.{ExecutionContext, Future}
 
 import connectors.SecureMessageFrontendConnector
-import connectors.SecureMessageFrontendConnector.conversationPartial
 import controllers.actions.{AuthAction, SecureMessagingFeatureAction, VerifiedEmailAction}
-import forms.ReplyToMessage
 import javax.inject.Inject
 import models.ConversationPartial
 import play.api.i18n.I18nSupport
@@ -66,18 +64,14 @@ class SecureMessagingController @Inject()(
   }
 
   def submitReply(client: String, conversationId: String): Action[AnyContent] = actions.async { implicit request =>
-    ReplyToMessage.form
-      .bindFromRequest()
-      .fold(
-        _ => Future.successful(BadRequest(wrapperFormForPartial(ConversationPartial(conversationPartial)))),
-        messageReply => {
-          messageConnector.submitReply(client, conversationId, messageReply).map { _ =>
-            //For the time being... until the downstream service is ready
-            Redirect(routes.SecureMessagingController.displayReplyResult(client, conversationId))
-            //Future.successful(NoContent)
-          }
-        }
-      )
+    request.body.asFormUrlEncoded.map { reply =>
+      messageConnector.submitReply(client, conversationId, reply)
+    }
+
+    // For the time being... until the downstream service is ready
+    Future(Redirect(routes.SecureMessagingController.displayReplyResult(client, conversationId)))
+
+  // Future.successful(NoContent)
   }
 
   private def wrapperFormForPartial(partial: ConversationPartial)(implicit request: Request[_]): HtmlFormat.Appendable = {

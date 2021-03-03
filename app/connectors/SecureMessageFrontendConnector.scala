@@ -20,7 +20,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import com.google.inject.Inject
 import config.AppConfig
-import forms.ReplyToMessage
 import models.{ConversationPartial, InboxPartial, ReplyResultPartial}
 import play.api.Logging
 import play.api.http.Status
@@ -86,13 +85,14 @@ class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: A
           Future.failed(exc)
       }*/
 
-  def submitReply(client: String, conversationId: String, reply: ReplyToMessage)(implicit hc: HeaderCarrier): Future[Unit] =
+  def submitReply(client: String, conversationId: String, reply: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[Unit] =
     Future.successful(())
+
   /*
     httpClient
       .doPost(
         config.microservice.services.secureMessaging.submitReplyEndpoint(client, conversationId),
-        Json.obj("reply-to-message" -> reply.messageReply)
+        Json.toJson(reply)
       )
       .map(_ => ())
       .recoverWith {
@@ -101,6 +101,7 @@ class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: A
           Future.failed(exc)
       }
  */
+
 }
 
 object SecureMessageFrontendConnector {
@@ -191,7 +192,7 @@ object SecureMessageFrontendConnector {
      |          <div class="govuk-form-group">
      |            <label class="govuk-label" for="messageReply">Your message (optional)</label>
      |
-     |            <textarea class="govuk-textarea" id="messageReply" name="messageReply" rows="10"></textarea>
+     |            <textarea class="govuk-textarea" id="previous-message-reply" name="previous-message-reply-1" rows="10" aria-describedby="previous-message-reply-hint"></textarea>
      |          </div>
      |          <input type="hidden" name="dec-previousMessageReplies" value="1">
      |          <input type="hidden" name="upload-mrn" value="20GB00004112345678001111">
