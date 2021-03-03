@@ -16,17 +16,36 @@
 
 package views.messaging
 
+import base.{OverridableInjector, SpecBase}
+import config.SecureMessagingConfig
 import org.jsoup.nodes.Document
+import org.mockito.Mockito.{reset, when}
+import play.api.inject.bind
 import play.twirl.api.HtmlFormat
 import views.html.messaging.inbox_wrapper
 import views.matchers.ViewMatchers
-import views.DomAssertions
 
-class InboxWrapperSpec extends DomAssertions with ViewMatchers {
+class InboxWrapperSpec extends SpecBase with ViewMatchers {
 
-  private val partialWrapperPage = instanceOf[inbox_wrapper]
+  private val secureMessagingConfig = mock[SecureMessagingConfig]
+  private val injector = new OverridableInjector(bind[SecureMessagingConfig].toInstance(secureMessagingConfig))
+
+  private val partialWrapperPage = injector.instanceOf[inbox_wrapper]
   private val partialContent = "Partial Content"
-  private val view: Document = partialWrapperPage(HtmlFormat.raw(partialContent))(fakeRequest, messages)
+
+  private def view: Document = partialWrapperPage(HtmlFormat.raw(partialContent))(fakeRequest, messages)
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+
+    reset(secureMessagingConfig)
+    when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(true)
+  }
+
+  override def afterEach(): Unit = {
+    reset(secureMessagingConfig)
+    super.afterEach()
+  }
 
   "Inbox Wrapper page" should {
 

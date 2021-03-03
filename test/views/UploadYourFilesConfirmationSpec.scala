@@ -16,22 +16,41 @@
 
 package views
 
-import base.FilesUploadedSpec
+import base.{FilesUploadedSpec, OverridableInjector}
+import config.SecureMessagingConfig
 import models.{FileUpload, MRN}
 import models.requests.{AuthenticatedRequest, SignedInUser}
+
 import scala.collection.JavaConverters._
 import org.jsoup.nodes.Document
+import org.mockito.Mockito.{reset, when}
+import play.api.inject.bind
 import views.html.upload_your_files_confirmation
 import views.matchers.ViewMatchers
 
 class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers with FilesUploadedSpec {
 
-  val page = instanceOf[upload_your_files_confirmation]
-  val mrn = MRN("20GB46J8TMJ4RFGVA0").get
-  val email = "example@email.com"
-  val pagePrefix = "fileUploadConfirmationPage"
+  private val secureMessagingConfig = mock[SecureMessagingConfig]
+  private val injector = new OverridableInjector(bind[SecureMessagingConfig].toInstance(secureMessagingConfig))
 
-  val view: Document = page(List(sampleFileUpload), Some(mrn), email)(fakeRequest, messages)
+  private val page = injector.instanceOf[upload_your_files_confirmation]
+  private val mrn = MRN("20GB46J8TMJ4RFGVA0").get
+  private val email = "example@email.com"
+  private val pagePrefix = "fileUploadConfirmationPage"
+
+  private def view: Document = page(List(sampleFileUpload), Some(mrn), email)(fakeRequest, messages)
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+
+    reset(secureMessagingConfig)
+    when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(true)
+  }
+
+  override def afterEach(): Unit = {
+    reset(secureMessagingConfig)
+    super.afterEach()
+  }
 
   "File Upload Confirmation Page" should {
 

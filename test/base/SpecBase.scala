@@ -38,14 +38,13 @@ trait SpecBase
 
   SharedMetricRegistries.clear()
 
-  implicit lazy val messagesApi: MessagesApi = instanceOf[MessagesApi]
   implicit lazy val appConfig: AppConfig = instanceOf[AppConfig]
   implicit val mcc: MessagesControllerComponents = stubMessagesControllerComponents()
 
   lazy val fakeRequest = FakeRequest("", "")
 
   implicit lazy val messages: Messages =
-    new AllMessageKeysAreMandatoryMessages(messagesApi.preferred(fakeRequest))
+    new AllMessageKeysAreMandatoryMessages(SpecBase.messagesApi.preferred(fakeRequest))
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -66,6 +65,10 @@ trait SpecBase
       case (n, None)             => List((n, ""))
       case (n, a)                => List((n, a.toString))
     }
+}
+
+object SpecBase extends Injector {
+  val messagesApi: MessagesApi = instanceOf[MessagesApi]
 }
 
 private class AllMessageKeysAreMandatoryMessages(msg: Messages) extends Messages {

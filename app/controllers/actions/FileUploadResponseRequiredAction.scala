@@ -16,9 +16,9 @@
 
 package controllers.actions
 
-import javax.inject.Inject
 import controllers.routes
-import models.requests.{DataRequest, FileUploadResponseRequest, MrnRequest}
+import javax.inject.Inject
+import models.requests.{FileUploadResponseRequest, MrnRequest}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Result}
 
