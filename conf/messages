@@ -54,7 +54,7 @@ inboxChoice.input.error.incorrect = Select what messages you would like to view
 
 ## Secure Messaging Inbox page
 
-inbox.heading = Message Inbox
+inbox.heading = Conversation Inbox
 
 ## Secure Messaging Read Conversation page
 

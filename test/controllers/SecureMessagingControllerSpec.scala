@@ -190,7 +190,7 @@ class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests
 
         "unsuccessfully returns a failed Future" should {
 
-          "display the 'Sorry' page to the user" in {
+          "throw an exception" in {
             secureMessagingFeatureAction.enableSecureMessagingFeature()
 
             when(connector.retrieveReplyResult(any[String], any[String])(any[HeaderCarrier]))
