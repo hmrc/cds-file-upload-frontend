@@ -15,8 +15,8 @@ GET         /unauthorised                                   controllers.Unauthor
 GET         /what-do-you-want-to-do                         controllers.ChoiceController.onPageLoad
 POST        /what-do-you-want-to-do                         controllers.ChoiceController.onSubmit
 
-GET         /what-messages-to-view                          controllers.InboxChoiceController.onPageLoad
-POST        /what-messages-to-view                          controllers.InboxChoiceController.onSubmit
+GET         /message-choice                                 controllers.InboxChoiceController.onPageLoad
+POST        /message-choice                                 controllers.InboxChoiceController.onSubmit
 
 GET         /messages                                       controllers.SecureMessagingController.displayInbox
 GET         /conversation/:client/:conversationId           controllers.SecureMessagingController.displayConversation(client, conversationId)
