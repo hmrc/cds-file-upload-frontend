@@ -22,6 +22,7 @@
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.hmrcStandardFooter
 @import views.Title
 @import config.AppConfig
+@import config.SecureMessagingConfig
 
 @this(
   govukHeader: GovukHeader,
@@ -30,15 +31,18 @@
   govukBackLink: GovukBackLink,
   siteHeader: components.gds.siteHeader,
   phaseBanner: components.gds.phaseBanner,
+  navigationBanner: components.gds.navigationBanner,
   hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet,
   hmrcReportTechnicalIssue: HmrcReportTechnicalIssue,
   hmrcFooter: hmrcStandardFooter,
-  appConfig: AppConfig
+  appConfig: AppConfig,
+  secureMessagingConfig: SecureMessagingConfig
 )
 
 @(
   title: Title,
-  useCustomContentWidth: Boolean = false
+  useCustomContentWidth: Boolean = false,
+  withNavigationBanner: Boolean = false
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages)
 
 @head = {
@@ -61,6 +65,10 @@
 
 @beforeContentBlock = {
     @phaseBanner("beta")
+
+    @if(secureMessagingConfig.isSecureMessagingEnabled && withNavigationBanner) {
+      @navigationBanner()
+    }
 }
 
 @content = {

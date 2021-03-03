@@ -57,7 +57,7 @@ trait ViewBehaviours extends DomAssertions {
           val newNav = doc.select(".govuk-header__link--service-name")
 
           val element = if (oldNav != null) oldNav.children.first else newNav.first()
-          element.text mustBe messagesApi("common.service.name")(Lang.forCode("en-uk"))
+          element.text mustBe messages("common.service.name")
         }
 
         "display the correct guidance" in {

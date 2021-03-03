@@ -16,22 +16,45 @@
 
 package views.messaging
 
+import base.{OverridableInjector, SpecBase}
+import config.SecureMessagingConfig
 import org.jsoup.nodes.Document
+import org.mockito.Mockito._
+import play.api.inject.bind
 import play.twirl.api.HtmlFormat
 import views.html.messaging.conversation_wrapper
 import views.matchers.ViewMatchers
-import views.DomAssertions
 
-class ConversationWrapperSpec extends DomAssertions with ViewMatchers {
+class ConversationWrapperSpec extends SpecBase with ViewMatchers {
 
-  private val partialWrapperPage = instanceOf[conversation_wrapper]
+  private val secureMessagingConfig = mock[SecureMessagingConfig]
+  private val injector = new OverridableInjector(bind[SecureMessagingConfig].toInstance(secureMessagingConfig))
+
+  private val partialWrapperPage = injector.instanceOf[conversation_wrapper]
   private val partialContent = "Partial Content"
-  private val view: Document = partialWrapperPage(HtmlFormat.raw(partialContent))(fakeRequest, messages)
+
+  private def view: Document = partialWrapperPage(HtmlFormat.raw(partialContent))(fakeRequest, messages)
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+
+    reset(secureMessagingConfig)
+    when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(true)
+  }
+
+  override def afterEach(): Unit = {
+    reset(secureMessagingConfig)
+    super.afterEach()
+  }
 
   "Conversation Wrapper page" should {
 
     "display page header" in {
       view.getElementsByTag("title").first() must containMessage("conversation.heading")
+    }
+
+    "display navigation banner" in {
+      view must containElementWithID("navigation-banner")
     }
 
     "display partial contents" in {

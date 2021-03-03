@@ -22,7 +22,7 @@
 @this(
     govukPanel : GovukPanel,
     govukTable : GovukTable,
-    govukLayout: gdsMainTemplate,
+    mainTemplate: gdsMainTemplate,
     feedbackSection: components.feedback_section,
     config: ExternalServicesConfig,
     govukButton: GovukButton,
@@ -35,7 +35,10 @@
 
 @panelContent = {@messages("fileUploadConfirmationPage.mrn") </br> <strong>@{mrn.map(_.value).getOrElse("???")}</strong> }
 
-@govukLayout(title = Title("fileUploadConfirmationPage.heading")) {
+@mainTemplate(
+    title = Title("fileUploadConfirmationPage.heading"),
+    withNavigationBanner = true
+) {
     @govukPanel(Panel(
         title = Text(messages("fileUploadConfirmationPage.heading")),
         content = HtmlContent(panelContent)
