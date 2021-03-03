@@ -18,9 +18,9 @@
 @import forms.InboxChoiceForm.InboxChoiceKey
 @import forms.InboxChoiceForm.Values.{ExportsMessages, ImportsMessages}
 @import uk.gov.hmrc.govukfrontend.views.html.components._
+@import views.components.gds.Styles._
 @import views.html.components.gds._
 @import views.Title
-@import views.components.gds.Styles._
 
 
 @this(
@@ -33,7 +33,7 @@
 
 @(form: Form[InboxChoiceForm])(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = Title("inboxChoicePage.heading")) {
+@mainTemplate(title = Title("inboxChoice.heading")) {
 
   @formHelper(action = routes.InboxChoiceController.onSubmit, 'autoComplete -> "off") {
 
@@ -43,7 +43,7 @@
       name = InboxChoiceKey,
       fieldset = Some(Fieldset(
         legend = Some(Legend(
-          content = Text(messages("inboxChoicePage.heading")),
+          content = Text(messages("inboxChoice.heading")),
           isPageHeading = true,
           classes = gdsPageLegend
         ))
@@ -52,13 +52,13 @@
         RadioItem(
           id = Some(ExportsMessages),
           value = Some(ExportsMessages),
-          content = Text(messages("inboxChoicePage.input.exportsMessages")),
+          content = Text(messages("inboxChoice.input.exportsMessages")),
           checked = form(InboxChoiceKey).value.contains(ExportsMessages)
         ),
         RadioItem(
           id = Some(ImportsMessages),
           value = Some(ImportsMessages),
-          content = Text(messages("inboxChoicePage.input.importsMessages")),
+          content = Text(messages("inboxChoice.input.importsMessages")),
           checked = form(InboxChoiceKey).value.contains(ImportsMessages)
         )
       )

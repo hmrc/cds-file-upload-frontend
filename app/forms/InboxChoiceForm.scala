@@ -35,8 +35,8 @@ object InboxChoiceForm {
     val inboxChoiceValues = Set(Values.ExportsMessages, Values.ImportsMessages)
 
     val fieldMapping =
-      requiredRadio("inboxChoicePage.input.error.empty")
-        .verifying("inboxChoicePage.input.error.incorrect", FieldValidator.isContainedIn(inboxChoiceValues))
+      requiredRadio("inboxChoice.input.error.empty")
+        .verifying("inboxChoice.input.error.incorrect", FieldValidator.isContainedIn(inboxChoiceValues))
 
     val inboxChoiceMapping = Forms.mapping(InboxChoiceKey -> fieldMapping)(InboxChoiceForm.apply)(InboxChoiceForm.unapply)
 

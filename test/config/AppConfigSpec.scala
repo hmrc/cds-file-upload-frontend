@@ -67,7 +67,14 @@ class AppConfigSpec extends PlaySpec {
       val secureMessaging = config.microservice.services.secureMessaging
 
       secureMessaging.fetchInboxEndpoint mustBe "http://localhost:9055/secure-message-frontend/cds-file-upload-service/messages"
-      secureMessaging.fetchMessageEndpoint("client", "conversation-id") mustBe "http://localhost:9055/secure-message-frontend/cds-file-upload-service/conversation/client/conversation-id"
+      secureMessaging.fetchMessageEndpoint("client", "conversation-id") mustBe
+        "http://localhost:9055/secure-message-frontend/cds-file-upload-service/conversation/client/conversation-id"
+
+      secureMessaging.replyResultEndpoint("client", "conversationId") mustBe
+        "http://localhost:9055/secure-message-frontend/cds-file-upload-service/conversation/client/conversationId/result"
+
+      secureMessaging.replyResultEndpoint("client", "conversationId") mustBe
+        "http://localhost:9055/secure-message-frontend/cds-file-upload-service/conversation/client/conversationId/result"
     }
   }
 }

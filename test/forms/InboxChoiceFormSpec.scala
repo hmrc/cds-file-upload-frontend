@@ -31,7 +31,7 @@ class InboxChoiceFormSpec extends UnitSpec {
 
         result.hasErrors mustBe true
         result.errors.length mustBe 1
-        result.errors.head.message mustBe "inboxChoicePage.input.error.empty"
+        result.errors.head.message mustBe "inboxChoice.input.error.empty"
       }
 
       "provided with incorrect input" in {
@@ -40,7 +40,7 @@ class InboxChoiceFormSpec extends UnitSpec {
 
         result.hasErrors mustBe true
         result.errors.length mustBe 1
-        result.errors.head.message mustBe "inboxChoicePage.input.error.incorrect"
+        result.errors.head.message mustBe "inboxChoice.input.error.incorrect"
       }
     }
 

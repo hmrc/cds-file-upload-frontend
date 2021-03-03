@@ -16,16 +16,18 @@
 
 package controllers
 
+import scala.concurrent.{ExecutionContext, Future}
+
 import connectors.SecureMessageFrontendConnector
 import controllers.actions.{AuthAction, SecureMessagingFeatureAction, VerifiedEmailAction}
+import javax.inject.Inject
+import models.ConversationPartial
 import play.api.i18n.I18nSupport
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
+import play.filters.csrf.CSRF
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import views.html.messaging.{conversation_wrapper, inbox_wrapper}
-
-import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import views.html.messaging.{conversation_wrapper, inbox_wrapper, reply_result_wrapper}
 
 class SecureMessagingController @Inject()(
   authenticate: AuthAction,
@@ -34,11 +36,14 @@ class SecureMessagingController @Inject()(
   messageConnector: SecureMessageFrontendConnector,
   mcc: MessagesControllerComponents,
   inbox_wrapper: inbox_wrapper,
-  conversation_wrapper: conversation_wrapper
+  conversation_wrapper: conversation_wrapper,
+  reply_result_wrapper: reply_result_wrapper
 )(implicit ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
-  def displayInbox: Action[AnyContent] = (authenticate andThen verifiedEmail andThen secureMessagingFeatureAction).async { implicit req =>
+  val actions = authenticate andThen verifiedEmail andThen secureMessagingFeatureAction
+
+  val displayInbox: Action[AnyContent] = actions.async { implicit request =>
     messageConnector
       .retrieveInboxPartial()
       .map { partial =>
@@ -46,12 +51,31 @@ class SecureMessagingController @Inject()(
       }
   }
 
-  def displayConversation(client: String, conversationId: String): Action[AnyContent] =
-    (authenticate andThen verifiedEmail andThen secureMessagingFeatureAction).async { implicit req =>
-      messageConnector
-        .retrieveConversationPartial(client, conversationId)
-        .map { partial =>
-          Ok(conversation_wrapper(HtmlFormat.raw(partial.body)))
-        }
+  def displayConversation(client: String, conversationId: String): Action[AnyContent] = actions.async { implicit request =>
+    messageConnector
+      .retrieveConversationPartial(client, conversationId)
+      .map(partial => Ok(wrapperFormForPartial(partial)))
+  }
+
+  def displayReplyResult(client: String, conversationId: String): Action[AnyContent] = actions.async { implicit request =>
+    messageConnector
+      .retrieveReplyResult(client, conversationId)
+      .map(partial => Ok(reply_result_wrapper(HtmlFormat.raw(partial.body))))
+  }
+
+  def submitReply(client: String, conversationId: String): Action[AnyContent] = actions.async { implicit request =>
+    request.body.asFormUrlEncoded.map { reply =>
+      messageConnector.submitReply(client, conversationId, reply)
     }
+
+    // For the time being... until the downstream service is ready
+    Future(Redirect(routes.SecureMessagingController.displayReplyResult(client, conversationId)))
+
+  // Future.successful(NoContent)
+  }
+
+  private def wrapperFormForPartial(partial: ConversationPartial)(implicit request: Request[_]): HtmlFormat.Appendable = {
+    val csrfToken = CSRF.getToken.get.value
+    conversation_wrapper(HtmlFormat.raw(partial.body.replace("[CSRF_TOKEN_TO_REPLACE]", csrfToken)))
+  }
 }
