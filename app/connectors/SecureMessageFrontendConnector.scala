@@ -17,21 +17,17 @@
 package connectors
 
 import scala.concurrent.{ExecutionContext, Future}
-
 import com.google.inject.Inject
 import config.AppConfig
 import models.{ConversationPartial, InboxPartial, ReplyResultPartial}
 import play.api.Logging
 import play.api.http.Status
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 
 class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: AppConfig)(implicit ec: ExecutionContext) extends Logging with Status {
 
   def retrieveInboxPartial()(implicit hc: HeaderCarrier): Future[InboxPartial] =
-    //TODO: reinstate 'Future.failed' and remove fakeInboxResponse once secure-message service is stable
-    SecureMessageFrontendConnector.fakeInboxPartial
-
-  /*httpClient
+    httpClient
       .GET[HttpResponse](config.microservice.services.secureMessaging.fetchInboxEndpoint)
       .flatMap { response =>
         response.status match {
@@ -47,7 +43,7 @@ class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: A
           )
 
           Future.failed(exc)
-      }*/
+      }
 
   def retrieveConversationPartial(client: String, conversationId: String)(implicit hc: HeaderCarrier): Future[ConversationPartial] =
     //TODO: reinstate httpClient call and remove fakeInboxResponse once secure-message service is stable
@@ -105,59 +101,12 @@ class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: A
 }
 
 object SecureMessageFrontendConnector {
-  lazy val fakeInboxPartial: Future[InboxPartial] = Future.successful(InboxPartial(inboxPartial))
-
   lazy val fakeConversationPartial: Future[ConversationPartial] = Future.successful(ConversationPartial(conversationPartial))
 
   lazy val fakeReplyResultPartial: Future[ReplyResultPartial] = Future.successful(ReplyResultPartial(replyResultPartial))
 
-  lazy val inboxPartial =
-    """
-    |    <h1 class="govuk-heading-l">Messages between you and customs authorities</h1>
-    |
-    |    <div>
-    |      <div class="govuk-accordion" data-module="govuk-accordion" id="accordion-with-summary-sections" style="border-bottom: solid 1px #fff !important"><div class="govuk-accordion__controls"><button type="button" class="govuk-accordion__open-all" aria-expanded="true">Close all<span class="govuk-visually-hidden"> sections</span></button></div>
-    |        <div class="govuk-accordion__section govuk-accordion__section--expanded">
-    |          <div class="govuk-accordion__section-header">
-    |            <h2 class="govuk-accordion__section-heading">
-    |
-    |            <button type="button" id="accordion-with-summary-sections-heading-1" aria-controls="accordion-with-summary-sections-content-1" class="govuk-accordion__section-button" aria-describedby="accordion-with-summary-sections-summary-1" aria-expanded="true">
-    |                Your messages
-    |              <span class="govuk-accordion__icon" aria-hidden="true"></span></button></h2>
-    |            <div class="govuk-accordion__section-summary govuk-body" id="accordion-with-summary-sections-summary-1">
-    |              Recent and unread messages
-    |            </div>
-    |          </div>
-    |          <div id="accordion-with-summary-sections-content-1" class="govuk-accordion__section-content" aria-labelledby="accordion-with-summary-sections-heading-1" style="border-bottom: solid 1px #fff !important;">
-    |
-    |            <table class="govuk-table">
-    |              <thead class="govuk-table__head">
-    |                <tr class="govuk-table__row">
-    |                  <th scope="col" class="govuk-table__header">Subject</th>
-    |                  <th scope="col" class="govuk-table__header">Date</th>
-    |                </tr>
-    |              </thead>
-    |              <tbody class="govuk-table__body">
-    |               <tr class="govuk-table__row no-border" role="row">
-    |                 <td role="cell" class="govuk-table__cell">
-    |                   HMRC exports
-    |                   <p class="govuk-body">
-    |                     <a href="/cds-file-upload-service/conversation/cdcm/D-80542-20201122" class="govuk-link">MRN0GB00004112345678001111</a> needs action
-    |                   </p>
-    |                 </td>
-    |                 <td role="cell" class="govuk-table__cell">
-    |                   24th Feburary 2021
-    |                 </td>
-    |               </tr>
-    |              </tbody>
-    |            </table>
-    |          </div>
-    |        </div>
-    |      </div>
-    |    </div>""".stripMargin
-
   lazy val conversationPartial =
-    """<a href="/cds-file-upload-service/messages" class="govuk-back-link">Back</a>
+    """<a href="/cds-file-upload-service/messages" class="govuk-back-link">Back</a> 
      |
      |      <h1 class="govuk-heading-m govuk-!-margin-bottom-2">Provide more information about MRN 20GB00004112345678001111 - Case 676767</h1>
      |      <span class="govuk-caption-m govuk-!-margin-bottom-5"><strong>HMRC sent</strong> this message on 10 November 2020 at 8:23am</span>

@@ -23,8 +23,8 @@ import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.BeforeAndAfterEach
-import play.mvc.Http.Status.{NOT_FOUND, OK}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import play.mvc.Http.Status.{OK, UNAUTHORIZED}
+import uk.gov.hmrc.http.{BadGatewayException, HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -44,7 +44,7 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
   "SecureMessageFrontend" when {
     "retrieveConversationsPartial is called" which {
       "receives a 200 response" should {
-        "return a populated InboxPartial" ignore { //TODO: reinstate when connector talks to real secure-message-frontend service
+        "return a populated InboxPartial" in {
           val partialContent = "<html>Some Content</html>"
           val httpResponse = HttpResponse(status = OK, body = partialContent)
 
@@ -58,15 +58,24 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
       }
 
       "receives a non 200 response" should {
-        "return a failed Future" ignore { //TODO: reinstate when connector talks to real secure-message-frontend service
-          val httpResponse = HttpResponse(status = NOT_FOUND, body = "")
+        "return a failed Future" in {
+          val httpResponse = HttpResponse(status = UNAUTHORIZED, body = "")
 
           when(httpClient.GET[HttpResponse](anyString())(any(), any(), any()))
             .thenReturn(Future.successful(httpResponse))
 
-          an[Exception] mustBe thrownBy {
-            connector.retrieveInboxPartial().futureValue
-          }
+          val result = connector.retrieveInboxPartial()
+          assert(result.failed.futureValue.isInstanceOf[UpstreamErrorResponse])
+        }
+      }
+
+      "fails to connect to downstream service" should {
+        "return a failed Future" in {
+          when(httpClient.GET[HttpResponse](anyString())(any(), any(), any()))
+            .thenReturn(Future.failed(new BadGatewayException("Error")))
+
+          val result = connector.retrieveInboxPartial()
+          assert(result.failed.futureValue.isInstanceOf[BadGatewayException])
         }
       }
     }
