@@ -21,13 +21,31 @@
 
 @this(mainTemplate: gdsMainTemplate, govukAccordion : GovukAccordion, govukBackLink : GovukBackLink)
 
-@(partial: HtmlFormat.Appendable)(implicit request: Request[_], messages: Messages)
+@(partial: HtmlFormat.Appendable, titleKey: String)(implicit request: Request[_], messages: Messages)
 
 @mainTemplate(
- title = Title("conversation.heading"),
- withNavigationBanner = true
+  title = Title(titleKey),
+  useCustomContentWidth = true,
+  withNavigationBanner = true
 ) {
- <div class="govuk-grid-column-full">
-  @partial
- </div>
+  <div class="govuk-grid-row">
+
+    <div class="govuk-grid-column-two-thirds">
+      @partial
+    </div>
+
+    <div class="govuk-grid-column-one-third">
+      <div style="background-color:#eee; padding: 15px;">
+        <h4 class="govuk-heading-s">@messages("greyBox.heading")</h4>
+
+        <p class="govuk-body">@messages("greyBox.paragraph.1")</p>
+        <p class="govuk-body">@messages("greyBox.paragraph.2")</p>
+
+        <a class="govuk-link govuk-link--no-visited-state" href="@routes.MrnEntryController.onPageLoad">
+          @messages("greyBox.uploadFiles")
+        </a>
+      </div>
+    </div>
+
+  </div>
 }

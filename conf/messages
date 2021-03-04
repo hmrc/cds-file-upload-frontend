@@ -67,6 +67,13 @@ conversation.heading = View conversation
 
 replyResult.heading = Reply result
 
+## Secure Messaging. Right grey box in "Conversation" and "Reply Result" pages
+
+greyBox.heading = Upload requested documents
+greyBox.paragraph.1 = You will need to re-enter the correct MRN to attach documents to the declaration.
+greyBox.paragraph.2 = Upload the documents then reply to the message to let us know they are ready to be checked.
+greyBox.uploadFiles = Attach documents to a declaration
+
 ## MRN Entry Page
 
 mrnEntryPage.heading=What is your movement reference number (MRN)?

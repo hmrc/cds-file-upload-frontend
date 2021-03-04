@@ -17,6 +17,7 @@
 package connectors
 
 import scala.concurrent.{ExecutionContext, Future}
+
 import com.google.inject.Inject
 import config.AppConfig
 import models.{ConversationPartial, InboxPartial, ReplyResultPartial}
@@ -27,63 +28,32 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorR
 class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: AppConfig)(implicit ec: ExecutionContext) extends Logging with Status {
 
   def retrieveInboxPartial()(implicit hc: HeaderCarrier): Future[InboxPartial] =
-    httpClient
-      .GET[HttpResponse](config.microservice.services.secureMessaging.fetchInboxEndpoint)
-      .flatMap { response =>
-        response.status match {
-          case OK => Future.successful(InboxPartial(response.body))
-          case statusCode =>
-            Future.failed(UpstreamErrorResponse("Unhappy response fetching user inbox!", statusCode))
-        }
-      }
-      .recoverWith {
-        case exc: UpstreamErrorResponse =>
-          logger.warn(
-            s"Received a ${exc.statusCode} response from secure-messaging-frontend service while retrieving the user's inbox. ${exc.message}"
-          )
-
-          Future.failed(exc)
-      }
+    fetchPartial(config.microservice.services.secureMessaging.fetchInboxEndpoint, "the user's inbox")
+      .map(response => InboxPartial(response.body))
 
   def retrieveConversationPartial(client: String, conversationId: String)(implicit hc: HeaderCarrier): Future[ConversationPartial] =
     //TODO: reinstate httpClient call and remove fakeInboxResponse once secure-message service is stable
     SecureMessageFrontendConnector.fakeConversationPartial
-
-  /*httpClient
-      .GET[HttpResponse](config.microservice.services.secureMessaging.fetchMessageEndpoint(client, conversationId))
-      .flatMap { response =>
-        response.status match {
-          case OK => Future.successful(ConversationPartial(response.body))
-          case statusCode =>
-            Future.failed(UpstreamErrorResponse("Unhappy response fetching a conversation!", statusCode))
-        }
-      }
-      .recoverWith {
-        case exc: UpstreamErrorResponse =>
-          logger.warn(s"Received a ${exc.statusCode} response from secure-messaging-frontend service while retrieving a user's conversation with params '$client/$conversationId' . ${exc.message}")
-          Future.failed(exc)
-      }*/
+  /*
+    fetchPartial(
+      config.microservice.services.secureMessaging.fetchMessageEndpoint(client, conversationId),
+      s"the '$client/$conversationId' conversation"
+    )
+    .map(response => ConversationPartial(response.body))
+   */
 
   def retrieveReplyResult(client: String, conversationId: String)(implicit hc: HeaderCarrier): Future[ReplyResultPartial] =
     SecureMessageFrontendConnector.fakeReplyResultPartial
-  /*httpClient
-      .GET[HttpResponse](config.microservice.services.secureMessaging.replyResultEndpoint(client, conversationId))
-      .flatMap { response =>
-        response.status match {
-          case OK => Future.successful(ReplyPartial(response.body))
-          case statusCode =>
-            Future.failed(UpstreamErrorResponse("Unhappy response retrieving the Reply result a conversation!", statusCode))
-        }
-      }
-      .recoverWith {
-        case exc: UpstreamErrorResponse =>
-          logger.warn(s"Received a ${exc.statusCode} response from secure-messaging-frontend service while retrieving the result of '$client/$conversationId''s reply . ${exc.message}")
-          Future.failed(exc)
-      }*/
+  /*
+    fetchPartial(
+      config.microservice.services.secureMessaging.replyResultEndpoint(client, conversationId),
+      s"the result of replying to '$client/$conversationId' conversation"
+    )
+    .map(response => ReplyResultPartial(response.body))
+   */
 
   def submitReply(client: String, conversationId: String, reply: Map[String, Seq[String]])(implicit hc: HeaderCarrier): Future[Unit] =
     Future.successful(())
-
   /*
     httpClient
       .doPost(
@@ -96,8 +66,24 @@ class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: A
           logger.warn(s"Received a ${exc.statusCode} response from secure-messaging-frontend service while submitting a message reply for '$client/$conversationId'. ${exc.message}")
           Future.failed(exc)
       }
- */
+   */
 
+  private def fetchPartial(url: String, errorInfo: String)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+    httpClient
+      .GET[HttpResponse](url)
+      .flatMap { response =>
+        response.status match {
+          case OK => Future.successful(response)
+          case statusCode =>
+            Future.failed(UpstreamErrorResponse(s"Unhappy response fetching $errorInfo", statusCode))
+        }
+      }
+      .recoverWith {
+        case exc: UpstreamErrorResponse =>
+          logger.warn(s"Received a ${exc.statusCode} response from secure-messaging-frontend while retrieving $errorInfo. ${exc.message}")
+
+          Future.failed(exc)
+      }
 }
 
 object SecureMessageFrontendConnector {
@@ -166,6 +152,6 @@ object SecureMessageFrontendConnector {
        |<p class="govuk-body">You do not need to do anything now.</p>
        |<p class="govuk-body govuk-!-margin-bottom-6">We will contact you if we need more information.</p>
        |
-       |<a href="declaration-messages" class="govuk-button">Back to your messages</a>
+       |<a href="/cds-file-upload-service/message-choice" class="govuk-button">Back to your messages</a>
        |""".stripMargin
 }
