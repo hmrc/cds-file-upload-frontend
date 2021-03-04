@@ -30,13 +30,12 @@ import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.FakeRequestCSRFSupport._
-import views.html.messaging.{conversation_wrapper, inbox_wrapper, reply_result_wrapper}
+import views.html.messaging.{inbox_wrapper, partial_wrapper}
 
 class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests {
 
   private val partialWrapperPage = mock[inbox_wrapper]
-  private val conversation_wrapper = mock[conversation_wrapper]
-  private val reply_result_wrapper = mock[reply_result_wrapper]
+  private val partial_wrapper = mock[partial_wrapper]
   private val connector = mock[SecureMessageFrontendConnector]
   private val secureMessagingFeatureAction = new SecureMessagingFeatureActionMock()
 
@@ -48,19 +47,17 @@ class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests
       connector,
       mcc,
       partialWrapperPage,
-      conversation_wrapper,
-      reply_result_wrapper
+      partial_wrapper
     )
 
   override def beforeEach(): Unit = {
     super.beforeEach()
 
-    reset(conversation_wrapper, partialWrapperPage, reply_result_wrapper)
+    reset(partial_wrapper, partialWrapperPage)
     secureMessagingFeatureAction.reset()
 
     when(partialWrapperPage.apply(any[HtmlFormat.Appendable])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
-    when(conversation_wrapper.apply(any[HtmlFormat.Appendable])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
-    when(reply_result_wrapper.apply(any[HtmlFormat.Appendable])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
+    when(partial_wrapper.apply(any[HtmlFormat.Appendable], any[String])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
   }
 
   "SecureMessagingController displayInbox is called" when {

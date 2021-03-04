@@ -27,7 +27,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
 import play.filters.csrf.CSRF
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import views.html.messaging.{conversation_wrapper, inbox_wrapper, reply_result_wrapper}
+import views.html.messaging.{inbox_wrapper, partial_wrapper}
 
 class SecureMessagingController @Inject()(
   authenticate: AuthAction,
@@ -36,8 +36,7 @@ class SecureMessagingController @Inject()(
   messageConnector: SecureMessageFrontendConnector,
   mcc: MessagesControllerComponents,
   inbox_wrapper: inbox_wrapper,
-  conversation_wrapper: conversation_wrapper,
-  reply_result_wrapper: reply_result_wrapper
+  partial_wrapper: partial_wrapper
 )(implicit ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
@@ -60,7 +59,7 @@ class SecureMessagingController @Inject()(
   def displayReplyResult(client: String, conversationId: String): Action[AnyContent] = actions.async { implicit request =>
     messageConnector
       .retrieveReplyResult(client, conversationId)
-      .map(partial => Ok(reply_result_wrapper(HtmlFormat.raw(partial.body))))
+      .map(partial => Ok(partial_wrapper(HtmlFormat.raw(partial.body), "replyResult.heading")))
   }
 
   def submitReply(client: String, conversationId: String): Action[AnyContent] = actions.async { implicit request =>
@@ -76,6 +75,6 @@ class SecureMessagingController @Inject()(
 
   private def wrapperFormForPartial(partial: ConversationPartial)(implicit request: Request[_]): HtmlFormat.Appendable = {
     val csrfToken = CSRF.getToken.get.value
-    conversation_wrapper(HtmlFormat.raw(partial.body.replace("[CSRF_TOKEN_TO_REPLACE]", csrfToken)))
+    partial_wrapper(HtmlFormat.raw(partial.body.replace("[CSRF_TOKEN_TO_REPLACE]", csrfToken)), "conversation.heading")
   }
 }
