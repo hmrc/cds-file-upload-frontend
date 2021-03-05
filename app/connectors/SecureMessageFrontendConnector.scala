@@ -32,15 +32,10 @@ class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: A
       .map(response => InboxPartial(response.body))
 
   def retrieveConversationPartial(client: String, conversationId: String)(implicit hc: HeaderCarrier): Future[ConversationPartial] =
-    //TODO: reinstate httpClient call and remove fakeInboxResponse once secure-message service is stable
-    SecureMessageFrontendConnector.fakeConversationPartial
-  /*
     fetchPartial(
       config.microservice.services.secureMessaging.fetchMessageEndpoint(client, conversationId),
       s"the '$client/$conversationId' conversation"
-    )
-    .map(response => ConversationPartial(response.body))
-   */
+    ).map(response => ConversationPartial(response.body))
 
   def retrieveReplyResult(client: String, conversationId: String)(implicit hc: HeaderCarrier): Future[ReplyResultPartial] =
     SecureMessageFrontendConnector.fakeReplyResultPartial
@@ -60,10 +55,16 @@ class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: A
         config.microservice.services.secureMessaging.submitReplyEndpoint(client, conversationId),
         Json.toJson(reply)
       )
-      .map(_ => ())
+      .flatMap { response =>
+        response.status match {
+          case OK => Future.successful(())
+          case statusCode =>
+            Future.failed(UpstreamErrorResponse(s"Unhappy response submitting a reply for '$client/$conversationId' conversation", statusCode))
+        }
+      }
       .recoverWith {
         case exc: UpstreamErrorResponse =>
-          logger.warn(s"Received a ${exc.statusCode} response from secure-messaging-frontend service while submitting a message reply for '$client/$conversationId'. ${exc.message}")
+          logger.warn(s"Received a ${exc.statusCode} response from secure-messaging-frontend while submitting a reply for '$client/$conversationId'. ${exc.message}")
           Future.failed(exc)
       }
    */
@@ -81,61 +82,12 @@ class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: A
       .recoverWith {
         case exc: UpstreamErrorResponse =>
           logger.warn(s"Received a ${exc.statusCode} response from secure-messaging-frontend while retrieving $errorInfo. ${exc.message}")
-
           Future.failed(exc)
       }
 }
 
 object SecureMessageFrontendConnector {
-  lazy val fakeConversationPartial: Future[ConversationPartial] = Future.successful(ConversationPartial(conversationPartial))
-
   lazy val fakeReplyResultPartial: Future[ReplyResultPartial] = Future.successful(ReplyResultPartial(replyResultPartial))
-
-  lazy val conversationPartial =
-    """<a href="/cds-file-upload-service/messages" class="govuk-back-link">Back</a> 
-     |
-     |      <h1 class="govuk-heading-m govuk-!-margin-bottom-2">Provide more information about MRN 20GB00004112345678001111 - Case 676767</h1>
-     |      <span class="govuk-caption-m govuk-!-margin-bottom-5"><strong>HMRC sent</strong> this message on 10 November 2020 at 8:23am</span>
-     |
-     |      <p class="govuk-body"><span class="govuk-caption-m govuk-!-font-size-16"><strong>EORI:</strong> GB6132244152.</span></p>
-     |
-     |      <p class="govuk-body">
-     |        Dear Trader,
-     |      </p>
-     |
-     |      <p class="govuk-body">
-     |        Your CITES Import or Export permit. Commission Reg 160/2017 on the protection of species of wild fauna and flora is no longer valid. Please send a valid permit by following these steps:
-     |      </p>
-     |
-     |
-     |      <ul class="govuk-list govuk-list--bullet">
-     |        <li>Use the link on this page to upload the document</li>
-     |        <li>Attach it to your declaration (you may need to re-enter the correct MRN shown on this message)</li>
-     |        <li>Return to this message and reply to let us know it is ready for us to check.
-     |          If it is in order we will approve your consignment.
-     |        </li>
-     |      </ul>
-     |
-     |      <p class="govuk-body">National Clearance Hub</p>
-     |
-     |      <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
-     |
-     |      <div class="form-group">
-     |        <h2 class="govuk-heading-m !-margin-bottom-9">Reply to this message</h2>
-     |        <form class="form" action="/cds-file-upload-service/conversation/cdcm/D-80542-20201122" method="POST">
-     |          <input type="hidden" name="csrfToken" value="[CSRF_TOKEN_TO_REPLACE]"/>
-     |          <div class="govuk-form-group">
-     |            <label class="govuk-label" for="messageReply">Your message (optional)</label>
-     |
-     |            <textarea class="govuk-textarea" id="previous-message-reply" name="previous-message-reply-1" rows="10" aria-describedby="previous-message-reply-hint"></textarea>
-     |          </div>
-     |          <input type="hidden" name="dec-previousMessageReplies" value="1">
-     |          <input type="hidden" name="upload-mrn" value="20GB00004112345678001111">
-     |
-     |          <button id="submit" class="button">Reply</button>
-     |        </form>
-     |      </div>
-     |""".stripMargin
 
   lazy val replyResultPartial =
     s"""<div class="govuk-panel govuk-panel--confirmation">

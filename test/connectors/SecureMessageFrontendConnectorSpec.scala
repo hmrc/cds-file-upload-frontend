@@ -16,17 +16,17 @@
 
 package connectors
 
+import scala.concurrent.{ExecutionContext, Future}
+
 import base.{Injector, UnitSpec}
 import config.AppConfig
-import models.InboxPartial
+import models.{ConversationPartial, InboxPartial}
 import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.Mockito.{reset, when}
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.BeforeAndAfterEach
-import play.mvc.Http.Status.{OK, UNAUTHORIZED}
-import uk.gov.hmrc.http.{BadGatewayException, HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
-
-import scala.concurrent.{ExecutionContext, Future}
+import org.scalatest.concurrent.ScalaFutures
+import play.mvc.Http.Status.{BAD_REQUEST, OK}
+import uk.gov.hmrc.http._
 
 class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEach with Injector with ScalaFutures {
   val appConfig = instanceOf[AppConfig]
@@ -42,24 +42,24 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
   val connector = new SecureMessageFrontendConnector(httpClient, appConfig)
 
   "SecureMessageFrontend" when {
-    "retrieveConversationsPartial is called" which {
+
+    "retrieveInboxPartial is called" which {
       "receives a 200 response" should {
         "return a populated InboxPartial" in {
-          val partialContent = "<html>Some Content</html>"
+          val partialContent = "<div>Some Content</div>"
           val httpResponse = HttpResponse(status = OK, body = partialContent)
 
           when(httpClient.GET[HttpResponse](anyString())(any(), any(), any()))
             .thenReturn(Future.successful(httpResponse))
 
           val result = connector.retrieveInboxPartial().futureValue
-
           result mustBe InboxPartial(partialContent)
         }
       }
 
       "receives a non 200 response" should {
         "return a failed Future" in {
-          val httpResponse = HttpResponse(status = UNAUTHORIZED, body = "")
+          val httpResponse = HttpResponse(status = BAD_REQUEST, body = "")
 
           when(httpClient.GET[HttpResponse](anyString())(any(), any(), any()))
             .thenReturn(Future.successful(httpResponse))
@@ -80,32 +80,67 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
       }
     }
 
-    "retrieveInboxPartial is called" which {
+    "retrieveConversationsPartial is called" which {
       "receives a 200 response" should {
-        "return a populated InboxPartial" ignore {} //TODO: implement when connector talks to real secure-message-frontend service
+        "return a populated ConversationPartial" in {
+          val partialContent = "<div>Some Content</div>"
+          val httpResponse = HttpResponse(status = OK, body = partialContent)
+
+          when(httpClient.GET[HttpResponse](anyString())(any(), any(), any()))
+            .thenReturn(Future.successful(httpResponse))
+
+          val result = connector.retrieveConversationPartial("cdm", "1234").futureValue
+          result mustBe ConversationPartial(partialContent)
+        }
       }
 
       "receives a non 200 response" should {
-        "return a failed Future" ignore {} //TODO: implement when connector talks to real secure-message-frontend service
+        "return a failed Future" in {
+          val httpResponse = HttpResponse(status = BAD_REQUEST, body = "")
+
+          when(httpClient.GET[HttpResponse](anyString())(any(), any(), any()))
+            .thenReturn(Future.successful(httpResponse))
+
+          val result = connector.retrieveConversationPartial("cdm", "1234")
+          assert(result.failed.futureValue.isInstanceOf[UpstreamErrorResponse])
+        }
+      }
+
+      "fails to connect to downstream service" should {
+        "return a failed Future" in {
+          when(httpClient.GET[HttpResponse](anyString())(any(), any(), any()))
+            .thenReturn(Future.failed(new BadGatewayException("Error")))
+
+          val result = connector.retrieveConversationPartial("cdm", "1234")
+          assert(result.failed.futureValue.isInstanceOf[BadGatewayException])
+        }
       }
     }
 
     "retrieveReplyResult is called" which {
       "receives a 200 response" should {
-        "return a populated InboxPartial" ignore {} //TODO: implement when connector talks to real secure-message-frontend service
+        "return a populated ReplyResultPartial" ignore {} //TODO: implement when connector talks to real secure-message-frontend service
       }
 
       "receives a non 200 response" should {
+        "return a failed Future" ignore {} //TODO: implement when connector talks to real secure-message-frontend service
+      }
+
+      "fails to connect to downstream service" should {
         "return a failed Future" ignore {} //TODO: implement when connector talks to real secure-message-frontend service
       }
     }
 
     "submitReply is called" which {
       "receives a 200 response" should {
-        "return a populated InboxPartial" ignore {} //TODO: implement when connector talks to real secure-message-frontend service
+        "return a OK(200) response" ignore {} //TODO: implement when connector talks to real secure-message-frontend service
       }
 
       "receives a non 200 response" should {
+        "return a failed Future" ignore {} //TODO: implement when connector talks to real secure-message-frontend service
+      }
+
+      "fails to connect to downstream service" should {
         "return a failed Future" ignore {} //TODO: implement when connector talks to real secure-message-frontend service
       }
     }
