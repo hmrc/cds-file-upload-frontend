@@ -23,7 +23,7 @@ import models.{EORI, MRN}
 import models.requests.DataRequest
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import services.{AnswersService, MrnDisValidator}
+import services.{FileUploadAnswersService, MrnDisValidator}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.{mrn_access_denied, mrn_entry}
@@ -37,7 +37,7 @@ class MrnEntryController @Inject()(
   getData: DataRetrievalAction,
   verifiedEmail: VerifiedEmailAction,
   formProvider: MRNFormProvider,
-  answersConnector: AnswersService,
+  answersService: FileUploadAnswersService,
   mcc: MessagesControllerComponents,
   mrnEntry: mrn_entry,
   mrnDisValidator: MrnDisValidator,
@@ -68,7 +68,7 @@ class MrnEntryController @Inject()(
     mrnDisValidator.validate(mrn, EORI(req.request.eori)).flatMap {
       case false => invalidMrnResponse(mrn.value)
       case true =>
-        answersConnector.upsert(req.userAnswers.copy(mrn = Some(mrn))).map { _ =>
+        answersService.upsert(req.userAnswers.copy(mrn = Some(mrn))).map { _ =>
           Redirect(routes.ContactDetailsController.onPageLoad())
         }
     }

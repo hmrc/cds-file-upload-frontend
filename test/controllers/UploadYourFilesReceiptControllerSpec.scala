@@ -43,7 +43,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
     sfusMetrics,
     originalConfirmationPage,
     secureMessagingConfirmationPage,
-    mockAnswersConnector,
+    mockFileUploadAnswersService,
     secureMessageConfig
   )(mcc, executionContext)
 
@@ -91,7 +91,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
 
     "redirect to start page" when {
       "no user answers are in the cache" in {
-        when(mockAnswersConnector.findByEori(anyString()))
+        when(mockFileUploadAnswersService.findByEori(anyString()))
           .thenReturn(Future.successful(None))
 
         val result = controller.onPageLoad()(fakeRequest).futureValue
@@ -112,7 +112,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
 
             result.header.status mustBe OK
 
-            verify(mockAnswersConnector).removeByEori(any())
+            verify(mockFileUploadAnswersService).removeByEori(any())
           }
         }
       }
@@ -127,19 +127,19 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
             val result = controller.onPageLoad()(fakeRequest)
 
             status(result) mustBe OK
-            verify(mockAnswersConnector).removeByEori(any())
+            verify(mockFileUploadAnswersService).removeByEori(any())
           }
         }
       }
 
       "user is redirect to start page" in {
-        when(mockAnswersConnector.findByEori(anyString()))
+        when(mockFileUploadAnswersService.findByEori(anyString()))
           .thenReturn(Future.successful(None))
 
         val result = controller.onPageLoad()(fakeRequest).futureValue
 
         result.header.status mustBe SEE_OTHER
-        verify(mockAnswersConnector).removeByEori(any())
+        verify(mockFileUploadAnswersService).removeByEori(any())
       }
     }
   }
@@ -148,8 +148,8 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
     when(cdsFileUploadConnector.getNotification(any())(any()))
       .thenReturn(Future.successful(Option(Notification(sampleFileUpload.reference, "SUCCESS", "someFile.pdf"))))
 
-    val answers = UserAnswers(eori, fileUploadResponse = Some(sampleFileUploadResponse))
-    when(mockAnswersConnector.findByEori(anyString()))
+    val answers = FileUploadAnswers(eori, fileUploadResponse = Some(sampleFileUploadResponse))
+    when(mockFileUploadAnswersService.findByEori(anyString()))
       .thenReturn(Future.successful(Some(answers)))
 
     test

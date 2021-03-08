@@ -48,7 +48,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
   val eori: String = eoriString.sample.get
   val mrn: MRN = arbitraryMrn.arbitrary.sample.get
   private val fileUploadCount = FileUploadCount(7)
-  val validAnswers = UserAnswers(eori, mrn = Some(mrn), fileUploadCount = fileUploadCount)
+  val validAnswers = FileUploadAnswers(eori, mrn = Some(mrn), fileUploadCount = fileUploadCount)
 
   implicit val arbitraryContactDetailsActions: Arbitrary[ContactDetailsRequiredAction] =
     Arbitrary(arbitrary[FakeContactDetailsRequiredAction].map(_.asInstanceOf[ContactDetailsRequiredAction]))
@@ -70,7 +70,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
 
   private def controller(
     contactDetailsRequiredAction: ContactDetailsRequiredAction = new FakeContactDetailsRequiredAction(),
-    answers: Option[UserAnswers] = Some(validAnswers)
+    answers: Option[FileUploadAnswers] = Some(validAnswers)
   ) =
     new HowManyFilesUploadController(
       new FakeAuthAction(),
@@ -79,7 +79,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       contactDetailsRequiredAction,
       new FakeVerifiedEmailAction(),
       new FileUploadCountProvider,
-      mockAnswersConnector,
+      mockFileUploadAnswersService,
       mockUpscanConnector,
       mockCustomsDeclarationsService,
       mcc,
@@ -175,7 +175,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       val nextRef = fileUploadsAfterContactDetails.map(_.reference).min
       redirectLocation(result) mustBe Some(routes.UpscanStatusController.onPageLoad(nextRef).url)
 
-      val savedAnswers = theSavedUserAnswers
+      val savedAnswers = theSavedFileUploadAnswers
       val Some(fileUploadCount) = FileUploadCount(2)
       savedAnswers.fileUploadCount mustBe Some(fileUploadCount)
       savedAnswers.fileUploadResponse mustBe Some(FileUploadResponse(fileUploadResponse.uploads.tail))

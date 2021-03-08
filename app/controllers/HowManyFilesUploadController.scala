@@ -25,7 +25,7 @@ import models.requests.ContactDetailsRequest
 import play.api.Logger
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.{AnswersService, CustomsDeclarationsService}
+import services.{CustomsDeclarationsService, FileUploadAnswersService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.how_many_files_upload
@@ -40,7 +40,7 @@ class HowManyFilesUploadController @Inject()(
   requireContactDetails: ContactDetailsRequiredAction,
   verifiedEmail: VerifiedEmailAction,
   formProvider: FileUploadCountProvider,
-  answersConnector: AnswersService,
+  answersService: FileUploadAnswersService,
   upscanConnector: UpscanConnector,
   customsDeclarationsService: CustomsDeclarationsService,
   mcc: MessagesControllerComponents,
@@ -87,7 +87,7 @@ class HowManyFilesUploadController @Inject()(
       val remainingFileUploads = fileUploadResponse.uploads.tail
       logger.info("remainingFileUploads " + remainingFileUploads)
 
-      answersConnector
+      answersService
         .upsert(req.userAnswers.copy(fileUploadCount = Some(fileUploadCount), fileUploadResponse = Some(FileUploadResponse(remainingFileUploads))))
         .map { _ =>
           logger.info("saving remaining uploads")

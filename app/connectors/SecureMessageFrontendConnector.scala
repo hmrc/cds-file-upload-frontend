@@ -16,19 +16,20 @@
 
 package connectors
 
-import scala.concurrent.{ExecutionContext, Future}
-
 import com.google.inject.Inject
 import config.AppConfig
-import models.{ConversationPartial, InboxPartial, ReplyResultPartial}
+import models.{ConversationPartial, InboxPartial, MessageFilterTag, ReplyResultPartial}
 import play.api.Logging
 import play.api.http.Status
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.HttpReads.Implicits._
+
+import scala.concurrent.{ExecutionContext, Future}
 
 class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: AppConfig)(implicit ec: ExecutionContext) extends Logging with Status {
 
-  def retrieveInboxPartial()(implicit hc: HeaderCarrier): Future[InboxPartial] =
-    fetchPartial(config.microservice.services.secureMessaging.fetchInboxEndpoint, "the user's inbox")
+  def retrieveInboxPartial(eori: String, filter: MessageFilterTag)(implicit hc: HeaderCarrier): Future[InboxPartial] =
+    fetchPartial(config.microservice.services.secureMessaging.fetchInboxEndpoint, "the user's inbox", constructInboxEndpointQueryParams(eori, filter))
       .map(response => InboxPartial(response.body))
 
   def retrieveConversationPartial(client: String, conversationId: String)(implicit hc: HeaderCarrier): Future[ConversationPartial] =
@@ -69,9 +70,11 @@ class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: A
       }
    */
 
-  private def fetchPartial(url: String, errorInfo: String)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+  private def fetchPartial(url: String, errorInfo: String, queryParams: Seq[(String, String)] = Seq.empty)(
+    implicit hc: HeaderCarrier
+  ): Future[HttpResponse] =
     httpClient
-      .GET[HttpResponse](url)
+      .GET[HttpResponse](url, queryParams)
       .flatMap { response =>
         response.status match {
           case OK => Future.successful(response)
@@ -84,6 +87,13 @@ class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: A
           logger.warn(s"Received a ${exc.statusCode} response from secure-messaging-frontend while retrieving $errorInfo. ${exc.message}")
           Future.failed(exc)
       }
+
+  private def constructInboxEndpointQueryParams(eori: String, filter: MessageFilterTag): Seq[(String, String)] = {
+    val enrolmentParameter = ("enrolment", s"HMRC-CUS-ORG~EoriNumber~$eori")
+    val filterParameter = ("tag", s"notificationType~${filter.filterValue}")
+
+    Seq(enrolmentParameter, filterParameter)
+  }
 }
 
 object SecureMessageFrontendConnector {

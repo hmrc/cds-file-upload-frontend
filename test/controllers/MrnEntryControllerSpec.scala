@@ -17,7 +17,7 @@
 package controllers
 
 import forms.MRNFormProvider
-import models.{MRN, UserAnswers}
+import models.{FileUploadAnswers, MRN}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import play.api.test.Helpers._
@@ -34,15 +34,15 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
   private val mrnEntryPage = mock[mrn_entry]
   private val mrnAccessDeniedPage = mock[mrn_access_denied]
 
-  private val validAnswers = UserAnswers(eori, contactDetails = Some(contactDetails))
+  private val validAnswers = FileUploadAnswers(eori, contactDetails = Some(contactDetails))
 
-  private def mrnEntryController(answers: UserAnswers = validAnswers) =
+  private def mrnEntryController(answers: FileUploadAnswers = validAnswers) =
     new MrnEntryController(
       new FakeAuthAction(),
       new FakeDataRetrievalAction(Some(answers)),
       new FakeVerifiedEmailAction(),
       new MRNFormProvider,
-      mockAnswersConnector,
+      mockFileUploadAnswersService,
       mcc,
       mrnEntryPage,
       mrnDisValidator,
@@ -122,13 +122,13 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
 
         val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn)
 
-        "call AnswersConnector" in {
+        "call AnswersService" in {
 
           when(mrnDisValidator.validate(any(), any())(any())).thenReturn(Future.successful(true))
 
           controller.onSubmit(postRequest).futureValue
 
-          val upsertedUserAnswers = theSavedUserAnswers
+          val upsertedUserAnswers = theSavedFileUploadAnswers
           upsertedUserAnswers.mrn mustBe defined
           upsertedUserAnswers.mrn.get mustBe MRN(mrn).get
         }
@@ -176,13 +176,13 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
       }
 
       "passes MRN DIS validation" should {
-        "call AnswersConnector" in {
+        "call AnswersService" in {
 
           when(mrnDisValidator.validate(any(), any())(any())).thenReturn(Future.successful(true))
 
           controller.autoFill(mrn)(fakeRequest).futureValue
 
-          val upsertedUserAnswers = theSavedUserAnswers
+          val upsertedUserAnswers = theSavedFileUploadAnswers
           upsertedUserAnswers.mrn mustBe defined
           upsertedUserAnswers.mrn.get mustBe MRN(mrn).get
         }

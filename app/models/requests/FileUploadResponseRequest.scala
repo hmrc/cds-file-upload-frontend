@@ -19,7 +19,7 @@ package models.requests
 import models._
 import play.api.mvc.WrappedRequest
 
-case class FileUploadResponseRequest[A](request: MrnRequest[A], userAnswers: UserAnswers, fileUploadResponse: FileUploadResponse)
+case class FileUploadResponseRequest[A](request: MrnRequest[A], userAnswers: FileUploadAnswers, fileUploadResponse: FileUploadResponse)
     extends WrappedRequest[A](request) with Authenticated {
   val eori = request.eori
 }

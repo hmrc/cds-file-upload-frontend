@@ -19,8 +19,5 @@ package models.requests
 import models._
 import play.api.mvc.WrappedRequest
 
-case class MrnRequest[A](request: AuthenticatedRequest[A], userAnswers: FileUploadAnswers, mrn: MRN)
-    extends WrappedRequest[A](request) with Authenticated {
-
-  def eori: String = request.eori
-}
+case class MessageFilterRequest[A](request: VerifiedEmailRequest[A], secureMessageAnswers: SecureMessageAnswers)
+    extends WrappedRequest[A](request) with Authenticated

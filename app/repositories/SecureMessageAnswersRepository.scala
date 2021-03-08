@@ -17,8 +17,7 @@
 package repositories
 
 import config.AppConfig
-import javax.inject.{Inject, Singleton}
-import models.UserAnswers
+import models.SecureMessageAnswers
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
@@ -26,12 +25,14 @@ import reactivemongo.play.json.collection.JSONCollection
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
+import javax.inject.{Inject, Singleton}
+
 @Singleton
-class AnswersRepository @Inject()(mc: ReactiveMongoComponent, appConfig: AppConfig)
-    extends ReactiveRepository[UserAnswers, BSONObjectID](
-      collectionName = "answers",
+class SecureMessageAnswersRepository @Inject()(mc: ReactiveMongoComponent, appConfig: AppConfig)
+    extends ReactiveRepository[SecureMessageAnswers, BSONObjectID](
+      collectionName = "answers-secure-message",
       mongo = mc.mongoConnector.db,
-      domainFormat = UserAnswers.answersFormat,
+      domainFormat = SecureMessageAnswers.format,
       idFormat = ReactiveMongoFormats.objectIdFormats
     ) {
 
@@ -41,10 +42,9 @@ class AnswersRepository @Inject()(mc: ReactiveMongoComponent, appConfig: AppConf
   override def indexes: Seq[Index] = Seq(
     Index(Seq("eori" -> IndexType.Ascending), name = Some("eoriIdx")),
     Index(
-      key = Seq("updated" -> IndexType.Ascending),
+      key = Seq("created" -> IndexType.Ascending),
       name = Some("ttl"),
-      options = BSONDocument("expireAfterSeconds" -> appConfig.answersRepository.ttlSeconds)
+      options = BSONDocument("expireAfterSeconds" -> appConfig.secureMessageAnswersRepository.ttlSeconds)
     )
   )
-
 }

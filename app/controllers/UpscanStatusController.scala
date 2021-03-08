@@ -28,7 +28,7 @@ import models.requests.FileUploadResponseRequest
 import play.api.Logger
 import play.api.i18n.I18nSupport
 import play.api.mvc._
-import services.AnswersService
+import services.FileUploadAnswersService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -44,7 +44,7 @@ class UpscanStatusController @Inject()(
   requireMrn: MrnRequiredAction,
   verifiedEmail: VerifiedEmailAction,
   requireResponse: FileUploadResponseRequiredAction,
-  answersConnector: AnswersService,
+  answersService: FileUploadAnswersService,
   auditConnector: AuditConnector,
   cdsFileUploadConnector: CdsFileUploadConnector,
   implicit val appConfig: AppConfig,
@@ -90,7 +90,7 @@ class UpscanStatusController @Inject()(
         case Some(upload) =>
           val updatedFiles = upload.copy(state = Uploaded) :: uploads.filterNot(_.id == id)
           val answers = req.userAnswers.copy(fileUploadResponse = Some(FileUploadResponse(updatedFiles)))
-          answersConnector.upsert(answers).flatMap { _ =>
+          answersService.upsert(answers).flatMap { _ =>
             nextPage(upload.reference, uploads)
           }
         case None =>
@@ -158,7 +158,7 @@ class UpscanStatusController @Inject()(
     retrieveNotifications()
   }
 
-  private def clearUserCache(eori: String) = answersConnector.removeByEori(eori)
+  private def clearUserCache(eori: String) = answersService.removeByEori(eori)
 
   private def auditUploadSuccess()(implicit req: FileUploadResponseRequest[_]): Unit = {
     def auditDetails: Map[String, String] = {

@@ -17,7 +17,6 @@
 package base
 
 import config.{
-  AnswersRepository,
   AppConfig,
   Assets,
   CDSFileUpload,
@@ -26,12 +25,14 @@ import config.{
   CustomsDeclarations,
   Feedback,
   FileFormats,
+  FileUploadAnswersRepository,
   GoogleAnalytics,
   Keystore,
   Microservice,
   Notifications,
   Platform,
   Proxy,
+  SecureMessageAnswersRepository,
   SecureMessaging,
   Services,
   TrackingConsentFrontend
@@ -49,7 +50,8 @@ object AppConfigMockHelper extends MockitoSugar {
     notifications: Notifications = mock[Notifications],
     feedback: Feedback = mock[Feedback],
     proxy: Proxy = mock[Proxy],
-    answersRepository: AnswersRepository = mock[AnswersRepository],
+    answersRepository: FileUploadAnswersRepository = mock[FileUploadAnswersRepository],
+    secureMessageAnswersRepository: SecureMessageAnswersRepository = mock[SecureMessageAnswersRepository],
     trackingConsentFrontend: TrackingConsentFrontend = mock[TrackingConsentFrontend],
     platform: Platform = mock[Platform]
   ) = AppConfig(
@@ -63,6 +65,7 @@ object AppConfigMockHelper extends MockitoSugar {
     feedback,
     proxy,
     answersRepository,
+    secureMessageAnswersRepository,
     trackingConsentFrontend,
     platform
   )

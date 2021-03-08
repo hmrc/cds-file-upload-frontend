@@ -18,12 +18,17 @@ package controllers
 
 import controllers.actions.{AuthAction, SecureMessagingFeatureAction, VerifiedEmailAction}
 import forms.InboxChoiceForm
-import forms.InboxChoiceForm.Values
-import javax.inject.{Inject, Singleton}
+import models.{MessageFilterTag, SecureMessageAnswers}
+import models.requests.VerifiedEmailRequest
 import play.api.i18n.I18nSupport
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.Logging
+import services.SecureMessageAnswersService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.messaging.inbox_choice
+
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class InboxChoiceController @Inject()(
@@ -31,8 +36,12 @@ class InboxChoiceController @Inject()(
   authenticate: AuthAction,
   verifiedEmail: VerifiedEmailAction,
   secureMessagingFeatureAction: SecureMessagingFeatureAction,
-  inboxChoice: inbox_choice
-) extends FrontendController(mcc) with I18nSupport {
+  answersService: SecureMessageAnswersService,
+  inboxChoice: inbox_choice,
+  ec: ExecutionContext
+) extends FrontendController(mcc) with I18nSupport with Logging {
+
+  implicit val eContext = ec
 
   val actions = authenticate andThen verifiedEmail andThen secureMessagingFeatureAction
 
@@ -40,12 +49,22 @@ class InboxChoiceController @Inject()(
     Ok(inboxChoice(InboxChoiceForm.form))
   }
 
-  val onSubmit: Action[AnyContent] = actions { implicit request =>
+  val onSubmit: Action[AnyContent] = actions.async { implicit request =>
     InboxChoiceForm.form
       .bindFromRequest()
-      .fold(formWithErrors => BadRequest(inboxChoice(formWithErrors)), _.choice match {
-        case Values.ExportsMessages => Redirect(controllers.routes.SecureMessagingController.displayInbox)
-        case Values.ImportsMessages => Redirect(controllers.routes.SecureMessagingController.displayInbox)
+      .fold(formWithErrors => Future.successful(BadRequest(inboxChoice(formWithErrors))), { form =>
+        checkMessageFilterTag(form.choice)
       })
   }
+
+  private def checkMessageFilterTag(choice: String)(implicit req: VerifiedEmailRequest[AnyContent]): Future[Result] =
+    MessageFilterTag.valueOf(choice) match {
+      case None =>
+        logger.error(s"InboxChoiceForm was sent an invalid MessageFilterTag value of '$choice'")
+        Future.successful(BadRequest(inboxChoice(InboxChoiceForm.form)))
+      case Some(tag) =>
+        answersService.upsert(SecureMessageAnswers(req.eori, tag)).map { _ =>
+          Redirect(routes.SecureMessagingController.displayInbox())
+        }
+    }
 }
