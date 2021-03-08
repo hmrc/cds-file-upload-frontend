@@ -16,6 +16,7 @@
 
 package views.messaging
 
+import controllers.routes
 import forms.InboxChoiceForm
 import forms.InboxChoiceForm.Values
 import org.jsoup.nodes.Document
@@ -34,6 +35,10 @@ class InboxChoiceSpec extends DomAssertions with ViewMatchers {
 
     "display page header" in {
       view.getElementsByTag("h1").first() must containMessage("inboxChoice.heading")
+    }
+
+    "display the 'Back' link" in {
+      assertBackLinkIsIncluded(view, routes.ChoiceController.onPageLoad.url)
     }
 
     "display radio buttons" in {

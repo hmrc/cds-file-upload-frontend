@@ -21,12 +21,13 @@
 
 @this(mainTemplate: gdsMainTemplate, govukAccordion : GovukAccordion, govukBackLink : GovukBackLink)
 
-@(partial: HtmlFormat.Appendable, titleKey: String)(implicit request: Request[_], messages: Messages)
+@(partial: HtmlFormat.Appendable, titleKey: String, backLinkUrl: Option[String] = None)(implicit request: Request[_], messages: Messages)
 
 @mainTemplate(
   title = Title(titleKey),
   useCustomContentWidth = true,
-  withNavigationBanner = true
+  withNavigationBanner = true,
+  backLinkUrl = backLinkUrl
 ) {
   <div class="govuk-grid-row">
 

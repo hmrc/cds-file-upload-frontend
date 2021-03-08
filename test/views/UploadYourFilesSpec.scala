@@ -16,6 +16,7 @@
 
 package views
 
+import controllers.routes
 import generators.Generators
 import models._
 import models.requests.{AuthenticatedRequest, SignedInUser}
@@ -32,13 +33,15 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCh
 
   def view(pos: Position): Html = page(uploadRequest, pos, mrn)(fakeRequest, messages, fakeRequest.flash)
 
-  val view: () => Html = () => view(First(3))
-
   val messagePrefix = "fileUploadPage"
 
   "Upload your files page" must {
 
-    behave like pageWithoutHeading(view, messagePrefix, "p.fileNeedsToBe", "listItem1", "listItem2", "listItem3", "listItem4")
+    behave like pageWithoutHeading(
+      () => view(First(3)),
+      messagePrefix,
+      "p.fileNeedsToBe", "listItem1", "listItem2", "listItem3", "listItem4"
+    )
 
     "include the 'Sign out' link if the user is authorised" in {
       forAll { user: SignedInUser =>
@@ -46,6 +49,10 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCh
         val view = page(uploadRequest, First(3), mrn)(request, messages, request.flash)
         assertSignoutLinkIsIncluded(view)
       }
+    }
+
+    "display the 'Back' link" in {
+      assertBackLinkIsIncluded(asDocument(view(First(3))), routes.HowManyFilesUploadController.onPageLoad.url)
     }
 
     "show title" when {

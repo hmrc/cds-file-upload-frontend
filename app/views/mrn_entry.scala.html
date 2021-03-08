@@ -29,7 +29,7 @@
 
 @(form: Form[MRN])(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = Title("mrnEntryPage.heading")) {
+@mainTemplate(title = Title("mrnEntryPage.heading"), backLinkUrl = Some(routes.ChoiceController.onPageLoad.url)) {
 
 <div class="form-group">
     <div class="govuk-grid-row">

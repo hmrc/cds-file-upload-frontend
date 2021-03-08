@@ -16,16 +16,18 @@
 
 package views.messaging
 
-import base.{OverridableInjector, SpecBase}
+import base.OverridableInjector
 import config.SecureMessagingConfig
+import controllers.routes
 import org.jsoup.nodes.Document
 import org.mockito.Mockito.{reset, when}
 import play.api.inject.bind
 import play.twirl.api.HtmlFormat
+import views.DomAssertions
 import views.html.messaging.inbox_wrapper
 import views.matchers.ViewMatchers
 
-class InboxWrapperSpec extends SpecBase with ViewMatchers {
+class InboxWrapperSpec extends DomAssertions with ViewMatchers {
 
   private val secureMessagingConfig = mock[SecureMessagingConfig]
   private val injector = new OverridableInjector(bind[SecureMessagingConfig].toInstance(secureMessagingConfig))
@@ -55,6 +57,10 @@ class InboxWrapperSpec extends SpecBase with ViewMatchers {
 
     "display navigation banner" in {
       view must containElementWithID("navigation-banner")
+    }
+
+    "display the 'Back' link" in {
+      assertBackLinkIsIncluded(view, routes.InboxChoiceController.onPageLoad.url)
     }
 
     "display partial contents" in {

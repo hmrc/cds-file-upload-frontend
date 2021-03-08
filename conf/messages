@@ -9,13 +9,15 @@ common.feedback.link=feedback
 common.navigation.messages = Messages
 common.navigation.uploadFiles = Upload files
 
+common.back.link = Back
+
+## common buttons with shared labels
+common.button.startNow=Start now
+
 ## errors
 error.browser.heading.prefix=Error:
 error.summary.title=There is a problem
 error.required = Please enter a value.
-
-## common buttons with shared labels
-common.button.startNow=Start now
 
 ## start page
 

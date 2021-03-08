@@ -16,12 +16,13 @@
 
 package views
 
+import controllers.routes
 import forms.MRNFormProvider
 import models.MRN
 import models.requests.{AuthenticatedRequest, SignedInUser}
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.data.Form
-import play.twirl.api.{Html, HtmlFormat}
+import play.twirl.api.HtmlFormat
 import utils.FakeRequestCSRFSupport._
 import views.behaviours.StringViewBehaviours
 import views.html.mrn_entry
@@ -32,14 +33,14 @@ class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with Sca
 
   val page = instanceOf[mrn_entry]
 
-  val view: () => Html = () => page(form)(fakeRequest.withCSRFToken, messages)
+  val view = page(form)(fakeRequest.withCSRFToken, messages)
 
   val messagePrefix = "mrnEntryPage"
 
   def createViewUsingForm: Form[MRN] => HtmlFormat.Appendable = form => page(form)(fakeRequest.withCSRFToken, messages)
 
   "MRN Entry Page" must {
-    behave like normalPage(view, messagePrefix)
+    behave like normalPage(() => view, messagePrefix)
 
     behave like stringPage(createViewUsingForm, "value", messagePrefix)
 
@@ -54,6 +55,10 @@ class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with Sca
         val view = page(form)(AuthenticatedRequest(fakeRequest.withCSRFToken, user), messages)
         assertSignoutLinkIsIncluded(view)
       }
+    }
+
+    "display the 'Back' link" in {
+      assertBackLinkIsIncluded(asDocument(view), routes.ChoiceController.onPageLoad.url)
     }
   }
 }

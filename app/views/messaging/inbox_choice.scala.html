@@ -33,7 +33,7 @@
 
 @(form: Form[InboxChoiceForm])(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = Title("inboxChoice.heading")) {
+@mainTemplate(title = Title("inboxChoice.heading"), backLinkUrl = Some(routes.ChoiceController.onPageLoad.url)) {
 
   @formHelper(action = routes.InboxChoiceController.onSubmit, 'autoComplete -> "off") {
 

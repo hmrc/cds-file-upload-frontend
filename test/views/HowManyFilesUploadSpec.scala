@@ -16,12 +16,13 @@
 
 package views
 
+import controllers.routes
 import forms.FileUploadCountProvider
-import models.{FileUploadCount, MRN}
 import models.requests.{AuthenticatedRequest, SignedInUser}
+import models.{FileUploadCount, MRN}
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.data.Form
-import play.twirl.api.{Html, HtmlFormat}
+import play.twirl.api.HtmlFormat
 import utils.FakeRequestCSRFSupport._
 import views.behaviours.IntViewBehaviours
 import views.html.how_many_files_upload
@@ -31,7 +32,7 @@ class HowManyFilesUploadSpec extends DomAssertions with IntViewBehaviours[FileUp
   val form = new FileUploadCountProvider()()
   val mrn: MRN = arbitraryMrn.arbitrary.sample.get
   val page = instanceOf[how_many_files_upload]
-  val view: () => Html = () => page(form, mrn)(fakeRequest.withCSRFToken, messages)
+  val view = page(form, mrn)(fakeRequest.withCSRFToken, messages)
 
   val messagePrefix = "howManyFilesUpload"
 
@@ -39,7 +40,7 @@ class HowManyFilesUploadSpec extends DomAssertions with IntViewBehaviours[FileUp
     form => page(form, mrn)(fakeRequest.withCSRFToken, messages)
 
   "How Many Files Upload Page" must {
-    behave like normalPage(view, messagePrefix)
+    behave like normalPage(() => view, messagePrefix)
 
     behave like intPage(createViewUsingForm, (form, i) => form.bind(Map("value" -> i.toString)), "value", messagePrefix)
 
@@ -48,6 +49,10 @@ class HowManyFilesUploadSpec extends DomAssertions with IntViewBehaviours[FileUp
         val view = page(form, mrn)(AuthenticatedRequest(fakeRequest.withCSRFToken, user), messages)
         assertSignoutLinkIsIncluded(view)
       }
+    }
+
+    "display the 'Back' link" in {
+      assertBackLinkIsIncluded(asDocument(view), routes.ContactDetailsController.onPageLoad.url)
     }
   }
 }
