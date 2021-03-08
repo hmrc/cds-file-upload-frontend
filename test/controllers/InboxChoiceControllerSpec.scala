@@ -20,7 +20,8 @@ import base.TestRequests
 import forms.InboxChoiceForm
 import forms.InboxChoiceForm.{InboxChoiceKey, Values}
 import models.exceptions.InvalidFeatureStateException
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import models.{ExportMessages, SecureMessageAnswers}
+import org.mockito.ArgumentMatchers.{any, anyString, eq => eqTo}
 import org.mockito.Mockito._
 import play.api.data.Form
 import play.api.i18n.Messages
@@ -28,11 +29,15 @@ import play.api.libs.json.Json
 import play.api.mvc.Request
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
+import services.SecureMessageAnswersService
 import views.html.messaging.inbox_choice
+
+import scala.concurrent.Future
 
 class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
 
   private val inboxChoice = mock[inbox_choice]
+  private val secureMessageAnswersService = mock[SecureMessageAnswersService]
   private val secureMessagingFeatureAction = new SecureMessagingFeatureActionMock()
 
   private val controller =
@@ -41,15 +46,18 @@ class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
       new FakeAuthAction(),
       new FakeVerifiedEmailAction(),
       secureMessagingFeatureAction,
-      inboxChoice
+      secureMessageAnswersService,
+      inboxChoice,
+      executionContext
     )
 
   override def beforeEach(): Unit = {
     super.beforeEach()
 
-    reset(inboxChoice)
+    reset(inboxChoice, secureMessageAnswersService)
     secureMessagingFeatureAction.reset()
     when(inboxChoice.apply(any[Form[InboxChoiceForm]])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
+    when(secureMessageAnswersService.upsert(any())).thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
   }
 
   "InboxChoiceController on onPageLoad" when {
@@ -150,7 +158,17 @@ class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
 
           val request = postRequest(Json.obj(InboxChoiceKey -> Values.ExportsMessages))
 
+          "call SecureMessageAnswerService" in {
+            when(secureMessageAnswersService.findByEori(anyString())).thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
+            secureMessagingFeatureAction.enableSecureMessagingFeature()
+
+            controller.onSubmit()(request).futureValue
+
+            verify(secureMessageAnswersService).upsert(SecureMessageAnswers(any(), ExportMessages))
+          }
+
           "return SEE_OTHER (303)" in {
+            when(secureMessageAnswersService.findByEori(anyString())).thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
             secureMessagingFeatureAction.enableSecureMessagingFeature()
 
             val result = controller.onSubmit()(request)
@@ -159,6 +177,7 @@ class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
           }
 
           "redirect to /messages" in {
+            when(secureMessageAnswersService.findByEori(anyString())).thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
             secureMessagingFeatureAction.enableSecureMessagingFeature()
 
             val result = controller.onSubmit()(request)

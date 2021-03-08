@@ -20,16 +20,9 @@ import org.joda.time.{DateTime, DateTimeZone}
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
-case class UserAnswers(
-  eori: String,
-  mrn: Option[MRN] = None,
-  contactDetails: Option[ContactDetails] = None,
-  fileUploadCount: Option[FileUploadCount] = None,
-  fileUploadResponse: Option[FileUploadResponse] = None,
-  updated: DateTime = DateTime.now.withZone(DateTimeZone.UTC)
-)
+case class SecureMessageAnswers(eori: String, filter: MessageFilterTag, created: DateTime = DateTime.now.withZone(DateTimeZone.UTC))
 
-object UserAnswers {
+object SecureMessageAnswers {
   implicit val dateFormat: Format[DateTime] = ReactiveMongoFormats.dateTimeFormats
-  implicit val answersFormat = Json.format[UserAnswers]
+  implicit val format = Json.format[SecureMessageAnswers]
 }

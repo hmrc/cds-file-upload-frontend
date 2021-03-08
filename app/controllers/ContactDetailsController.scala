@@ -23,7 +23,7 @@ import javax.inject.Inject
 import play.api.data.Form
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.AnswersService
+import services.FileUploadAnswersService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.contact_details
 
@@ -35,7 +35,7 @@ class ContactDetailsController @Inject()(
   getData: DataRetrievalAction,
   requireMrn: MrnRequiredAction,
   verifiedEmail: VerifiedEmailAction,
-  answersConnector: AnswersService,
+  answersService: FileUploadAnswersService,
   mcc: MessagesControllerComponents,
   contactDetails: contact_details
 )(implicit ec: ExecutionContext)
@@ -54,7 +54,7 @@ class ContactDetailsController @Inject()(
       .fold(
         errorForm => Future.successful(BadRequest(contactDetails(errorForm, req.mrn))),
         contactDetails => {
-          answersConnector.upsert(req.userAnswers.copy(contactDetails = Some(contactDetails))).map { _ =>
+          answersService.upsert(req.userAnswers.copy(contactDetails = Some(contactDetails))).map { _ =>
             Redirect(routes.HowManyFilesUploadController.onPageLoad())
           }
         }

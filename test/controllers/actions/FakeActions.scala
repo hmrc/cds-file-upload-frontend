@@ -18,7 +18,7 @@ package controllers.actions
 
 import config.SecureMessagingConfig
 import generators.Generators
-import models.{ContactDetails, MRN, UserAnswers}
+import models.{ContactDetails, ExportMessages, FileUploadAnswers, MRN, MessageFilterTag, SecureMessageAnswers}
 import models.requests._
 import org.mockito.Mockito
 import org.scalacheck.Arbitrary._
@@ -38,11 +38,11 @@ trait FakeActions extends Generators with MockitoSugar {
       Future.successful(Right(AuthenticatedRequest(request, user)))
   }
 
-  class FakeDataRetrievalAction(answers: Option[UserAnswers] = None) extends DataRetrievalAction {
+  class FakeDataRetrievalAction(answers: Option[FileUploadAnswers] = None) extends DataRetrievalAction {
     protected def executionContext = ExecutionContext.global
     def parser = stubBodyParser()
     override protected def transform[A](request: VerifiedEmailRequest[A]): Future[DataRequest[A]] =
-      Future.successful(DataRequest(request, answers.getOrElse(UserAnswers(request.eori))))
+      Future.successful(DataRequest(request, answers.getOrElse(FileUploadAnswers(request.eori))))
   }
 
   class FakeContactDetailsRequiredAction(val contactDetails: ContactDetails = arbitraryContactDetails.arbitrary.sample.get)
@@ -64,6 +64,13 @@ trait FakeActions extends Generators with MockitoSugar {
     def parser = stubBodyParser()
     override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, VerifiedEmailRequest[A]]] =
       Future.successful(Right(VerifiedEmailRequest[A](request, email)))
+  }
+
+  class FakeMessageFilterAction(eori: String = eoriString.sample.get, tag: MessageFilterTag = ExportMessages) extends MessageFilterAction {
+    protected def executionContext = ExecutionContext.global
+    def parser = stubBodyParser()
+    override protected def refine[A](request: VerifiedEmailRequest[A]): Future[Either[Result, MessageFilterRequest[A]]] =
+      Future.successful(Right(MessageFilterRequest[A](request, SecureMessageAnswers(eori, tag))))
   }
 
   class SecureMessagingFeatureActionMock(private val secureMessagingConfig: SecureMessagingConfig = mock[SecureMessagingConfig])

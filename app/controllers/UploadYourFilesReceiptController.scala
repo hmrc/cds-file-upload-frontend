@@ -29,7 +29,7 @@ import models.requests.VerifiedEmailRequest
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import play.twirl.api.Html
-import services.AnswersService
+import services.FileUploadAnswersService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.{upload_your_files_confirmation, upload_your_files_receipt}
@@ -44,7 +44,7 @@ class UploadYourFilesReceiptController @Inject()(
   metrics: SfusMetrics,
   uploadYourFilesReceipt: upload_your_files_receipt,
   uploadYourFilesConfirmation: upload_your_files_confirmation,
-  answersService: AnswersService,
+  answersService: FileUploadAnswersService,
   secureMessagingConfig: SecureMessagingConfig
 )(implicit mcc: MessagesControllerComponents, ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {

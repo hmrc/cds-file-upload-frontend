@@ -29,7 +29,8 @@ case class AppConfig(
   notifications: Notifications,
   feedback: Feedback,
   proxy: Proxy,
-  answersRepository: AnswersRepository,
+  fileUploadAnswersRepository: FileUploadAnswersRepository,
+  secureMessageAnswersRepository: SecureMessageAnswersRepository,
   trackingConsentFrontend: TrackingConsentFrontend,
   platform: Platform
 )
@@ -103,7 +104,9 @@ case class Feedback(url: String)
 
 case class Proxy(protocol: String, host: String, port: Int, username: String, password: String, proxyRequiredForThisEnvironment: Boolean)
 
-case class AnswersRepository(ttlSeconds: Int)
+case class FileUploadAnswersRepository(ttlSeconds: Int)
+
+case class SecureMessageAnswersRepository(ttlSeconds: Int)
 
 case class Gtm(container: String)
 

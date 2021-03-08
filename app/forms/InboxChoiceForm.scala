@@ -18,6 +18,7 @@ package forms
 
 import forms.mappings.EnhancedMapping.requiredRadio
 import forms.validators.FieldValidator
+import models.{ExportMessages, ImportMessages}
 import play.api.data.{Form, Forms}
 
 case class InboxChoiceForm(choice: String)
@@ -27,8 +28,8 @@ object InboxChoiceForm {
   val InboxChoiceKey = "choice"
 
   object Values {
-    val ExportsMessages = "ExportsMessages"
-    val ImportsMessages = "ImportsMessages"
+    val ExportsMessages = ExportMessages.toString
+    val ImportsMessages = ImportMessages.toString
   }
 
   val form: Form[InboxChoiceForm] = {

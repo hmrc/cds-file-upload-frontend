@@ -76,5 +76,13 @@ class AppConfigSpec extends PlaySpec {
       secureMessaging.replyResultEndpoint("client", "conversationId") mustBe
         "http://localhost:9055/secure-message-frontend/cds-file-upload-service/conversation/client/conversationId/result"
     }
+
+    "have a TTL defined for the FileUploadAnswersRepository" in {
+      config.fileUploadAnswersRepository.ttlSeconds mustBe 3600
+    }
+
+    "have a TTL defined for the SecureMessageAnswersRepository" in {
+      config.secureMessageAnswersRepository.ttlSeconds mustBe 3600
+    }
   }
 }

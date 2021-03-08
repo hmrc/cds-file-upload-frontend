@@ -16,9 +16,9 @@
 
 package pages
 
-import models.UserAnswers
+import models.FileUploadAnswers
 
 trait QuestionPage[A] extends Page {
 
-  def cleanup(value: Option[A], userAnswers: UserAnswers): UserAnswers = userAnswers
+  def cleanup(value: Option[A], userAnswers: FileUploadAnswers): FileUploadAnswers = userAnswers
 }

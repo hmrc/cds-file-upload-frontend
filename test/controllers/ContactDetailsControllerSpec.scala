@@ -44,7 +44,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
       dataRetrieval,
       new FakeMrnRequiredAction,
       new FakeVerifiedEmailAction(),
-      mockAnswersConnector,
+      mockFileUploadAnswersService,
       mcc,
       page
     )(mcc.executionContext)
@@ -66,7 +66,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
     "load the correct page when user is logged in" in {
 
       forAll { (user: SignedInUser, eori: String) =>
-        val answers = UserAnswers(eori, mrn = Some(mrn))
+        val answers = FileUploadAnswers(eori, mrn = Some(mrn))
         val result = controller(user, eori, fakeDataRetrievalAction(answers)).onPageLoad(fakeRequest)
 
         status(result) mustBe OK
@@ -76,7 +76,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
     "contact details should be displayed if they exist in the cache" in {
 
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
-        val answers = UserAnswers(eori, mrn = Some(mrn), contactDetails = Some(contactDetails))
+        val answers = FileUploadAnswers(eori, mrn = Some(mrn), contactDetails = Some(contactDetails))
         val result = controller(user, eori, fakeDataRetrievalAction(answers)).onPageLoad(fakeRequest)
 
         contentAsString(result) mustBe view(form.fill(contactDetails))
@@ -88,7 +88,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
         whenever(contactDetails.email.matches(emailRegex)) {
           val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
-          val answers = UserAnswers(eori, mrn = Some(mrn))
+          val answers = FileUploadAnswers(eori, mrn = Some(mrn))
           val result = controller(user, eori, fakeDataRetrievalAction(answers)).onSubmit(postRequest)
 
           status(result) mustBe SEE_OTHER
@@ -101,7 +101,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
 
       forAll(arbitrary[SignedInUser], eoriString, arbitrary[ContactDetails], minStringLength(36)) { (user, eori, contactDetails, invalidName) =>
         val badData = contactDetails.copy(name = invalidName)
-        val answers = UserAnswers(eori, mrn = Some(mrn))
+        val answers = FileUploadAnswers(eori, mrn = Some(mrn))
 
         val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(badData): _*)
         val badForm = form.fillAndValidate(badData)
@@ -117,13 +117,13 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
 
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
         whenever(contactDetails.email.matches(emailRegex)) {
-          resetAnswersConnector()
+          resetAnswersService()
           val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
-          val answers = UserAnswers(eori, mrn = Some(mrn))
+          val answers = FileUploadAnswers(eori, mrn = Some(mrn))
 
           await(controller(user, eori, fakeDataRetrievalAction(answers)).onSubmit(postRequest))
 
-          theSavedUserAnswers.contactDetails mustBe Some(contactDetails)
+          theSavedFileUploadAnswers.contactDetails mustBe Some(contactDetails)
         }
       }
     }

@@ -21,11 +21,11 @@ import base.SpecBase
 import config.SecureMessagingConfig
 import controllers.actions.{ContactDetailsRequiredAction, DataRetrievalAction, FakeActions}
 import models.requests.SignedInUser
-import models.{ContactDetails, UserAnswers}
+import models.{ContactDetails, FileUploadAnswers, SecureMessageAnswers}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, verify, when}
-import services.AnswersService
+import services.{FileUploadAnswersService, SecureMessageAnswersService}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException, Enrolments}
 
@@ -34,7 +34,8 @@ import scala.concurrent.Future
 abstract class ControllerSpecBase extends SpecBase with FakeActions {
 
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
-  val mockAnswersConnector: AnswersService = mock[AnswersService]
+  val mockFileUploadAnswersService: FileUploadAnswersService = mock[FileUploadAnswersService]
+  val mockSecureMessageAnswersService: SecureMessageAnswersService = mock[SecureMessageAnswersService]
   val secureMessageConfig: SecureMessagingConfig = mock[SecureMessagingConfig]
 
   def withSecureMessagingEnabled(enabled: Boolean)(test: => Unit): Unit = {
@@ -65,18 +66,24 @@ abstract class ControllerSpecBase extends SpecBase with FakeActions {
   }
 
   override protected def beforeEach(): Unit = {
-    resetAnswersConnector()
+    resetAnswersService()
     reset(secureMessageConfig)
   }
 
-  def resetAnswersConnector() = {
-    reset(mockAnswersConnector)
-    when(mockAnswersConnector.upsert(any[UserAnswers])).thenReturn(Future.successful(Some(UserAnswers(""))))
+  def resetAnswersService() = {
+    reset(mockFileUploadAnswersService)
+    when(mockFileUploadAnswersService.upsert(any[FileUploadAnswers])).thenReturn(Future.successful(Some(FileUploadAnswers(""))))
   }
 
-  def theSavedUserAnswers: UserAnswers = {
-    val captor = ArgumentCaptor.forClass(classOf[UserAnswers])
-    verify(mockAnswersConnector).upsert(captor.capture())
+  def theSavedFileUploadAnswers: FileUploadAnswers = {
+    val captor = ArgumentCaptor.forClass(classOf[FileUploadAnswers])
+    verify(mockFileUploadAnswersService).upsert(captor.capture())
+    captor.getValue
+  }
+
+  def theSavedSecureMessageAnswers: SecureMessageAnswers = {
+    val captor = ArgumentCaptor.forClass(classOf[SecureMessageAnswers])
+    verify(mockSecureMessageAnswersService).upsert(captor.capture())
     captor.getValue
   }
 
@@ -86,5 +93,5 @@ abstract class ControllerSpecBase extends SpecBase with FakeActions {
     new FakeContactDetailsRequiredAction(contactDetails)
 
   def fakeDataRetrievalAction(): DataRetrievalAction = new FakeDataRetrievalAction(None)
-  def fakeDataRetrievalAction(answers: UserAnswers): DataRetrievalAction = new FakeDataRetrievalAction(Some(answers))
+  def fakeDataRetrievalAction(answers: FileUploadAnswers): DataRetrievalAction = new FakeDataRetrievalAction(Some(answers))
 }

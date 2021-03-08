@@ -36,6 +36,7 @@ class Module extends AbstractModule {
     bind(classOf[ContactDetailsRequiredAction]).to(classOf[ContactDetailsRequiredActionImpl]).asEagerSingleton()
     bind(classOf[MrnRequiredAction]).to(classOf[MrnRequiredActionImpl]).asEagerSingleton()
     bind(classOf[DataRetrievalAction]).to(classOf[DataRetrievalActionImpl]).asEagerSingleton()
+    bind(classOf[MessageFilterAction]).to(classOf[MessageFilterActionImpl]).asEagerSingleton()
   }
 
   @Provides @Singleton

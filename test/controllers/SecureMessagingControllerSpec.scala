@@ -16,12 +16,10 @@
 
 package controllers
 
-import scala.concurrent.Future
-
 import base.TestRequests
 import connectors.SecureMessageFrontendConnector
-import models.exceptions.InvalidFeatureStateException
 import models.{ConversationPartial, InboxPartial, ReplyResultPartial}
+import models.exceptions.InvalidFeatureStateException
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, verify, when}
 import play.api.i18n.Messages
@@ -31,6 +29,8 @@ import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.FakeRequestCSRFSupport._
 import views.html.messaging.{inbox_wrapper, partial_wrapper}
+
+import scala.concurrent.Future
 
 class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests {
 
@@ -44,6 +44,7 @@ class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests
       new FakeAuthAction(),
       new FakeVerifiedEmailAction(),
       secureMessagingFeatureAction,
+      new FakeMessageFilterAction(),
       connector,
       mcc,
       partialWrapperPage,
@@ -80,7 +81,7 @@ class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests
 
           "wrap the partial in the inbox display wrapper" in {
             secureMessagingFeatureAction.enableSecureMessagingFeature()
-            when(connector.retrieveInboxPartial()(any[HeaderCarrier])).thenReturn(Future.successful(InboxPartial("")))
+            when(connector.retrieveInboxPartial(any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(InboxPartial("")))
 
             val result = controller.displayInbox()(fakeRequest)
 
@@ -93,7 +94,7 @@ class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests
           "display the 'Sorry' page to the user" in {
             secureMessagingFeatureAction.enableSecureMessagingFeature()
 
-            when(connector.retrieveInboxPartial()(any[HeaderCarrier])).thenReturn(Future.failed(new Exception("Whoopse")))
+            when(connector.retrieveInboxPartial(any(), any())(any[HeaderCarrier])).thenReturn(Future.failed(new Exception("Whoopse")))
 
             an[Exception] mustBe thrownBy {
               await(controller.displayInbox()(fakeRequest))

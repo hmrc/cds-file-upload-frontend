@@ -17,9 +17,9 @@
 package controllers
 
 import scala.concurrent.{ExecutionContext, Future}
-
 import connectors.SecureMessageFrontendConnector
-import controllers.actions.{AuthAction, SecureMessagingFeatureAction, VerifiedEmailAction}
+import controllers.actions.{AuthAction, MessageFilterAction, SecureMessagingFeatureAction, VerifiedEmailAction}
+
 import javax.inject.Inject
 import models.ConversationPartial
 import play.api.i18n.I18nSupport
@@ -33,6 +33,7 @@ class SecureMessagingController @Inject()(
   authenticate: AuthAction,
   verifiedEmail: VerifiedEmailAction,
   secureMessagingFeatureAction: SecureMessagingFeatureAction,
+  messageFilterAction: MessageFilterAction,
   messageConnector: SecureMessageFrontendConnector,
   mcc: MessagesControllerComponents,
   inbox_wrapper: inbox_wrapper,
@@ -40,11 +41,11 @@ class SecureMessagingController @Inject()(
 )(implicit ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
-  val actions = authenticate andThen verifiedEmail andThen secureMessagingFeatureAction
+  val actions = authenticate andThen verifiedEmail andThen secureMessagingFeatureAction andThen messageFilterAction
 
   val displayInbox: Action[AnyContent] = actions.async { implicit request =>
     messageConnector
-      .retrieveInboxPartial()
+      .retrieveInboxPartial(request.secureMessageAnswers.eori, request.secureMessageAnswers.filter)
       .map { partial =>
         Ok(inbox_wrapper(HtmlFormat.raw(partial.body)))
       }

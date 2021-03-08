@@ -69,7 +69,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       new FakeMrnRequiredAction(),
       new FakeVerifiedEmailAction(),
       new FileUploadResponseRequiredAction(),
-      mockAnswersConnector,
+      mockFileUploadAnswersService,
       mockAuditConnector,
       cdsFileUploadConnector,
       appConfig.copy(notifications = Notifications(maxRetries = 3, retryPauseMillis = 500)),
@@ -87,7 +87,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
   }
 
   override protected def afterEach(): Unit = {
-    reset(mockAuditConnector, cdsFileUploadConnector, uploadYourFiles, uploadError, mockAnswersConnector)
+    reset(mockAuditConnector, cdsFileUploadConnector, uploadYourFiles, uploadError, mockFileUploadAnswersService)
 
     super.afterEach()
   }
@@ -110,7 +110,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
 
         forAll(waitingGen) {
           case (file, _, response) =>
-            val answers = UserAnswers(eori, fileUploadResponse = Some(response))
+            val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response))
             val result = controller(fakeDataRetrievalAction(answers)).onPageLoad(file.reference)(fakeRequest)
 
             status(result) mustBe OK
@@ -124,7 +124,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
         val fileUpload = FileUpload("ref1", Uploaded, id = "ref1")
         val response = FileUploadResponse(List(fileUpload))
 
-        val answers = UserAnswers(eori, fileUploadResponse = Some(response))
+        val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response))
 
         when(cdsFileUploadConnector.getNotification(any())(any()))
           .thenReturn(Future.successful(Some(Notification("ref1", "SUCCESS", "file1.pdf"))))
@@ -142,7 +142,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
     val response = FileUploadResponse(List(fileUpload1, fileUpload2))
 
     "redirect to next page when file is valid" in {
-      val answers = UserAnswers(eori, fileUploadResponse = Some(response))
+      val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response))
 
       val result = controller(fakeDataRetrievalAction(answers)).success(fileUpload1.id)(fakeRequest)
 
@@ -157,7 +157,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
 
       when(cdsFileUploadConnector.getNotification(any())(any()))
         .thenReturn(Future.successful(Some(Notification("ref1", "SUCCESS", "myfile.doc"))))
-      val answers = UserAnswers(eori, fileUploadResponse = Some(response))
+      val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response))
 
       val result = controller(fakeDataRetrievalAction(answers)).success("ref1")(fakeRequest)
 
@@ -172,7 +172,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
 
       val result = controller(new FakeDataRetrievalAction(None)).success("someRef")(fakeRequest)
 
-      result.map(_ => verify(mockAnswersConnector).removeByEori(any()))
+      result.map(_ => verify(mockFileUploadAnswersService).removeByEori(any()))
 
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(routes.ErrorPageController.error().url)
@@ -183,10 +183,10 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       forAll { (ref: String, response: FileUploadResponse) =>
         whenever(!response.uploads.exists(_.reference == ref)) {
 
-          val answers = UserAnswers(eori, fileUploadResponse = Some(response))
+          val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response))
           val result = controller(fakeDataRetrievalAction(answers)).success(ref)(fakeRequest)
 
-          result.map(_ => verify(mockAnswersConnector).removeByEori(any()))
+          result.map(_ => verify(mockFileUploadAnswersService).removeByEori(any()))
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some(routes.ErrorPageController.error().url)
@@ -205,10 +205,10 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       when(cdsFileUploadConnector.getNotification(any())(any()))
         .thenReturn(Future.successful(Some(Notification("ref", "SUCCESS", "myfile.pdf"))))
 
-      val answers = UserAnswers(eori, fileUploadResponse = Some(response))
+      val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response))
       await(controller(fakeDataRetrievalAction(answers)).success("ref")(fakeRequest))
 
-      val Some(updateResponse) = theSavedUserAnswers.fileUploadResponse
+      val Some(updateResponse) = theSavedFileUploadAnswers.fileUploadResponse
       val Some(updatedFile) = updateResponse.uploads.find(_.id == "ref")
       updatedFile.state mustBe Uploaded
     }
@@ -219,7 +219,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val fileUploadWaiting = FileUpload("ref2", Waiting(UploadRequest("href", Map.empty)), id = "ref2")
       val response = FileUploadResponse(List(fileUploaded, fileUploadWaiting))
 
-      val answers = UserAnswers(eori, fileUploadResponse = Some(response))
+      val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response))
       val result = controller(fakeDataRetrievalAction(answers)).success(fileUploaded.reference)(fakeRequest)
 
       status(result) mustBe SEE_OTHER
@@ -236,7 +236,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val Some(mrn) = MRN("34GB1234567ABCDEFG")
       val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456", "joe@bloggs.com")
       val answers =
-        UserAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
+        FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
 
       val expectedDetail = Map(
         "eori" -> eori,
@@ -280,7 +280,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val Some(mrn) = MRN("34GB1234567ABCDEFG")
       val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456", "joe@bloggs.com")
       val answers =
-        UserAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
+        FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
 
       when(cdsFileUploadConnector.getNotification(meq("fileRef1"))(any()))
         .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", "file1.pdf"))))
@@ -304,7 +304,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val Some(mrn) = MRN("34GB1234567ABCDEFG")
       val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456", "joe@bloggs.com")
       val answers =
-        UserAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
+        FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
 
       when(cdsFileUploadConnector.getNotification(meq("fileRef1"))(any()))
         .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", "file1.pdf"))))
@@ -314,7 +314,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
         .thenReturn(Future.successful(Some(Notification("fileRef3", "SUCCESS", "file3.gif"))))
 
       val result = controller(fakeDataRetrievalAction(answers)).success(lastFile.reference)(fakeRequest)
-      result.map(_ => verify(mockAnswersConnector).removeByEori(any()))
+      result.map(_ => verify(mockFileUploadAnswersService).removeByEori(any()))
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(routes.ErrorPageController.uploadError().url)
     }
@@ -329,7 +329,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val Some(mrn) = MRN("34GB1234567ABCDEFG")
       val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456", "joe@bloggs.com")
       val answers =
-        UserAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
+        FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
 
       when(cdsFileUploadConnector.getNotification(meq("fileRef1"))(any()))
         .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", "file1.pdf"))))
@@ -339,7 +339,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
         .thenReturn(Future.successful(None))
 
       val result = controller(fakeDataRetrievalAction(answers)).success(lastFile.reference)(fakeRequest)
-      result.map(_ => verify(mockAnswersConnector).removeByEori(any()))
+      result.map(_ => verify(mockFileUploadAnswersService).removeByEori(any()))
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(routes.ErrorPageController.uploadError().url)
     }

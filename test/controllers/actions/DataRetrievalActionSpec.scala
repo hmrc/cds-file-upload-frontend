@@ -17,31 +17,31 @@
 package controllers.actions
 
 import controllers.ControllerSpecBase
-import models.UserAnswers
+import models.FileUploadAnswers
 import models.requests.{AuthenticatedRequest, DataRequest, VerifiedEmailRequest}
 import org.mockito.ArgumentMatchers.{eq => eqTo}
 import org.mockito.Mockito._
-import services.AnswersService
+import services.FileUploadAnswersService
 import testdata.CommonTestData._
 
 import scala.concurrent.Future
 
 class DataRetrievalActionSpec extends ControllerSpecBase {
 
-  private val answersConnector: AnswersService = mock[AnswersService]
-  private val action: ActionTestWrapper = new ActionTestWrapper(answersConnector)
+  private val answersService: FileUploadAnswersService = mock[FileUploadAnswersService]
+  private val action: ActionTestWrapper = new ActionTestWrapper(answersService)
 
-  private val answers = UserAnswers(eori)
+  private val answers = FileUploadAnswers(eori)
 
   override def beforeEach(): Unit = {
     super.beforeEach()
 
-    reset(answersConnector)
-    when(answersConnector.findOrCreate(eqTo(eori))) thenReturn Future.successful(answers)
+    reset(answersService)
+    when(answersService.findOrCreate(eqTo(eori))) thenReturn Future.successful(answers)
   }
 
   override def afterEach(): Unit = {
-    reset(answersConnector)
+    reset(answersService)
     super.afterEach()
   }
 
@@ -58,7 +58,7 @@ class DataRetrievalActionSpec extends ControllerSpecBase {
     }
   }
 
-  class ActionTestWrapper(answersConnector: AnswersService) extends DataRetrievalActionImpl(answersConnector, mcc) {
+  class ActionTestWrapper(answersService: FileUploadAnswersService) extends DataRetrievalActionImpl(answersService, mcc) {
     def callTransform[A](request: VerifiedEmailRequest[A]): Future[DataRequest[A]] = transform(request)
   }
 }
