@@ -41,7 +41,7 @@
     }
 }
 
-@mainTemplate(title = Title(s"fileUploadPage.heading.$positionModifier")) {
+@mainTemplate(title = Title(s"fileUploadPage.heading.$positionModifier"), backLinkUrl = Some(routes.HowManyFilesUploadController.onPageLoad.url)) {
 
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-full">

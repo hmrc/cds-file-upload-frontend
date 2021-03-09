@@ -26,7 +26,8 @@
 @mainTemplate(
   title = Title("inbox.heading"),
   useCustomContentWidth = true,
-  withNavigationBanner = true
+  withNavigationBanner = true,
+  backLinkUrl = Some(routes.InboxChoiceController.onPageLoad.url)
 ) {
 
   <div class="govuk-grid-row">

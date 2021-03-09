@@ -25,14 +25,15 @@ class StartSpec extends DomAssertions with ViewBehaviours {
 
   val page = instanceOf[start]
 
-  val view = () => page()(fakeRequest.withCSRFToken, messages)
+  val view = page()(fakeRequest.withCSRFToken, messages)
 
   val messageKeyPrefix = "startPage"
 
   "Start Page" must {
-    behave like normalPage(view, messageKeyPrefix, "paragraph2")
+    behave like normalPage(() => view, messageKeyPrefix, "paragraph2")
+
     "have a start button with correct link" in {
-      val doc = asDocument(view())
+      val doc = asDocument(view)
       val expectedLink = routes.StartController.onStart().url
 
       val form = doc.getElementsByTag("form").first()
@@ -41,16 +42,20 @@ class StartSpec extends DomAssertions with ViewBehaviours {
       form.getElementsByTag("button").text() mustBe messages("common.button.startNow")
     }
 
+    "not include the 'Back' link" in {
+      assertBackLinkIsNotIncluded(asDocument(view))
+    }
+
     "have paragraph3 with bold text" in {
       val paragraph3 = messages("startPage.paragraph3", messages("startPage.paragraph3.bold"))
-      val doc = asDocument(view())
+      val doc = asDocument(view)
 
       assertContainsText(doc, paragraph3)
     }
 
     "have paragraph4 with bold text" in {
       val paragraph4 = messages("startPage.paragraph4", messages("startPage.paragraph4.bold"))
-      val doc = asDocument(view())
+      val doc = asDocument(view)
 
       assertContainsText(doc, paragraph4)
     }

@@ -16,6 +16,8 @@
 
 package connectors
 
+import scala.concurrent.{ExecutionContext, Future}
+
 import com.google.inject.Inject
 import config.AppConfig
 import models.{ConversationPartial, InboxPartial, MessageFilterTag, ReplyResultPartial}
@@ -23,8 +25,6 @@ import play.api.Logging
 import play.api.http.Status
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.http.HttpReads.Implicits._
-
-import scala.concurrent.{ExecutionContext, Future}
 
 class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: AppConfig)(implicit ec: ExecutionContext) extends Logging with Status {
 
@@ -79,7 +79,7 @@ class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: A
         response.status match {
           case OK => Future.successful(response)
           case statusCode =>
-            Future.failed(UpstreamErrorResponse(s"Unhappy response fetching $errorInfo", statusCode))
+            Future.failed(UpstreamErrorResponse(s"Unhappy response($statusCode) fetching $errorInfo", statusCode))
         }
       }
       .recoverWith {

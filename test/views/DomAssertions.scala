@@ -20,13 +20,13 @@ import scala.collection.JavaConverters._
 
 import base.SpecBase
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
+import org.jsoup.nodes.{Document, Element}
 import org.scalatest.Assertion
 import play.twirl.api.{Html, HtmlFormat}
 
 trait DomAssertions extends SpecBase {
 
-  def asDocument(string: String) = Jsoup.parse(string)
+  def asDocument(string: String): Document = Jsoup.parse(string)
 
   def asDocument(html: Html): Document = asDocument(html.toString())
 
@@ -117,6 +117,18 @@ trait DomAssertions extends SpecBase {
       case true => assert(radio.attr("checked") == "checked", s"\n\nElement $id is not checked")
       case _    => assert(!radio.hasAttr("checked") && radio.attr("checked") != "checked", s"\n\nElement $id is checked")
     }
+  }
+
+  def assertBackLinkIsIncluded(view: Document, url: String): Assertion = {
+    val elements: List[Element] = view.getElementsByClass("govuk-back-link").iterator.asScala.toList
+    assert(elements.exists { element =>
+      element.text == messages("common.back.link") && element.attr("href") == url
+    })
+  }
+
+  def assertBackLinkIsNotIncluded(view: Document): Assertion = {
+    val elements: List[Element] = view.getElementsByClass("govuk-back-link").iterator.asScala.toList
+    assert(elements.isEmpty)
   }
 
   def assertSignoutLinkIsIncluded(view: HtmlFormat.Appendable): Assertion =

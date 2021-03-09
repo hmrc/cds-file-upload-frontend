@@ -42,7 +42,8 @@
 @(
   title: Title,
   useCustomContentWidth: Boolean = false,
-  withNavigationBanner: Boolean = false
+  withNavigationBanner: Boolean = false,
+  backLinkUrl: Option[String] = None
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages)
 
 @head = {
@@ -69,6 +70,8 @@
     @if(secureMessagingConfig.isSecureMessagingEnabled && withNavigationBanner) {
       @navigationBanner()
     }
+
+    @backLinkUrl.map(href => govukBackLink(BackLink(href = href)))
 }
 
 @content = {

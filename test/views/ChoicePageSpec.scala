@@ -16,6 +16,7 @@
 
 package views
 
+import controllers.routes
 import forms.ChoiceForm
 import forms.ChoiceForm.AllowedChoiceValues
 import org.jsoup.nodes.Document
@@ -35,6 +36,10 @@ class ChoicePageSpec extends DomAssertions with ViewMatchers {
       view.getElementsByTag("h1").first() must containMessage("choicePage.heading")
     }
 
+    "display the 'Back' link" in {
+      assertBackLinkIsIncluded(view, routes.StartController.displayStartPage.url)
+    }
+
     "display radio buttons" in {
       view must containElementWithID(AllowedChoiceValues.SecureMessageInbox)
       view must containElementWithID(AllowedChoiceValues.DocumentUpload)
@@ -44,5 +49,4 @@ class ChoicePageSpec extends DomAssertions with ViewMatchers {
       view.getElementsByClass("govuk-button").first() must containMessage("common.continue")
     }
   }
-
 }

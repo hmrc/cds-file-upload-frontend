@@ -18,7 +18,7 @@ package views.messaging
 
 import scala.collection.JavaConverters._
 
-import base.{OverridableInjector, SpecBase}
+import base.OverridableInjector
 import config.SecureMessagingConfig
 import controllers.routes
 import org.jsoup.nodes.{Document, Element}
@@ -26,10 +26,11 @@ import org.mockito.Mockito._
 import org.scalatest.Assertion
 import play.api.inject.bind
 import play.twirl.api.HtmlFormat
+import views.DomAssertions
 import views.html.messaging.partial_wrapper
 import views.matchers.ViewMatchers
 
-class PartialWrapperSpec extends SpecBase with ViewMatchers {
+class PartialWrapperSpec extends DomAssertions with ViewMatchers {
 
   private val secureMessagingConfig = mock[SecureMessagingConfig]
   private val injector = new OverridableInjector(bind[SecureMessagingConfig].toInstance(secureMessagingConfig))
@@ -45,7 +46,7 @@ class PartialWrapperSpec extends SpecBase with ViewMatchers {
   "partial_wrapper in case of Conversation page" should {
 
     val titleKeyForConversation = "conversation.heading"
-    val view = genView(titleKeyForConversation)
+    val view = genView(titleKeyForConversation, Some(routes.SecureMessagingController.displayInbox.url))
 
     "display page header" in {
       view.getElementsByTag("title").first() must containMessage(titleKeyForConversation)
@@ -53,6 +54,10 @@ class PartialWrapperSpec extends SpecBase with ViewMatchers {
 
     "display navigation banner" in {
       view must containElementWithID("navigation-banner")
+    }
+
+    "display the 'Back' link" in {
+      assertBackLinkIsIncluded(view, routes.SecureMessagingController.displayInbox.url)
     }
 
     "display partial contents" in {
@@ -67,7 +72,7 @@ class PartialWrapperSpec extends SpecBase with ViewMatchers {
   "partial_wrapper in case of Reply Result page" should {
 
     val titleKeyForReplyResult = "replyResult.heading"
-    val view = genView(titleKeyForReplyResult)
+    val view = genView(titleKeyForReplyResult, None)
 
     "display page header" in {
       view.getElementsByTag("title").first() must containMessage(titleKeyForReplyResult)
@@ -75,6 +80,10 @@ class PartialWrapperSpec extends SpecBase with ViewMatchers {
 
     "display navigation banner" in {
       view must containElementWithID("navigation-banner")
+    }
+
+    "not display the 'Back' link" in {
+      assertBackLinkIsNotIncluded(view)
     }
 
     "display partial contents" in {
@@ -93,8 +102,8 @@ class PartialWrapperSpec extends SpecBase with ViewMatchers {
     })
   }
 
-  private def genView(titleKey: String): Document = {
+  private def genView(titleKey: String, backLinkUrl: Option[String]): Document = {
     when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(true)
-    partialWrapperPage(HtmlFormat.raw(partialContent), titleKey)(fakeRequest, messages)
+    partialWrapperPage(HtmlFormat.raw(partialContent), titleKey, backLinkUrl)(fakeRequest, messages)
   }
 }

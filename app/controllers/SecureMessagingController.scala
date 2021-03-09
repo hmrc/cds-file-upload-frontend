@@ -76,6 +76,10 @@ class SecureMessagingController @Inject()(
 
   private def wrapperFormForPartial(partial: ConversationPartial)(implicit request: Request[_]): HtmlFormat.Appendable = {
     val csrfToken = CSRF.getToken.get.value
-    partial_wrapper(HtmlFormat.raw(partial.body.replace("[CSRF_TOKEN_TO_REPLACE]", csrfToken)), "conversation.heading")
+    partial_wrapper(
+      HtmlFormat.raw(partial.body.replace("[CSRF_TOKEN_TO_REPLACE]", csrfToken)),
+      "conversation.heading",
+      Some(routes.SecureMessagingController.displayInbox.url)
+    )
   }
 }
