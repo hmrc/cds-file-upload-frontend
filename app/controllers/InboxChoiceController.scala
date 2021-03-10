@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions.{AuthAction, SecureMessagingFeatureAction, VerifiedEmailAction}
 import forms.InboxChoiceForm
-import models.{MessageFilterTag, SecureMessageAnswers}
+import models.{ExportMessages, MessageFilterTag, SecureMessageAnswers}
 import models.requests.VerifiedEmailRequest
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -26,7 +26,6 @@ import play.api.Logging
 import services.SecureMessageAnswersService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.messaging.inbox_choice
-
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -45,6 +44,10 @@ class InboxChoiceController @Inject()(
 
   val actions = authenticate andThen verifiedEmail andThen secureMessagingFeatureAction
 
+  val onExportsMessageChoice: Action[AnyContent] = actions.async { implicit request =>
+    checkMessageFilterTag(ExportMessages.toString)
+  }
+
   val onPageLoad: Action[AnyContent] = actions { implicit request =>
     Ok(inboxChoice(InboxChoiceForm.form))
   }
@@ -62,9 +65,10 @@ class InboxChoiceController @Inject()(
       case None =>
         logger.error(s"InboxChoiceForm was sent an invalid MessageFilterTag value of '$choice'")
         Future.successful(BadRequest(inboxChoice(InboxChoiceForm.form)))
+
       case Some(tag) =>
         answersService.upsert(SecureMessageAnswers(req.eori, tag)).map { _ =>
-          Redirect(routes.SecureMessagingController.displayInbox())
+          Redirect(routes.SecureMessagingController.displayInbox)
         }
     }
 }

@@ -182,7 +182,7 @@ class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
 
             val result = controller.onSubmit()(request)
 
-            redirectLocation(result) mustBe Some(controllers.routes.SecureMessagingController.displayInbox.url)
+            redirectLocation(result) mustBe Some(routes.SecureMessagingController.displayInbox.url)
           }
         }
 
@@ -203,9 +203,54 @@ class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
 
             val result = controller.onSubmit()(request)
 
-            redirectLocation(result) mustBe Some(controllers.routes.SecureMessagingController.displayInbox.url)
+            redirectLocation(result) mustBe Some(routes.SecureMessagingController.displayInbox.url)
           }
         }
+      }
+    }
+  }
+
+  "InboxChoiceController on onExportsMessageChoice" when {
+
+    "the feature flag for SecureMessaging is disabled" should {
+
+      "return a 404(NOT_FOUND) status code" in {
+        secureMessagingFeatureAction.disableSecureMessagingFeature()
+        an[InvalidFeatureStateException] mustBe thrownBy { await(controller.onExportsMessageChoice()(getRequest)) }
+      }
+    }
+
+    "the feature flag for SecureMessaging is enabled" should {
+
+      "call SecureMessageAnswerService" in {
+        when(secureMessageAnswersService.findByEori(any[String]))
+          .thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
+
+        secureMessagingFeatureAction.enableSecureMessagingFeature()
+
+        controller.onExportsMessageChoice()(getRequest).futureValue
+
+        verify(secureMessageAnswersService).upsert(SecureMessageAnswers(any(), ExportMessages))
+      }
+
+      "return SEE_OTHER (303)" in {
+        when(secureMessageAnswersService.findByEori(any[String]))
+          .thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
+
+        secureMessagingFeatureAction.enableSecureMessagingFeature()
+
+        val result = controller.onExportsMessageChoice()(getRequest)
+        status(result) mustBe SEE_OTHER
+      }
+
+      "redirect to /messages" in {
+        when(secureMessageAnswersService.findByEori(any[String]))
+          .thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
+
+        secureMessagingFeatureAction.enableSecureMessagingFeature()
+
+        val result = controller.onExportsMessageChoice()(getRequest)
+        redirectLocation(result) mustBe Some(routes.SecureMessagingController.displayInbox.url)
       }
     }
   }

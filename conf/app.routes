@@ -15,6 +15,7 @@ GET         /unauthorised                                   controllers.Unauthor
 GET         /what-do-you-want-to-do                         controllers.ChoiceController.onPageLoad
 POST        /what-do-you-want-to-do                         controllers.ChoiceController.onSubmit
 
+GET         /exports-message-choice                         controllers.InboxChoiceController.onExportsMessageChoice
 GET         /message-choice                                 controllers.InboxChoiceController.onPageLoad
 POST        /message-choice                                 controllers.InboxChoiceController.onSubmit
 
