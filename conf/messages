@@ -74,7 +74,7 @@ replyResult.heading = Reply result
 greyBox.heading = Upload requested documents
 greyBox.paragraph.1 = You will need to re-enter the correct MRN to attach documents to the declaration.
 greyBox.paragraph.2 = Upload the documents then reply to the message to let us know they are ready to be checked.
-greyBox.uploadFiles = Attach documents to a declaration
+greyBox.uploadFiles = Upload and attach documents to a declaration
 
 ## MRN Entry Page
 
