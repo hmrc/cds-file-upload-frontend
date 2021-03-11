@@ -35,7 +35,8 @@ class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: A
   def retrieveConversationPartial(client: String, conversationId: String)(implicit hc: HeaderCarrier): Future[ConversationPartial] =
     fetchPartial(
       config.microservice.services.secureMessaging.fetchMessageEndpoint(client, conversationId),
-      s"the '$client/$conversationId' conversation"
+      s"the '$client/$conversationId' conversation",
+      conversationEndpointQueryParams
     ).map(response => ConversationPartial(response.body))
 
   def retrieveReplyResult(client: String, conversationId: String)(implicit hc: HeaderCarrier): Future[ReplyResultPartial] =
@@ -94,6 +95,8 @@ class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: A
 
     Seq(enrolmentParameter, filterParameter)
   }
+
+  private val conversationEndpointQueryParams: Seq[(String, String)] = Seq(("showReplyForm", "true"))
 }
 
 object SecureMessageFrontendConnector {

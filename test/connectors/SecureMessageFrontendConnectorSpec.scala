@@ -18,7 +18,7 @@ package connectors
 
 import base.{Injector, UnitSpec}
 import config.AppConfig
-import models.{ExportMessages, ImportMessages, InboxPartial}
+import models.{ConversationPartial, ExportMessages, ImportMessages, InboxPartial}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.Mockito.{reset, verify, when}
@@ -42,6 +42,8 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
   }
 
   val connector = new SecureMessageFrontendConnector(httpClient, appConfig)
+  val clientId = "clientId"
+  val conversationId = "conversationId"
 
   "SecureMessageFrontend" when {
     "retrieveInboxPartial is called" which {
@@ -133,6 +135,63 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
           queryParamValue.size mustBe 2
           queryParamValue(1) mustBe Tuple2("tag", "notificationType~CDS-IMPORTS")
         }
+      }
+    }
+
+    "retrieveConversationPartial is called" which {
+      "receives a 200 response" should {
+        "return a populated InboxPartial" in {
+          val partialContent = "<div>Some Content</div>"
+          val httpResponse = HttpResponse(status = OK, body = partialContent)
+
+          when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+            .thenReturn(Future.successful(httpResponse))
+
+          val result = connector.retrieveConversationPartial(clientId, conversationId).futureValue
+
+          result mustBe ConversationPartial(partialContent)
+        }
+      }
+
+      "receives a non 200 response" should {
+        "return a failed Future" in {
+          val httpResponse = HttpResponse(status = BAD_REQUEST, body = "")
+
+          when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+            .thenReturn(Future.successful(httpResponse))
+
+          val result = connector.retrieveConversationPartial(clientId, conversationId)
+          assert(result.failed.futureValue.isInstanceOf[UpstreamErrorResponse])
+        }
+      }
+
+      "fails to connect to downstream service" should {
+        "return a failed Future" in {
+          when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+            .thenReturn(Future.failed(new BadGatewayException("Error")))
+
+          val result = connector.retrieveConversationPartial(clientId, conversationId)
+          assert(result.failed.futureValue.isInstanceOf[BadGatewayException])
+        }
+      }
+    }
+
+    "calling retrieveConversationPartial" should {
+      "include the 'showReplyForm' query string param" in {
+        val httpResponse = HttpResponse(status = OK, "")
+
+        when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+          .thenReturn(Future.successful(httpResponse))
+
+        connector.retrieveConversationPartial(clientId, conversationId).futureValue
+
+        val queryParamCaptor = ArgumentCaptor.forClass(classOf[Seq[(String, String)]])
+        verify(httpClient).GET[HttpResponse](anyString(), queryParamCaptor.capture())(any(), any(), any())
+
+        val queryParamValue = queryParamCaptor.getValue().asInstanceOf[Seq[(String, String)]]
+
+        queryParamValue.size mustBe 1
+        queryParamValue(0) mustBe Tuple2("showReplyForm", "true")
       }
     }
 
