@@ -16,18 +16,23 @@
 
 package views
 
+import base.OverridableInjector
+import config.SecureMessagingConfig
+import controllers.actions.FakeActions
 import controllers.routes
 import forms.MRNFormProvider
 import models.MRN
 import models.requests.{AuthenticatedRequest, SignedInUser}
+import org.jsoup.nodes.Document
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.data.Form
+import play.api.inject.bind
 import play.twirl.api.HtmlFormat
 import utils.FakeRequestCSRFSupport._
 import views.behaviours.StringViewBehaviours
 import views.html.mrn_entry
 
-class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with ScalaCheckPropertyChecks {
+class MrnEntrySpec extends DomAssertions with FakeActions with StringViewBehaviours[MRN] with ScalaCheckPropertyChecks {
 
   val form = new MRNFormProvider()()
 
@@ -57,8 +62,24 @@ class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with Sca
       }
     }
 
-    "display the 'Back' link" in {
-      assertBackLinkIsIncluded(asDocument(view), routes.ChoiceController.onPageLoad.url)
+    "display the 'Back' link" when {
+
+      "the feature flag for SecureMessaging is disabled" in {
+        assertBackLinkIsIncluded(document(false), routes.StartController.displayStartPage.url)
+      }
+
+      "the feature flag for SecureMessaging is enabled" in {
+        assertBackLinkIsIncluded(document(true), routes.ChoiceController.onPageLoad.url)
+      }
+
+      def document(enabled: Boolean): Document = {
+        val secureMessagingConfig = mock[SecureMessagingConfig]
+        val injector = new OverridableInjector(bind[SecureMessagingConfig].toInstance(secureMessagingConfig))
+        val secureMessagingFlagMock = new SecureMessagingFeatureActionMock(secureMessagingConfig)
+        if (enabled) secureMessagingFlagMock.enableSecureMessagingFeature else secureMessagingFlagMock.disableSecureMessagingFeature
+        val page = injector.instanceOf[mrn_entry]
+        asDocument(page(form)(fakeRequest.withCSRFToken, messages))
+      }
     }
   }
 }

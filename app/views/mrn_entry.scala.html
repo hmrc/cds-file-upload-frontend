@@ -17,19 +17,26 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.html.components.gds._
 @import views.Title
+@import config.SecureMessagingConfig
 
 @this(
-        mainTemplate: gdsMainTemplate,
-        errorSummary: errorSummary,
-        formHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        exportsInputText: exportsInputText,
-        govukButton: GovukButton,
-        pageTitle: pageTitle
+    mainTemplate: gdsMainTemplate,
+    errorSummary: errorSummary,
+    formHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+    exportsInputText: exportsInputText,
+    govukButton: GovukButton,
+    pageTitle: pageTitle,
+    secureMessagingConfig: SecureMessagingConfig
 )
 
 @(form: Form[MRN])(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = Title("mrnEntryPage.heading"), backLinkUrl = Some(routes.ChoiceController.onPageLoad.url)) {
+@backLinkUrl = @{
+  if (secureMessagingConfig.isSecureMessagingEnabled) routes.ChoiceController.onPageLoad.url
+  else routes.StartController.displayStartPage.url
+}
+
+@mainTemplate(title = Title("mrnEntryPage.heading"), backLinkUrl = Some(backLinkUrl)) {
 
 <div class="form-group">
     <div class="govuk-grid-row">
