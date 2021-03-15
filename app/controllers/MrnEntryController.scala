@@ -50,7 +50,7 @@ class MrnEntryController @Inject()(
 
   val form = formProvider()
 
-  val backLinkUrl =
+  lazy val backLinkUrl: String =
     if (secureMessagingConfig.isSecureMessagingEnabled) routes.ChoiceController.onPageLoad.url
     else routes.StartController.displayStartPage.url
 
