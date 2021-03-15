@@ -16,33 +16,31 @@
 
 package views
 
-import base.OverridableInjector
-import config.SecureMessagingConfig
-import controllers.actions.FakeActions
 import controllers.routes
 import forms.MRNFormProvider
 import models.MRN
 import models.requests.{AuthenticatedRequest, SignedInUser}
-import org.jsoup.nodes.Document
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.data.Form
-import play.api.inject.bind
 import play.twirl.api.HtmlFormat
 import utils.FakeRequestCSRFSupport._
 import views.behaviours.StringViewBehaviours
 import views.html.mrn_entry
 
-class MrnEntrySpec extends DomAssertions with FakeActions with StringViewBehaviours[MRN] with ScalaCheckPropertyChecks {
+class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with ScalaCheckPropertyChecks {
 
   val form = new MRNFormProvider()()
 
   val page = instanceOf[mrn_entry]
 
-  val view = page(form)(fakeRequest.withCSRFToken, messages)
+  val backLinkUrlWithMessagingDisabled = routes.StartController.displayStartPage.url
+
+  val view = page(form, backLinkUrlWithMessagingDisabled)(fakeRequest.withCSRFToken, messages)
 
   val messagePrefix = "mrnEntryPage"
 
-  def createViewUsingForm: Form[MRN] => HtmlFormat.Appendable = form => page(form)(fakeRequest.withCSRFToken, messages)
+  def createViewUsingForm: Form[MRN] => HtmlFormat.Appendable =
+    form => page(form, backLinkUrlWithMessagingDisabled)(fakeRequest.withCSRFToken, messages)
 
   "MRN Entry Page" must {
     behave like normalPage(() => view, messagePrefix)
@@ -57,7 +55,8 @@ class MrnEntrySpec extends DomAssertions with FakeActions with StringViewBehavio
 
     "include the 'Sign out' link if the user is authorised" in {
       forAll { user: SignedInUser =>
-        val view = page(form)(AuthenticatedRequest(fakeRequest.withCSRFToken, user), messages)
+        val authenticatedRequest = AuthenticatedRequest(fakeRequest.withCSRFToken, user)
+        val view = page(form, backLinkUrlWithMessagingDisabled)(authenticatedRequest, messages)
         assertSignoutLinkIsIncluded(view)
       }
     }
@@ -65,20 +64,13 @@ class MrnEntrySpec extends DomAssertions with FakeActions with StringViewBehavio
     "display the 'Back' link" when {
 
       "the feature flag for SecureMessaging is disabled" in {
-        assertBackLinkIsIncluded(document(false), routes.StartController.displayStartPage.url)
+        assertBackLinkIsIncluded(asDocument(view), backLinkUrlWithMessagingDisabled)
       }
 
       "the feature flag for SecureMessaging is enabled" in {
-        assertBackLinkIsIncluded(document(true), routes.ChoiceController.onPageLoad.url)
-      }
-
-      def document(enabled: Boolean): Document = {
-        val secureMessagingConfig = mock[SecureMessagingConfig]
-        val injector = new OverridableInjector(bind[SecureMessagingConfig].toInstance(secureMessagingConfig))
-        val secureMessagingFlagMock = new SecureMessagingFeatureActionMock(secureMessagingConfig)
-        if (enabled) secureMessagingFlagMock.enableSecureMessagingFeature else secureMessagingFlagMock.disableSecureMessagingFeature
-        val page = injector.instanceOf[mrn_entry]
-        asDocument(page(form)(fakeRequest.withCSRFToken, messages))
+        val backLinkUrlWithMessagingEnabled = routes.ChoiceController.onPageLoad.url
+        val view = page(form, backLinkUrlWithMessagingEnabled)(fakeRequest.withCSRFToken, messages)
+        assertBackLinkIsIncluded(asDocument(view), backLinkUrlWithMessagingEnabled)
       }
     }
   }

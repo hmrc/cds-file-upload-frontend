@@ -17,7 +17,6 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.html.components.gds._
 @import views.Title
-@import config.SecureMessagingConfig
 
 @this(
     mainTemplate: gdsMainTemplate,
@@ -25,16 +24,10 @@
     formHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
     exportsInputText: exportsInputText,
     govukButton: GovukButton,
-    pageTitle: pageTitle,
-    secureMessagingConfig: SecureMessagingConfig
+    pageTitle: pageTitle
 )
 
-@(form: Form[MRN])(implicit request: Request[_], messages: Messages)
-
-@backLinkUrl = @{
-  if (secureMessagingConfig.isSecureMessagingEnabled) routes.ChoiceController.onPageLoad.url
-  else routes.StartController.displayStartPage.url
-}
+@(form: Form[MRN], backLinkUrl: String)(implicit request: Request[_], messages: Messages)
 
 @mainTemplate(title = Title("mrnEntryPage.heading"), backLinkUrl = Some(backLinkUrl)) {
 

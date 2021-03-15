@@ -16,6 +16,9 @@
 
 package controllers
 
+import scala.concurrent.Future
+
+import config.SecureMessagingConfig
 import forms.MRNFormProvider
 import models.{FileUploadAnswers, MRN}
 import org.mockito.ArgumentMatchers.any
@@ -26,13 +29,12 @@ import services.MrnDisValidator
 import testdata.CommonTestData._
 import views.html.{mrn_access_denied, mrn_entry}
 
-import scala.concurrent.Future
-
 class MrnEntryControllerSpec extends ControllerSpecBase {
 
   private val mrnDisValidator = mock[MrnDisValidator]
   private val mrnEntryPage = mock[mrn_entry]
   private val mrnAccessDeniedPage = mock[mrn_access_denied]
+  private val secureMessagingConfig = mock[SecureMessagingConfig]
 
   private val validAnswers = FileUploadAnswers(eori, contactDetails = Some(contactDetails))
 
@@ -46,21 +48,17 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
       mcc,
       mrnEntryPage,
       mrnDisValidator,
-      mrnAccessDeniedPage
+      mrnAccessDeniedPage,
+      secureMessagingConfig
     )(executionContext)
 
   override def beforeEach(): Unit = {
     super.beforeEach()
 
-    reset(mrnEntryPage, mrnAccessDeniedPage, mrnDisValidator)
-    when(mrnEntryPage.apply(any())(any(), any())).thenReturn(HtmlFormat.empty)
+    reset(mrnEntryPage, mrnAccessDeniedPage, mrnDisValidator, secureMessagingConfig)
+    when(mrnEntryPage.apply(any(), any())(any(), any())).thenReturn(HtmlFormat.empty)
     when(mrnAccessDeniedPage.apply(any())(any(), any())).thenReturn(HtmlFormat.empty)
-  }
-
-  override def afterEach(): Unit = {
-    reset(mrnEntryPage, mrnAccessDeniedPage, mrnDisValidator)
-
-    super.afterEach()
+    when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(true)
   }
 
   "MrnEntryController on onPageLoad" should {
