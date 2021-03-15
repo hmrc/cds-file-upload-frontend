@@ -28,6 +28,7 @@
         pageTitle: pageTitle,
         errorInline: ErrorInline,
         paragraphBody: paragraphBody,
+        link: link,
         appConfig: AppConfig
 )
 
@@ -41,7 +42,7 @@
     }
 }
 
-@mainTemplate(title = Title(s"fileUploadPage.heading.$positionModifier"), backLinkUrl = Some(routes.HowManyFilesUploadController.onPageLoad.url)) {
+@mainTemplate(title = Title(s"fileUploadPage.heading.$positionModifier")) {
 
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-full">
@@ -76,11 +77,11 @@
 
                     <div class="form-field-group">
 
-                    @errorInline(
-                    errorKey = "upload-file",
-                    errorMessage = "",
-                    classes = List("error-message")
-                    )
+                        @errorInline(
+                            errorKey = "upload-file",
+                            errorMessage = "",
+                            classes = List("error-message")
+                        )
 
                         <label class="govuk-label" for="upload-file">Upload a file</label>
                         <input
@@ -99,6 +100,12 @@
                     </br>
 
                     @govukButton(Button(content = Text(messages("fileUploadPage.button")), attributes = Map("id" -> "submit", "name" -> "continue")))
+
+                    @link(
+                        id = Some("cancel-link"),
+                        classes = "govuk-link govuk-!-margin-left-5 govuk-!-margin-top-2 inline-block",
+                        text = messages("fileUploadPage.cancel"),
+                        call = Call("GET", controllers.routes.HowManyFilesUploadController.onPageLoad.url))
                 </div>
             </form>
         </div>

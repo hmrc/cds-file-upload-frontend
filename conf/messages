@@ -143,6 +143,7 @@ fileUploadPage.validation.accept=File is too large or invalid type. \n Please ch
 fileUploadPage.validation.filesize=The file you have chosen is bigger than {0}MB and is not permitted
 fileUploadPage.paragraph1=Ensure that you select the correct documents as requested by HMRC.
 fileUploadPage.button=Upload a document
+fileUploadPage.cancel=Cancel upload
 
 fileUploadReceiptPage.heading=Files have been uploaded and sent to HMRC
 fileUploadReceiptPage.mrn=Movement Reference Number:
