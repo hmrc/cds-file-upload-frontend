@@ -33,11 +33,14 @@ class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with Sca
 
   val page = instanceOf[mrn_entry]
 
-  val view = page(form)(fakeRequest.withCSRFToken, messages)
+  val backLinkUrlWithMessagingDisabled = routes.StartController.displayStartPage.url
+
+  val view = page(form, backLinkUrlWithMessagingDisabled)(fakeRequest.withCSRFToken, messages)
 
   val messagePrefix = "mrnEntryPage"
 
-  def createViewUsingForm: Form[MRN] => HtmlFormat.Appendable = form => page(form)(fakeRequest.withCSRFToken, messages)
+  def createViewUsingForm: Form[MRN] => HtmlFormat.Appendable =
+    form => page(form, backLinkUrlWithMessagingDisabled)(fakeRequest.withCSRFToken, messages)
 
   "MRN Entry Page" must {
     behave like normalPage(() => view, messagePrefix)
@@ -52,13 +55,23 @@ class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with Sca
 
     "include the 'Sign out' link if the user is authorised" in {
       forAll { user: SignedInUser =>
-        val view = page(form)(AuthenticatedRequest(fakeRequest.withCSRFToken, user), messages)
+        val authenticatedRequest = AuthenticatedRequest(fakeRequest.withCSRFToken, user)
+        val view = page(form, backLinkUrlWithMessagingDisabled)(authenticatedRequest, messages)
         assertSignoutLinkIsIncluded(view)
       }
     }
 
-    "display the 'Back' link" in {
-      assertBackLinkIsIncluded(asDocument(view), routes.ChoiceController.onPageLoad.url)
+    "display the 'Back' link" when {
+
+      "the feature flag for SecureMessaging is disabled" in {
+        assertBackLinkIsIncluded(asDocument(view), backLinkUrlWithMessagingDisabled)
+      }
+
+      "the feature flag for SecureMessaging is enabled" in {
+        val backLinkUrlWithMessagingEnabled = routes.ChoiceController.onPageLoad.url
+        val view = page(form, backLinkUrlWithMessagingEnabled)(fakeRequest.withCSRFToken, messages)
+        assertBackLinkIsIncluded(asDocument(view), backLinkUrlWithMessagingEnabled)
+      }
     }
   }
 }

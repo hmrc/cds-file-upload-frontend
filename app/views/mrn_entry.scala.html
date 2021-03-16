@@ -19,17 +19,17 @@
 @import views.Title
 
 @this(
-        mainTemplate: gdsMainTemplate,
-        errorSummary: errorSummary,
-        formHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        exportsInputText: exportsInputText,
-        govukButton: GovukButton,
-        pageTitle: pageTitle
+    mainTemplate: gdsMainTemplate,
+    errorSummary: errorSummary,
+    formHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+    exportsInputText: exportsInputText,
+    govukButton: GovukButton,
+    pageTitle: pageTitle
 )
 
-@(form: Form[MRN])(implicit request: Request[_], messages: Messages)
+@(form: Form[MRN], backLinkUrl: String)(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = Title("mrnEntryPage.heading"), backLinkUrl = Some(routes.ChoiceController.onPageLoad.url)) {
+@mainTemplate(title = Title("mrnEntryPage.heading"), backLinkUrl = Some(backLinkUrl)) {
 
 <div class="form-group">
     <div class="govuk-grid-row">

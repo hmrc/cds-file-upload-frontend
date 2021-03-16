@@ -16,7 +16,12 @@
 
 package controllers
 
+import javax.inject.Inject
+
+import scala.concurrent.{ExecutionContext, Future}
+
 import com.google.inject.Singleton
+import config.SecureMessagingConfig
 import controllers.actions._
 import forms.MRNFormProvider
 import models.{EORI, MRN}
@@ -28,9 +33,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.{mrn_access_denied, mrn_entry}
 
-import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
-
 @Singleton
 class MrnEntryController @Inject()(
   authenticate: AuthAction,
@@ -41,21 +43,26 @@ class MrnEntryController @Inject()(
   mcc: MessagesControllerComponents,
   mrnEntry: mrn_entry,
   mrnDisValidator: MrnDisValidator,
-  mrnAccessDenied: mrn_access_denied
+  mrnAccessDenied: mrn_access_denied,
+  secureMessagingConfig: SecureMessagingConfig
 )(implicit ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
   val form = formProvider()
 
+  lazy val backLinkUrl: String =
+    if (secureMessagingConfig.isSecureMessagingEnabled) routes.ChoiceController.onPageLoad.url
+    else routes.StartController.displayStartPage.url
+
   def onPageLoad: Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData) { implicit req =>
     val populatedForm = req.userAnswers.mrn.fold(form)(form.fill)
-    Ok(mrnEntry(populatedForm))
+    Ok(mrnEntry(populatedForm, backLinkUrl))
   }
 
   def onSubmit: Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData).async { implicit req =>
     form
       .bindFromRequest()
-      .fold(errorForm => Future.successful(BadRequest(mrnEntry(errorForm))), mrn => checkMrnExistenceAndOwnership(mrn))
+      .fold(errorForm => Future.successful(BadRequest(mrnEntry(errorForm, backLinkUrl))), mrn => checkMrnExistenceAndOwnership(mrn))
   }
 
   def autoFill(mrn: String): Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData).async { implicit req =>
@@ -73,6 +80,6 @@ class MrnEntryController @Inject()(
         }
     }
 
-  private def invalidMrnResponse(mrn: String)(implicit req: DataRequest[AnyContent]) =
+  private def invalidMrnResponse(mrn: String)(implicit req: DataRequest[AnyContent]): Future[Result] =
     Future.successful(BadRequest(mrnAccessDenied(mrn)))
 }

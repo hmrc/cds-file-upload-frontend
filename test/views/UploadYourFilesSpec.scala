@@ -47,8 +47,12 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCh
       }
     }
 
-    "display the 'Back' link" in {
-      assertBackLinkIsIncluded(asDocument(view(First(3))), routes.HowManyFilesUploadController.onPageLoad.url)
+    "not display the 'Back' link" in {
+      assertBackLinkIsNotIncluded(asDocument(view(First(3))))
+    }
+
+    "display the 'Cancel upload' link" in {
+      assertContainsLink(asDocument(view(First(3))), "Cancel upload", controllers.routes.HowManyFilesUploadController.onPageLoad.url)
     }
 
     "display inset text" in {

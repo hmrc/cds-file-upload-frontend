@@ -150,6 +150,7 @@ fileUploadPage.validation.filesize=The file you have chosen is bigger than {0}MB
 fileUploadPage.paragraph1=Each file you upload must be less than 10 megabytes (MB), and must be in one of the following formats:
 fileUploadPage.button=Upload and continue
 fileUploadPage.insetText=If you have a Word or Excel document to upload, you need to 'save as' a PDF first. Word and Excel formats are not allowed on this service.
+fileUploadPage.cancel=Cancel upload
 
 fileUploadReceiptPage.heading=Files have been uploaded and sent to HMRC
 fileUploadReceiptPage.mrn=Movement Reference Number:
