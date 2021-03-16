@@ -37,7 +37,7 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCh
 
   "Upload your files page" must {
 
-    behave like pageWithoutHeading(() => view(First(3)), messagePrefix, "p.fileNeedsToBe", "listItem1", "listItem2", "listItem3", "listItem4")
+    behave like pageWithoutHeading(() => view(First(3)), messagePrefix, "paragraph1", "listItem1", "listItem2", "listItem3", "listItem4")
 
     "include the 'Sign out' link if the user is authorised" in {
       forAll { user: SignedInUser =>
@@ -49,6 +49,10 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCh
 
     "display the 'Back' link" in {
       assertBackLinkIsIncluded(asDocument(view(First(3))), routes.HowManyFilesUploadController.onPageLoad.url)
+    }
+
+    "display inset text" in {
+      assertContainsMessage(asDocument(view(First(3))), s"$messagePrefix.insetText")
     }
 
     "show title" when {
