@@ -23,6 +23,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.messaging.{inbox_wrapper, partial_wrapper}
+import java.net.URLEncoder.encode
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
@@ -53,14 +54,30 @@ class SecureMessagingController @Inject()(
     messageConnector
       .retrieveConversationPartial(client, conversationId)
       .map(
-        partial => Ok(partial_wrapper(HtmlFormat.raw(partial.body), "conversation.heading", Some(routes.SecureMessagingController.displayInbox.url)))
+        partial =>
+          Ok(
+            partial_wrapper(
+              HtmlFormat.raw(partial.body),
+              "conversation.heading",
+              defineUploadLink(routes.SecureMessagingController.displayConversation(client, conversationId).url)
+            )
+        )
       )
   }
 
   def displayReplyResult(client: String, conversationId: String): Action[AnyContent] = actions.async { implicit request =>
     messageConnector
       .retrieveReplyResult(client, conversationId)
-      .map(partial => Ok(partial_wrapper(HtmlFormat.raw(partial.body), "replyResult.heading")))
+      .map(
+        partial =>
+          Ok(
+            partial_wrapper(
+              HtmlFormat.raw(partial.body),
+              "replyResult.heading",
+              defineUploadLink(routes.SecureMessagingController.displayReplyResult(client, conversationId).url)
+            )
+        )
+      )
   }
 
   def submitReply(client: String, conversationId: String): Action[AnyContent] = actions.async { implicit request =>
@@ -72,8 +89,19 @@ class SecureMessagingController @Inject()(
         maybeErrorPartial match {
           case None => Redirect(routes.SecureMessagingController.displayReplyResult(client, conversationId))
           case Some(partial) =>
-            Ok(partial_wrapper(HtmlFormat.raw(partial.body), "replyResult.heading"))
+            Ok(
+              partial_wrapper(
+                HtmlFormat.raw(partial.body),
+                "replyResult.heading",
+                defineUploadLink(routes.SecureMessagingController.displayConversation(client, conversationId).url)
+              )
+            )
         }
       }
+  }
+
+  private def defineUploadLink(refererUrl: String) = {
+    val encodedRefererUrl = encode(refererUrl, "UTF-8")
+    routes.MrnEntryController.onPageLoad(Some(encodedRefererUrl)).url
   }
 }

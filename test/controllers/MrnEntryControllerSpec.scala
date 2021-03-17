@@ -61,6 +61,8 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
     when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(true)
   }
 
+  val validUrl = "https://www.google.com"
+
   "MrnEntryController on onPageLoad" should {
 
     "return Ok (200) response" when {
@@ -68,7 +70,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
       "cache is empty" in {
 
         val controller = mrnEntryController()
-        val result = controller.onPageLoad(fakeRequest)
+        val result = controller.onPageLoad()(fakeRequest)
 
         status(result) mustBe OK
       }
@@ -76,9 +78,29 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
       "cache contains MRN data" in {
 
         val controller = mrnEntryController(validAnswers.copy(mrn = MRN(mrn)))
-        val result = controller.onPageLoad(fakeRequest)
+        val result = controller.onPageLoad()(fakeRequest)
 
         status(result) mustBe OK
+      }
+    }
+
+    "not update the mrnPageRefererUrl value in the cache" when {
+      "no value is sent in the request" in {
+        val controller = mrnEntryController(validAnswers.copy(mrnPageRefererUrl = Some(validUrl)))
+
+        controller.onPageLoad()(fakeRequest).futureValue
+
+        verifyNoInteractions(mockFileUploadAnswersService)
+      }
+    }
+
+    "update the mrnPageRefererUrl value in the cache" when {
+      "a valid URL is sent in the request" in {
+        val controller = mrnEntryController()
+
+        controller.onPageLoad(Some(validUrl))(fakeRequest).futureValue
+
+        theSavedFileUploadAnswers.mrnPageRefererUrl mustBe Some(validUrl)
       }
     }
   }
@@ -194,6 +216,32 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
           status(result) mustBe SEE_OTHER
           redirectLocation(result).get mustBe routes.ContactDetailsController.onPageLoad().url
         }
+      }
+    }
+  }
+
+  "MrnEntryController on autoFill" should {
+    "not clear the mrnPageRefererUrl value in the cache" when {
+      "no value is sent in the request" in {
+        val controller = mrnEntryController(validAnswers.copy(mrnPageRefererUrl = Some(validUrl)))
+
+        when(mrnDisValidator.validate(any(), any())(any())).thenReturn(Future.successful(true))
+
+        controller.autoFill(mrn)(fakeRequest).futureValue
+
+        theSavedFileUploadAnswers.mrnPageRefererUrl mustBe Some(validUrl)
+      }
+    }
+
+    "update the mrnPageRefererUrl value in the cache" when {
+      "a valid URL is sent in the request" in {
+        val controller = mrnEntryController()
+
+        when(mrnDisValidator.validate(any(), any())(any())).thenReturn(Future.successful(true))
+
+        controller.autoFill(mrn, Some(validUrl))(fakeRequest).futureValue
+
+        theSavedFileUploadAnswers.mrnPageRefererUrl mustBe Some(validUrl)
       }
     }
   }

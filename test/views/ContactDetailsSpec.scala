@@ -55,7 +55,7 @@ class ContactDetailsSpec extends DomAssertions with ViewBehaviours with ScalaChe
     }
 
     "display the 'Back' link" in {
-      assertBackLinkIsIncluded(asDocument(view), routes.MrnEntryController.onPageLoad.url)
+      assertBackLinkIsIncluded(asDocument(view), routes.MrnEntryController.onPageLoad().url)
     }
 
     "display name input" in {

@@ -26,7 +26,8 @@ case class FileUploadAnswers(
   contactDetails: Option[ContactDetails] = None,
   fileUploadCount: Option[FileUploadCount] = None,
   fileUploadResponse: Option[FileUploadResponse] = None,
-  updated: DateTime = DateTime.now.withZone(DateTimeZone.UTC)
+  updated: DateTime = DateTime.now.withZone(DateTimeZone.UTC),
+  mrnPageRefererUrl: Option[String] = None
 )
 
 object FileUploadAnswers {

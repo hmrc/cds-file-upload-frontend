@@ -49,7 +49,7 @@ class ChoiceController @Inject()(
         validChoice =>
           validChoice.choice match {
             case SecureMessageInbox => Redirect(controllers.routes.InboxChoiceController.onPageLoad)
-            case DocumentUpload     => Redirect(controllers.routes.MrnEntryController.onPageLoad)
+            case DocumentUpload     => Redirect(controllers.routes.MrnEntryController.onPageLoad())
         }
       )
   }

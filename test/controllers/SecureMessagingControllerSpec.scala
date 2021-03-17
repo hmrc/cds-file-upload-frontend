@@ -58,7 +58,7 @@ class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests
     secureMessagingFeatureAction.reset()
 
     when(partialWrapperPage.apply(any[HtmlFormat.Appendable])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
-    when(partial_wrapper.apply(any[HtmlFormat.Appendable], any[String], any[Option[String]])(any[Request[_]], any[Messages]))
+    when(partial_wrapper.apply(any[HtmlFormat.Appendable], any[String], any[String], any[Option[String]])(any[Request[_]], any[Messages]))
       .thenReturn(HtmlFormat.empty)
   }
 

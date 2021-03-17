@@ -16,7 +16,6 @@
 
 package views
 
-import controllers.routes
 import generators.Generators
 import models._
 import models.requests.{AuthenticatedRequest, SignedInUser}
