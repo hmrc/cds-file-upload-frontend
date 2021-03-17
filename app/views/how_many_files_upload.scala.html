@@ -23,6 +23,9 @@
         errorSummary: errorSummary,
         formHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
         exportsInputText: exportsInputText,
+        paragraphBody: paragraphBody,
+        govukInsetText: GovukInsetText,
+        bulletList: bulletList,
         govukButton: GovukButton,
         pageTitle: pageTitle
 )
@@ -43,11 +46,28 @@
                 <span class="govuk-caption-l">@{mrn.value}</span>
                 @pageTitle(text = messages("howManyFilesUpload.heading"))
 
+                @paragraphBody(messages("howManyFilesUpload.paragraph1"))
+
+                @paragraphBody(messages("howManyFilesUpload.paragraph2"))
+
+                @paragraphBody(messages("howManyFilesUpload.paragraph3"))
+
+                @bulletList(
+                    elements = Seq(
+                        Html(messages("howManyFilesUpload.listItem1")),
+                        Html(messages("howManyFilesUpload.listItem2")),
+                        Html(messages("howManyFilesUpload.listItem3")),
+                        Html(messages("howManyFilesUpload.listItem4"))
+                    )
+                )
+
                 @exportsInputText(
                     field = form("value"),
                     labelKey = "howManyFilesUpload.heading",
                     labelClasses = "visually-hidden",
                 )
+
+                @govukInsetText(InsetText(content = Text(messages("howManyFilesUpload.insetText"))))
 
                 </br>
 

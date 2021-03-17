@@ -96,25 +96,25 @@ class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers wi
 
     "have a paragraph explaining next steps" which {
       "has a heading" in {
-        view.getElementsByTag("h3").first() must containMessage(s"$pagePrefix.section1.title")
+        view.getElementsByTag("h3").get(1) must containMessage(s"$pagePrefix.section2.title")
       }
 
       "has some description text" in {
-        view.getElementsByTag("p").get(2) must containMessage(s"$pagePrefix.section1.paragraph1")
+        view.getElementsByTag("p").get(4) must containMessage(s"$pagePrefix.section2.paragraph1")
       }
 
       "have a bullet list" in {
         val bulletList = view.getElementsByTag("ul").get(0)
 
-        bulletList must containMessage(s"${pagePrefix}.section1.listitem1")
-        bulletList must containMessage(s"${pagePrefix}.section1.listitem2")
-        bulletList must containMessage(s"${pagePrefix}.section1.listitem3")
+        bulletList must containMessage(s"${pagePrefix}.section2.listitem1")
+        bulletList must containMessage(s"${pagePrefix}.section2.listitem2")
+        bulletList must containMessage(s"${pagePrefix}.section2.listitem3")
       }
 
       "has a link to the NCH" in {
         assertContainsLink(
           view,
-          messages(s"$pagePrefix.section1.paragraph2.linkText"),
+          messages(s"$pagePrefix.section2.paragraph2.linkText"),
           "https://www.gov.uk/government/organisations/hm-revenue-customs/contact/national-clearance-hub"
         )
       }
@@ -122,7 +122,7 @@ class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers wi
 
     "have a paragraph explaining what happens when a query is raised" which {
       "has a heading" in {
-        view.getElementsByTag("h3").get(1) must containMessage(s"$pagePrefix.section2.title")
+        view.getElementsByTag("h3").first() must containMessage(s"$pagePrefix.section1.title")
       }
 
       "displays the current user's verified email address" in {
@@ -130,7 +130,7 @@ class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers wi
       }
 
       "has a link to the secure messages filter page" in {
-        assertContainsLink(view, messages(s"$pagePrefix.section2.paragraph2.linkText"), controllers.routes.InboxChoiceController.onPageLoad().url)
+        assertContainsLink(view, messages(s"$pagePrefix.section1.paragraph1.linkText"), controllers.routes.InboxChoiceController.onPageLoad().url)
       }
     }
 

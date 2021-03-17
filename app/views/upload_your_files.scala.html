@@ -25,6 +25,8 @@
         formHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
         exportsInputText: exportsInputText,
         govukButton: GovukButton,
+        govukInsetText: GovukInsetText,
+        bulletList: bulletList,
         pageTitle: pageTitle,
         errorInline: ErrorInline,
         paragraphBody: paragraphBody,
@@ -51,16 +53,18 @@
             <span class="govuk-caption-l">@{mrn.value}</span>
             @pageTitle(text = messages(s"fileUploadPage.heading.$positionModifier"))
 
-            @paragraphBody(messages("fileUploadPage.paragraph1"))
-            @paragraphBody(messages("fileUploadPage.p.fileNeedsToBeSize", appConfig.fileFormats.maxFileSizeMb))
-            @paragraphBody(messages("fileUploadPage.p.fileNeedsToBe"))
+            @paragraphBody(messages("fileUploadPage.paragraph1", appConfig.fileFormats.maxFileSizeMb))
 
-            <ul class="list list-bullet">
-                <li class="govuk-body">@messages("fileUploadPage.listItem1")</li>
-                <li class="govuk-body">@messages("fileUploadPage.listItem2")</li>
-                <li class="govuk-body">@messages("fileUploadPage.listItem3")</li>
-                <li class="govuk-body">@messages("fileUploadPage.listItem4")</li>
-            </ul>
+            @bulletList(
+                elements = Seq(
+                    Html(messages("fileUploadPage.listItem1")),
+                    Html(messages("fileUploadPage.listItem2")),
+                    Html(messages("fileUploadPage.listItem3")),
+                    Html(messages("fileUploadPage.listItem4"))
+                )
+            )
+
+            @govukInsetText(InsetText(content = Text(messages("fileUploadPage.insetText"))))
 
             @{
                 Some(refPosition).collect {

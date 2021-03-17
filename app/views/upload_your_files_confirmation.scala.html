@@ -73,27 +73,27 @@
 
     <h3 class="govuk-heading-m">@messages("fileUploadConfirmationPage.section1.title")</h3>
 
-    @paragraphBody(message = messages("fileUploadConfirmationPage.section1.paragraph1"))
-    @bulletList(
-        elements = Seq(
-            Html(messages("fileUploadConfirmationPage.section1.listitem1")),
-            Html(messages("fileUploadConfirmationPage.section1.listitem2")),
-            Html(messages("fileUploadConfirmationPage.section1.listitem3"))
-        )
-    )
+    @paragraphBody(message = messages("fileUploadConfirmationPage.section1.paragraph1",
+        link(text = messages("fileUploadConfirmationPage.section1.paragraph1.linkText"),
+            call = Call("GET", controllers.routes.InboxChoiceController.onPageLoad.url)),
+            <strong id="verifiedEmail">{emailAddress}</strong>))
 
-    @paragraphBody(message = messages("fileUploadConfirmationPage.section1.paragraph2", link(
-        text = messages("fileUploadConfirmationPage.section1.paragraph2.linkText"),
-        call = Call("GET", config.nationalClearingHubLink)
-    )))
+    @paragraphBody(message = messages("fileUploadConfirmationPage.section1.paragraph2"))
 
     <h3 class="govuk-heading-m">@messages("fileUploadConfirmationPage.section2.title")</h3>
 
-    @paragraphBody(message = messages("fileUploadConfirmationPage.section2.paragraph1", <strong id="verifiedEmail">{emailAddress}</strong>))
+    @paragraphBody(message = messages("fileUploadConfirmationPage.section2.paragraph1"))
+    @bulletList(
+        elements = Seq(
+            Html(messages("fileUploadConfirmationPage.section2.listitem1")),
+            Html(messages("fileUploadConfirmationPage.section2.listitem2")),
+            Html(messages("fileUploadConfirmationPage.section2.listitem3"))
+        )
+    )
 
     @paragraphBody(message = messages("fileUploadConfirmationPage.section2.paragraph2", link(
         text = messages("fileUploadConfirmationPage.section2.paragraph2.linkText"),
-        call = Call("GET", controllers.routes.InboxChoiceController.onPageLoad.url)
+        call = Call("GET", config.nationalClearingHubLink)
     )))
 
     </br>

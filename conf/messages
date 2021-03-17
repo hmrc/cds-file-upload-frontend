@@ -1,5 +1,5 @@
 ## common
-common.service.name=Upload a customs document
+common.service.name= CDS document uploads and secure messages
 common.phase=Beta
 common.continue=Continue
 
@@ -78,8 +78,8 @@ greyBox.uploadFiles = Upload and attach documents to a declaration
 
 ## MRN Entry Page
 
-mrnEntryPage.heading=What is your movement reference number (MRN)?
-mrnEntryPage.hint=This is 18 digits long, and is made up of letters and numbers.</br> You were given this when you submitted your declaration.
+mrnEntryPage.heading=What is the MRN of the declaration you want to attach files to?
+mrnEntryPage.hint=The movement reference number (MRN) is 18 digits long, and is made up of current year, 2-letter country code, and 14 numbers. You are given this when you submit a declaration to the Customs Declaration Service.</br></br>For example, 21GB45454545454545.
 mrn.invalid=The MRN you have entered doesn't follow CDS rules, please check your declaration MRN and re-enter
 
 ## MRN access denied page
@@ -127,12 +127,18 @@ fileWarning.button=I understand
 
 howManyFilesUpload.heading=How many files do you need to upload?
 howManyFilesUpload.invalid=You have entered an invalid number of files, you can upload 1 or more files up to a maximum number of 10 files. Re-enter the number of files you wish to upload.
+howManyFilesUpload.paragraph1=Tell us the exact number of files you intend to upload. Count the files, not the actual documents. For example, if you have saved one packing list as 2 jpegs, this is 2 files.
+howManyFilesUpload.paragraph2=Make sure that file names start with a letter or number, not a space, and do not contain any special characters. Hyphens and underscores are acceptable.
+howManyFilesUpload.paragraph3=Each file you upload must be less than 10 megabytes (MB), and must be in one of the following formats:
+howManyFilesUpload.listItem1=jpeg (image)
+howManyFilesUpload.listItem2=png (image)
+howManyFilesUpload.listItem3=PDF
+howManyFilesUpload.listItem4=txt (plain text)
+howManyFilesUpload.insetText=You cannot change this number once you select continue. If you input the wrong number, you will have to start again.
 
 fileUploadPage.heading.first=Upload your first file
 fileUploadPage.heading.middle=Upload your next file
 fileUploadPage.heading.last=Upload your last file
-fileUploadPage.p.fileNeedsToBeSize=The file needs to be less than {0}MB
-fileUploadPage.p.fileNeedsToBe=The file needs to be one of the following formats:
 fileUploadPage.listItem1=jpeg (image)
 fileUploadPage.listItem2=png (image)
 fileUploadPage.listItem3=PDF
@@ -141,8 +147,9 @@ fileUploadPage.filesUploaded=You have uploaded {0} of {1} files
 fileUploadPage.validation.required=You must choose a file to upload
 fileUploadPage.validation.accept=File is too large or invalid type. \n Please choose another file.
 fileUploadPage.validation.filesize=The file you have chosen is bigger than {0}MB and is not permitted
-fileUploadPage.paragraph1=Ensure that you select the correct documents as requested by HMRC.
-fileUploadPage.button=Upload a document
+fileUploadPage.paragraph1=Each file you upload must be less than 10 megabytes (MB), and must be in one of the following formats:
+fileUploadPage.button=Upload and continue
+fileUploadPage.insetText=If you have a Word or Excel document to upload, you need to 'save as' a PDF first. Word and Excel formats are not allowed on this service.
 fileUploadPage.cancel=Cancel upload
 
 fileUploadReceiptPage.heading=Files have been uploaded and sent to HMRC
@@ -164,23 +171,23 @@ fileUploadReceiptPage.uploadAnother=Upload documents for another declaration
 fileUploadReceiptPage.paragraph3=You only need to add documents that are required by HMRC: this will show in the status of the declaration or in a message to you from HMRC.
 fileUploadReceiptPage.finalButton.text=Upload documents for another declaration
 
-fileUploadConfirmationPage.heading=Files have been uploaded and sent to HMRC
+fileUploadConfirmationPage.heading=Files uploaded
 fileUploadConfirmationPage.mrn=Movement Reference Number:
 fileUploadConfirmationPage.tableTitle=Uploaded files
 fileUploadConfirmationPage.fileName=File name
 fileUploadConfirmationPage.receipt=Receipt
 fileUploadConfirmationPage.printPage=Save or print this page for your records (opens in new tab).
-fileUploadConfirmationPage.section1.title=What happens next?
-fileUploadConfirmationPage.section1.paragraph1=As long as you have provided the documents that customs needs to clear your goods, they should be cleared within these time limits from arriving goods or uploading documents (whichever is later):
-fileUploadConfirmationPage.section1.listitem1=2 hours for air freight imports, road freight imports, all exports
-fileUploadConfirmationPage.section1.listitem2=3 hours if received between 8am and 3pm - for maritime freight imports
-fileUploadConfirmationPage.section1.listitem3=by 8am the following day if received after 3pm - for maritime freight imports
-fileUploadConfirmationPage.section1.paragraph2=If the status of your declaration has not changed within the specified time, you should {0}
-fileUploadConfirmationPage.section1.paragraph2.linkText=contact the National Clearance Hub
-fileUploadConfirmationPage.section2.title=If a query is raised
-fileUploadConfirmationPage.section2.paragraph1=If a query is raised, or if you get further replies, you will be notified via {0}
-fileUploadConfirmationPage.section2.paragraph2=If you uploaded documents in response to a query from a case worker on this service, you should now {0}.
-fileUploadConfirmationPage.section2.paragraph2.linkText=reply to the message to tell customs authorities your documents are ready to check
+fileUploadConfirmationPage.section1.title=What to do with queries
+fileUploadConfirmationPage.section1.paragraph1=If a query is raised by customs authorities about your goods or documents, the query will be sent to your {0}. You will be notified about the query on {1} which is your registered CDS email address. You should also be notified in your customs software.
+fileUploadConfirmationPage.section1.paragraph1.linkText=CDS secure inbox
+fileUploadConfirmationPage.section1.paragraph2=If you have just uploaded documents in response to a query, you should now reply to the message to tell customs authorities your documents are ready to be checked.
+fileUploadConfirmationPage.section2.title=What happens next?
+fileUploadConfirmationPage.section2.paragraph1=As long as you have provided the documents that customs needs to clear your goods, they should be cleared within these time limits from arriving goods or uploading documents (whichever is later):
+fileUploadConfirmationPage.section2.listitem1=2 hours for air freight imports, road freight imports, all exports
+fileUploadConfirmationPage.section2.listitem2=3 hours if received between 8am and 3pm - for maritime freight imports
+fileUploadConfirmationPage.section2.listitem3=by 8am the following day if received after 3pm - for maritime freight imports
+fileUploadConfirmationPage.section2.paragraph2=If the status of your declaration has not changed within the specified time, you should {0}
+fileUploadConfirmationPage.section2.paragraph2.linkText=contact the National Clearance Hub (opens in new tab).
 fileUploadConfirmationPage.finalButton.text=Back to start
 
 unauthorised.heading = To continue, you need to get access to the Customs Declaration Service (CDS)
