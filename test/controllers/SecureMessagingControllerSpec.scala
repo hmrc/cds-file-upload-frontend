@@ -54,7 +54,7 @@ class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests
   override def beforeEach(): Unit = {
     super.beforeEach()
 
-    reset(partial_wrapper, partialWrapperPage)
+    reset(partial_wrapper, partialWrapperPage, connector)
     secureMessagingFeatureAction.reset()
 
     when(partialWrapperPage.apply(any[HtmlFormat.Appendable])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
@@ -172,9 +172,9 @@ class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests
 
     "feature flag for SecureMessaging is enabled" should {
 
-      "call secure message connector" when {
+      "call secure message connector" that {
 
-        "successfully returns a ReplyResultPartial" should {
+        "returns a ReplyResultPartial" should {
 
           "wrap the partial in the reply_result page" in {
             secureMessagingFeatureAction.enableSecureMessagingFeature()
@@ -187,7 +187,7 @@ class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests
           }
         }
 
-        "unsuccessfully returns a failed Future" should {
+        "returns a failed Future" should {
 
           "throw an exception" in {
             secureMessagingFeatureAction.enableSecureMessagingFeature()
@@ -221,16 +221,55 @@ class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests
 
     "feature flag for SecureMessaging is enabled" should {
 
-      "call secure message connector" when {
-        "a reply was entered by the user" in {
+      "call secure message connector" in {
+        secureMessagingFeatureAction.enableSecureMessagingFeature()
+        when(connector.submitReply(any[String], any[String], any[Map[String, Seq[String]]])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(None))
+
+        val postRequest = fakeRequest.withFormUrlEncodedBody("messageReply" -> "BlaBla").withCSRFToken
+        controller.submitReply(clientId, conversationId)(postRequest).futureValue
+
+        verify(connector).submitReply(any[String], any[String], any[Map[String, Seq[String]]])(any[HeaderCarrier])
+      }
+
+      "returns a successful Future of None" that {
+        "wraps the returned partial in the partial_wrapper page" in {
           secureMessagingFeatureAction.enableSecureMessagingFeature()
           when(connector.submitReply(any[String], any[String], any[Map[String, Seq[String]]])(any[HeaderCarrier]))
-            .thenReturn(Future.successful(()))
+            .thenReturn(Future.successful(Some(ConversationPartial("<html></html>"))))
 
           val postRequest = fakeRequest.withFormUrlEncodedBody("messageReply" -> "BlaBla").withCSRFToken
           val result = controller.submitReply(clientId, conversationId)(postRequest)
 
-          status(result) mustBe SEE_OTHER
+          status(result) mustBe OK
+        }
+      }
+
+      "returns a successful Future of Some(ConversationPartial)" that {
+        "wraps the returned partial in the partial_wrapper page" in {
+          secureMessagingFeatureAction.enableSecureMessagingFeature()
+          when(connector.submitReply(any[String], any[String], any[Map[String, Seq[String]]])(any[HeaderCarrier]))
+            .thenReturn(Future.successful(Some(ConversationPartial("<html></html>"))))
+
+          val postRequest = fakeRequest.withFormUrlEncodedBody("messageReply" -> "BlaBla").withCSRFToken
+          val result = controller.submitReply(clientId, conversationId)(postRequest)
+
+          status(result) mustBe OK
+        }
+      }
+
+      "returns a failed Future" should {
+        "return a 500 response to the user" in {
+          secureMessagingFeatureAction.enableSecureMessagingFeature()
+          when(connector.submitReply(any[String], any[String], any[Map[String, Seq[String]]])(any[HeaderCarrier]))
+            .thenReturn(Future.failed(new Exception("Whoops!")))
+
+          val postRequest = fakeRequest.withFormUrlEncodedBody("messageReply" -> "BlaBla").withCSRFToken
+
+          an[Exception] mustBe thrownBy {
+            await(controller.submitReply(clientId, conversationId)(postRequest))
+          }
+
           verify(connector).submitReply(any[String], any[String], any[Map[String, Seq[String]]])(any[HeaderCarrier])
         }
       }

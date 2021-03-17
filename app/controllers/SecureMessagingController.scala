@@ -16,18 +16,16 @@
 
 package controllers
 
-import scala.concurrent.{ExecutionContext, Future}
 import connectors.SecureMessageFrontendConnector
 import controllers.actions.{AuthAction, MessageFilterAction, SecureMessagingFeatureAction, VerifiedEmailAction}
-
-import javax.inject.Inject
-import models.ConversationPartial
 import play.api.i18n.I18nSupport
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
-import play.filters.csrf.CSRF
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.messaging.{inbox_wrapper, partial_wrapper}
+
+import javax.inject.Inject
+import scala.concurrent.ExecutionContext
 
 class SecureMessagingController @Inject()(
   authenticate: AuthAction,
@@ -54,7 +52,9 @@ class SecureMessagingController @Inject()(
   def displayConversation(client: String, conversationId: String): Action[AnyContent] = actions.async { implicit request =>
     messageConnector
       .retrieveConversationPartial(client, conversationId)
-      .map(partial => Ok(wrapperFormForPartial(partial)))
+      .map(
+        partial => Ok(partial_wrapper(HtmlFormat.raw(partial.body), "conversation.heading", Some(routes.SecureMessagingController.displayInbox.url)))
+      )
   }
 
   def displayReplyResult(client: String, conversationId: String): Action[AnyContent] = actions.async { implicit request =>
@@ -64,22 +64,16 @@ class SecureMessagingController @Inject()(
   }
 
   def submitReply(client: String, conversationId: String): Action[AnyContent] = actions.async { implicit request =>
-    request.body.asFormUrlEncoded.map { reply =>
-      messageConnector.submitReply(client, conversationId, reply)
-    }
+    val formData = request.body.asFormUrlEncoded.getOrElse(Map.empty)
 
-    // For the time being... until the downstream service is ready
-    Future(Redirect(routes.SecureMessagingController.displayReplyResult(client, conversationId)))
-
-  // Future.successful(NoContent)
-  }
-
-  private def wrapperFormForPartial(partial: ConversationPartial)(implicit request: Request[_]): HtmlFormat.Appendable = {
-    val csrfToken = CSRF.getToken.get.value
-    partial_wrapper(
-      HtmlFormat.raw(partial.body.replace("[CSRF_TOKEN_TO_REPLACE]", csrfToken)),
-      "conversation.heading",
-      Some(routes.SecureMessagingController.displayInbox.url)
-    )
+    messageConnector
+      .submitReply(client, conversationId, formData)
+      .map { maybeErrorPartial =>
+        maybeErrorPartial match {
+          case None => Redirect(routes.SecureMessagingController.displayReplyResult(client, conversationId))
+          case Some(partial) =>
+            Ok(partial_wrapper(HtmlFormat.raw(partial.body), "replyResult.heading"))
+        }
+      }
   }
 }
