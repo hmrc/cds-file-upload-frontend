@@ -18,13 +18,13 @@ package connectors
 
 import base.{Injector, UnitSpec}
 import config.AppConfig
-import models.{ConversationPartial, ExportMessages, ImportMessages, InboxPartial}
+import models.{ConversationPartial, ExportMessages, ImportMessages, InboxPartial, ReplyResultPartial}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.BeforeAndAfterEach
-import play.mvc.Http.Status.{BAD_REQUEST, OK}
+import play.mvc.Http.Status.{BAD_GATEWAY, BAD_REQUEST, NOT_FOUND, OK}
 import testdata.CommonTestData
 import uk.gov.hmrc.http._
 
@@ -195,31 +195,108 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
       }
     }
 
-    "retrieveReplyResult is called" which {
+    "submitReply is called" which {
       "receives a 200 response" should {
-        "return a populated ReplyResultPartial" ignore {} //TODO: implement when connector talks to real secure-message-frontend service
+        "return a None" in {
+          val httpResponse = HttpResponse(status = OK, body = "")
+
+          when(httpClient.POSTForm[HttpResponse](anyString(), any(), any())(any(), any(), any()))
+            .thenReturn(Future.successful(httpResponse))
+
+          val result = connector.submitReply(clientId, conversationId, Map("field" -> Seq("value"))).futureValue
+
+          result.isEmpty mustBe true
+        }
       }
 
-      "receives a non 200 response" should {
-        "return a failed Future" ignore {} //TODO: implement when connector talks to real secure-message-frontend service
+      "receives a 400 response" should {
+        "return a Some ConversationPartial" in {
+          val partialContent = "<div>Some Content</div>"
+          val httpResponse = HttpResponse(status = BAD_REQUEST, body = partialContent)
+
+          when(httpClient.POSTForm[HttpResponse](anyString(), any(), any())(any(), any(), any()))
+            .thenReturn(Future.successful(httpResponse))
+
+          val result = connector.submitReply(clientId, conversationId, Map("field" -> Seq("value"))).futureValue
+
+          result.isDefined mustBe true
+          result.get mustBe ConversationPartial(partialContent)
+        }
+      }
+
+      "receives a 503 response" should {
+        "return a Some ConversationPartial" in {
+          val partialContent = "<div>Some Content</div>"
+          val httpResponse = HttpResponse(status = BAD_GATEWAY, body = partialContent)
+
+          when(httpClient.POSTForm[HttpResponse](anyString(), any(), any())(any(), any(), any()))
+            .thenReturn(Future.successful(httpResponse))
+
+          val result = connector.submitReply(clientId, conversationId, Map("field" -> Seq("value"))).futureValue
+
+          result.isDefined mustBe true
+          result.get mustBe ConversationPartial(partialContent)
+        }
+      }
+
+      "receives a response that is not a 200, 400 or 503 response" should {
+        "return a failed Future" in {
+          val httpResponse = HttpResponse(status = NOT_FOUND, body = "")
+
+          when(httpClient.POSTForm[HttpResponse](anyString(), any(), any())(any(), any(), any()))
+            .thenReturn(Future.successful(httpResponse))
+
+          val result = connector.submitReply(clientId, conversationId, Map("field" -> Seq("value")))
+          assert(result.failed.futureValue.isInstanceOf[UpstreamErrorResponse])
+        }
       }
 
       "fails to connect to downstream service" should {
-        "return a failed Future" ignore {} //TODO: implement when connector talks to real secure-message-frontend service
+        "return a failed Future" in {
+          when(httpClient.POSTForm[HttpResponse](anyString(), any(), any())(any(), any(), any()))
+            .thenReturn(Future.failed(new BadGatewayException("Error")))
+
+          val result = connector.submitReply(clientId, conversationId, Map("field" -> Seq("value")))
+          assert(result.failed.futureValue.isInstanceOf[BadGatewayException])
+        }
+      }
+    }
+  }
+
+  "retrieveReplyResult is called" which {
+    "receives a 200 response" should {
+      "return a populated ReplyResultPartial" in {
+        val partialContent = "<div>Some Content</div>"
+        val httpResponse = HttpResponse(status = OK, body = partialContent)
+
+        when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+          .thenReturn(Future.successful(httpResponse))
+
+        val result = connector.retrieveReplyResult(clientId, conversationId).futureValue
+
+        result mustBe ReplyResultPartial(partialContent)
       }
     }
 
-    "submitReply is called" which {
-      "receives a 200 response" should {
-        "return a OK(200) response" ignore {} //TODO: implement when connector talks to real secure-message-frontend service
-      }
+    "receives a non 200 response" should {
+      "return a failed Future" in {
+        val httpResponse = HttpResponse(status = BAD_REQUEST, body = "")
 
-      "receives a non 200 response" should {
-        "return a failed Future" ignore {} //TODO: implement when connector talks to real secure-message-frontend service
-      }
+        when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+          .thenReturn(Future.successful(httpResponse))
 
-      "fails to connect to downstream service" should {
-        "return a failed Future" ignore {} //TODO: implement when connector talks to real secure-message-frontend service
+        val result = connector.retrieveReplyResult(clientId, conversationId)
+        assert(result.failed.futureValue.isInstanceOf[UpstreamErrorResponse])
+      }
+    }
+
+    "fails to connect to downstream service" should {
+      "return a failed Future" in {
+        when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+          .thenReturn(Future.failed(new BadGatewayException("Error")))
+
+        val result = connector.retrieveReplyResult(clientId, conversationId)
+        assert(result.failed.futureValue.isInstanceOf[BadGatewayException])
       }
     }
   }
