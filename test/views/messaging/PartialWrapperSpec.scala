@@ -98,12 +98,12 @@ class PartialWrapperSpec extends DomAssertions with ViewMatchers {
   private def assertUploadFilesLink(view: Document): Assertion = {
     val elements: List[Element] = view.getElementsByClass("govuk-link").iterator.asScala.toList
     assert(elements.exists { element =>
-      element.text == messages("greyBox.uploadFiles") && element.attr("href") == routes.MrnEntryController.onPageLoad.url
+      element.text == messages("greyBox.uploadFiles") && element.attr("href") == routes.MrnEntryController.onPageLoad().url
     })
   }
 
   private def genView(titleKey: String, backLinkUrl: Option[String]): Document = {
     when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(true)
-    partialWrapperPage(HtmlFormat.raw(partialContent), titleKey, backLinkUrl)(fakeRequest, messages)
+    partialWrapperPage(HtmlFormat.raw(partialContent), titleKey, routes.MrnEntryController.onPageLoad().url, backLinkUrl)(fakeRequest, messages)
   }
 }
