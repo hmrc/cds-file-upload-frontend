@@ -224,24 +224,9 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
         }
       }
 
-      "receives a 503 response" should {
-        "return a Some ConversationPartial" in {
-          val partialContent = "<div>Some Content</div>"
-          val httpResponse = HttpResponse(status = BAD_GATEWAY, body = partialContent)
-
-          when(httpClient.POSTForm[HttpResponse](anyString(), any(), any())(any(), any(), any()))
-            .thenReturn(Future.successful(httpResponse))
-
-          val result = connector.submitReply(clientId, conversationId, Map("field" -> Seq("value"))).futureValue
-
-          result.isDefined mustBe true
-          result.get mustBe ConversationPartial(partialContent)
-        }
-      }
-
-      "receives a response that is not a 200, 400 or 503 response" should {
+      "receives a response that is not a 200 or 400" should {
         "return a failed Future" in {
-          val httpResponse = HttpResponse(status = NOT_FOUND, body = "")
+          val httpResponse = HttpResponse(status = BAD_GATEWAY, body = "")
 
           when(httpClient.POSTForm[HttpResponse](anyString(), any(), any())(any(), any(), any()))
             .thenReturn(Future.successful(httpResponse))
