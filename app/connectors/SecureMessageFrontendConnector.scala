@@ -45,8 +45,8 @@ class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: A
       .POSTForm(config.microservice.services.secureMessaging.submitReplyEndpoint(client, conversationId), reply)
       .flatMap { response =>
         response.status match {
-          case OK                        => Future.successful(None)
-          case BAD_REQUEST | BAD_GATEWAY => Future.successful(Some(ConversationPartial(response.body)))
+          case OK          => Future.successful(None)
+          case BAD_REQUEST => Future.successful(Some(ConversationPartial(response.body)))
           case statusCode =>
             Future.failed(UpstreamErrorResponse(s"Unhappy response($statusCode) posting reply form to secure-messaging-frontend", statusCode))
         }
