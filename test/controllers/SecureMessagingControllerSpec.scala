@@ -20,7 +20,7 @@ import base.TestRequests
 import connectors.SecureMessageFrontendConnector
 import models.{ConversationPartial, InboxPartial, ReplyResultPartial}
 import models.exceptions.InvalidFeatureStateException
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, verify, when}
 import play.api.i18n.Messages
 import play.api.mvc.Request
@@ -135,6 +135,9 @@ class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests
             val result = controller.displayConversation(clientId, conversationId)(fakeRequest.withCSRFToken)
 
             status(result) mustBe OK
+
+            val expectedUrl = Some(routes.SecureMessagingController.displayInbox.url)
+            verify(partial_wrapper).apply(any(), any(), any(), eqTo(expectedUrl))(any(), any())
           }
         }
 
