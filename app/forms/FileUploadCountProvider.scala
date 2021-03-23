@@ -25,21 +25,30 @@ import scala.util.Try
 
 class FileUploadCountProvider {
 
-  def apply(): Form[FileUploadCount] = Form("value" -> of(fileUploadCountFormatter("howManyFilesUpload.invalid")))
+  def apply(): Form[FileUploadCount] = Form("value" -> of(fileUploadCountFormatter()))
 
-  def fileUploadCountFormatter(errorKey: String): Formatter[FileUploadCount] = new Formatter[FileUploadCount] {
+  private def isMissing(key: String, data: Map[String, String]) =
+    data.get(key).map(_.trim) match {
+      case None | Some("") => Left(Seq(FormError(key, "howManyFilesUpload.missing")))
+      case Some(count)     => Right(count)
+    }
+
+  private def isInvalid(key: String, data: String) =
+    Try(data.toInt).toOption
+      .flatMap(FileUploadCount(_)) match {
+      case None        => Left(Seq(FormError(key, "howManyFilesUpload.invalid")))
+      case Some(count) => Right(count)
+    }
+
+  def fileUploadCountFormatter(): Formatter[FileUploadCount] = new Formatter[FileUploadCount] {
 
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], FileUploadCount] =
-      data
-        .get(key)
-        .flatMap(s => Try(s.toInt).toOption)
-        .flatMap(FileUploadCount(_)) match {
-        case None        => Left(Seq(FormError(key, errorKey)))
-        case Some(count) => Right(count)
-      }
+      for {
+        value <- isMissing(key, data)
+        count <- isInvalid(key, value)
+      } yield count
 
     override def unbind(key: String, value: FileUploadCount): Map[String, String] =
       Map(key -> value.value.toString)
   }
-
 }

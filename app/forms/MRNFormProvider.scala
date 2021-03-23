@@ -24,15 +24,26 @@ import play.api.data.{Form, FormError}
 class MRNFormProvider {
 
   def apply(): Form[MRN] =
-    Form("value" -> of(mrnFormatter("mrn.invalid")))
+    Form("value" -> of(mrnFormatter()))
 
-  def mrnFormatter(errorKey: String): Formatter[MRN] = new Formatter[MRN] {
+  private def isMissing(key: String, data: Map[String, String]) =
+    data.get(key).map(_.trim) match {
+      case None | Some("") => Left(Seq(FormError(key, "mrn.missing")))
+      case Some(mrn)       => Right(mrn)
+    }
 
+  private def isInvalid(key: String, data: String) =
+    MRN(data) match {
+      case None      => Left(Seq(FormError(key, "mrn.invalid")))
+      case Some(mrn) => Right(mrn)
+    }
+
+  def mrnFormatter(): Formatter[MRN] = new Formatter[MRN] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], MRN] =
-      data.get(key).flatMap(MRN(_)) match {
-        case None      => Left(Seq(FormError(key, errorKey)))
-        case Some(mrn) => Right(mrn)
-      }
+      for {
+        value <- isMissing(key, data)
+        mrn <- isInvalid(key, value)
+      } yield mrn
 
     override def unbind(key: String, value: MRN): Map[String, String] =
       Map(key -> value.value)

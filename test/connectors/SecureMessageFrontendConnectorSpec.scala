@@ -18,13 +18,13 @@ package connectors
 
 import base.{Injector, UnitSpec}
 import config.AppConfig
-import models.{ConversationPartial, ExportMessages, ImportMessages, InboxPartial, ReplyResultPartial}
+import models._
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.BeforeAndAfterEach
-import play.mvc.Http.Status.{BAD_GATEWAY, BAD_REQUEST, NOT_FOUND, OK}
+import play.mvc.Http.Status.{BAD_GATEWAY, BAD_REQUEST, OK}
 import testdata.CommonTestData
 import uk.gov.hmrc.http._
 

@@ -25,6 +25,7 @@ import play.twirl.api.HtmlFormat
 import views.Title
 import views.html.components.gds.gdsMainTemplate
 import views.matchers.ViewMatchers
+import scala.collection.JavaConverters._
 
 class MainTemplateSpec extends SpecBase with ViewMatchers {
 
@@ -35,8 +36,10 @@ class MainTemplateSpec extends SpecBase with ViewMatchers {
   private val mainTemplate = injector.instanceOf[gdsMainTemplate]
   private val testContent = HtmlFormat.empty
 
-  private def createView(withNavigationBanner: Boolean): Document =
-    mainTemplate(title = Title("common.service.name"), withNavigationBanner = withNavigationBanner)(testContent)(fakeRequest, messages)
+  private def createView(withNavigationBanner: Boolean = false, withFileUploadFlag: Boolean = false): Document =
+    mainTemplate(title = Title("common.service.name"), withNavigationBanner = withNavigationBanner, withFileUploadValidation = withFileUploadFlag)(
+      testContent
+    )(fakeRequest, messages)
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -92,6 +95,34 @@ class MainTemplateSpec extends SpecBase with ViewMatchers {
 
           view mustNot containElementWithID("navigation-banner")
         }
+      }
+    }
+
+    "fileUploadFlag is set on" should {
+      "contain the JQuery validation script files" in {
+        val view: Document = createView(withFileUploadFlag = true)
+
+        val scripts = view.getElementsByTag("script").asScala.toSeq
+        val scriptAttribs = scripts.map(_.attr("src"))
+        scriptAttribs must contain("/assets/javascripts/jquery-3.6.0.min.js")
+        scriptAttribs must contain("/assets/javascripts/jquery.validate.min.js")
+        scriptAttribs must contain("/assets/javascripts/cdsfileuploadfrontend.js")
+
+        scripts.map(_.data()) must contain("""$("form").validate();""")
+      }
+    }
+
+    "fileUploadFlag is set off" should {
+      "not contain the JQuery validation script files" in {
+        val view: Document = createView(withFileUploadFlag = false)
+
+        val scripts = view.getElementsByTag("script").asScala.toSeq
+        val scriptAttribs = scripts.map(_.attr("src"))
+        scriptAttribs mustNot contain("/assets/javascripts/jquery-3.6.0.min.js")
+        scriptAttribs mustNot contain("/assets/javascripts/jquery.validate.min.js")
+        scriptAttribs mustNot contain("/assets/javascripts/cdsfileuploadfrontend.js")
+
+        scripts.map(_.data()) mustNot contain("""$("form").validate();""")
       }
     }
   }

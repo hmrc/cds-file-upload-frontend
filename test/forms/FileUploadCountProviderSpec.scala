@@ -29,13 +29,13 @@ class FileUploadCountProviderSpec extends SpecBase with ScalaCheckPropertyChecks
 
   "formProvider" should {
 
-    "return success for valid FileUploadCount" in {
+    "return success for valid FileUploadCount values" in {
       forAll(validFileUploadCountGen) { count: Int =>
         form.bind(Map("value" -> count.toString)).fold(_ => fail("Form binding must not fail!"), result => result.value mustBe count)
       }
     }
 
-    "retun invalid error for invalid FileUploadCount" in {
+    "return invalid error for invalid FileUploadCount values" in {
       forAll { count: Int =>
         if (count < 1 || count > 10) {
           form
@@ -43,6 +43,15 @@ class FileUploadCountProviderSpec extends SpecBase with ScalaCheckPropertyChecks
             .fold(errors => errorMessage(errors) mustBe "howManyFilesUpload.invalid", _ => fail("Form binding must fail!"))
         }
       }
+    }
+
+    "return missing error for an empty or only whitespace FileUploadCount value" in {
+      form
+        .bind(Map.empty[String, String])
+        .fold(errors => errorMessage(errors) mustBe "howManyFilesUpload.missing", _ => fail("Form binding must not fail!"))
+      form
+        .bind(Map("value" -> "  "))
+        .fold(errors => errorMessage(errors) mustBe "howManyFilesUpload.missing", _ => fail("Form binding must not fail!"))
     }
   }
 }

@@ -54,8 +54,8 @@ choicePage.input.error.incorrect = Select what you would like to do
 inboxChoice.heading = View messages
 inboxChoice.input.exportsMessages = Exports messages
 inboxChoice.input.importsMessages = Imports messages
-inboxChoice.input.error.empty = Select what messages you would like to view
-inboxChoice.input.error.incorrect = Select what messages you would like to view
+inboxChoice.input.error.empty = Select which messages you want to view
+inboxChoice.input.error.incorrect = Select which messages you want to view
 
 ## Secure Messaging Inbox page
 
@@ -80,7 +80,8 @@ greyBox.uploadFiles = Upload and attach documents to a declaration
 
 mrnEntryPage.heading=What is the MRN of the declaration you want to attach files to?
 mrnEntryPage.hint=The movement reference number (MRN) is 18 digits long, and is made up of current year, 2-letter country code, and 14 numbers. You are given this when you submit a declaration to the Customs Declaration Service.</br></br>For example, 21GB45454545454545.
-mrn.invalid=The MRN you have entered doesn't follow CDS rules, please check your declaration MRN and re-enter
+mrn.missing=Enter a movement reference number (MRN)
+mrn.invalid=Movement reference number (MRN) must be in the correct format
 
 ## MRN access denied page
 
@@ -104,15 +105,19 @@ emailUnverified.link=Verify your email address
 
 contactDetails.heading=Your contact details
 contactDetails.name=Name
+contactDetails.name.missing=Enter a name
 contactDetails.companyName=Company name
+contactDetails.companyName.missing=Enter a company name
 contactDetails.phoneNumber=Phone number
 contactDetails.email=Email address
-contactDetails.name.invalid=Name must be less than or equal to 35 characters
-contactDetails.companyName.invalid=Company name must be less than or equal to 35 characters
-contactDetails.phoneNumber.invalid=Phone number must be less than or equal to 15 characters
-contactDetails.phoneNumber.invalidPattern=Phone number is invalid
-contactDetails.email.invalid=Email must be less than or equal to 50 characters
-contactDetails.email.invalidPattern=Email is invalid
+contactDetails.email.missing=Enter an email
+contactDetails.name.invalid=Name must contain 35 characters or fewer
+contactDetails.companyName.invalid=Company name must contain 35 characters or fewer
+contactDetails.phoneNumber.missing=Enter a telephone number
+contactDetails.phoneNumber.invalid=Number must contain 15 digits or fewer
+contactDetails.phoneNumber.invalidPattern=Telephone number must contain only numbers
+contactDetails.email.invalid=Email must be 50 characters or fewer
+contactDetails.email.invalidPattern=Email must contain an @ symbol and no spaces
 contactDetails.paragraph1=Provide these details so we can contact you if there are any issues with the documents you submit.
 
 ## file warning page
@@ -126,7 +131,8 @@ fileWarning.button=I understand
 ## How many files do you need to upload page
 
 howManyFilesUpload.heading=How many files do you need to upload?
-howManyFilesUpload.invalid=You have entered an invalid number of files, you can upload 1 or more files up to a maximum number of 10 files. Re-enter the number of files you wish to upload.
+howManyFilesUpload.missing=Enter a number of files to upload
+howManyFilesUpload.invalid=Enter a number between 1 and 10
 howManyFilesUpload.paragraph1=Tell us the exact number of files you intend to upload. Count the files, not the actual documents. For example, if you have saved one packing list as 2 jpegs, this is 2 files.
 howManyFilesUpload.paragraph2=Make sure that file names start with a letter or number, not a space, and do not contain any special characters. Hyphens and underscores are acceptable.
 howManyFilesUpload.paragraph3=Each file you upload must be less than 10 megabytes (MB), and must be in one of the following formats:
@@ -144,9 +150,9 @@ fileUploadPage.listItem2=png (image)
 fileUploadPage.listItem3=PDF
 fileUploadPage.listItem4=txt (plain text)
 fileUploadPage.filesUploaded=You have uploaded {0} of {1} files
-fileUploadPage.validation.required=You must choose a file to upload
-fileUploadPage.validation.accept=File is too large or invalid type. \n Please choose another file.
-fileUploadPage.validation.filesize=The file you have chosen is bigger than {0}MB and is not permitted
+fileUploadPage.validation.required=Select the file you want to upload
+fileUploadPage.validation.accept=File is not an accepted file type
+fileUploadPage.validation.filesize=File size is bigger than 10 Megabytes (MB)
 fileUploadPage.paragraph1=Each file you upload must be less than 10 megabytes (MB), and must be in one of the following formats:
 fileUploadPage.button=Upload and continue
 fileUploadPage.insetText=If you have a Word or Excel document to upload, you need to 'save as' a PDF first. Word and Excel formats are not allowed on this service.
