@@ -245,6 +245,9 @@ class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests
           val result = controller.submitReply(clientId, conversationId)(postRequest)
 
           status(result) mustBe OK
+
+          val expectedUrl = Some(routes.SecureMessagingController.displayInbox.url)
+          verify(partial_wrapper).apply(any(), any(), any(), eqTo(expectedUrl))(any(), any())
         }
       }
 
@@ -258,6 +261,9 @@ class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests
           val result = controller.submitReply(clientId, conversationId)(postRequest)
 
           status(result) mustBe OK
+
+          val expectedUrl = Some(routes.SecureMessagingController.displayInbox.url)
+          verify(partial_wrapper).apply(any(), any(), any(), eqTo(expectedUrl))(any(), any())
         }
       }
 
