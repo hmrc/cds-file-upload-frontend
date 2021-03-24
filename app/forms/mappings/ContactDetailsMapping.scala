@@ -22,12 +22,14 @@ import play.api.data.Forms._
 object ContactDetailsMapping extends Mappings {
 
   val contactDetailsMapping = mapping(
-    "name" -> text().verifying(maxLength(35, "contactDetails.name.invalid")),
-    "companyName" -> text().verifying(maxLength(35, "contactDetails.companyName.invalid")),
-    "phoneNumber" -> text()
+    "name" -> text("contactDetails.name.missing")
+      .verifying(maxLength(35, "contactDetails.name.invalid")),
+    "companyName" -> text("contactDetails.companyName.missing")
+      .verifying(maxLength(35, "contactDetails.companyName.invalid")),
+    "phoneNumber" -> text("contactDetails.phoneNumber.missing")
       .verifying(maxLength(15, "contactDetails.phoneNumber.invalid"))
       .verifying("contactDetails.phoneNumber.invalidPattern", isValidPhoneNumber),
-    "email" -> text()
+    "email" -> text("contactDetails.email.missing")
       .verifying(maxLength(50, "contactDetails.email.invalid"))
       .verifying("contactDetails.email.invalidPattern", isValidEmail)
   )(ContactDetails.apply)(ContactDetails.unapply)

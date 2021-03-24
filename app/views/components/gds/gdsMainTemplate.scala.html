@@ -43,7 +43,8 @@
   title: Title,
   useCustomContentWidth: Boolean = false,
   withNavigationBanner: Boolean = false,
-  backLinkUrl: Option[String] = None
+  backLinkUrl: Option[String] = None,
+  withFileUploadValidation: Boolean = false
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages)
 
 @head = {
@@ -57,11 +58,19 @@
 }
 
 @scripts = {
+    @if(withFileUploadValidation) {
+        <script src="@routes.Assets.versioned("javascripts/jquery-3.6.0.min.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.versioned("javascripts/jquery.validate.min.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.versioned("javascripts/cdsfileuploadfrontend.js")" type="text/javascript"></script>
+        <script>$("form").validate();</script>
+    }
+
     <script src="@routes.Assets.versioned("javascripts/show-hide-content.js")" type="text/javascript"></script>
     <script src='@routes.Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
     <script src='@routes.Assets.versioned("lib/hmrc-frontend/hmrc/all.js")'></script>
     <script>window.HMRCFrontend.initAll();</script>
     <script>window.GOVUKFrontend.initAll();</script>
+
 }
 
 @beforeContentBlock = {
@@ -106,4 +115,6 @@
   )(content)
 }
 
-<script src='@routes.Assets.versioned("javascripts/preventMultipleFormSubmissions.js")'></script>
+@if(!withFileUploadValidation) {
+    <script src='@routes.Assets.versioned("javascripts/preventMultipleFormSubmissions.js")'></script>
+}

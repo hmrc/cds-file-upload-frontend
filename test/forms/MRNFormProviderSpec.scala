@@ -30,21 +30,25 @@ class MRNFormProviderSpec extends SpecBase {
 
   "formProvider" should {
 
-    "return success for valid MRN" in {
+    "return success for valid MRN values" in {
 
       forAll(validMRNGen) { mrn =>
         form.bind(Map("value" -> mrn)).fold(_ => fail("Form binding must not fail!"), result => result.value mustBe mrn)
       }
     }
 
-    "return invalid error for invalid MRN" in {
+    "return invalid error for some invalid MRN values" in {
 
       forAll { mrn: String =>
-        whenever(!mrn.matches(MRN.validRegex)) {
-
+        whenever(!mrn.matches(MRN.validRegex) && mrn.trim.size > 0) {
           form.bind(Map("value" -> mrn)).fold(errors => errorMessage(errors) mustBe "mrn.invalid", _ => fail("Form binding must fail!"))
         }
       }
+    }
+
+    "return missing error for an empty or only whitespace MRN value" in {
+      form.bind(Map.empty[String, String]).fold(errors => errorMessage(errors) mustBe "mrn.missing", _ => fail("Form binding must fail!"))
+      form.bind(Map("value" -> "   ")).fold(errors => errorMessage(errors) mustBe "mrn.missing", _ => fail("Form binding must fail!"))
     }
   }
 }
