@@ -19,19 +19,6 @@ error.browser.heading.prefix=Error:
 error.summary.title=There is a problem
 error.required = Please enter a value.
 
-## start page
-
-startPage.heading=Upload a customs document
-startPage.paragraph2=You will need to know how many files you want to upload before you start uploading them. You can submit a maximum of 10 files, and each file can be up to 10 Megabytes (MB).
-startPage.paragraph3= {0} - if you have two photos of an invoice saved as separate jpegs, this is two files.
-startPage.paragraph3.bold= Example 1
-startPage.paragraph4= {0} - if you have a bill of lading, an invoice, and a licence saved in a single PDF document, this is one file.
-startPage.paragraph4.bold= Example 2
-startPage.p.youWillNeed=You will need:
-startPage.listItem1=a Government Gateway account
-startPage.listItem2=a Customs Declaration Service (CDS) enrolment
-startPage.listItem3=the movement reference number (MRN) of your declaration
-
 ## Sign-out
 
 signOut.link = Sign out

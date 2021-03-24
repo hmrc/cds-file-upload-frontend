@@ -44,7 +44,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
     originalConfirmationPage,
     secureMessagingConfirmationPage,
     mockFileUploadAnswersService,
-    secureMessageConfig
+    secureMessagingConfig
   )(mcc, executionContext)
 
   override protected def beforeEach(): Unit = {
@@ -97,7 +97,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
         val result = controller.onPageLoad()(fakeRequest).futureValue
 
         result.header.status mustBe SEE_OTHER
-        result.header.headers.get(LOCATION) mustBe Some(routes.StartController.displayStartPage().url)
+        result.header.headers.get(LOCATION) mustBe Some(routes.RootController.displayPage().url)
       }
     }
 

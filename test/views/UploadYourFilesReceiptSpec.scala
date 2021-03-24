@@ -130,7 +130,7 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
       forAll { fileUploads: List[FileUpload] =>
         val doc = asDocument(view(fileUploads))
 
-        assertContainsLink(doc, messages(s"${pagePrefix}.finalButton.text"), controllers.routes.StartController.displayStartPage().url)
+        assertContainsLink(doc, messages(s"${pagePrefix}.finalButton.text"), controllers.routes.RootController.displayPage().url)
       }
     }
   }

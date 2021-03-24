@@ -16,7 +16,6 @@
 
 package views
 
-import controllers.routes
 import forms.ChoiceForm
 import forms.ChoiceForm.AllowedChoiceValues
 import org.jsoup.nodes.Document
@@ -36,8 +35,8 @@ class ChoicePageSpec extends DomAssertions with ViewMatchers {
       view.getElementsByTag("h1").first() must containMessage("choicePage.heading")
     }
 
-    "display the 'Back' link" in {
-      assertBackLinkIsIncluded(view, routes.StartController.displayStartPage.url)
+    "not display the 'Back' link" in {
+      assertBackLinkIsNotIncluded(view)
     }
 
     "display radio buttons" in {

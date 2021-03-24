@@ -16,15 +16,19 @@
 
 package controllers
 
+import config.SecureMessagingConfig
+import javax.inject.Inject
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
-import javax.inject.Inject
-
-class RootController @Inject()(mcc: MessagesControllerComponents) extends FrontendController(mcc) with I18nSupport {
+class RootController @Inject()(mcc: MessagesControllerComponents, secureMessagingConfig: SecureMessagingConfig)
+    extends FrontendController(mcc) with I18nSupport {
 
   def displayPage(): Action[AnyContent] = Action {
-    Redirect(controllers.routes.StartController.displayStartPage())
+    if (secureMessagingConfig.isSecureMessagingEnabled)
+      Redirect(controllers.routes.ChoiceController.onPageLoad())
+    else
+      Redirect(controllers.routes.MrnEntryController.onPageLoad())
   }
 }

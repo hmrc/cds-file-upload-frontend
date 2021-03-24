@@ -16,22 +16,36 @@
 
 package controllers
 
+import org.mockito.Mockito.when
 import play.api.test.Helpers._
 
 class RootControllerSpec extends ControllerSpecBase {
 
-  private val controller = new RootController(stubMessagesControllerComponents())
+  private val controller = new RootController(stubMessagesControllerComponents(), secureMessagingConfig)
 
-  "Root Controller" should {
+  "Root Controller" when {
 
-    "return 303 (SEE_OTHER)" when {
+    "SecureMessaging feature is enabled" should {
 
-      "redirect user to the choice page" in {
+      "redirect to Choice page" in {
+        when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(true)
 
         val result = controller.displayPage()(fakeRequest)
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(controllers.routes.StartController.displayStartPage().url)
+        redirectLocation(result) mustBe Some(controllers.routes.ChoiceController.onPageLoad().url)
+      }
+    }
+
+    "SecureMessaging feature is enabled" should {
+
+      "redirect to MrnEntry page" in {
+        when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(false)
+
+        val result = controller.displayPage()(fakeRequest)
+
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result) mustBe Some(controllers.routes.MrnEntryController.onPageLoad().url)
       }
     }
   }

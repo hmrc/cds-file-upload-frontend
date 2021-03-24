@@ -16,7 +16,6 @@
 
 package views
 
-import controllers.routes
 import forms.MRNFormProvider
 import models.MRN
 import models.requests.{AuthenticatedRequest, SignedInUser}
@@ -30,17 +29,14 @@ import views.html.mrn_entry
 class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with ScalaCheckPropertyChecks {
 
   val form = new MRNFormProvider()()
-
-  val page = instanceOf[mrn_entry]
-
-  val backLinkUrlWithMessagingDisabled = routes.StartController.displayStartPage.url
-
-  val view = page(form, backLinkUrlWithMessagingDisabled)(fakeRequest.withCSRFToken, messages)
-
+  val testBackLink = Some("testBackLink")
   val messagePrefix = "mrnEntryPage"
 
+  val page = instanceOf[mrn_entry]
+  val view = createViewUsingForm(form)
+
   def createViewUsingForm: Form[MRN] => HtmlFormat.Appendable =
-    form => page(form, backLinkUrlWithMessagingDisabled)(fakeRequest.withCSRFToken, messages)
+    form => page(form, testBackLink)(fakeRequest.withCSRFToken, messages)
 
   "MRN Entry Page" must {
     behave like normalPage(() => view, messagePrefix)
@@ -56,22 +52,15 @@ class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with Sca
     "include the 'Sign out' link if the user is authorised" in {
       forAll { user: SignedInUser =>
         val authenticatedRequest = AuthenticatedRequest(fakeRequest.withCSRFToken, user)
-        val view = page(form, backLinkUrlWithMessagingDisabled)(authenticatedRequest, messages)
+        val view = page(form, testBackLink)(authenticatedRequest, messages)
         assertSignoutLinkIsIncluded(view)
       }
     }
 
-    "display the 'Back' link" when {
+    "display the 'Back' link with URL provided" in {
+      val view = page(form, testBackLink)(fakeRequest.withCSRFToken, messages)
 
-      "the feature flag for SecureMessaging is disabled" in {
-        assertBackLinkIsIncluded(asDocument(view), backLinkUrlWithMessagingDisabled)
-      }
-
-      "the feature flag for SecureMessaging is enabled" in {
-        val backLinkUrlWithMessagingEnabled = routes.ChoiceController.onPageLoad.url
-        val view = page(form, backLinkUrlWithMessagingEnabled)(fakeRequest.withCSRFToken, messages)
-        assertBackLinkIsIncluded(asDocument(view), backLinkUrlWithMessagingEnabled)
-      }
+      assertBackLinkIsIncluded(asDocument(view), testBackLink.get)
     }
   }
 }

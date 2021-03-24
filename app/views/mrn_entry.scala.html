@@ -27,9 +27,9 @@
     pageTitle: pageTitle
 )
 
-@(form: Form[MRN], backLinkUrl: String)(implicit request: Request[_], messages: Messages)
+@(form: Form[MRN], backLinkUrl: Option[String])(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = Title("mrnEntryPage.heading"), backLinkUrl = Some(backLinkUrl)) {
+@mainTemplate(title = Title("mrnEntryPage.heading"), backLinkUrl = backLinkUrl) {
 
 <div class="form-group">
     <div class="govuk-grid-row">
