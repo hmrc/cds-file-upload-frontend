@@ -55,11 +55,11 @@ class UploadErrorSpec extends ViewBehaviours with ViewMatchers {
       bulletList must containMessage("uploadError.bullet.3")
     }
 
-    "have a button that links to start page" in {
+    "have a button that links to root page" in {
       val button = asDocument(view()).getElementsByClass("govuk-button").first()
 
       button must containMessage("uploadError.button")
-      button must haveHref(controllers.routes.StartController.displayStartPage())
+      button must haveHref(controllers.routes.RootController.displayPage())
     }
 
     "have a guidance" in {

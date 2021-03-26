@@ -16,12 +16,9 @@
 
 package controllers
 
-import scala.concurrent.Future
-
-import config.SecureMessagingConfig
 import forms.MRNFormProvider
 import models.{FileUploadAnswers, MRN}
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
@@ -29,12 +26,13 @@ import services.MrnDisValidator
 import testdata.CommonTestData._
 import views.html.{mrn_access_denied, mrn_entry}
 
+import scala.concurrent.Future
+
 class MrnEntryControllerSpec extends ControllerSpecBase {
 
   private val mrnDisValidator = mock[MrnDisValidator]
   private val mrnEntryPage = mock[mrn_entry]
   private val mrnAccessDeniedPage = mock[mrn_access_denied]
-  private val secureMessagingConfig = mock[SecureMessagingConfig]
 
   private val validAnswers = FileUploadAnswers(eori, contactDetails = Some(contactDetails))
 
@@ -83,24 +81,58 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
         status(result) mustBe OK
       }
     }
+  }
 
-    "not update the mrnPageRefererUrl value in the cache" when {
-      "no value is sent in the request" in {
+  "MrnEntryController on onPageLoad" when {
+
+    "no value is sent in the request" should {
+
+      "not update the mrnPageRefererUrl value in the cache" in {
         val controller = mrnEntryController(validAnswers.copy(mrnPageRefererUrl = Some(validUrl)))
 
         controller.onPageLoad()(fakeRequest).futureValue
 
         verifyNoInteractions(mockFileUploadAnswersService)
       }
+
+      "call MrnEntryPage, providing default back link url" when {
+
+        "SecureMessaging is enabled" in withSecureMessagingEnabled(enabled = true) {
+          val controller = mrnEntryController()
+
+          controller.onPageLoad()(fakeRequest).futureValue
+
+          val expectedBackLink = Some(controllers.routes.ChoiceController.onPageLoad().url)
+          verify(mrnEntryPage).apply(any(), eqTo(expectedBackLink))(any(), any())
+        }
+
+        "SecureMessaging is disabled" in withSecureMessagingEnabled(enabled = false) {
+          val controller = mrnEntryController()
+
+          controller.onPageLoad()(fakeRequest).futureValue
+
+          val expectedBackLink = None
+          verify(mrnEntryPage).apply(any(), eqTo(expectedBackLink))(any(), any())
+        }
+      }
     }
 
-    "update the mrnPageRefererUrl value in the cache" when {
-      "a valid URL is sent in the request" in {
+    "a valid URL is sent in the request" should {
+
+      "update the mrnPageRefererUrl value in the cache" in {
         val controller = mrnEntryController()
 
         controller.onPageLoad(Some(validUrl))(fakeRequest).futureValue
 
         theSavedFileUploadAnswers.mrnPageRefererUrl mustBe Some(validUrl)
+      }
+
+      "call MrnEntryPage, providing back link url from cache" in {
+        val controller = mrnEntryController()
+
+        controller.onPageLoad(Some(validUrl))(fakeRequest).futureValue
+
+        verify(mrnEntryPage).apply(any(), eqTo(Some(validUrl)))(any(), any())
       }
     }
   }

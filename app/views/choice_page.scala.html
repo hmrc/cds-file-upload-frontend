@@ -33,7 +33,7 @@
 
 @(form: Form[ChoiceForm])(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = Title("choicePage.heading"), backLinkUrl = Some(routes.StartController.displayStartPage.url)) {
+@mainTemplate(title = Title("choicePage.heading")) {
 
   @formHelper(action = routes.ChoiceController.onSubmit(), 'autoComplete -> "off") {
 

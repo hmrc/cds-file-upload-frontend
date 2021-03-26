@@ -49,13 +49,13 @@ class MrnEntryController @Inject()(
 )(implicit ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
-  val form = formProvider()
+  private val form = formProvider()
 
-  lazy val defautBackLinkUrl: String =
-    if (secureMessagingConfig.isSecureMessagingEnabled) routes.ChoiceController.onPageLoad.url
-    else routes.StartController.displayStartPage.url
+  private lazy val defaultBackLinkUrl: Option[String] =
+    if (secureMessagingConfig.isSecureMessagingEnabled) Some(routes.ChoiceController.onPageLoad().url)
+    else None
 
-  private def getBackLink(refererUrl: Option[String]) = refererUrl.getOrElse(defautBackLinkUrl)
+  private def getBackLink(refererUrl: Option[String]) = refererUrl.orElse(defaultBackLinkUrl)
 
   def onPageLoad(refererUrl: Option[String] = None): Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData).async { implicit req =>
     val populatedForm = req.userAnswers.mrn.fold(form)(form.fill)
