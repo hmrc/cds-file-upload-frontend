@@ -17,7 +17,8 @@
 package views
 
 import forms.ChoiceForm
-import forms.ChoiceForm.AllowedChoiceValues
+import forms.ChoiceForm.AllowedChoiceValues._
+import forms.ChoiceForm.ChoiceKey
 import org.jsoup.nodes.Document
 import views.html.choice_page
 import views.matchers.ViewMatchers
@@ -29,8 +30,30 @@ class ChoicePageSpec extends DomAssertions with ViewMatchers {
 
   private val view: Document = choicePage(form)(fakeRequest, messages)
 
-  "Choice page" should {
+  "Choice page" when {
+    "form does not contain errors" should {
+      commonAssertions()
+    }
 
+    "form contains errors" should {
+      commonAssertions()
+
+      val errorView = choicePage(form.withError(ChoiceKey, "choicePage.input.error.empty"))(fakeRequest, messages)
+
+      "display error box at top of page" in {
+        errorView.getElementsByClass("govuk-error-summary__title").first() must containMessage("error.summary.title")
+      }
+
+      "display error box with a link to first radio option" in {
+        val errorLink = errorView.getElementsByClass("govuk-list govuk-error-summary__list").first().getElementsByTag("a").first()
+
+        errorLink must containMessage("choicePage.input.error.empty")
+        errorLink must haveHref(s"#${SecureMessageInbox}")
+      }
+    }
+  }
+
+  private def commonAssertions() = {
     "display page header" in {
       view.getElementsByTag("h1").first() must containMessage("choicePage.heading")
     }
@@ -40,8 +63,8 @@ class ChoicePageSpec extends DomAssertions with ViewMatchers {
     }
 
     "display radio buttons" in {
-      view must containElementWithID(AllowedChoiceValues.SecureMessageInbox)
-      view must containElementWithID(AllowedChoiceValues.DocumentUpload)
+      view must containElementWithID(SecureMessageInbox)
+      view must containElementWithID(DocumentUpload)
     }
 
     "display 'Continue' button" in {

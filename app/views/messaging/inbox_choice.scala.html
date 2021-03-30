@@ -19,9 +19,9 @@
 @import forms.InboxChoiceForm.Values.{ExportsMessages, ImportsMessages}
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.components.gds.Styles._
+@import views.helpers.ErrorMapper.radioGroupErrors
 @import views.html.components.gds._
 @import views.Title
-
 
 @this(
   mainTemplate: gdsMainTemplate,
@@ -36,8 +36,7 @@
 @mainTemplate(title = Title("inboxChoice.heading"), backLinkUrl = Some(routes.ChoiceController.onPageLoad.url)) {
 
   @formHelper(action = routes.InboxChoiceController.onSubmit, 'autoComplete -> "off") {
-
-    @errorSummary(form.errors)
+    @errorSummary(radioGroupErrors("choice", ExportsMessages, form.errors))
 
     @govukRadios(Radios(
       name = InboxChoiceKey,

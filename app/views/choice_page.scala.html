@@ -20,8 +20,8 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.html.components.gds._
 @import views.Title
+@import views.helpers.ErrorMapper.radioGroupErrors
 @import views.components.gds.Styles._
-
 
 @this(
   mainTemplate: gdsMainTemplate,
@@ -36,8 +36,7 @@
 @mainTemplate(title = Title("choicePage.heading")) {
 
   @formHelper(action = routes.ChoiceController.onSubmit(), 'autoComplete -> "off") {
-
-    @errorSummary(form.errors)
+    @errorSummary(radioGroupErrors("choice", SecureMessageInbox, form.errors))
 
     @govukRadios(Radios(
       name = ChoiceKey,
