@@ -112,11 +112,9 @@ class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers wi
       }
 
       "has a link to the NCH" in {
-        assertContainsLink(
-          view,
-          messages(s"$pagePrefix.section2.paragraph2.linkText"),
-          "https://www.gov.uk/government/organisations/hm-revenue-customs/contact/national-clearance-hub"
-        )
+        containMessage(s"${pagePrefix}.section2.paragraph2")
+
+        assertContainsLink(view, "nch.cds@hmrc.gov.uk", "mailto:nch.cds@hmrc.gov.uk")
       }
     }
 

@@ -38,7 +38,7 @@ class ExternalServiceConfigSpec extends SpecBase {
   }
 
   "have a correct configuration for National Clearance Hub url" in {
-    config.nationalClearingHubLink mustBe "https://www.gov.uk/government/organisations/hm-revenue-customs/contact/national-clearance-hub"
+    config.nationalClearingHubLink mustBe "mailto:nch.cds@hmrc.gov.uk"
   }
 
   "have a correct configuration for Customs Email Frontend url" in {

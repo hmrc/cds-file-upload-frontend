@@ -92,7 +92,7 @@
     )
 
     @paragraphBody(message = messages("fileUploadConfirmationPage.section2.paragraph2", link(
-        text = messages("fileUploadConfirmationPage.section2.paragraph2.linkText"),
+        text = config.nationalClearingHubLink.replace("mailto:", ""),
         call = Call("GET", config.nationalClearingHubLink)
     )))
 

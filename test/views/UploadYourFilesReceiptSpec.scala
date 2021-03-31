@@ -17,8 +17,8 @@
 package views
 
 import generators.Generators
-import models.requests.{AuthenticatedRequest, SignedInUser}
 import models.{FileUpload, MRN}
+import models.requests.{AuthenticatedRequest, SignedInUser}
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.twirl.api.Html
 import views.behaviours.ViewBehaviours
@@ -48,8 +48,7 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
       "listitem1",
       "listitem2",
       "listitem3",
-      "listitem4",
-      "listitem5"
+      "listitem4"
     )
 
     "include the 'Sign out' link if the user is authorised" in {
@@ -123,7 +122,9 @@ class UploadYourFilesReceiptSpec extends DomAssertions with ViewBehaviours with 
       val bulletList = asDocument(view()).getElementsByTag("ul").get(1)
 
       bulletList must containMessage(s"${pagePrefix}.listitem4")
-      bulletList must containMessage(s"${pagePrefix}.listitem5")
+      bulletList must containText(messages(s"${pagePrefix}.listitem5", ""))
+
+      assertContainsLink(view(), "nch.cds@hmrc.gov.uk", "mailto:nch.cds@hmrc.gov.uk")
     }
 
     "have a links to restart the journey" in {
