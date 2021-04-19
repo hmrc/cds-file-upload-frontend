@@ -21,27 +21,30 @@ import config.AppConfig
 import models._
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, anyString}
-import org.mockito.Mockito.{reset, verify, when}
+import org.mockito.Mockito.{reset, verify, verifyNoInteractions, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.BeforeAndAfterEach
 import play.mvc.Http.Status.{BAD_GATEWAY, BAD_REQUEST, OK}
+import services.AuditService
 import testdata.CommonTestData
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEach with Injector with ScalaFutures {
   val appConfig = instanceOf[AppConfig]
   val httpClient = mock[HttpClient]
+  val mockAuditService = mock[AuditService]
   implicit val hc = mock[HeaderCarrier]
   implicit val ec: ExecutionContext = ExecutionContext.global
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
-    reset(httpClient)
+    reset(httpClient, mockAuditService)
   }
 
-  val connector = new SecureMessageFrontendConnector(httpClient, appConfig)
+  val connector = new SecureMessageFrontendConnector(httpClient, appConfig, mockAuditService)
   val clientId = "clientId"
   val conversationId = "conversationId"
 
@@ -59,6 +62,18 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
 
           result mustBe InboxPartial(partialContent)
         }
+
+        "audits the retrieval of the InboxPartial" in {
+          val partialContent = "<div>Some Content</div>"
+          val httpResponse = HttpResponse(status = OK, body = partialContent)
+
+          when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+            .thenReturn(Future.successful(httpResponse))
+
+          connector.retrieveInboxPartial(CommonTestData.eori, ExportMessages)
+
+          verify(mockAuditService).auditSecureMessageInbox(anyString(), anyString(), any[MessageFilterTag])(any())
+        }
       }
 
       "receives a non 200 response" should {
@@ -70,6 +85,17 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
 
           val result = connector.retrieveInboxPartial(CommonTestData.eori, ExportMessages)
           assert(result.failed.futureValue.isInstanceOf[UpstreamErrorResponse])
+        }
+
+        "not audit the attempted retrieval of the InboxPartial" in {
+          val httpResponse = HttpResponse(status = BAD_REQUEST, body = "")
+
+          when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+            .thenReturn(Future.successful(httpResponse))
+
+          connector.retrieveInboxPartial(CommonTestData.eori, ExportMessages)
+
+          verifyNoInteractions(mockAuditService)
         }
       }
 
