@@ -17,12 +17,12 @@
 package services
 
 import base.SpecBase
-import models.ExportMessages
+import models._
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{verify, when}
 import play.api.libs.json.Json
-import services.AuditTypes.NavigateToMessages
+import services.AuditTypes.{NavigateToMessages, UploadSuccess}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Disabled, Failure, Success}
@@ -39,6 +39,9 @@ class AuditServiceSpec extends SpecBase {
 
   private val enrolment = "HMRC-CUS-ORG"
   private val eori = "GB150454489082"
+  private val contactDetails = ContactDetails("Joe Bloggs", "Bloggs Inc", "0123456", "joe@bloggs.com")
+  private val fileUploadCount = FileUploadCount(1)
+  private val fileUpload = FileUpload("fileRef1", Successful, "", "id")
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -49,7 +52,12 @@ class AuditServiceSpec extends SpecBase {
 
     "audit a 'NavigateToMessages' event" in {
       auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages)(hc)
-      verify(mockAuditConnector).sendExtendedEvent(ArgumentMatchers.refEq(extendedEvent, "eventId", "generatedAt"))(any(), any())
+      verify(mockAuditConnector).sendExtendedEvent(ArgumentMatchers.refEq(navigateToMessageEvent, "eventId", "generatedAt"))(any(), any())
+    }
+
+    "audit a 'UploadSuccess' event" in {
+      auditService.auditUploadSuccess(eori, Some(contactDetails), None, fileUploadCount, List(fileUpload))(hc)
+      verify(mockAuditConnector).sendEvent(ArgumentMatchers.refEq(uploadSuccessEvent, "eventId", "generatedAt"))(any(), any())
     }
 
     "audit with a success" in {
@@ -59,7 +67,6 @@ class AuditServiceSpec extends SpecBase {
     }
 
     "handle audit failure" in {
-
       mockSendEvent(result = auditFailure)
 
       val res = auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages)(hc).futureValue
@@ -68,7 +75,6 @@ class AuditServiceSpec extends SpecBase {
     }
 
     "handled audit disabled" in {
-
       mockSendEvent(result = Disabled)
 
       val res = auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages)(hc).futureValue
@@ -77,7 +83,7 @@ class AuditServiceSpec extends SpecBase {
     }
   }
 
-  private val extendedEvent = ExtendedDataEvent(
+  private val navigateToMessageEvent = ExtendedDataEvent(
     auditSource = appConfig.appName,
     auditType = NavigateToMessages.toString,
     detail = Json.parse("""{
@@ -92,12 +98,30 @@ class AuditServiceSpec extends SpecBase {
       .toAuditTags("callSFUSPartial", "/secure-message-frontend/cds-file-upload-service/messages")
   )
 
+  private val uploadSuccessEvent = DataEvent(
+    auditSource = appConfig.appName,
+    auditType = UploadSuccess.toString,
+    detail = Map(
+      "eori" -> eori,
+      "telephoneNumber" -> contactDetails.phoneNumber,
+      "fullName" -> contactDetails.name,
+      "emailAddress" -> contactDetails.email,
+      "companyName" -> contactDetails.companyName,
+      "numberOfFiles" -> fileUploadCount.get.value.toString,
+      "fileReference1" -> fileUpload.reference
+    ),
+    tags = AuditExtensions
+      .auditHeaderCarrier(hc)
+      .toAuditTags("trader-submission", "N/A")
+  )
+
   private def mockSendEvent(result: AuditResult = Success) = {
     when(
-      mockAuditConnector.sendExtendedEvent(ArgumentMatchers.any[ExtendedDataEvent])(
-        ArgumentMatchers.any[HeaderCarrier],
-        ArgumentMatchers.any[ExecutionContext]
-      )
+      mockAuditConnector
+        .sendExtendedEvent(ArgumentMatchers.any[ExtendedDataEvent])(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[ExecutionContext])
     ).thenReturn(Future.successful(result))
+
+    when(mockAuditConnector.sendEvent(ArgumentMatchers.any[DataEvent])(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[ExecutionContext]))
+      .thenReturn(Future.successful(result))
   }
 }

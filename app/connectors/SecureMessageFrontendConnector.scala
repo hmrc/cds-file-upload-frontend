@@ -26,15 +26,19 @@ import services.AuditService
 import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 
-class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: AppConfig, auditService: AuditService)(implicit ec: ExecutionContext) extends Logging with Status {
+class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: AppConfig, auditService: AuditService)(implicit ec: ExecutionContext)
+    extends Logging with Status {
 
   def retrieveInboxPartial(eori: String, filter: MessageFilterTag)(implicit hc: HeaderCarrier): Future[InboxPartial] = {
     val enrolment = "HMRC-CUS-ORG"
-    fetchPartial(config.microservice.services.secureMessaging.fetchInboxEndpoint, "the user's inbox", constructInboxEndpointQueryParams(enrolment, eori, filter))
-      .map{response =>
-        auditService.auditSecureMessageInbox(enrolment, eori, filter)
-        InboxPartial(response.body)
-      }
+    fetchPartial(
+      config.microservice.services.secureMessaging.fetchInboxEndpoint,
+      "the user's inbox",
+      constructInboxEndpointQueryParams(enrolment, eori, filter)
+    ).map { response =>
+      auditService.auditSecureMessageInbox(enrolment, eori, filter)
+      InboxPartial(response.body)
+    }
   }
 
   def retrieveConversationPartial(client: String, conversationId: String)(implicit hc: HeaderCarrier): Future[ConversationPartial] =

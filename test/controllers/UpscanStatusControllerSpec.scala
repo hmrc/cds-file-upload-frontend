@@ -21,29 +21,25 @@ import config.Notifications
 import connectors.CdsFileUploadConnector
 import controllers.actions.{DataRetrievalAction, FileUploadResponseRequiredAction}
 import models._
-import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
+import services.AuditService
 import testdata.CommonTestData.{eori, signedInUser}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.audit.model.DataEvent
 import views.html.{upload_error, upload_your_files}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock {
 
-  val auditConnector = mock[AuditConnector]
-  val uploadYourFiles = mock[upload_your_files]
-  val uploadError = mock[upload_error]
-  val cdsFileUploadConnector = mock[CdsFileUploadConnector]
-
-  private val mockAuditConnector = mock[AuditConnector]
+  private val auditService = mock[AuditService]
+  private val uploadYourFiles = mock[upload_your_files]
+  private val uploadError = mock[upload_error]
+  private val cdsFileUploadConnector = mock[CdsFileUploadConnector]
 
   private val responseGen: Gen[(FileUpload, FileUploadResponse)] =
     for {
@@ -70,7 +66,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       new FakeVerifiedEmailAction(),
       new FileUploadResponseRequiredAction(),
       mockFileUploadAnswersService,
-      mockAuditConnector,
+      auditService,
       cdsFileUploadConnector,
       appConfig.copy(notifications = Notifications(maxRetries = 3, retryPauseMillis = 500)),
       mcc,
@@ -87,7 +83,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
   }
 
   override protected def afterEach(): Unit = {
-    reset(mockAuditConnector, cdsFileUploadConnector, uploadYourFiles, uploadError, mockFileUploadAnswersService)
+    reset(auditService, cdsFileUploadConnector, uploadYourFiles, uploadError, mockFileUploadAnswersService)
 
     super.afterEach()
   }
@@ -227,7 +223,6 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
     }
 
     "audit upload success" in {
-
       val file1 = FileUpload("fileRef1", Waiting(UploadRequest("some href", Map.empty)), id = "fileRef1")
       val file2 = FileUpload("fileRef2", Waiting(UploadRequest("some other href", Map.empty)), id = "fileRef2")
       val lastFile = FileUpload("fileRef3", Waiting(UploadRequest("another href", Map.empty)), id = "fileRef3")
@@ -237,19 +232,6 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456", "joe@bloggs.com")
       val answers =
         FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
-
-      val expectedDetail = Map(
-        "eori" -> eori,
-        "fullName" -> "Joe Bloggs",
-        "companyName" -> "Bloggs Inc",
-        "emailAddress" -> "joe@bloggs.com",
-        "telephoneNumber" -> "07998123456",
-        "mrn" -> "34GB1234567ABCDEFG",
-        "numberOfFiles" -> "3",
-        "fileReference1" -> "fileRef1",
-        "fileReference2" -> "fileRef2",
-        "fileReference3" -> "fileRef3"
-      )
 
       when(cdsFileUploadConnector.getNotification(meq("fileRef1"))(any()))
         .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", "file1.pdf"))))
@@ -261,13 +243,9 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val result = controller(fakeDataRetrievalAction(answers)).success(lastFile.reference)(fakeRequest)
       status(result) mustBe SEE_OTHER
 
-      val captor: ArgumentCaptor[DataEvent] = ArgumentCaptor.forClass(classOf[DataEvent])
-      verify(mockAuditConnector).sendEvent(captor.capture())(any[HeaderCarrier], any[ExecutionContext])
-
-      val dataEvent = captor.getValue
-      dataEvent.auditType mustBe "UploadSuccess"
-      dataEvent.auditSource mustBe "cds-file-upload-frontend"
-      dataEvent.detail mustBe expectedDetail
+      verify(auditService).auditUploadSuccess(meq(eori), meq(Some(cd)), meq(Some(mrn)), meq(FileUploadCount(3)), meq(response.uploads))(
+        any[HeaderCarrier]
+      )
     }
 
     "load receipt page when all notifications are successful" in {

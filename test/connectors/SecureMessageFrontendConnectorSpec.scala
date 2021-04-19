@@ -28,7 +28,6 @@ import play.mvc.Http.Status.{BAD_GATEWAY, BAD_REQUEST, OK}
 import services.AuditService
 import testdata.CommonTestData
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -63,14 +62,14 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
           result mustBe InboxPartial(partialContent)
         }
 
-        "audits the retrieval of the InboxPartial" in {
+        "audit the retrieval of the InboxPartial" in {
           val partialContent = "<div>Some Content</div>"
           val httpResponse = HttpResponse(status = OK, body = partialContent)
 
           when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
             .thenReturn(Future.successful(httpResponse))
 
-          connector.retrieveInboxPartial(CommonTestData.eori, ExportMessages)
+          connector.retrieveInboxPartial(CommonTestData.eori, ExportMessages).futureValue
 
           verify(mockAuditService).auditSecureMessageInbox(anyString(), anyString(), any[MessageFilterTag])(any())
         }
