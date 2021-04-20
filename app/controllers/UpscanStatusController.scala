@@ -18,9 +18,7 @@ package controllers
 
 import config.AppConfig
 import connectors.CdsFileUploadConnector
-import controllers.actions.{AuthAction, DataRetrievalAction, FileUploadResponseRequiredAction, MrnRequiredAction, VerifiedEmailAction}
-
-import javax.inject.Inject
+import controllers.actions._
 import metrics.MetricIdentifiers.fetchNotificationMetric
 import metrics.SfusMetrics
 import models._
@@ -28,14 +26,11 @@ import models.requests.FileUploadResponseRequest
 import play.api.Logger
 import play.api.i18n.I18nSupport
 import play.api.mvc._
-import services.FileUploadAnswersService
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.audit.AuditExtensions._
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.audit.model.{Audit, DataEvent}
+import services.{AuditService, FileUploadAnswersService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.{upload_error, upload_your_files}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class UpscanStatusController @Inject()(
@@ -45,7 +40,7 @@ class UpscanStatusController @Inject()(
   verifiedEmail: VerifiedEmailAction,
   requireResponse: FileUploadResponseRequiredAction,
   answersService: FileUploadAnswersService,
-  auditConnector: AuditConnector,
+  auditservice: AuditService,
   cdsFileUploadConnector: CdsFileUploadConnector,
   implicit val appConfig: AppConfig,
   mcc: MessagesControllerComponents,
@@ -57,8 +52,6 @@ class UpscanStatusController @Inject()(
 
   private val logger = Logger(this.getClass)
 
-  private val AuditSource = appConfig.appName
-  private val audit = Audit(AuditSource, auditConnector)
   private val notificationsMaxRetries = appConfig.notifications.maxRetries
   private val notificationsRetryPause = appConfig.notifications.retryPauseMillis
 
@@ -138,7 +131,13 @@ class UpscanStatusController @Inject()(
 
           case ns if ns.length == uploads.length =>
             logger.info("All notifications successful.")
-            auditUploadSuccess()
+            auditservice.auditUploadSuccess(
+              req.eori,
+              req.userAnswers.contactDetails,
+              req.userAnswers.mrn,
+              req.userAnswers.fileUploadCount,
+              req.fileUploadResponse.uploads
+            )
             Future.successful(Redirect(routes.UploadYourFilesReceiptController.onPageLoad()))
 
           case ns if retries < notificationsMaxRetries =>
@@ -159,34 +158,6 @@ class UpscanStatusController @Inject()(
   }
 
   private def clearUserCache(eori: String) = answersService.removeByEori(eori)
-
-  private def auditUploadSuccess()(implicit req: FileUploadResponseRequest[_]): Unit = {
-    def auditDetails: Map[String, String] = {
-      val contactDetails = req.userAnswers.contactDetails
-        .fold(Map.empty[String, String])(
-          cd => Map("fullName" -> cd.name, "companyName" -> cd.companyName, "emailAddress" -> cd.email, "telephoneNumber" -> cd.phoneNumber)
-        )
-      val eori = Map("eori" -> req.eori)
-      val mrn = req.userAnswers.mrn.fold(Map.empty[String, String])(m => Map("mrn" -> m.value))
-      val numberOfFiles = req.userAnswers.fileUploadCount.fold(Map.empty[String, String])(n => Map("numberOfFiles" -> s"${n.value}"))
-      val files = req.fileUploadResponse.uploads
-      val fileReferences = (1 to files.size).map(i => s"fileReference$i").zip(files.map(_.reference)).toMap
-      contactDetails ++ eori ++ mrn ++ numberOfFiles ++ fileReferences
-    }
-
-    sendDataEvent(transactionName = "trader-submission", detail = auditDetails, auditType = "UploadSuccess")
-  }
-
-  private def sendDataEvent(
-    transactionName: String,
-    path: String = "N/A",
-    tags: Map[String, String] = Map.empty,
-    detail: Map[String, String],
-    auditType: String
-  )(implicit hc: HeaderCarrier): Unit =
-    audit.sendDataEvent(
-      DataEvent(AuditSource, auditType, tags = hc.toAuditTags(transactionName, path) ++ tags, detail = hc.toAuditDetails(detail.toSeq: _*))
-    )
 
   private def getPosition(ref: String, refs: List[String]): Position = refs match {
     case head :: _ if head == ref => First(refs.size)

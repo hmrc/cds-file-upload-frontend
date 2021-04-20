@@ -16,7 +16,7 @@
 
 package testdata
 
-import models.ContactDetails
+import models.{AuthKey, ContactDetails}
 import models.requests.SignedInUser
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 
@@ -32,5 +32,5 @@ object CommonTestData {
   val contactDetails = ContactDetails(name = "name", companyName = "company name", phoneNumber = "0123456789", email = verifiedEmail)
 
   val signedInUser =
-    SignedInUser(eori, Enrolments(Set(Enrolment(SignedInUser.cdsEnrolmentName, Seq(EnrolmentIdentifier(SignedInUser.eoriIdentifierKey, eori)), ""))))
+    SignedInUser(eori, Enrolments(Set(Enrolment(AuthKey.enrolment, Seq(EnrolmentIdentifier(AuthKey.identifierKey, eori)), ""))))
 }

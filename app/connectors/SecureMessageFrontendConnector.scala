@@ -19,17 +19,25 @@ package connectors
 import scala.concurrent.{ExecutionContext, Future}
 import com.google.inject.Inject
 import config.AppConfig
-import models.{ConversationPartial, InboxPartial, MessageFilterTag, ReplyResultPartial}
+import models.{AuthKey, ConversationPartial, InboxPartial, MessageFilterTag, ReplyResultPartial}
 import play.api.Logging
 import play.api.http.Status
+import services.AuditService
 import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 
-class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: AppConfig)(implicit ec: ExecutionContext) extends Logging with Status {
+class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: AppConfig, auditService: AuditService)(implicit ec: ExecutionContext)
+    extends Logging with Status {
 
   def retrieveInboxPartial(eori: String, filter: MessageFilterTag)(implicit hc: HeaderCarrier): Future[InboxPartial] =
-    fetchPartial(config.microservice.services.secureMessaging.fetchInboxEndpoint, "the user's inbox", constructInboxEndpointQueryParams(eori, filter))
-      .map(response => InboxPartial(response.body))
+    fetchPartial(
+      config.microservice.services.secureMessaging.fetchInboxEndpoint,
+      "the user's inbox",
+      constructInboxEndpointQueryParams(AuthKey.enrolment, eori, filter)
+    ).map { response =>
+      auditService.auditSecureMessageInbox(AuthKey.enrolment, eori, filter, config.microservice.services.secureMessaging.fetchInboxEndpoint)
+      InboxPartial(response.body)
+    }
 
   def retrieveConversationPartial(client: String, conversationId: String)(implicit hc: HeaderCarrier): Future[ConversationPartial] =
     fetchPartial(
@@ -83,8 +91,8 @@ class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: A
           Future.failed(exc)
       }
 
-  private def constructInboxEndpointQueryParams(eori: String, filter: MessageFilterTag): Seq[(String, String)] = {
-    val enrolmentParameter = ("enrolment", s"HMRC-CUS-ORG~EoriNumber~$eori")
+  private def constructInboxEndpointQueryParams(enrolment: String, eori: String, filter: MessageFilterTag): Seq[(String, String)] = {
+    val enrolmentParameter = ("enrolment", s"$enrolment~EoriNumber~$eori")
     val filterParameter = ("tag", s"notificationType~${filter.filterValue}")
 
     Seq(enrolmentParameter, filterParameter)

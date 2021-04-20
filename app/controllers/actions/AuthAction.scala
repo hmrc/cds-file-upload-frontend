@@ -18,9 +18,11 @@ package controllers.actions
 
 import com.google.inject.ProvidedBy
 import controllers.routes
+
 import javax.inject.{Inject, Provider}
 import models.requests.SignedInUser._
 import models.requests.{AuthenticatedRequest, SignedInUser}
+import models.AuthKey
 import play.api.mvc.Results.Redirect
 import play.api.mvc._
 import play.api.{Configuration, Environment}
@@ -50,9 +52,9 @@ class AuthActionImpl @Inject()(
   override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    authorised(SignedInUser.authorisationPredicate)
+    authorised(Enrolment(AuthKey.enrolment))
       .retrieve(allEnrolments) { allEnrolments: Enrolments =>
-        allEnrolments.getEnrolment(cdsEnrolmentName).flatMap(_.getIdentifier(eoriIdentifierKey)) match {
+        allEnrolments.getEnrolment(AuthKey.enrolment).flatMap(_.getIdentifier(AuthKey.identifierKey)) match {
 
           case Some(eori) if eoriAllowList.allows(eori.value) =>
             val signedInUser = SignedInUser(eori.value, allEnrolments)
