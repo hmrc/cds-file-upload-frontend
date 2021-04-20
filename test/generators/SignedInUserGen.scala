@@ -17,6 +17,7 @@
 package generators
 
 import models.requests.SignedInUser
+import models.AuthKey
 import org.scalacheck.Gen.listOf
 import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
@@ -53,8 +54,8 @@ trait SignedInUserGen {
 
   val eoriEnrolmentGen: Gen[EORIEnrolment] = {
     eoriString.map { eori =>
-      val eoriIdentifier = EnrolmentIdentifier("EORINumber", eori)
-      EORIEnrolment(Enrolment("HMRC-CUS-ORG", Seq(eoriIdentifier), ""))
+      val eoriIdentifier = EnrolmentIdentifier(AuthKey.identifierKey, eori)
+      EORIEnrolment(Enrolment(AuthKey.enrolment, Seq(eoriIdentifier), ""))
     }
   }
 }

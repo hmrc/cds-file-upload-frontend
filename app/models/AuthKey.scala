@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package models.requests
+package models
 
-import uk.gov.hmrc.auth.core.Enrolments
-
-case class SignedInUser(eori: String, enrolments: Enrolments)
+object AuthKey {
+  val enrolment: String = "HMRC-CUS-ORG"
+  val identifierKey: String = "EORINumber"
+}

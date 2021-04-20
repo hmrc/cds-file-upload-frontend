@@ -71,7 +71,7 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
 
           connector.retrieveInboxPartial(CommonTestData.eori, ExportMessages).futureValue
 
-          verify(mockAuditService).auditSecureMessageInbox(anyString(), anyString(), any[MessageFilterTag])(any())
+          verify(mockAuditService).auditSecureMessageInbox(anyString(), anyString(), any[MessageFilterTag], anyString())(any())
         }
       }
 
@@ -122,7 +122,7 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
           val queryParamValue = queryParamCaptor.getValue().asInstanceOf[Seq[(String, String)]]
 
           queryParamValue.size mustBe 2
-          queryParamValue(0) mustBe Tuple2("enrolment", s"HMRC-CUS-ORG~EoriNumber~${CommonTestData.eori}")
+          queryParamValue(0) mustBe Tuple2("enrolment", s"${AuthKey.enrolment}~EoriNumber~${CommonTestData.eori}")
         }
       }
 

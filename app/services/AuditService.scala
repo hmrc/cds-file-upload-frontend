@@ -33,16 +33,16 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class AuditService @Inject()(connector: AuditConnector, appConfig: AppConfig)(implicit ec: ExecutionContext) extends Logging {
 
-  def auditSecureMessageInbox(enrolment: String, eori: String, filter: MessageFilterTag)(implicit hc: HeaderCarrier): Future[AuditResult] = {
+  def auditSecureMessageInbox(enrolment: String, eori: String, filter: MessageFilterTag, path: String)(
+    implicit hc: HeaderCarrier
+  ): Future[AuditResult] = {
     val auditType = NavigateToMessages
-    val details = Map("enrolment" -> enrolment, "eoriNumber" -> eori)
-    val tags = Map("notificationType" -> filter.filterValue)
 
     val extendedEvent = ExtendedDataEvent(
       auditSource = appConfig.appName,
       auditType = auditType.toString,
-      detail = Json.toJson(details).as[JsObject] + ("tags" -> Json.toJson(tags)),
-      tags = getAuditTags("callSFUSPartial", "/secure-message-frontend/cds-file-upload-service/messages")
+      detail = Json.obj("enrolment" -> enrolment, "eoriNumber" -> eori, "tags" -> Json.obj("notificationType" -> filter.filterValue)),
+      tags = getAuditTags("callSFUSPartial", path)
     )
 
     connector.sendExtendedEvent(extendedEvent).map(handleResponse(_, auditType.toString))

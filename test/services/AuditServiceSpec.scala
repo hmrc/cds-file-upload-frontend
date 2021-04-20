@@ -37,8 +37,9 @@ class AuditServiceSpec extends SpecBase {
   private val auditService = new AuditService(mockAuditConnector, appConfig)(global)
   private val auditFailure = Failure("Event sending failed")
 
-  private val enrolment = "HMRC-CUS-ORG"
+  private val enrolment = AuthKey.enrolment
   private val eori = "GB150454489082"
+  private val dcPath = "/secure-message-frontend/cds-file-upload-service/messages"
   private val contactDetails = ContactDetails("Joe Bloggs", "Bloggs Inc", "0123456", "joe@bloggs.com")
   private val fileUploadCount = FileUploadCount(1)
   private val fileUpload = FileUpload("fileRef1", Successful, "", "id")
@@ -51,7 +52,7 @@ class AuditServiceSpec extends SpecBase {
   "AuditService" should {
 
     "audit a 'NavigateToMessages' event" in {
-      auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages)(hc)
+      auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages, dcPath)(hc)
       verify(mockAuditConnector).sendExtendedEvent(ArgumentMatchers.refEq(navigateToMessageEvent, "eventId", "generatedAt"))(any(), any())
     }
 
@@ -61,7 +62,7 @@ class AuditServiceSpec extends SpecBase {
     }
 
     "audit with a success" in {
-      val res = auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages)(hc).futureValue
+      val res = auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages, dcPath)(hc).futureValue
 
       res mustBe Success
     }
@@ -69,7 +70,7 @@ class AuditServiceSpec extends SpecBase {
     "handle audit failure" in {
       mockSendEvent(result = auditFailure)
 
-      val res = auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages)(hc).futureValue
+      val res = auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages, dcPath)(hc).futureValue
 
       res mustBe auditFailure
     }
@@ -77,7 +78,7 @@ class AuditServiceSpec extends SpecBase {
     "handled audit disabled" in {
       mockSendEvent(result = Disabled)
 
-      val res = auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages)(hc).futureValue
+      val res = auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages, dcPath)(hc).futureValue
 
       res mustBe AuditResult.Disabled
     }
@@ -95,7 +96,7 @@ class AuditServiceSpec extends SpecBase {
                           | }""".stripMargin),
     tags = AuditExtensions
       .auditHeaderCarrier(hc)
-      .toAuditTags("callSFUSPartial", "/secure-message-frontend/cds-file-upload-service/messages")
+      .toAuditTags("callSFUSPartial", dcPath)
   )
 
   private val uploadSuccessEvent = DataEvent(

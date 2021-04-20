@@ -19,7 +19,7 @@ package connectors
 import scala.concurrent.{ExecutionContext, Future}
 import com.google.inject.Inject
 import config.AppConfig
-import models.{ConversationPartial, InboxPartial, MessageFilterTag, ReplyResultPartial}
+import models.{AuthKey, ConversationPartial, InboxPartial, MessageFilterTag, ReplyResultPartial}
 import play.api.Logging
 import play.api.http.Status
 import services.AuditService
@@ -29,17 +29,15 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorR
 class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: AppConfig, auditService: AuditService)(implicit ec: ExecutionContext)
     extends Logging with Status {
 
-  def retrieveInboxPartial(eori: String, filter: MessageFilterTag)(implicit hc: HeaderCarrier): Future[InboxPartial] = {
-    val enrolment = "HMRC-CUS-ORG"
+  def retrieveInboxPartial(eori: String, filter: MessageFilterTag)(implicit hc: HeaderCarrier): Future[InboxPartial] =
     fetchPartial(
       config.microservice.services.secureMessaging.fetchInboxEndpoint,
       "the user's inbox",
-      constructInboxEndpointQueryParams(enrolment, eori, filter)
+      constructInboxEndpointQueryParams(AuthKey.enrolment, eori, filter)
     ).map { response =>
-      auditService.auditSecureMessageInbox(enrolment, eori, filter)
+      auditService.auditSecureMessageInbox(AuthKey.enrolment, eori, filter, config.microservice.services.secureMessaging.fetchInboxEndpoint)
       InboxPartial(response.body)
     }
-  }
 
   def retrieveConversationPartial(client: String, conversationId: String)(implicit hc: HeaderCarrier): Future[ConversationPartial] =
     fetchPartial(
