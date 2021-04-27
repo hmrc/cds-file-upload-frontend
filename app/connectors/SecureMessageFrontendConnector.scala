@@ -35,7 +35,7 @@ class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: A
       "the user's inbox",
       constructInboxEndpointQueryParams(AuthKey.enrolment, eori, filter)
     ).map { response =>
-      auditService.auditSecureMessageInbox(AuthKey.enrolment, eori, filter, config.microservice.services.secureMessaging.fetchInboxEndpoint)
+      auditService.auditSecureMessageInbox(AuthKey.enrolment, eori, filter, config.microservice.services.secureMessaging.fetchInbox)
       InboxPartial(response.body)
     }
 
