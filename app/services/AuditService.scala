@@ -18,15 +18,15 @@ package services
 
 import com.google.inject.Inject
 import config.AppConfig
-import models.{ContactDetails, FileUpload, FileUploadCount, MRN, MessageFilterTag}
+import models._
 import play.api.Logging
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.Json
 import services.AuditTypes.{NavigateToMessages, UploadSuccess}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.AuditExtensions
 import uk.gov.hmrc.play.audit.AuditExtensions._
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Disabled, Failure, Success}
+import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.{DataEvent, ExtendedDataEvent}
 
 import scala.concurrent.{ExecutionContext, Future}

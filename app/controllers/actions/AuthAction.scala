@@ -18,11 +18,8 @@ package controllers.actions
 
 import com.google.inject.ProvidedBy
 import controllers.routes
-
-import javax.inject.{Inject, Provider}
-import models.requests.SignedInUser._
-import models.requests.{AuthenticatedRequest, SignedInUser}
 import models.AuthKey
+import models.requests.{AuthenticatedRequest, SignedInUser}
 import play.api.mvc.Results.Redirect
 import play.api.mvc._
 import play.api.{Configuration, Environment}
@@ -32,6 +29,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 
+import javax.inject.{Inject, Provider}
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthActionImpl @Inject()(
