@@ -8,14 +8,11 @@ majorVersion := 0
 
 PlayKeys.devSettings := Seq("play.server.http.port" -> "6793")
 
-resolvers += Resolver.bintrayRepo("wolfendale", "maven")
-
 lazy val microservice = (project in file("."))
   .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
   .settings(libraryDependencies ++= compileDependencies ++ testDependencies)
   .settings(scalaVersion := "2.12.12")
   .settings(publishingSettings: _*)
-  .settings(resolvers += Resolver.jcenterRepo)
   .settings(
     // concatenate js
     Concat.groups := Seq(
@@ -60,7 +57,6 @@ val testDependencies = Seq(
   "org.scalatestplus.play"    %%  "scalatestplus-play"       % "4.0.3"     % "test",
   "org.mockito"               %   "mockito-core"             % "3.5.7"     % "test",
   "org.scalacheck"            %%  "scalacheck"               % "1.15.2"    % "test",
-  "wolfendale"                %%  "scalacheck-gen-regexp"    % "0.1.1"     % "test",
   "com.github.tomakehurst"    %   "wiremock-standalone"      % "2.27.2"    % "test"
 )
 

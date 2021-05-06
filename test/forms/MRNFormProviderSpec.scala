@@ -17,13 +17,11 @@
 package forms
 
 import base.SpecBase
-import models.MRN
 import play.api.data.Form
-import wolfendale.scalacheck.regexp.RegexpGen
+import testdata.CommonTestData.mrn
 
 class MRNFormProviderSpec extends SpecBase {
 
-  val validMRNGen = RegexpGen.from(MRN.validRegex)
   val form = new MRNFormProvider()()
 
   val errorMessage: Form[_] => String = _.errors.map(_.message).headOption.getOrElse("")
@@ -32,21 +30,17 @@ class MRNFormProviderSpec extends SpecBase {
 
     "return success for valid MRN values" in {
 
-      forAll(validMRNGen) { mrn =>
-        form.bind(Map("value" -> mrn)).fold(_ => fail("Form binding must not fail!"), result => result.value mustBe mrn)
-      }
+      form.bind(Map("value" -> mrn)).fold(_ => fail("Form binding must not fail!"), result => result.value mustBe mrn)
     }
 
     "return invalid error for some invalid MRN values" in {
 
-      forAll { mrn: String =>
-        whenever(!mrn.matches(MRN.validRegex) && mrn.trim.size > 0) {
-          form.bind(Map("value" -> mrn)).fold(errors => errorMessage(errors) mustBe "mrn.invalid", _ => fail("Form binding must fail!"))
-        }
-      }
+      val invalidMrn = "12GBINVALIDMRN"
+      form.bind(Map("value" -> invalidMrn)).fold(errors => errorMessage(errors) mustBe "mrn.invalid", _ => fail("Form binding must fail!"))
     }
 
     "return missing error for an empty or only whitespace MRN value" in {
+
       form.bind(Map.empty[String, String]).fold(errors => errorMessage(errors) mustBe "mrn.missing", _ => fail("Form binding must fail!"))
       form.bind(Map("value" -> "   ")).fold(errors => errorMessage(errors) mustBe "mrn.missing", _ => fail("Form binding must fail!"))
     }
