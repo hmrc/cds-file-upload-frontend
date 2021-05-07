@@ -17,31 +17,22 @@
 package models
 
 import base.SpecBase
-import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import wolfendale.scalacheck.regexp.RegexpGen
+import testdata.CommonTestData.mrn
 
 class MRNSpec extends SpecBase with ScalaCheckPropertyChecks {
-
-  val validMRNGen: Gen[String] = RegexpGen.from(MRN.validRegex)
 
   "MRN.apply" should {
 
     "return Some for valid MRN" in {
 
-      forAll(validMRNGen) { mrn =>
-        MRN(mrn).map(_.value) mustBe Some(mrn)
-      }
+      MRN(mrn).map(_.value) mustBe Some(mrn)
     }
 
     "return None for invalid MRN" in {
 
-      forAll { mrn: String =>
-        whenever(!mrn.matches(MRN.validRegex)) {
-
-          MRN(mrn) mustBe None
-        }
-      }
+      val invalidMrn = "12GBINVALIDMRN"
+      MRN(invalidMrn) mustBe None
     }
   }
 }
