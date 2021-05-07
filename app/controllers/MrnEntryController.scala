@@ -17,7 +17,7 @@
 package controllers
 
 import com.google.inject.Singleton
-import config.SecureMessagingConfig
+import config.{AppConfig, SecureMessagingConfig}
 import controllers.actions._
 import forms.MRNFormProvider
 import models.{EORI, FileUploadAnswers, MRN}
@@ -27,6 +27,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import services.{FileUploadAnswersService, MrnDisValidator}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import utils.RefererUrlValidator
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -46,7 +47,7 @@ class MrnEntryController @Inject()(
   mrnDisValidator: MrnDisValidator,
   mrnAccessDenied: mrn_access_denied,
   secureMessagingConfig: SecureMessagingConfig
-)(implicit ec: ExecutionContext)
+)(implicit ec: ExecutionContext, appConf: AppConfig)
     extends FrontendController(mcc) with I18nSupport {
 
   private val form = formProvider()
@@ -60,10 +61,15 @@ class MrnEntryController @Inject()(
   def onPageLoad(refererUrl: Option[String] = None): Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData).async { implicit req =>
     val populatedForm = req.userAnswers.mrn.fold(form)(form.fill)
 
-    decodeRefererUrl(refererUrl).map { decodedBackLink =>
+    val sanitisedRefererUrl = for {
+      decodedUrl <- decodeRefererUrl(refererUrl)
+      filteredUrl <- filterBadRefererUrl(decodedUrl)
+    } yield filteredUrl
+
+    sanitisedRefererUrl.map { backLink =>
       answersService
-        .upsert(req.userAnswers.copy(mrnPageRefererUrl = Some(decodedBackLink)))
-        .map(_ => Ok(mrnEntry(populatedForm, getBackLink(Some(decodedBackLink)))))
+        .upsert(req.userAnswers.copy(mrnPageRefererUrl = Some(backLink)))
+        .map(_ => Ok(mrnEntry(populatedForm, getBackLink(Some(backLink)))))
     }.getOrElse(Future.successful(Ok(mrnEntry(populatedForm, getBackLink(req.userAnswers.mrnPageRefererUrl)))))
   }
 
@@ -103,4 +109,6 @@ class MrnEntryController @Inject()(
     Future.successful(BadRequest(mrnAccessDenied(mrn)))
 
   private val decodeRefererUrl = (refererUrl: Option[String]) => refererUrl.map(url => decode(url, "UTF-8"))
+
+  private val filterBadRefererUrl = (refererUrl: String) => if (RefererUrlValidator.isValid(refererUrl)) Some(refererUrl) else None
 }

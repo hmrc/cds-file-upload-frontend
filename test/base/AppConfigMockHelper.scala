@@ -16,27 +16,7 @@
 
 package base
 
-import config.{
-  AppConfig,
-  Assets,
-  CDSFileUpload,
-  CDSFileUploadFrontend,
-  ContactFrontend,
-  CustomsDeclarations,
-  Feedback,
-  FileFormats,
-  FileUploadAnswersRepository,
-  GoogleAnalytics,
-  Keystore,
-  Microservice,
-  Notifications,
-  Platform,
-  Proxy,
-  SecureMessageAnswersRepository,
-  SecureMessaging,
-  Services,
-  TrackingConsentFrontend
-}
+import config._
 import org.scalatestplus.mockito.MockitoSugar
 
 object AppConfigMockHelper extends MockitoSugar {
@@ -53,7 +33,8 @@ object AppConfigMockHelper extends MockitoSugar {
     answersRepository: FileUploadAnswersRepository = mock[FileUploadAnswersRepository],
     secureMessageAnswersRepository: SecureMessageAnswersRepository = mock[SecureMessageAnswersRepository],
     trackingConsentFrontend: TrackingConsentFrontend = mock[TrackingConsentFrontend],
-    platform: Platform = mock[Platform]
+    platform: Platform = mock[Platform],
+    allowList: AllowList = mock[AllowList]
   ) = AppConfig(
     appName,
     developerHubClientId,
@@ -67,7 +48,8 @@ object AppConfigMockHelper extends MockitoSugar {
     answersRepository,
     secureMessageAnswersRepository,
     trackingConsentFrontend,
-    platform
+    platform,
+    allowList
   )
 
   def generateMockServices(
