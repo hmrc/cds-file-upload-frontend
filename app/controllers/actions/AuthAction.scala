@@ -17,6 +17,7 @@
 package controllers.actions
 
 import com.google.inject.ProvidedBy
+import config.AppConfig
 import controllers.routes
 import models.AuthKey
 import models.requests.{AuthenticatedRequest, SignedInUser}
@@ -76,7 +77,7 @@ class EoriAllowList(val values: Seq[String]) {
   def allows(eori: String): Boolean = values.isEmpty || values.contains(eori)
 }
 
-class EoriAllowListProvider @Inject()(configuration: Configuration) extends Provider[EoriAllowList] {
+class EoriAllowListProvider @Inject()(config: AppConfig) extends Provider[EoriAllowList] {
   override def get(): EoriAllowList =
-    new EoriAllowList(configuration.get[Seq[String]]("allowList.eori"))
+    new EoriAllowList(config.allowList.eori)
 }
