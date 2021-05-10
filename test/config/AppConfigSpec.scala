@@ -96,7 +96,6 @@ class AppConfigSpec extends PlaySpec {
       |
       |    features {
       |      default = disabled
-      |      secureMessaging = enabled
       |    }
       |  }
       |}

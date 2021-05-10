@@ -17,7 +17,7 @@
 package controllers
 
 import com.google.inject.Singleton
-import config.{AppConfig, SecureMessagingConfig}
+import config.AppConfig
 import controllers.actions._
 import forms.MRNFormProvider
 import models.{EORI, FileUploadAnswers, MRN}
@@ -45,18 +45,13 @@ class MrnEntryController @Inject()(
   mcc: MessagesControllerComponents,
   mrnEntry: mrn_entry,
   mrnDisValidator: MrnDisValidator,
-  mrnAccessDenied: mrn_access_denied,
-  secureMessagingConfig: SecureMessagingConfig
+  mrnAccessDenied: mrn_access_denied
 )(implicit ec: ExecutionContext, appConf: AppConfig)
     extends FrontendController(mcc) with I18nSupport {
 
   private val form = formProvider()
 
-  private lazy val defaultBackLinkUrl: Option[String] =
-    if (secureMessagingConfig.isSecureMessagingEnabled) Some(routes.ChoiceController.onPageLoad().url)
-    else None
-
-  private def getBackLink(refererUrl: Option[String]) = refererUrl.orElse(defaultBackLinkUrl)
+  private def getBackLink(refererUrl: Option[String]) = refererUrl.getOrElse(routes.ChoiceController.onPageLoad().url)
 
   def onPageLoad(refererUrl: Option[String] = None): Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData).async { implicit req =>
     val populatedForm = req.userAnswers.mrn.fold(form)(form.fill)
@@ -110,5 +105,5 @@ class MrnEntryController @Inject()(
 
   private val decodeRefererUrl = (refererUrl: Option[String]) => refererUrl.map(url => decode(url, "UTF-8"))
 
-  private val filterBadRefererUrl = (refererUrl: String) => if (RefererUrlValidator.isValid(refererUrl)) Some(refererUrl) else None
+  private val filterBadRefererUrl = (refererUrl: String) => Some(refererUrl).filter(RefererUrlValidator.isValid)
 }

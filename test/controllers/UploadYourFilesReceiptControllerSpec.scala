@@ -26,66 +26,42 @@ import play.api.mvc.Request
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
 import testdata.CommonTestData.eori
-import views.html.{upload_your_files_confirmation, upload_your_files_receipt}
+import views.html.upload_your_files_confirmation
 
 import scala.concurrent.Future
 
 class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusMetricsMock with FilesUploadedSpec {
 
   private val cdsFileUploadConnector = mock[CdsFileUploadConnector]
-  private val originalConfirmationPage = mock[upload_your_files_receipt]
-  private val secureMessagingConfirmationPage = mock[upload_your_files_confirmation]
+  private val confirmationPage = mock[upload_your_files_confirmation]
 
   private val controller = new UploadYourFilesReceiptController(
     new FakeAuthAction(),
     new FakeVerifiedEmailAction(),
     cdsFileUploadConnector,
     sfusMetrics,
-    originalConfirmationPage,
-    secureMessagingConfirmationPage,
-    mockFileUploadAnswersService,
-    secureMessagingConfig
+    confirmationPage,
+    mockFileUploadAnswersService
   )(mcc, executionContext)
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
 
-    reset(cdsFileUploadConnector, originalConfirmationPage, secureMessagingConfirmationPage)
+    reset(cdsFileUploadConnector, confirmationPage)
   }
 
   "UploadYourFilesReceiptController onPageLoad" should {
 
-    "load the original confirmation view" when {
-      "the Secure Messaging flag is disabled" in {
-        withSecureMessagingEnabled(false) {
-          withSingleFileSuccessfullyUploaded {
+    "load the confirmation view" in {
+      withSingleFileSuccessfullyUploaded {
 
-            when(originalConfirmationPage.apply(any(), any())(any(), any()))
-              .thenReturn(HtmlFormat.empty)
+        when(confirmationPage.apply(any(), any(), any())(any(), any()))
+          .thenReturn(HtmlFormat.empty)
 
-            val result = controller.onPageLoad()(fakeRequest)
+        val result = controller.onPageLoad()(fakeRequest)
 
-            status(result) mustBe OK
-            verify(originalConfirmationPage).apply(any(), any())(any[Request[_]], any[Messages])
-          }
-        }
-      }
-    }
-
-    "load the secure messaging confirmation view" when {
-      "the Secure Messaging flag is enabled" in {
-        withSecureMessagingEnabled(true) {
-          withSingleFileSuccessfullyUploaded {
-
-            when(secureMessagingConfirmationPage.apply(any(), any(), any())(any(), any()))
-              .thenReturn(HtmlFormat.empty)
-
-            val result = controller.onPageLoad()(fakeRequest)
-
-            status(result) mustBe OK
-            verify(secureMessagingConfirmationPage).apply(any(), any(), any())(any[Request[_]], any[Messages])
-          }
-        }
+        status(result) mustBe OK
+        verify(confirmationPage).apply(any(), any(), any())(any[Request[_]], any[Messages])
       }
     }
 
@@ -101,46 +77,27 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
       }
     }
 
-    "clear the answers cache" when {
-      "the Secure Messaging flag is enabled" in {
-        withSecureMessagingEnabled(true) {
-          withSingleFileSuccessfullyUploaded {
-            when(secureMessagingConfirmationPage.apply(any(), any(), any())(any(), any()))
-              .thenReturn(HtmlFormat.empty)
-
-            val result = controller.onPageLoad()(fakeRequest).futureValue
-
-            result.header.status mustBe OK
-
-            verify(mockFileUploadAnswersService).removeByEori(any())
-          }
-        }
-      }
-
-      "the Secure Messaging flag is disabled" in {
-        withSecureMessagingEnabled(false) {
-          withSingleFileSuccessfullyUploaded {
-
-            when(originalConfirmationPage.apply(any(), any())(any(), any()))
-              .thenReturn(HtmlFormat.empty)
-
-            val result = controller.onPageLoad()(fakeRequest)
-
-            status(result) mustBe OK
-            verify(mockFileUploadAnswersService).removeByEori(any())
-          }
-        }
-      }
-
-      "user is redirect to start page" in {
-        when(mockFileUploadAnswersService.findByEori(anyString()))
-          .thenReturn(Future.successful(None))
+    "clear the answers cache" in {
+      withSingleFileSuccessfullyUploaded {
+        when(confirmationPage.apply(any(), any(), any())(any(), any()))
+          .thenReturn(HtmlFormat.empty)
 
         val result = controller.onPageLoad()(fakeRequest).futureValue
 
-        result.header.status mustBe SEE_OTHER
+        result.header.status mustBe OK
+
         verify(mockFileUploadAnswersService).removeByEori(any())
       }
+    }
+
+    "user is redirect to start page" in {
+      when(mockFileUploadAnswersService.findByEori(anyString()))
+        .thenReturn(Future.successful(None))
+
+      val result = controller.onPageLoad()(fakeRequest).futureValue
+
+      result.header.status mustBe SEE_OTHER
+      verify(mockFileUploadAnswersService).removeByEori(any())
     }
   }
 

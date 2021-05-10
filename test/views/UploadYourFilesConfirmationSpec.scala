@@ -17,7 +17,6 @@
 package views
 
 import base.{FilesUploadedSpec, OverridableInjector}
-import config.SecureMessagingConfig
 import models.{FileUpload, MRN}
 import models.requests.{AuthenticatedRequest, SignedInUser}
 
@@ -30,27 +29,12 @@ import views.matchers.ViewMatchers
 
 class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers with FilesUploadedSpec {
 
-  private val secureMessagingConfig = mock[SecureMessagingConfig]
-  private val injector = new OverridableInjector(bind[SecureMessagingConfig].toInstance(secureMessagingConfig))
-
-  private val page = injector.instanceOf[upload_your_files_confirmation]
+  private val page = instanceOf[upload_your_files_confirmation]
   private val mrn = MRN("20GB46J8TMJ4RFGVA0").get
   private val email = "example@email.com"
   private val pagePrefix = "fileUploadConfirmationPage"
 
   private def view: Document = page(List(sampleFileUpload), Some(mrn), email)(fakeRequest, messages)
-
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-
-    reset(secureMessagingConfig)
-    when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(true)
-  }
-
-  override def afterEach(): Unit = {
-    reset(secureMessagingConfig)
-    super.afterEach()
-  }
 
   "File Upload Confirmation Page" should {
 

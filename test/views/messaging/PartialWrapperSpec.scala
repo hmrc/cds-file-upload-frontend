@@ -19,7 +19,6 @@ package views.messaging
 import scala.collection.JavaConverters._
 
 import base.OverridableInjector
-import config.SecureMessagingConfig
 import controllers.routes
 import org.jsoup.nodes.{Document, Element}
 import org.mockito.Mockito._
@@ -32,16 +31,8 @@ import views.matchers.ViewMatchers
 
 class PartialWrapperSpec extends DomAssertions with ViewMatchers {
 
-  private val secureMessagingConfig = mock[SecureMessagingConfig]
-  private val injector = new OverridableInjector(bind[SecureMessagingConfig].toInstance(secureMessagingConfig))
-
-  private val partialWrapperPage = injector.instanceOf[partial_wrapper]
+  private val partialWrapperPage = instanceOf[partial_wrapper]
   private val partialContent = "Partial Content"
-
-  override def afterEach(): Unit = {
-    reset(secureMessagingConfig)
-    super.afterEach()
-  }
 
   "partial_wrapper in case of Conversation page" should {
 
@@ -102,8 +93,6 @@ class PartialWrapperSpec extends DomAssertions with ViewMatchers {
     })
   }
 
-  private def genView(titleKey: String, backLinkUrl: Option[String]): Document = {
-    when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(true)
+  private def genView(titleKey: String, backLinkUrl: Option[String]): Document =
     partialWrapperPage(HtmlFormat.raw(partialContent), titleKey, routes.MrnEntryController.onPageLoad().url, backLinkUrl)(fakeRequest, messages)
-  }
 }

@@ -22,7 +22,6 @@
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.hmrcStandardFooter
 @import views.Title
 @import config.AppConfig
-@import config.SecureMessagingConfig
 
 @this(
   govukHeader: GovukHeader,
@@ -35,8 +34,7 @@
   hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet,
   hmrcReportTechnicalIssue: HmrcReportTechnicalIssue,
   hmrcFooter: hmrcStandardFooter,
-  appConfig: AppConfig,
-  secureMessagingConfig: SecureMessagingConfig
+  appConfig: AppConfig
 )
 
 @(
@@ -76,7 +74,7 @@
 @beforeContentBlock = {
     @phaseBanner("beta")
 
-    @if(secureMessagingConfig.isSecureMessagingEnabled && withNavigationBanner) {
+    @if(withNavigationBanner) {
       @navigationBanner()
     }
 

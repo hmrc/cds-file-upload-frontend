@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions.{AuthAction, SecureMessagingFeatureAction, VerifiedEmailAction}
+import controllers.actions.{AuthAction, VerifiedEmailAction}
 import forms.InboxChoiceForm
 import models.{ExportMessages, MessageFilterTag, SecureMessageAnswers}
 import models.requests.VerifiedEmailRequest
@@ -26,6 +26,7 @@ import play.api.Logging
 import services.SecureMessageAnswersService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.messaging.inbox_choice
+
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -34,7 +35,6 @@ class InboxChoiceController @Inject()(
   mcc: MessagesControllerComponents,
   authenticate: AuthAction,
   verifiedEmail: VerifiedEmailAction,
-  secureMessagingFeatureAction: SecureMessagingFeatureAction,
   answersService: SecureMessageAnswersService,
   inboxChoice: inbox_choice,
   ec: ExecutionContext
@@ -42,7 +42,7 @@ class InboxChoiceController @Inject()(
 
   implicit val eContext = ec
 
-  val actions = authenticate andThen verifiedEmail andThen secureMessagingFeatureAction
+  val actions = authenticate andThen verifiedEmail
 
   val onExportsMessageChoice: Action[AnyContent] = actions.async { implicit request =>
     checkMessageFilterTag(ExportMessages.toString)

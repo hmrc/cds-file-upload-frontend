@@ -17,21 +17,20 @@
 package controllers
 
 import connectors.SecureMessageFrontendConnector
-import controllers.actions.{AuthAction, MessageFilterAction, SecureMessagingFeatureAction, VerifiedEmailAction}
+import controllers.actions.{AuthAction, MessageFilterAction, VerifiedEmailAction}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.messaging.{inbox_wrapper, partial_wrapper}
-import java.net.URLEncoder.encode
 
+import java.net.URLEncoder.encode
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class SecureMessagingController @Inject()(
   authenticate: AuthAction,
   verifiedEmail: VerifiedEmailAction,
-  secureMessagingFeatureAction: SecureMessagingFeatureAction,
   messageFilterAction: MessageFilterAction,
   messageConnector: SecureMessageFrontendConnector,
   mcc: MessagesControllerComponents,
@@ -40,7 +39,7 @@ class SecureMessagingController @Inject()(
 )(implicit ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
-  val actions = authenticate andThen verifiedEmail andThen secureMessagingFeatureAction andThen messageFilterAction
+  val actions = authenticate andThen verifiedEmail andThen messageFilterAction
 
   val displayInbox: Action[AnyContent] = actions.async { implicit request =>
     messageConnector

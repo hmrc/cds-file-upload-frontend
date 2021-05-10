@@ -32,165 +32,109 @@ import views.html.choice_page
 class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
 
   private val choicePage = mock[choice_page]
-  private val secureMessagingFeatureAction = new SecureMessagingFeatureActionMock()
 
   private val controller =
-    new ChoiceController(
-      stubMessagesControllerComponents(),
-      new FakeAuthAction(),
-      new FakeVerifiedEmailAction(),
-      secureMessagingFeatureAction,
-      choicePage
-    )
+    new ChoiceController(stubMessagesControllerComponents(), new FakeAuthAction(), new FakeVerifiedEmailAction(), choicePage)
 
   override def beforeEach(): Unit = {
     super.beforeEach()
 
     reset(choicePage)
-    secureMessagingFeatureAction.reset()
     when(choicePage.apply(any[Form[ChoiceForm]])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
   }
 
   override def afterEach(): Unit = {
     reset(choicePage)
-    secureMessagingFeatureAction.reset()
 
     super.afterEach()
   }
 
-  "ChoiceController on onPageLoad" when {
+  "ChoiceController on onPageLoad" should {
 
-    "feature flag for SecureMessaging is disabled" should {
+    "return Ok (200) response" in {
+      val result = controller.onPageLoad()(fakeRequest)
 
-      "throw InvalidFeatureStateException$" in {
-        secureMessagingFeatureAction.disableSecureMessagingFeature()
-
-        an[InvalidFeatureStateException] mustBe thrownBy {
-          await(controller.onPageLoad()(fakeRequest))
-        }
-      }
+      status(result) mustBe OK
     }
 
-    "feature flag for SecureMessaging is enabled" should {
+    "call choice_page template" in {
+      controller.onPageLoad()(fakeRequest).futureValue
 
-      "return Ok (200) response" in {
-        secureMessagingFeatureAction.enableSecureMessagingFeature()
-
-        val result = controller.onPageLoad()(fakeRequest)
-
-        status(result) mustBe OK
-      }
-
-      "call choice_page template" in {
-        secureMessagingFeatureAction.enableSecureMessagingFeature()
-
-        controller.onPageLoad()(fakeRequest).futureValue
-
-        verify(choicePage).apply(any[Form[ChoiceForm]])(any[Request[_]], any[Messages])
-      }
+      verify(choicePage).apply(any[Form[ChoiceForm]])(any[Request[_]], any[Messages])
     }
   }
 
   "ChoiceController on onSubmit" when {
 
-    "feature flag for SecureMessaging is disabled" should {
+    "provided with incorrect form" should {
 
-      "return NotFound (404) response" in {
-        secureMessagingFeatureAction.disableSecureMessagingFeature()
-        val request = postRequest(Json.obj("choice" -> "Test Choice"))
+      val request = postRequest(Json.obj("choice" -> "Incorrect Choice"))
 
-        an[InvalidFeatureStateException] mustBe thrownBy { await(controller.onSubmit()(request)) }
+      "return BadRequest (400)" in {
+        val result = controller.onSubmit()(request)
+
+        status(result) mustBe BAD_REQUEST
+      }
+
+      "call choicePage passing form with errors" in {
+        controller.onSubmit()(request).futureValue
+
+        val expectedFormWithErrors = ChoiceForm.form.bind(Map("choice" -> "Incorrect Choice"))
+        verify(choicePage).apply(eqTo(expectedFormWithErrors))(any[Request[_]], any[Messages])
       }
     }
 
-    "feature flag for SecureMessaging is enabled" when {
+    "provided with empty form" should {
 
-      "provided with incorrect form" should {
+      val request = postRequest(Json.obj("choice" -> ""))
 
-        val request = postRequest(Json.obj("choice" -> "Incorrect Choice"))
+      "return BadRequest (400)" in {
+        val result = controller.onSubmit()(request)
 
-        "return BadRequest (400)" in {
-          secureMessagingFeatureAction.enableSecureMessagingFeature()
+        status(result) mustBe BAD_REQUEST
+      }
 
+      "call choicePage passing form with errors" in {
+        controller.onSubmit()(request).futureValue
+
+        val expectedFormWithErrors = ChoiceForm.form.bind(Map("choice" -> ""))
+        verify(choicePage).apply(eqTo(expectedFormWithErrors))(any[Request[_]], any[Messages])
+      }
+    }
+
+    "provided with correct form" which {
+
+      "contains value for Secure Inbox" should {
+
+        val request = postRequest(Json.obj("choice" -> ChoiceForm.AllowedChoiceValues.SecureMessageInbox))
+
+        "return SEE_OTHER (303)" in {
           val result = controller.onSubmit()(request)
 
-          status(result) mustBe BAD_REQUEST
+          status(result) mustBe SEE_OTHER
         }
 
-        "call choicePage passing form with errors" in {
-          secureMessagingFeatureAction.enableSecureMessagingFeature()
+        "redirect to /what-messages-to-view" in {
+          val result = controller.onSubmit()(request)
 
-          controller.onSubmit()(request).futureValue
-
-          val expectedFormWithErrors = ChoiceForm.form.bind(Map("choice" -> "Incorrect Choice"))
-          verify(choicePage).apply(eqTo(expectedFormWithErrors))(any[Request[_]], any[Messages])
+          redirectLocation(result) mustBe Some(controllers.routes.InboxChoiceController.onPageLoad.url)
         }
       }
 
-      "provided with empty form" should {
+      "contains value for submitting documents" should {
 
-        val request = postRequest(Json.obj("choice" -> ""))
+        val request = postRequest(Json.obj("choice" -> ChoiceForm.AllowedChoiceValues.DocumentUpload))
 
-        "return BadRequest (400)" in {
-          secureMessagingFeatureAction.enableSecureMessagingFeature()
-
+        "return SeeOther (303)" in {
           val result = controller.onSubmit()(request)
 
-          status(result) mustBe BAD_REQUEST
+          status(result) mustBe SEE_OTHER
         }
 
-        "call choicePage passing form with errors" in {
-          secureMessagingFeatureAction.enableSecureMessagingFeature()
+        "redirect to /mrn-entry" in {
+          val result = controller.onSubmit()(request)
 
-          controller.onSubmit()(request).futureValue
-
-          val expectedFormWithErrors = ChoiceForm.form.bind(Map("choice" -> ""))
-          verify(choicePage).apply(eqTo(expectedFormWithErrors))(any[Request[_]], any[Messages])
-        }
-      }
-
-      "provided with correct form" which {
-
-        "contains value for Secure Inbox" should {
-
-          val request = postRequest(Json.obj("choice" -> ChoiceForm.AllowedChoiceValues.SecureMessageInbox))
-
-          "return SEE_OTHER (303)" in {
-            secureMessagingFeatureAction.enableSecureMessagingFeature()
-
-            val result = controller.onSubmit()(request)
-
-            status(result) mustBe SEE_OTHER
-          }
-
-          "redirect to /what-messages-to-view" in {
-            secureMessagingFeatureAction.enableSecureMessagingFeature()
-
-            val result = controller.onSubmit()(request)
-
-            redirectLocation(result) mustBe Some(controllers.routes.InboxChoiceController.onPageLoad.url)
-          }
-        }
-
-        "contains value for submitting documents" should {
-
-          val request = postRequest(Json.obj("choice" -> ChoiceForm.AllowedChoiceValues.DocumentUpload))
-
-          "return SeeOther (303)" in {
-            secureMessagingFeatureAction.enableSecureMessagingFeature()
-
-            val result = controller.onSubmit()(request)
-
-            status(result) mustBe SEE_OTHER
-          }
-
-          "redirect to /mrn-entry" in {
-            secureMessagingFeatureAction.enableSecureMessagingFeature()
-
-            val result = controller.onSubmit()(request)
-
-            redirectLocation(result) mustBe Some(controllers.routes.MrnEntryController.onPageLoad().url)
-          }
+          redirectLocation(result) mustBe Some(controllers.routes.MrnEntryController.onPageLoad().url)
         }
       }
     }
