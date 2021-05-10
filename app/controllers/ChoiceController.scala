@@ -16,9 +16,7 @@
 
 package controllers
 
-import javax.inject.{Inject, Singleton}
-
-import controllers.actions.{AuthAction, SecureMessagingFeatureAction, VerifiedEmailAction}
+import controllers.actions.{AuthAction, VerifiedEmailAction}
 import forms.ChoiceForm
 import forms.ChoiceForm.AllowedChoiceValues._
 import play.api.i18n.I18nSupport
@@ -26,16 +24,17 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.choice_page
 
+import javax.inject.{Inject, Singleton}
+
 @Singleton
 class ChoiceController @Inject()(
   mcc: MessagesControllerComponents,
   authenticate: AuthAction,
   verifiedEmail: VerifiedEmailAction,
-  secureMessagingFeatureAction: SecureMessagingFeatureAction,
   choicePage: choice_page
 ) extends FrontendController(mcc) with I18nSupport {
 
-  val actions = authenticate andThen verifiedEmail andThen secureMessagingFeatureAction
+  val actions = authenticate andThen verifiedEmail
 
   val onPageLoad: Action[AnyContent] = actions { implicit request =>
     Ok(choicePage(ChoiceForm.form))

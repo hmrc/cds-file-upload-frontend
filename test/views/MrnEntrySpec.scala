@@ -29,7 +29,7 @@ import views.html.mrn_entry
 class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with ScalaCheckPropertyChecks {
 
   val form = new MRNFormProvider()()
-  val testBackLink = Some("testBackLink")
+  val testBackLink = "testBackLink"
   val messagePrefix = "mrnEntryPage"
 
   val page = instanceOf[mrn_entry]
@@ -60,7 +60,7 @@ class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with Sca
     "display the 'Back' link with URL provided" in {
       val view = page(form, testBackLink)(fakeRequest.withCSRFToken, messages)
 
-      assertBackLinkIsIncluded(asDocument(view), testBackLink.get)
+      assertBackLinkIsIncluded(asDocument(view), testBackLink)
     }
   }
 }

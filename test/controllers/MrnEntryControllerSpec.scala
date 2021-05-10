@@ -46,16 +46,14 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
       mcc,
       mrnEntryPage,
       mrnDisValidator,
-      mrnAccessDeniedPage,
-      secureMessagingConfig
+      mrnAccessDeniedPage
     )(executionContext, appConfig)
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    reset(mrnEntryPage, mrnAccessDeniedPage, mrnDisValidator, secureMessagingConfig)
+    reset(mrnEntryPage, mrnAccessDeniedPage, mrnDisValidator)
     when(mrnEntryPage.apply(any(), any())(any(), any())).thenReturn(HtmlFormat.empty)
     when(mrnAccessDeniedPage.apply(any())(any(), any())).thenReturn(HtmlFormat.empty)
-    when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(true)
   }
 
   val validRefererUrl = "/cds-file-upload-service/conversation/CDCM/TEST-kWZYP-9cZCw9Dw"
@@ -94,25 +92,13 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
         verifyNoInteractions(mockFileUploadAnswersService)
       }
 
-      "call MrnEntryPage, providing default back link url" when {
+      "call MrnEntryPage, providing default back link url" in {
+        val controller = mrnEntryController()
 
-        "SecureMessaging is enabled" in withSecureMessagingEnabled(enabled = true) {
-          val controller = mrnEntryController()
+        controller.onPageLoad()(fakeRequest).futureValue
 
-          controller.onPageLoad()(fakeRequest).futureValue
-
-          val expectedBackLink = Some(controllers.routes.ChoiceController.onPageLoad().url)
-          verify(mrnEntryPage).apply(any(), eqTo(expectedBackLink))(any(), any())
-        }
-
-        "SecureMessaging is disabled" in withSecureMessagingEnabled(enabled = false) {
-          val controller = mrnEntryController()
-
-          controller.onPageLoad()(fakeRequest).futureValue
-
-          val expectedBackLink = None
-          verify(mrnEntryPage).apply(any(), eqTo(expectedBackLink))(any(), any())
-        }
+        val expectedBackLink = controllers.routes.ChoiceController.onPageLoad().url
+        verify(mrnEntryPage).apply(any(), eqTo(expectedBackLink))(any(), any())
       }
     }
 
@@ -131,7 +117,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
 
         controller.onPageLoad(Some(validRefererUrl))(fakeRequest).futureValue
 
-        verify(mrnEntryPage).apply(any(), eqTo(Some(validRefererUrl)))(any(), any())
+        verify(mrnEntryPage).apply(any(), eqTo(validRefererUrl))(any(), any())
       }
     }
 
@@ -146,24 +132,12 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
         verifyNoInteractions(mockFileUploadAnswersService)
       }
 
-      "call MrnEntryPage, providing default back link url" when {
-        "SecureMessaging is enabled" in withSecureMessagingEnabled(enabled = true) {
-          val controller = mrnEntryController()
+      "call MrnEntryPage, providing default back link url" in {
+        val controller = mrnEntryController()
 
-          controller.onPageLoad(Some(invalidRefererUrl))(fakeRequest).futureValue
+        controller.onPageLoad(Some(invalidRefererUrl))(fakeRequest).futureValue
 
-          verify(mrnEntryPage).apply(any(), eqTo(Some(routes.ChoiceController.onPageLoad().url)))(any(), any())
-        }
-      }
-
-      "call MrnEntryPage, providing no back link url" when {
-        "SecureMessaging is disabled" in withSecureMessagingEnabled(enabled = false) {
-          val controller = mrnEntryController()
-
-          controller.onPageLoad(Some(invalidRefererUrl))(fakeRequest).futureValue
-
-          verify(mrnEntryPage).apply(any(), eqTo(None))(any(), any())
-        }
+        verify(mrnEntryPage).apply(any(), eqTo(routes.ChoiceController.onPageLoad().url))(any(), any())
       }
     }
   }

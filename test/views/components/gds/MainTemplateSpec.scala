@@ -17,7 +17,7 @@
 package views.components.gds
 
 import base.{OverridableInjector, SpecBase}
-import config.{AppConfig, SecureMessagingConfig}
+import config.AppConfig
 import org.jsoup.nodes.Document
 import org.mockito.Mockito.{reset, when}
 import play.api.inject.bind
@@ -29,11 +29,8 @@ import scala.collection.JavaConverters._
 
 class MainTemplateSpec extends SpecBase with ViewMatchers {
 
-  private val secureMessagingConfig = mock[SecureMessagingConfig]
-  private val injector = new OverridableInjector(bind[SecureMessagingConfig].toInstance(secureMessagingConfig))
-
-  override implicit lazy val appConfig: AppConfig = injector.instanceOf[AppConfig]
-  private val mainTemplate = injector.instanceOf[gdsMainTemplate]
+  override implicit lazy val appConfig: AppConfig = instanceOf[AppConfig]
+  private val mainTemplate = instanceOf[gdsMainTemplate]
   private val testContent = HtmlFormat.empty
 
   private def createView(withNavigationBanner: Boolean = false, withFileUploadFlag: Boolean = false): Document =
@@ -41,60 +38,20 @@ class MainTemplateSpec extends SpecBase with ViewMatchers {
       testContent
     )(fakeRequest, messages)
 
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-    reset(secureMessagingConfig)
-  }
+  "Main Template" should {
+    "display NavigationBanner" when {
+      "withNavigationBanner flag set to true" in {
+        val view: Document = createView(withNavigationBanner = true)
 
-  override def afterEach(): Unit = {
-    reset(secureMessagingConfig)
-    super.afterEach()
-  }
-
-  "Main Template" when {
-
-    "SecureMessagingConfig on isSecureMessagingEnabled returns true" should {
-
-      "display NavigationBanner" when {
-        "withNavigationBanner flag set to true" in {
-          when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(true)
-
-          val view: Document = createView(withNavigationBanner = true)
-
-          view must containElementWithID("navigation-banner")
-        }
-      }
-
-      "not display NavigationBanner" when {
-        "withNavigationBanner flag set to false" in {
-          when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(true)
-
-          val view: Document = createView(withNavigationBanner = false)
-
-          view mustNot containElementWithID("navigation-banner")
-        }
+        view must containElementWithID("navigation-banner")
       }
     }
 
-    "SecureMessagingConfig on isSecureMessagingEnabled returns false" should {
+    "not display NavigationBanner" when {
+      "withNavigationBanner flag set to false" in {
+        val view: Document = createView(withNavigationBanner = false)
 
-      "not display NavigationBanner" when {
-
-        "withNavigationBanner flag set to true" in {
-          when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(false)
-
-          val view: Document = createView(withNavigationBanner = true)
-
-          view mustNot containElementWithID("navigation-banner")
-        }
-
-        "withNavigationBanner flag set to false" in {
-          when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(false)
-
-          val view: Document = createView(withNavigationBanner = false)
-
-          view mustNot containElementWithID("navigation-banner")
-        }
+        view mustNot containElementWithID("navigation-banner")
       }
     }
 

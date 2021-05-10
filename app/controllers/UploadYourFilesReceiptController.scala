@@ -17,7 +17,6 @@
 package controllers
 
 import com.google.inject.Singleton
-import config.SecureMessagingConfig
 import connectors.CdsFileUploadConnector
 import controllers.actions._
 
@@ -32,7 +31,7 @@ import play.twirl.api.Html
 import services.FileUploadAnswersService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import views.html.{upload_your_files_confirmation, upload_your_files_receipt}
+import views.html.upload_your_files_confirmation
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -42,10 +41,8 @@ class UploadYourFilesReceiptController @Inject()(
   verifiedEmail: VerifiedEmailAction,
   cdsFileUploadConnector: CdsFileUploadConnector,
   metrics: SfusMetrics,
-  uploadYourFilesReceipt: upload_your_files_receipt,
   uploadYourFilesConfirmation: upload_your_files_confirmation,
-  answersService: FileUploadAnswersService,
-  secureMessagingConfig: SecureMessagingConfig
+  answersService: FileUploadAnswersService
 )(implicit mcc: MessagesControllerComponents, ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
@@ -72,10 +69,7 @@ class UploadYourFilesReceiptController @Inject()(
     maybeMrn: Option[MRN]
   )(implicit hc: HeaderCarrier, req: VerifiedEmailRequest[AnyContent]): Future[Html] =
     addFilenames(uploads).map { uploads =>
-      if (secureMessagingConfig.isSecureMessagingEnabled)
-        uploadYourFilesConfirmation(uploads, maybeMrn, req.email)
-      else
-        uploadYourFilesReceipt(uploads, maybeMrn)
+      uploadYourFilesConfirmation(uploads, maybeMrn, req.email)
     }
 
   private def getOrRedirect[A](option: Option[A], errorAction: Call): Either[Future[Result], A] =

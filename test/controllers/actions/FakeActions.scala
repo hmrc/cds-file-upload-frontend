@@ -16,18 +16,15 @@
 
 package controllers.actions
 
-import config.SecureMessagingConfig
 import generators.Generators
-import models.{ContactDetails, ExportMessages, FileUploadAnswers, MRN, MessageFilterTag, SecureMessageAnswers}
+import models._
 import models.requests._
-import org.mockito.Mockito
 import org.scalacheck.Arbitrary._
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.{Request, Result}
 import play.api.test.Helpers.stubBodyParser
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.ExecutionContext.Implicits.global
 
 trait FakeActions extends Generators with MockitoSugar {
 
@@ -72,19 +69,6 @@ trait FakeActions extends Generators with MockitoSugar {
     override protected def refine[A](request: VerifiedEmailRequest[A]): Future[Either[Result, MessageFilterRequest[A]]] =
       Future.successful(Right(MessageFilterRequest[A](request, SecureMessageAnswers(eori, tag))))
   }
-
-  class SecureMessagingFeatureActionMock(private val secureMessagingConfig: SecureMessagingConfig = mock[SecureMessagingConfig])
-      extends SecureMessagingFeatureAction(secureMessagingConfig) {
-
-    def enableSecureMessagingFeature(): Unit =
-      Mockito.when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(true)
-
-    def disableSecureMessagingFeature(): Unit =
-      Mockito.when(secureMessagingConfig.isSecureMessagingEnabled).thenReturn(false)
-
-    def reset(): Unit = Mockito.reset(secureMessagingConfig)
-  }
-
 }
 
 object FakeActions extends FakeActions
