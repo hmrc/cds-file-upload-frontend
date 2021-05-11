@@ -59,9 +59,7 @@ class AuditService @Inject()(connector: AuditConnector, appConfig: AppConfig)(im
 
     def auditDetails: Map[String, String] = {
       val contactDetails = maybeContactDetails
-        .fold(Map.empty[String, String])(
-          cd => Map("fullName" -> cd.name, "companyName" -> cd.companyName, "emailAddress" -> cd.email, "telephoneNumber" -> cd.phoneNumber)
-        )
+        .fold(Map.empty[String, String])(cd => Map("fullName" -> cd.name, "companyName" -> cd.companyName, "telephoneNumber" -> cd.phoneNumber))
       val eoriMap = Map("eori" -> eori)
       val mrn = maybeMrn.fold(Map.empty[String, String])(m => Map("mrn" -> m.value))
       val numberOfFiles = maybeFileUploadCount.fold(Map.empty[String, String])(n => Map("numberOfFiles" -> s"${n.value}"))

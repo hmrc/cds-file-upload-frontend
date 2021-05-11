@@ -65,7 +65,6 @@ trait Generators extends ModelGenerators with JsonGenerators {
       name <- alphaNumString()
       companyName <- alphaNumString()
       phoneNumber <- numString()
-      email <- emailString
-    } yield ContactDetails(name, companyName, phoneNumber, email)
+    } yield ContactDetails(name, companyName, phoneNumber)
   }
 }

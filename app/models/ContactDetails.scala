@@ -18,17 +18,14 @@ package models
 
 import play.api.libs.json.Json
 
-case class ContactDetails(name: String, companyName: String, phoneNumber: String, email: String) {
+case class ContactDetails(name: String, companyName: String, phoneNumber: String) {
 
   override def toString: String =
     s"""Name: $name
        |Company name: $companyName
-       |Phone number: $phoneNumber
-       |Email: $email""".stripMargin
+       |Phone number: $phoneNumber""".stripMargin
 }
 
 object ContactDetails {
-
   implicit val format = Json.format[ContactDetails]
-
 }

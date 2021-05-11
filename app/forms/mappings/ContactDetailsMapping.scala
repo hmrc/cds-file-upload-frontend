@@ -28,9 +28,6 @@ object ContactDetailsMapping extends Mappings {
       .verifying(maxLength(35, "contactDetails.companyName.invalid")),
     "phoneNumber" -> text("contactDetails.phoneNumber.missing")
       .verifying(maxLength(15, "contactDetails.phoneNumber.invalid"))
-      .verifying("contactDetails.phoneNumber.invalidPattern", isValidPhoneNumber),
-    "email" -> text("contactDetails.email.missing")
-      .verifying(maxLength(50, "contactDetails.email.invalid"))
-      .verifying("contactDetails.email.invalidPattern", isValidEmail)
+      .verifying("contactDetails.phoneNumber.invalidPattern", isValidPhoneNumber)
   )(ContactDetails.apply)(ContactDetails.unapply)
 }

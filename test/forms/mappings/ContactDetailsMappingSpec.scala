@@ -30,7 +30,7 @@ class ContactDetailsMappingSpec extends SpecBase with MustMatchers with ScalaChe
   val form = Form(contactDetailsMapping)
 
   val errorMessage: Form[_] => String = _.errors.map(_.message).headOption.getOrElse("")
-  val validContactDetails = ContactDetails("name", "companyName", "0123456789", "email@.")
+  val validContactDetails = ContactDetails("name", "companyName", "0123456789")
 
   "contactDetailsMapping" should {
 
@@ -132,43 +132,6 @@ class ContactDetailsMappingSpec extends SpecBase with MustMatchers with ScalaChe
           form
             .bind(formData)
             .fold(errors => errorMessage(errors) mustBe "contactDetails.phoneNumber.missing", _ => fail("Form binding must not fail!"))
-        }
-      }
-
-      "Email" that {
-        "is invalid" in {
-          forAll(arbitrary[ContactDetails], stringsWithMaxLength(50)) { (contactDetails, invalidEmail) =>
-            val badData = contactDetails.copy(email = invalidEmail)
-
-            form
-              .fillAndValidate(badData)
-              .fold(errors => errorMessage(errors) mustBe "contactDetails.email.invalidPattern", _ => fail("form should not succeed"))
-          }
-        }
-
-        "is larger than 50 chars" in {
-
-          forAll(arbitrary[ContactDetails], minStringLength(51)) { (contactDetails, invalidEmail) =>
-            val badData = contactDetails.copy(email = invalidEmail)
-
-            form
-              .fillAndValidate(badData)
-              .fold(errors => errorMessage(errors) mustBe "contactDetails.email.invalid", _ => fail("form should not succeed"))
-          }
-        }
-
-        "is empty" in {
-          val formData = contactDetailsMapping.unbind(validContactDetails).filterKeys(_ != "email")
-          form
-            .bind(formData)
-            .fold(errors => errorMessage(errors) mustBe "contactDetails.email.missing", _ => fail("Form binding must not fail!"))
-        }
-
-        "is just whitespace chars" in {
-          val formData = contactDetailsMapping.unbind(validContactDetails.copy(email = "   "))
-          form
-            .bind(formData)
-            .fold(errors => errorMessage(errors) mustBe "contactDetails.email.missing", _ => fail("Form binding must not fail!"))
         }
       }
     }

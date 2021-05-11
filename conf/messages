@@ -96,15 +96,11 @@ contactDetails.name.missing=Enter a name
 contactDetails.companyName=Company name
 contactDetails.companyName.missing=Enter a company name
 contactDetails.phoneNumber=Phone number
-contactDetails.email=Email address
-contactDetails.email.missing=Enter an email
 contactDetails.name.invalid=Name must contain 35 characters or fewer
 contactDetails.companyName.invalid=Company name must contain 35 characters or fewer
 contactDetails.phoneNumber.missing=Enter a telephone number
 contactDetails.phoneNumber.invalid=Number must contain 15 digits or fewer
 contactDetails.phoneNumber.invalidPattern=Telephone number must contain only numbers
-contactDetails.email.invalid=Email must be 50 characters or fewer
-contactDetails.email.invalidPattern=Email must contain an @ symbol and no spaces
 contactDetails.paragraph1=Provide these details so we can contact you if there are any issues with the documents you submit.
 
 ## file warning page
