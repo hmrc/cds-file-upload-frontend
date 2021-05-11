@@ -40,7 +40,7 @@ class AuditServiceSpec extends SpecBase {
   private val enrolment = AuthKey.enrolment
   private val eori = "GB150454489082"
   private val dcPath = "/secure-message-frontend/cds-file-upload-service/messages"
-  private val contactDetails = ContactDetails("Joe Bloggs", "Bloggs Inc", "0123456", "joe@bloggs.com")
+  private val contactDetails = ContactDetails("Joe Bloggs", "Bloggs Inc", "0123456")
   private val fileUploadCount = FileUploadCount(1)
   private val fileUpload = FileUpload("fileRef1", Successful, "", "id")
 
@@ -106,7 +106,6 @@ class AuditServiceSpec extends SpecBase {
       "eori" -> eori,
       "telephoneNumber" -> contactDetails.phoneNumber,
       "fullName" -> contactDetails.name,
-      "emailAddress" -> contactDetails.email,
       "companyName" -> contactDetails.companyName,
       "numberOfFiles" -> fileUploadCount.get.value.toString,
       "fileReference1" -> fileUpload.reference

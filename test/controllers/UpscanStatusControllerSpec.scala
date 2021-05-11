@@ -229,7 +229,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val response = FileUploadResponse(List(file1, file2, lastFile))
 
       val Some(mrn) = MRN("34GB1234567ABCDEFG")
-      val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456", "joe@bloggs.com")
+      val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456")
       val answers =
         FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
 
@@ -256,7 +256,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val response = FileUploadResponse(List(file1, file2, lastFile))
 
       val Some(mrn) = MRN("34GB1234567ABCDEFG")
-      val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456", "joe@bloggs.com")
+      val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456")
       val answers =
         FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
 
@@ -280,7 +280,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val response = FileUploadResponse(List(file1, file2, lastFile))
 
       val Some(mrn) = MRN("34GB1234567ABCDEFG")
-      val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456", "joe@bloggs.com")
+      val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456")
       val answers =
         FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
 
@@ -305,7 +305,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val response = FileUploadResponse(List(file1, file2, lastFile))
 
       val Some(mrn) = MRN("34GB1234567ABCDEFG")
-      val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456", "joe@bloggs.com")
+      val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456")
       val answers =
         FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
 
@@ -321,7 +321,5 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(routes.ErrorPageController.uploadError().url)
     }
-
   }
-
 }

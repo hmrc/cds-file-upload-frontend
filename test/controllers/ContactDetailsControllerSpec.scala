@@ -33,7 +33,6 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
   private val form = Form(contactDetailsMapping)
   val page = mock[contact_details]
 
-  val emailRegex = """^[a-zA-Z0-9\.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-.]+$"""
   val mrn: MRN = arbitraryMrn.arbitrary.sample.get
 
   def view(form: Form[ContactDetails] = form): String = page(form, mrn)(fakeRequest, messages).toString
@@ -86,14 +85,12 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
     "return an see other when valid data is submitted" in {
 
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
-        whenever(contactDetails.email.matches(emailRegex)) {
-          val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
-          val answers = FileUploadAnswers(eori, mrn = Some(mrn))
-          val result = controller(user, eori, fakeDataRetrievalAction(answers)).onSubmit(postRequest)
+        val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
+        val answers = FileUploadAnswers(eori, mrn = Some(mrn))
+        val result = controller(user, eori, fakeDataRetrievalAction(answers)).onSubmit(postRequest)
 
-          status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(routes.HowManyFilesUploadController.onPageLoad().url)
-        }
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result) mustBe Some(routes.HowManyFilesUploadController.onPageLoad().url)
       }
     }
 
@@ -116,15 +113,13 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
     "save data in cache when valid" in {
 
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
-        whenever(contactDetails.email.matches(emailRegex)) {
-          resetAnswersService()
-          val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
-          val answers = FileUploadAnswers(eori, mrn = Some(mrn))
+        resetAnswersService()
+        val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
+        val answers = FileUploadAnswers(eori, mrn = Some(mrn))
 
-          await(controller(user, eori, fakeDataRetrievalAction(answers)).onSubmit(postRequest))
+        await(controller(user, eori, fakeDataRetrievalAction(answers)).onSubmit(postRequest))
 
-          theSavedFileUploadAnswers.contactDetails mustBe Some(contactDetails)
-        }
+        theSavedFileUploadAnswers.contactDetails mustBe Some(contactDetails)
       }
     }
   }

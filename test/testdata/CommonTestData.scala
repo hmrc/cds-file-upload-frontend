@@ -29,7 +29,7 @@ object CommonTestData {
   val ucr = "20GBAKZ81EQJ2WXYZ"
 
   val verifiedEmail = "email@mail.org"
-  val contactDetails = ContactDetails(name = "name", companyName = "company name", phoneNumber = "0123456789", email = verifiedEmail)
+  val contactDetails = ContactDetails(name = "name", companyName = "company name", phoneNumber = "0123456789")
 
   val signedInUser =
     SignedInUser(eori, Enrolments(Set(Enrolment(AuthKey.enrolment, Seq(EnrolmentIdentifier(AuthKey.identifierKey, eori)), ""))))

@@ -41,7 +41,7 @@ class UpscanConnectorTest extends PlaySpec with MockitoSugar with SpecBase with 
   val uploadUrl = "http://localhost/theUploadUrl"
   val as = ActorSystem("test-system")
   implicit val materializer = ActorMaterializer()(as)
-  val contactDetails = ContactDetails("a", "b", "c", "d")
+  val contactDetails = ContactDetails("a", "b", "c")
 
   "Upload" should {
 

@@ -87,15 +87,5 @@ class ContactDetailsSpec extends DomAssertions with ViewBehaviours with ScalaChe
         viewAsString(popForm) must include(input.toString())
       }
     }
-
-    "display email input" in {
-
-      forAll { contactDetails: ContactDetails =>
-        val popForm = form.fillAndValidate(contactDetails)
-        val input = exportsInputText(field = popForm("email"), labelKey = "contactDetails.email", labelClasses = "govuk-label")
-
-        viewAsString(popForm) must include(input.toString())
-      }
-    }
   }
 }
