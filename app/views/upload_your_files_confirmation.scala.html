@@ -78,7 +78,9 @@
             call = Call("GET", controllers.routes.InboxChoiceController.onPageLoad.url)),
             <strong id="verifiedEmail">{emailAddress}</strong>))
 
-    @paragraphBody(message = messages("fileUploadConfirmationPage.section1.paragraph2"))
+    @paragraphBody(message = messages("fileUploadConfirmationPage.section1.paragraph2",
+        link(text = messages("fileUploadConfirmationPage.section1.paragraph2.linkText"),
+            call = Call("GET", controllers.routes.InboxChoiceController.onPageLoad.url))))
 
     <h3 class="govuk-heading-m">@messages("fileUploadConfirmationPage.section2.title")</h3>
 

@@ -168,7 +168,9 @@ fileUploadConfirmationPage.printPage=Save or print this page for your records (o
 fileUploadConfirmationPage.section1.title=What to do with queries
 fileUploadConfirmationPage.section1.paragraph1=If a query is raised by customs authorities about your goods or documents, the query will be sent to your {0}. You will be notified about the query on {1} which is your registered CDS email address. You should also be notified in your customs software.
 fileUploadConfirmationPage.section1.paragraph1.linkText=CDS secure inbox
-fileUploadConfirmationPage.section1.paragraph2=If you have just uploaded documents in response to a query, you should now reply to the message to tell customs authorities your documents are ready to be checked.
+fileUploadConfirmationPage.section1.paragraph2=If you have just uploaded documents in response to a query, you should now {0} to tell customs authorities your documents are ready to be checked.
+fileUploadConfirmationPage.section1.paragraph2.linkText=reply to the message
+
 fileUploadConfirmationPage.section2.title=What happens next?
 fileUploadConfirmationPage.section2.paragraph1=As long as you have provided the documents that customs needs to clear your goods, they should be cleared within these time limits from arriving goods or uploading documents (whichever is later):
 fileUploadConfirmationPage.section2.listitem1=2 hours for air freight imports, road freight imports, all exports
