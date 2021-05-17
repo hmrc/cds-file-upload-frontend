@@ -16,23 +16,20 @@
 
 package views
 
-import base.{FilesUploadedSpec, OverridableInjector}
-import models.{FileUpload, MRN}
+import base.FilesUploadedSpec
 import models.requests.{AuthenticatedRequest, SignedInUser}
-
-import scala.collection.JavaConverters._
+import models.{FileUpload, MRN}
 import org.jsoup.nodes.Document
-import org.mockito.Mockito.{reset, when}
-import play.api.inject.bind
 import views.html.upload_your_files_confirmation
 import views.matchers.ViewMatchers
+
+import scala.collection.JavaConverters._
 
 class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers with FilesUploadedSpec {
 
   private val page = instanceOf[upload_your_files_confirmation]
   private val mrn = MRN("20GB46J8TMJ4RFGVA0").get
   private val email = "example@email.com"
-  private val pagePrefix = "fileUploadConfirmationPage"
 
   private def view: Document = page(List(sampleFileUpload), Some(mrn), email)(fakeRequest, messages)
 
@@ -47,7 +44,7 @@ class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers wi
 
     "display page header" which {
       "contains the header text" in {
-        view.getElementsByTag("h1").first() must containMessage(s"$pagePrefix.heading")
+        view.getElementsByTag("h1").first() must containMessage("fileUploadConfirmationPage.heading")
       }
 
       "display the mrn value" in {
@@ -74,50 +71,59 @@ class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers wi
       }
     }
 
-    "have a links to print the page" in {
-      assertContainsLink(view, messages(s"$pagePrefix.printPage"), "javascript:if(window.print)window.print()")
-    }
-
-    "have a paragraph explaining next steps" which {
-      "has a heading" in {
-        view.getElementsByTag("h3").get(1) must containMessage(s"$pagePrefix.section2.title")
-      }
-
-      "has some description text" in {
-        view.getElementsByTag("p").get(4) must containMessage(s"$pagePrefix.section2.paragraph1")
-      }
-
-      "have a bullet list" in {
-        val bulletList = view.getElementsByTag("ul").get(0)
-
-        bulletList must containMessage(s"${pagePrefix}.section2.listitem1")
-        bulletList must containMessage(s"${pagePrefix}.section2.listitem2")
-        bulletList must containMessage(s"${pagePrefix}.section2.listitem3")
-      }
-
-      "has a link to the NCH" in {
-        containMessage(s"${pagePrefix}.section2.paragraph2")
-
-        assertContainsLink(view, "nch.cds@hmrc.gov.uk", "mailto:nch.cds@hmrc.gov.uk")
-      }
+    "have a link to print the page" in {
+      assertContainsLink(view, messages("fileUploadConfirmationPage.printPage"), "javascript:if(window.print)window.print()")
     }
 
     "have a paragraph explaining what happens when a query is raised" which {
       "has a heading" in {
-        view.getElementsByTag("h3").first() must containMessage(s"$pagePrefix.section1.title")
+        view.getElementsByTag("h3").first() must containMessage("fileUploadConfirmationPage.section1.title")
       }
 
       "displays the current user's verified email address" in {
         view.getElementById("verifiedEmail") must containText(email)
       }
 
-      "has a link to the secure messages filter page" in {
-        assertContainsLink(view, messages(s"$pagePrefix.section1.paragraph1.linkText"), controllers.routes.InboxChoiceController.onPageLoad().url)
+      "has links to the secure messages filter page" in {
+        assertContainsLink(
+          view,
+          messages("fileUploadConfirmationPage.section1.paragraph1.linkText"),
+          controllers.routes.InboxChoiceController.onPageLoad().url
+        )
+        assertContainsLink(
+          view,
+          messages("fileUploadConfirmationPage.section1.paragraph2.linkText"),
+          controllers.routes.InboxChoiceController.onPageLoad().url
+        )
+      }
+    }
+
+    "have a paragraph explaining next steps" which {
+      "has a heading" in {
+        view.getElementsByTag("h3").get(1) must containMessage("fileUploadConfirmationPage.section2.title")
+      }
+
+      "has some description text" in {
+        view.getElementsByTag("p").get(4) must containMessage("fileUploadConfirmationPage.section2.paragraph1")
+      }
+
+      "have a bullet list" in {
+        val bulletList = view.getElementsByTag("ul").get(0)
+
+        bulletList must containMessage("fileUploadConfirmationPage.section2.listitem1")
+        bulletList must containMessage("fileUploadConfirmationPage.section2.listitem2")
+        bulletList must containMessage("fileUploadConfirmationPage.section2.listitem3")
+      }
+
+      "has a link to the NCH" in {
+        containMessage("fileUploadConfirmationPage.section2.paragraph2")
+
+        assertContainsLink(view, "nch.cds@hmrc.gov.uk", "mailto:nch.cds@hmrc.gov.uk")
       }
     }
 
     "have a links to restart the journey" in {
-      assertContainsLink(view, messages(s"${pagePrefix}.finalButton.text"), controllers.routes.ChoiceController.onPageLoad().url)
+      assertContainsLink(view, messages("fileUploadConfirmationPage.finalButton.text"), controllers.routes.ChoiceController.onPageLoad().url)
     }
   }
 }
