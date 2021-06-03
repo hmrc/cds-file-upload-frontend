@@ -68,7 +68,7 @@ class UpscanStatusController @Inject()(
           }
 
         case None =>
-          Future.successful(Redirect(routes.ErrorPageController.error()))
+          Future.successful(Redirect(routes.ErrorPageController.error))
       }
     }
 
@@ -87,7 +87,7 @@ class UpscanStatusController @Inject()(
             nextPage(upload.reference, uploads)
           }
         case None =>
-          Future.successful(Redirect(routes.ErrorPageController.error()))
+          Future.successful(Redirect(routes.ErrorPageController.error))
       }
     }
 
@@ -127,7 +127,7 @@ class UpscanStatusController @Inject()(
             logger.warn("Failed notification received for an upload.")
             logger.warn(s"Notifications: ${prettyPrint(ns)}")
             clearUserCache(req.eori)
-            Future.successful(Redirect(routes.ErrorPageController.uploadError()))
+            Future.successful(Redirect(routes.ErrorPageController.uploadError))
 
           case ns if ns.length == uploads.length =>
             logger.info("All notifications successful.")
@@ -138,7 +138,7 @@ class UpscanStatusController @Inject()(
               req.userAnswers.fileUploadCount,
               req.fileUploadResponse.uploads
             )
-            Future.successful(Redirect(routes.UploadYourFilesReceiptController.onPageLoad()))
+            Future.successful(Redirect(routes.UploadYourFilesReceiptController.onPageLoad))
 
           case ns if retries < notificationsMaxRetries =>
             logger.info(s"Retrieved ${ns.length} of ${uploads.length} notifications. Retrying in $notificationsRetryPause ms ...")
@@ -149,7 +149,7 @@ class UpscanStatusController @Inject()(
             logger.warn(s"Maximum number of retries exceeded. Retrieved ${ns.length} of ${uploads.length} notifications.")
             logger.warn(s"Notifications: ${prettyPrint(ns)}")
             clearUserCache(req.eori)
-            Future.successful(Redirect(routes.ErrorPageController.uploadError()))
+            Future.successful(Redirect(routes.ErrorPageController.uploadError))
         }
       }
     }

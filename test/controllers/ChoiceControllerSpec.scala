@@ -18,7 +18,6 @@ package controllers
 
 import base.TestRequests
 import forms.ChoiceForm
-import models.exceptions.InvalidFeatureStateException
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import play.api.data.Form

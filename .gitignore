@@ -1,6 +1,7 @@
 !.gitignore
 !.pa11yci
 
+/.bsp
 .cache
 /.classpath
 db

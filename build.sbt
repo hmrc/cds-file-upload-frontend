@@ -32,32 +32,30 @@ lazy val microservice = (project in file("."))
   .settings(silencerSettings)
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
 
-val httpComponentsVersion = "4.5.11"
+val httpComponentsVersion = "4.5.13"
 
 val compileDependencies = Seq(
-  "uk.gov.hmrc"                   %% "bootstrap-frontend-play-27"   % "3.2.0",
-  "uk.gov.hmrc"                   %% "play-ui"                      % "8.19.0-play-27",
-  "uk.gov.hmrc"                   %% "play-frontend-hmrc"           % "0.34.0-play-27",
-  "uk.gov.hmrc"                   %% "govuk-template"               % "5.60.0-play-27",
-  "uk.gov.hmrc"                   %% "auth-client"                  % "3.2.0-play-27",
-  "com.github.pureconfig"         %% "pureconfig"                   % "0.14.0",
-  "org.apache.httpcomponents"     %  "httpclient"                   % httpComponentsVersion,
-  "org.apache.httpcomponents"     %  "httpmime"                     % httpComponentsVersion,
-  "com.typesafe.play"             %% "play-json"                    % "2.9.2",
-  "uk.gov.hmrc"                   %% "play-whitelist-filter"        % "3.4.0-play-27",
-  "uk.gov.hmrc"                   %% "crypto"                       % "5.6.0",
-  "uk.gov.hmrc"                   %% "simple-reactivemongo"         % "7.31.0-play-27"
+  "uk.gov.hmrc"               %% "bootstrap-frontend-play-28" % "5.3.0",
+  "uk.gov.hmrc"               %% "govuk-template"             % "5.66.0-play-27",
+  "uk.gov.hmrc"               %% "play-frontend-hmrc"         % "0.68.0-play-28",
+  "uk.gov.hmrc"               %% "play-ui"                    % "9.4.0-play-28",
+  "uk.gov.hmrc"               %% "crypto"                     % "5.6.0",
+  "uk.gov.hmrc"               %% "simple-reactivemongo"       % "8.0.0-play-28",
+  "com.github.pureconfig"     %% "pureconfig"                 % "0.15.0",
+  "com.typesafe.play"         %% "play-json"                  % "2.9.2",
+  "org.apache.httpcomponents" %  "httpclient"                 % httpComponentsVersion,
+  "org.apache.httpcomponents" %  "httpmime"                   % httpComponentsVersion
 )
 
 val testDependencies = Seq(
-  "org.scalatest"             %%  "scalatest"                % "3.0.8"     % "test",
-  "org.jsoup"                 %   "jsoup"                    % "1.13.1"    % "test",
-  "com.typesafe.play"         %%  "play-test"                % current     % "test",
-  "org.pegdown"               %   "pegdown"                  % "1.6.0"     % "test",
-  "org.scalatestplus.play"    %%  "scalatestplus-play"       % "4.0.3"     % "test",
-  "org.mockito"               %   "mockito-core"             % "3.5.7"     % "test",
-  "org.scalacheck"            %%  "scalacheck"               % "1.15.2"    % "test",
-  "com.github.tomakehurst"    %   "wiremock-standalone"      % "2.27.2"    % "test"
+  "org.scalatest"          %% "scalatest"           % "3.2.9"   % "test",
+  "org.jsoup"              %  "jsoup"               % "1.13.1"  % "test",
+  "com.typesafe.play"      %% "play-test"           % current   % "test",
+  "org.scalatestplus.play" %% "scalatestplus-play"  % "5.1.0"   % "test",
+  "org.scalatestplus"      %% "mockito-3-4"         % "3.2.9.0" % "test",
+  "org.scalatestplus"      %% "scalacheck-1-15"     % "3.2.9.0" % "test",
+  "com.vladsch.flexmark"   %  "flexmark-all"        % "0.36.8"  % "test",
+  "com.github.tomakehurst" %  "wiremock-standalone" % "2.27.2"  % "test"
 )
 
 lazy val silencerSettings: Seq[Setting[_]] = {

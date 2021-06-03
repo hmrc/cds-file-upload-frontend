@@ -73,7 +73,7 @@ class AuthActionSpec extends ControllerSpecBase {
           val response = authController().action(FakeRequest())
 
           status(response) mustBe SEE_OTHER
-          redirectLocation(response) mustBe Some(controllers.routes.UnauthorisedController.onPageLoad().url)
+          redirectLocation(response) mustBe Some(controllers.routes.UnauthorisedController.onPageLoad.url)
         }
       }
 
@@ -86,7 +86,7 @@ class AuthActionSpec extends ControllerSpecBase {
           val response = authController().action(FakeRequest())
 
           status(response) mustBe SEE_OTHER
-          redirectLocation(response) mustBe Some(controllers.routes.UnauthorisedController.onPageLoad().url)
+          redirectLocation(response) mustBe Some(controllers.routes.UnauthorisedController.onPageLoad.url)
         }
       }
     }
@@ -126,7 +126,7 @@ class AuthActionSpec extends ControllerSpecBase {
           val response = authController(Seq("GB1111231")).action(FakeRequest())
 
           status(response) mustBe SEE_OTHER
-          redirectLocation(response) mustBe Some(controllers.routes.UnauthorisedController.onPageLoad().url)
+          redirectLocation(response) mustBe Some(controllers.routes.UnauthorisedController.onPageLoad.url)
         }
       }
     }

@@ -59,7 +59,7 @@ class UploadErrorSpec extends ViewBehaviours with ViewMatchers {
       val button = asDocument(view()).getElementsByClass("govuk-button").first()
 
       button must containMessage("uploadError.button")
-      button must haveHref(controllers.routes.RootController.displayPage())
+      button must haveHref(controllers.routes.RootController.displayPage)
     }
 
     "have a guidance" in {

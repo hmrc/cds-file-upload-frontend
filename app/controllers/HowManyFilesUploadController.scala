@@ -73,7 +73,7 @@ class HowManyFilesUploadController @Inject()(
                 Redirect(routes.UpscanStatusController.onPageLoad(firstUpload.reference))
               case err =>
                 logger.warn("uploadContactDetails error: " + err)
-                Redirect(routes.ErrorPageController.error())
+                Redirect(routes.ErrorPageController.error)
             }
           }
         )

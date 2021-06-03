@@ -73,7 +73,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
         val result = controller.onPageLoad()(fakeRequest).futureValue
 
         result.header.status mustBe SEE_OTHER
-        result.header.headers.get(LOCATION) mustBe Some(routes.RootController.displayPage().url)
+        result.header.headers.get(LOCATION) mustBe Some(routes.RootController.displayPage.url)
       }
     }
 

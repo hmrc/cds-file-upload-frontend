@@ -28,7 +28,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class MrnRequiredActionImpl @Inject()(mcc: MessagesControllerComponents) extends MrnRequiredAction {
 
   implicit val executionContext: ExecutionContext = mcc.executionContext
-  private lazy val onError = Redirect(routes.ErrorPageController.error())
+  private lazy val onError = Redirect(routes.ErrorPageController.error)
 
   override protected def refine[A](request: DataRequest[A]): Future[Either[Result, MrnRequest[A]]] =
     Future.successful(request.userAnswers.mrn.map(mrn => MrnRequest(request.request.request, request.userAnswers, mrn)).toRight(onError))

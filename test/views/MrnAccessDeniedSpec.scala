@@ -51,7 +51,7 @@ class MrnAccessDeniedSpec extends SpecBase with ViewMatchers {
       val signOutButton = testView.getElementsByClass("govuk-button").first()
 
       signOutButton must containMessage("signOut.link")
-      signOutButton must haveHref(controllers.routes.SignOutController.signOut())
+      signOutButton must haveHref(controllers.routes.SignOutController.signOut)
     }
 
     "display link to /mrn-entry page" in {

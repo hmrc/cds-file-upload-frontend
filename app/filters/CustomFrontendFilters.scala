@@ -17,8 +17,7 @@
 package filters
 
 import javax.inject.Inject
-import play.api.http.DefaultHttpFilters
-import uk.gov.hmrc.play.bootstrap.frontend.filters.FrontendFilters
+import play.api.http.{DefaultHttpFilters, EnabledFilters}
 
-class CustomFrontendFilters @Inject()(frontendFilters: FrontendFilters, csrfFilter: CsrfFilter)
-    extends DefaultHttpFilters(frontendFilters.filters :+ csrfFilter: _*)
+class CustomFrontendFilters @Inject()(enabledFilters: EnabledFilters, allowListFilter: AllowListFilter, csrfFilter: CsrfFilter)
+    extends DefaultHttpFilters(enabledFilters.filters :+ allowListFilter :+ csrfFilter: _*)

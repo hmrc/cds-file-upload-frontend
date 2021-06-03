@@ -16,16 +16,15 @@
 
 package views.components.gds
 
-import base.{OverridableInjector, SpecBase}
+import scala.collection.JavaConverters._
+
+import base.SpecBase
 import config.AppConfig
 import org.jsoup.nodes.Document
-import org.mockito.Mockito.{reset, when}
-import play.api.inject.bind
 import play.twirl.api.HtmlFormat
 import views.Title
 import views.html.components.gds.gdsMainTemplate
 import views.matchers.ViewMatchers
-import scala.collection.JavaConverters._
 
 class MainTemplateSpec extends SpecBase with ViewMatchers {
 
@@ -60,7 +59,7 @@ class MainTemplateSpec extends SpecBase with ViewMatchers {
         val view: Document = createView(withFileUploadFlag = true)
 
         val scripts = view.getElementsByTag("script").asScala.toSeq
-        val scriptAttribs = scripts.map(_.attr("src"))
+        val scriptAttribs = scripts.map(_.attr("src").replaceFirst("^/cds-file-upload-service", ""))
         scriptAttribs must contain("/assets/javascripts/jquery-3.6.0.min.js")
         scriptAttribs must contain("/assets/javascripts/jquery.validate.min.js")
         scriptAttribs must contain("/assets/javascripts/cdsfileuploadfrontend.js")

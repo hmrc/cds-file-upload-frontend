@@ -18,32 +18,28 @@ package connectors
 
 import java.util.UUID
 
+import scala.concurrent.duration.{Duration, SECONDS}
+import scala.concurrent.{Await, ExecutionContext, Future}
+
 import akka.stream.Materializer
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import config.AppConfig
 import javax.inject.{Inject, Singleton}
-import metrics.SfusMetrics
 import metrics.MetricIdentifiers.fileUploadMetric
+import metrics.SfusMetrics
 import models.{ContactDetails, UploadRequest}
-import play.api.Logger
-import play.api.libs.ws.{BodyWritable, DefaultWSProxyServer, InMemoryBody, WSClient}
+import play.api.Logging
+import play.api.libs.ws.{BodyWritable, DefaultWSProxyServer, InMemoryBody, WSClient, WSResponse}
 import play.api.mvc.MultipartFormData
 import play.api.mvc.MultipartFormData.{DataPart, FilePart}
 import play.core.formatters.Multipart
 
-import scala.concurrent.duration.{Duration, SECONDS}
-import scala.concurrent.{Await, ExecutionContext}
-
 @Singleton
-class UpscanConnector @Inject()(conf: AppConfig, wsClient: WSClient, metrics: SfusMetrics)(
-  implicit ec: ExecutionContext,
-  materializer: Materializer
-) {
+class UpscanConnector @Inject()(conf: AppConfig, wsClient: WSClient, metrics: SfusMetrics)(implicit ec: ExecutionContext, materializer: Materializer)
+    extends Logging {
 
-  private val logger = Logger(this.getClass)
-
-  def upload(upload: UploadRequest, contactDetails: ContactDetails) = {
+  def upload(upload: UploadRequest, contactDetails: ContactDetails): Future[WSResponse] = {
     val settings = conf.proxy
 
     logger.info(s"Connecting to proxy = ${settings.proxyRequiredForThisEnvironment}")

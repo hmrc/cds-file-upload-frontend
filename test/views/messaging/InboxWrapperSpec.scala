@@ -16,11 +16,8 @@
 
 package views.messaging
 
-import base.OverridableInjector
 import controllers.routes
 import org.jsoup.nodes.Document
-import org.mockito.Mockito.{reset, when}
-import play.api.inject.bind
 import play.twirl.api.HtmlFormat
 import views.DomAssertions
 import views.html.messaging.inbox_wrapper

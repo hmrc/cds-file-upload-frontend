@@ -25,14 +25,14 @@ class LinkButtonSpec extends UnitViewSpec with Injector {
 
   private val linkPartial = instanceOf[link_button]
 
-  private def createLink(): Html = linkPartial("signOut.link", ChoiceController.onPageLoad())(messages)
+  private def createLink(): Html = linkPartial("signOut.link", ChoiceController.onPageLoad)(messages)
 
   "linkButton" should {
 
     "display a link with correct href" in {
       val element = createLink().getElementsByClass("govuk-button").first()
       val tag = element.getElementsByTag("a").first()
-      tag must haveHref(ChoiceController.onPageLoad().url)
+      tag must haveHref(ChoiceController.onPageLoad.url)
     }
   }
 }
