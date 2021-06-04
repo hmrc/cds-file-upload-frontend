@@ -18,12 +18,9 @@ package views.messaging
 
 import scala.collection.JavaConverters._
 
-import base.OverridableInjector
 import controllers.routes
 import org.jsoup.nodes.{Document, Element}
-import org.mockito.Mockito._
 import org.scalatest.Assertion
-import play.api.inject.bind
 import play.twirl.api.HtmlFormat
 import views.DomAssertions
 import views.html.messaging.partial_wrapper

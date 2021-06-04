@@ -51,7 +51,7 @@ class MrnEntryController @Inject()(
 
   private val form = formProvider()
 
-  private def getBackLink(refererUrl: Option[String]) = refererUrl.getOrElse(routes.ChoiceController.onPageLoad().url)
+  private def getBackLink(refererUrl: Option[String]) = refererUrl.getOrElse(routes.ChoiceController.onPageLoad.url)
 
   def onPageLoad(refererUrl: Option[String] = None): Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData).async { implicit req =>
     val populatedForm = req.userAnswers.mrn.fold(form)(form.fill)
@@ -96,7 +96,7 @@ class MrnEntryController @Inject()(
       case false => invalidMrnResponse(mrn.value)
       case true =>
         answersService.upsert(userAnswers.copy(mrn = Some(mrn))).map { _ =>
-          Redirect(routes.ContactDetailsController.onPageLoad())
+          Redirect(routes.ContactDetailsController.onPageLoad)
         }
     }
 

@@ -21,11 +21,11 @@ import forms.mappings.ContactDetailsMapping._
 import generators.Generators
 import models.ContactDetails
 import org.scalacheck.Arbitrary._
-import org.scalatest.MustMatchers
+import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.data.Form
 
-class ContactDetailsMappingSpec extends SpecBase with MustMatchers with ScalaCheckPropertyChecks with Generators {
+class ContactDetailsMappingSpec extends SpecBase with Matchers with ScalaCheckPropertyChecks with Generators {
 
   val form = Form(contactDetailsMapping)
 

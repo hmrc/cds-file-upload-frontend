@@ -30,7 +30,7 @@ class RootControllerSpec extends ControllerSpecBase {
         val result = controller.displayPage()(fakeRequest)
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(controllers.routes.ChoiceController.onPageLoad().url)
+        redirectLocation(result) mustBe Some(controllers.routes.ChoiceController.onPageLoad.url)
       }
     }
   }

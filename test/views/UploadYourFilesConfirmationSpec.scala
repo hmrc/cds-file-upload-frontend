@@ -88,12 +88,12 @@ class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers wi
         assertContainsLink(
           view,
           messages("fileUploadConfirmationPage.section1.paragraph1.linkText"),
-          controllers.routes.InboxChoiceController.onPageLoad().url
+          controllers.routes.InboxChoiceController.onPageLoad.url
         )
         assertContainsLink(
           view,
           messages("fileUploadConfirmationPage.section1.paragraph2.linkText"),
-          controllers.routes.InboxChoiceController.onPageLoad().url
+          controllers.routes.InboxChoiceController.onPageLoad.url
         )
       }
     }
@@ -123,7 +123,7 @@ class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers wi
     }
 
     "have a links to restart the journey" in {
-      assertContainsLink(view, messages("fileUploadConfirmationPage.finalButton.text"), controllers.routes.ChoiceController.onPageLoad().url)
+      assertContainsLink(view, messages("fileUploadConfirmationPage.finalButton.text"), controllers.routes.ChoiceController.onPageLoad.url)
     }
   }
 }

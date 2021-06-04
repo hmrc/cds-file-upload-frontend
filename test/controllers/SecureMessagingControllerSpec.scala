@@ -16,10 +16,11 @@
 
 package controllers
 
+import scala.concurrent.Future
+
 import base.TestRequests
 import connectors.SecureMessageFrontendConnector
 import models.{ConversationPartial, InboxPartial, ReplyResultPartial}
-import models.exceptions.InvalidFeatureStateException
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, verify, when}
 import play.api.i18n.Messages
@@ -29,8 +30,6 @@ import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.FakeRequestCSRFSupport._
 import views.html.messaging.{inbox_wrapper, partial_wrapper}
-
-import scala.concurrent.Future
 
 class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests {
 

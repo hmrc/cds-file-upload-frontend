@@ -16,7 +16,6 @@
 
 package controllers.actions
 
-import controllers.Assets.Redirect
 import controllers.{routes, ControllerSpecBase}
 import models.{ExportMessages, SecureMessageAnswers}
 import models.requests.{AuthenticatedRequest, MessageFilterRequest, VerifiedEmailRequest}
@@ -25,8 +24,9 @@ import org.mockito.Mockito._
 import play.api.mvc.Result
 import services.SecureMessageAnswersService
 import testdata.CommonTestData._
-
 import scala.concurrent.Future
+
+import play.api.mvc.Results.Redirect
 
 class MessageFilterActionSpec extends ControllerSpecBase {
 
@@ -67,7 +67,7 @@ class MessageFilterActionSpec extends ControllerSpecBase {
         val result = action.callRefine(request).futureValue
 
         result.isLeft mustBe true
-        result.left.get mustBe Redirect(routes.InboxChoiceController.onPageLoad())
+        result.left.get mustBe Redirect(routes.InboxChoiceController.onPageLoad)
       }
     }
   }

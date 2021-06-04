@@ -24,6 +24,6 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 class RootController @Inject()(mcc: MessagesControllerComponents) extends FrontendController(mcc) with I18nSupport {
 
   def displayPage(): Action[AnyContent] = Action {
-    Redirect(controllers.routes.ChoiceController.onPageLoad())
+    Redirect(controllers.routes.ChoiceController.onPageLoad)
   }
 }

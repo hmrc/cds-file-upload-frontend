@@ -20,13 +20,14 @@ import akka.stream.Materializer
 import com.typesafe.config.ConfigException
 import generators.Generators
 import org.scalacheck.Gen
-import org.scalatest.{FreeSpec, MustMatchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Configuration
 import play.api.mvc.Call
 
-class AllowListFilterSpec extends FreeSpec with MustMatchers with ScalaCheckPropertyChecks with MockitoSugar with Generators {
+class AllowListFilterSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyChecks with MockitoSugar with Generators {
 
   val mockMaterializer = mock[Materializer]
 
@@ -72,7 +73,7 @@ class AllowListFilterSpec extends FreeSpec with MustMatchers with ScalaCheckProp
 
           val allowListFilter = new AllowListFilter(config, mockMaterializer)
 
-          allowListFilter.whitelist mustBe empty
+          allowListFilter.allowlist mustBe empty
         }
       }
     }
@@ -95,7 +96,7 @@ class AllowListFilterSpec extends FreeSpec with MustMatchers with ScalaCheckProp
 
           val allowListFilter = new AllowListFilter(config, mockMaterializer)
 
-          allowListFilter.whitelist must contain theSameElementsAs ips
+          allowListFilter.allowlist must contain theSameElementsAs ips
         }
       }
     }

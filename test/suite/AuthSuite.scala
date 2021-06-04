@@ -16,15 +16,12 @@
 
 package suite
 
+import scala.concurrent.{ExecutionContext, Future}
+
 import org.scalatest.concurrent.ScalaFutures
 import play.api.Application
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
-import play.api.mvc.Headers
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.HeaderCarrierConverter
-
-import scala.concurrent.{ExecutionContext, Future}
 
 trait AuthSuite extends ScalaFutures {
 
@@ -53,13 +50,8 @@ trait AuthSuite extends ScalaFutures {
                |  ]
                |}""".stripMargin
 
-  def authenticate(app: Application)(implicit ec: ExecutionContext): Future[HeaderCarrier] = {
-
+  def authenticate(app: Application)(implicit ec: ExecutionContext): Future[Map[String, Seq[String]]] = {
     val ws = app.injector.instanceOf[WSClient]
-
-    ws.url("http://localhost:8585/government-gateway/session/login").post(Json.parse(json)).map { auth =>
-      val headers = Headers(auth.headers.mapValues(_.headOption.getOrElse("")).toList: _*)
-      HeaderCarrierConverter.fromHeadersAndSession(headers)
-    }
+    ws.url("http://localhost:8585/government-gateway/session/login").post(Json.parse(json)).map(_.headers)
   }
 }

@@ -97,7 +97,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
 
         controller.onPageLoad()(fakeRequest).futureValue
 
-        val expectedBackLink = controllers.routes.ChoiceController.onPageLoad().url
+        val expectedBackLink = controllers.routes.ChoiceController.onPageLoad.url
         verify(mrnEntryPage).apply(any(), eqTo(expectedBackLink))(any(), any())
       }
     }
@@ -137,7 +137,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
 
         controller.onPageLoad(Some(invalidRefererUrl))(fakeRequest).futureValue
 
-        verify(mrnEntryPage).apply(any(), eqTo(routes.ChoiceController.onPageLoad().url))(any(), any())
+        verify(mrnEntryPage).apply(any(), eqTo(routes.ChoiceController.onPageLoad.url))(any(), any())
       }
     }
   }
@@ -197,7 +197,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
           val result = controller.onSubmit(postRequest)
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).get mustBe routes.ContactDetailsController.onPageLoad().url
+          redirectLocation(result).get mustBe routes.ContactDetailsController.onPageLoad.url
         }
       }
     }
@@ -251,7 +251,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
           val result = controller.autoFill(mrn)(fakeRequest)
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).get mustBe routes.ContactDetailsController.onPageLoad().url
+          redirectLocation(result).get mustBe routes.ContactDetailsController.onPageLoad.url
         }
       }
     }

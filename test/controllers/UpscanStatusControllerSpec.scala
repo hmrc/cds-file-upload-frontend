@@ -127,7 +127,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
         val result = controller(fakeDataRetrievalAction(answers)).onPageLoad(fileUpload.reference)(fakeRequest)
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.UploadYourFilesReceiptController.onPageLoad().url)
+        redirectLocation(result) mustBe Some(routes.UploadYourFilesReceiptController.onPageLoad.url)
       }
     }
   }
@@ -171,7 +171,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       result.map(_ => verify(mockFileUploadAnswersService).removeByEori(any()))
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.ErrorPageController.error().url)
+      redirectLocation(result) mustBe Some(routes.ErrorPageController.error.url)
     }
 
     "file reference is not in response" in {
@@ -185,7 +185,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
           result.map(_ => verify(mockFileUploadAnswersService).removeByEori(any()))
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(routes.ErrorPageController.error().url)
+          redirectLocation(result) mustBe Some(routes.ErrorPageController.error.url)
         }
       }
     }
@@ -269,7 +269,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
 
       val result = controller(fakeDataRetrievalAction(answers)).success(lastFile.reference)(fakeRequest)
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UploadYourFilesReceiptController.onPageLoad().url)
+      redirectLocation(result) mustBe Some(routes.UploadYourFilesReceiptController.onPageLoad.url)
     }
 
     "load upload error page when we get a fail notification" in {
@@ -294,7 +294,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val result = controller(fakeDataRetrievalAction(answers)).success(lastFile.reference)(fakeRequest)
       result.map(_ => verify(mockFileUploadAnswersService).removeByEori(any()))
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.ErrorPageController.uploadError().url)
+      redirectLocation(result) mustBe Some(routes.ErrorPageController.uploadError.url)
     }
 
     "load upload error page when notification retries are exceeded" in {
@@ -319,7 +319,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val result = controller(fakeDataRetrievalAction(answers)).success(lastFile.reference)(fakeRequest)
       result.map(_ => verify(mockFileUploadAnswersService).removeByEori(any()))
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.ErrorPageController.uploadError().url)
+      redirectLocation(result) mustBe Some(routes.ErrorPageController.uploadError.url)
     }
   }
 }

@@ -16,8 +16,8 @@
 
 package connectors
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import scala.concurrent.Future
+
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import base.{SfusMetricsMock, SpecBase}
@@ -26,21 +26,18 @@ import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.libs.ws.ahc.AhcWSResponse
 import play.api.libs.ws.ahc.cache.CacheableHttpResponseStatus
 import play.api.libs.ws.{WSClient, WSRequest}
 import play.api.mvc.MultipartFormData
+import play.shaded.ahc.org.asynchttpclient.Response
 import play.shaded.ahc.org.asynchttpclient.uri.Uri
 
-import scala.concurrent.Future
-import play.shaded.ahc.org.asynchttpclient.Response
-
-class UpscanConnectorTest extends PlaySpec with MockitoSugar with SpecBase with SfusMetricsMock {
+class UpscanConnectorTest extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar with SpecBase with SfusMetricsMock {
 
   val uploadUrl = "http://localhost/theUploadUrl"
-  val as = ActorSystem("test-system")
-  implicit val materializer = ActorMaterializer()(as)
   val contactDetails = ContactDetails("a", "b", "c")
 
   "Upload" should {
@@ -48,7 +45,10 @@ class UpscanConnectorTest extends PlaySpec with MockitoSugar with SpecBase with 
     "POST to Upscan" in {
       val wsClient = mock[WSClient]
       val wsRequest = mock[WSRequest]
+
+      implicit val materializer = app.materializer
       val connector = new UpscanConnector(appConfig, wsClient, sfusMetrics)
+
       when(wsRequest.withFollowRedirects(any())).thenReturn(wsRequest)
       when(wsClient.url(eqTo(uploadUrl))).thenReturn(wsRequest)
 

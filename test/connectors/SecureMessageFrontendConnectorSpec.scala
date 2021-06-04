@@ -54,7 +54,7 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
           val partialContent = "<div>Some Content</div>"
           val httpResponse = HttpResponse(status = OK, body = partialContent)
 
-          when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+          when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
             .thenReturn(Future.successful(httpResponse))
 
           val result = connector.retrieveInboxPartial(CommonTestData.eori, ExportMessages).futureValue
@@ -66,7 +66,7 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
           val partialContent = "<div>Some Content</div>"
           val httpResponse = HttpResponse(status = OK, body = partialContent)
 
-          when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+          when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
             .thenReturn(Future.successful(httpResponse))
 
           connector.retrieveInboxPartial(CommonTestData.eori, ExportMessages).futureValue
@@ -79,7 +79,7 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
         "return a failed Future" in {
           val httpResponse = HttpResponse(status = BAD_REQUEST, body = "")
 
-          when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+          when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
             .thenReturn(Future.successful(httpResponse))
 
           val result = connector.retrieveInboxPartial(CommonTestData.eori, ExportMessages)
@@ -89,7 +89,7 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
         "not audit the attempted retrieval of the InboxPartial" in {
           val httpResponse = HttpResponse(status = BAD_REQUEST, body = "")
 
-          when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+          when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
             .thenReturn(Future.successful(httpResponse))
 
           connector.retrieveInboxPartial(CommonTestData.eori, ExportMessages)
@@ -100,7 +100,7 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
 
       "fails to connect to downstream service" should {
         "return a failed Future" in {
-          when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+          when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
             .thenReturn(Future.failed(new BadGatewayException("Error")))
 
           val result = connector.retrieveInboxPartial(CommonTestData.eori, ExportMessages)
@@ -112,13 +112,13 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
         "include the Enrolment tag as a query string parameter with the correct eori value" in {
           val httpResponse = HttpResponse(status = OK, body = "")
 
-          when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+          when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
             .thenReturn(Future.successful(httpResponse))
 
           connector.retrieveInboxPartial(CommonTestData.eori, ExportMessages).futureValue
 
           val queryParamCaptor = ArgumentCaptor.forClass(classOf[Seq[(String, String)]])
-          verify(httpClient).GET[HttpResponse](anyString(), queryParamCaptor.capture())(any(), any(), any())
+          verify(httpClient).GET[HttpResponse](anyString(), queryParamCaptor.capture(), any())(any(), any(), any())
           val queryParamValue = queryParamCaptor.getValue().asInstanceOf[Seq[(String, String)]]
 
           queryParamValue.size mustBe 2
@@ -130,13 +130,13 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
         "include the ExportMessages tag as a query string parameter" in {
           val httpResponse = HttpResponse(status = OK, body = "")
 
-          when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+          when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
             .thenReturn(Future.successful(httpResponse))
 
           connector.retrieveInboxPartial(CommonTestData.eori, ExportMessages).futureValue
 
           val queryParamCaptor = ArgumentCaptor.forClass(classOf[Seq[(String, String)]])
-          verify(httpClient).GET[HttpResponse](anyString(), queryParamCaptor.capture())(any(), any(), any())
+          verify(httpClient).GET[HttpResponse](anyString(), queryParamCaptor.capture(), any())(any(), any(), any())
           val queryParamValue = queryParamCaptor.getValue().asInstanceOf[Seq[(String, String)]]
 
           queryParamValue.size mustBe 2
@@ -148,13 +148,13 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
         "include the ImportMessages tag as a query string parameter" in {
           val httpResponse = HttpResponse(status = OK, body = "")
 
-          when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+          when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
             .thenReturn(Future.successful(httpResponse))
 
           connector.retrieveInboxPartial(CommonTestData.eori, ImportMessages).futureValue
 
           val queryParamCaptor = ArgumentCaptor.forClass(classOf[Seq[(String, String)]])
-          verify(httpClient).GET[HttpResponse](anyString(), queryParamCaptor.capture())(any(), any(), any())
+          verify(httpClient).GET[HttpResponse](anyString(), queryParamCaptor.capture(), any())(any(), any(), any())
           val queryParamValue = queryParamCaptor.getValue().asInstanceOf[Seq[(String, String)]]
 
           queryParamValue.size mustBe 2
@@ -169,7 +169,7 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
           val partialContent = "<div>Some Content</div>"
           val httpResponse = HttpResponse(status = OK, body = partialContent)
 
-          when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+          when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
             .thenReturn(Future.successful(httpResponse))
 
           val result = connector.retrieveConversationPartial(clientId, conversationId).futureValue
@@ -182,7 +182,7 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
         "return a failed Future" in {
           val httpResponse = HttpResponse(status = BAD_REQUEST, body = "")
 
-          when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+          when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
             .thenReturn(Future.successful(httpResponse))
 
           val result = connector.retrieveConversationPartial(clientId, conversationId)
@@ -192,7 +192,7 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
 
       "fails to connect to downstream service" should {
         "return a failed Future" in {
-          when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+          when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
             .thenReturn(Future.failed(new BadGatewayException("Error")))
 
           val result = connector.retrieveConversationPartial(clientId, conversationId)
@@ -205,13 +205,13 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
       "include the 'showReplyForm' query string param" in {
         val httpResponse = HttpResponse(status = OK, "")
 
-        when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+        when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
           .thenReturn(Future.successful(httpResponse))
 
         connector.retrieveConversationPartial(clientId, conversationId).futureValue
 
         val queryParamCaptor = ArgumentCaptor.forClass(classOf[Seq[(String, String)]])
-        verify(httpClient).GET[HttpResponse](anyString(), queryParamCaptor.capture())(any(), any(), any())
+        verify(httpClient).GET[HttpResponse](anyString(), queryParamCaptor.capture(), any())(any(), any(), any())
 
         val queryParamValue = queryParamCaptor.getValue().asInstanceOf[Seq[(String, String)]]
 
@@ -279,7 +279,7 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
         val partialContent = "<div>Some Content</div>"
         val httpResponse = HttpResponse(status = OK, body = partialContent)
 
-        when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+        when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
           .thenReturn(Future.successful(httpResponse))
 
         val result = connector.retrieveReplyResult(clientId, conversationId).futureValue
@@ -292,7 +292,7 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
       "return a failed Future" in {
         val httpResponse = HttpResponse(status = BAD_REQUEST, body = "")
 
-        when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+        when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
           .thenReturn(Future.successful(httpResponse))
 
         val result = connector.retrieveReplyResult(clientId, conversationId)
@@ -302,7 +302,7 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
 
     "fails to connect to downstream service" should {
       "return a failed Future" in {
-        when(httpClient.GET[HttpResponse](anyString(), any())(any(), any(), any()))
+        when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
           .thenReturn(Future.failed(new BadGatewayException("Error")))
 
         val result = connector.retrieveReplyResult(clientId, conversationId)

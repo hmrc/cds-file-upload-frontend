@@ -57,7 +57,7 @@ class CdsFileUploadConnectorSpec extends UnitSpec with BeforeAndAfterEach with I
 
         val notification = Notification("fileReference", "outcome", "fileName")
 
-        when(httpClient.GET[Option[Notification]](anyString())(any(), any(), any()))
+        when(httpClient.GET[Option[Notification]](anyString(), any(), any())(any(), any(), any()))
           .thenReturn(Future.successful(Some(notification)))
 
         val result = cdsFileUploadConnector.getNotification("fileReference")(hc).futureValue
@@ -70,7 +70,7 @@ class CdsFileUploadConnectorSpec extends UnitSpec with BeforeAndAfterEach with I
 
       "there is no notification with specific reference" in {
 
-        when(httpClient.GET[Option[Notification]](anyString())(any(), any(), any()))
+        when(httpClient.GET[Option[Notification]](anyString(), any(), any())(any(), any(), any()))
           .thenReturn(Future.successful(None))
 
         val result = cdsFileUploadConnector.getNotification("fileReference")(hc).futureValue
@@ -86,12 +86,12 @@ class CdsFileUploadConnectorSpec extends UnitSpec with BeforeAndAfterEach with I
 
       val httpResponse = HttpResponse(status = OK, body = "")
 
-      when(httpClient.GET[HttpResponse](anyString())(any(), any(), any()))
+      when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
         .thenReturn(Future.successful(httpResponse))
 
       cdsFileUploadConnector.getDeclarationStatus(MRN(CommonTestData.mrn).get)(hc).futureValue
 
-      verify(httpClient).GET[HttpResponse](anyString())(any(), any(), any())
+      verify(httpClient).GET[HttpResponse](anyString(), any(), any())(any(), any(), any())
     }
 
     "return value returned from HttpClient" when {
@@ -100,7 +100,7 @@ class CdsFileUploadConnectorSpec extends UnitSpec with BeforeAndAfterEach with I
 
         val httpResponse = HttpResponse(status = OK, body = "")
 
-        when(httpClient.GET[HttpResponse](anyString())(any(), any(), any()))
+        when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
           .thenReturn(Future.successful(httpResponse))
 
         val result = cdsFileUploadConnector.getDeclarationStatus(MRN(CommonTestData.mrn).get)(hc).futureValue
@@ -112,7 +112,7 @@ class CdsFileUploadConnectorSpec extends UnitSpec with BeforeAndAfterEach with I
 
         val httpResponse = HttpResponse(status = NOT_FOUND, body = "")
 
-        when(httpClient.GET[HttpResponse](anyString())(any(), any(), any()))
+        when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
           .thenReturn(Future.successful(httpResponse))
 
         val result = cdsFileUploadConnector.getDeclarationStatus(MRN(CommonTestData.mrn).get)(hc).futureValue
@@ -124,7 +124,7 @@ class CdsFileUploadConnectorSpec extends UnitSpec with BeforeAndAfterEach with I
 
         val httpResponse = HttpResponse(status = INTERNAL_SERVER_ERROR, body = "")
 
-        when(httpClient.GET[HttpResponse](anyString())(any(), any(), any()))
+        when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
           .thenReturn(Future.successful(httpResponse))
 
         val result = cdsFileUploadConnector.getDeclarationStatus(MRN(CommonTestData.mrn).get)(hc).futureValue
@@ -140,7 +140,7 @@ class CdsFileUploadConnectorSpec extends UnitSpec with BeforeAndAfterEach with I
     "handle a 200 response by returning a VerifiedEmailAddress" in {
       val expectedVerifiedEmailAddress = VerifiedEmailAddress("some@email.com", ZonedDateTime.now())
 
-      when(httpClient.GET[Option[VerifiedEmailAddress]](anyString())(any(), any(), any()))
+      when(httpClient.GET[Option[VerifiedEmailAddress]](anyString(), any(), any())(any(), any(), any()))
         .thenReturn(Future.successful(Some(expectedVerifiedEmailAddress)))
 
       val result = cdsFileUploadConnector.getVerifiedEmailAddress(sampleEori)(hc).futureValue
@@ -149,7 +149,7 @@ class CdsFileUploadConnectorSpec extends UnitSpec with BeforeAndAfterEach with I
     }
 
     "handle a 404 response by returning None" in {
-      when(httpClient.GET[Option[VerifiedEmailAddress]](anyString())(any(), any(), any()))
+      when(httpClient.GET[Option[VerifiedEmailAddress]](anyString(), any(), any())(any(), any(), any()))
         .thenReturn(Future.successful(None))
 
       val result = cdsFileUploadConnector.getVerifiedEmailAddress(sampleEori)(hc).futureValue
@@ -158,7 +158,7 @@ class CdsFileUploadConnectorSpec extends UnitSpec with BeforeAndAfterEach with I
     }
 
     "handle a 'non 404' 4XX response by throwing an exception" in {
-      when(httpClient.GET[Option[VerifiedEmailAddress]](anyString())(any(), any(), any()))
+      when(httpClient.GET[Option[VerifiedEmailAddress]](anyString(), any(), any())(any(), any(), any()))
         .thenReturn(Future.failed(UpstreamErrorResponse("", 410)))
 
       val result = cdsFileUploadConnector.getVerifiedEmailAddress(sampleEori)(hc)

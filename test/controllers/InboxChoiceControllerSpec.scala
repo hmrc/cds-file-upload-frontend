@@ -16,10 +16,11 @@
 
 package controllers
 
+import scala.concurrent.Future
+
 import base.TestRequests
 import forms.InboxChoiceForm
 import forms.InboxChoiceForm.{InboxChoiceKey, Values}
-import models.exceptions.InvalidFeatureStateException
 import models.{ExportMessages, SecureMessageAnswers}
 import org.mockito.ArgumentMatchers.{any, anyString, eq => eqTo}
 import org.mockito.Mockito._
@@ -31,8 +32,6 @@ import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
 import services.SecureMessageAnswersService
 import views.html.messaging.inbox_choice
-
-import scala.concurrent.Future
 
 class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
 

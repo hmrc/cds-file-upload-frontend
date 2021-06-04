@@ -20,26 +20,24 @@ import akka.stream.Materializer
 import javax.inject.Inject
 import play.api.Configuration
 import play.api.mvc.Call
-import uk.gov.hmrc.whitelist.AkamaiWhitelistFilter
+import uk.gov.hmrc.allowlist.AkamaiAllowlistFilter
 
-class AllowListFilter @Inject()(config: Configuration, override val mat: Materializer) extends AkamaiWhitelistFilter {
+class AllowListFilter @Inject()(config: Configuration, override val mat: Materializer) extends AkamaiAllowlistFilter {
 
-  override val whitelist: Seq[String] = {
+  override val allowlist: Seq[String] =
     config.underlying
       .getString("filters.allowList.ips")
       .split(",")
       .map(_.trim)
       .filter(_.nonEmpty)
-  }
 
   override val destination: Call = {
     val path = config.underlying.getString("filters.allowList.destination")
     Call("GET", path)
   }
 
-  override val excludedPaths: Seq[Call] = {
+  override val excludedPaths: Seq[Call] =
     config.underlying.getString("filters.allowList.excluded").split(",").map { path =>
       Call("GET", path.trim)
     }
-  }
 }

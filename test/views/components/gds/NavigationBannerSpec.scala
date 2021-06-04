@@ -32,7 +32,7 @@ class NavigationBannerSpec extends SpecBase with ViewMatchers {
       val messagesLink = component.getElementsByClass("govuk-link").get(0)
 
       messagesLink must containMessage("common.navigation.messages")
-      messagesLink must haveHref(controllers.routes.InboxChoiceController.onPageLoad())
+      messagesLink must haveHref(controllers.routes.InboxChoiceController.onPageLoad)
     }
 
     "contain link to /mrn-entry page" in {
