@@ -35,9 +35,9 @@ lazy val microservice = (project in file("."))
 val httpComponentsVersion = "4.5.13"
 
 val compileDependencies = Seq(
-  "uk.gov.hmrc"               %% "bootstrap-frontend-play-28" % "5.3.0",
-  "uk.gov.hmrc"               %% "govuk-template"             % "5.66.0-play-27",
-  "uk.gov.hmrc"               %% "play-frontend-hmrc"         % "0.68.0-play-28",
+  "uk.gov.hmrc"               %% "bootstrap-frontend-play-28" % "5.10.0",
+  "uk.gov.hmrc"               %% "govuk-template"             % "5.69.0-play-28",
+  "uk.gov.hmrc"               %% "play-frontend-hmrc"         % "0.94.0-play-28",
   "uk.gov.hmrc"               %% "crypto"                     % "5.6.0",
   "uk.gov.hmrc"               %% "simple-reactivemongo"       % "8.0.0-play-28",
   "com.github.pureconfig"     %% "pureconfig"                 % "0.15.0",
