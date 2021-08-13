@@ -15,22 +15,22 @@
  *@
 
 @import config.AppConfig
-@import uk.gov.hmrc.play.views.html.helpers.ErrorInline
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.html.components.gds._
+@import views.html.components.ErrorInLine
 @import views.Title
 
 @this(
         mainTemplate: gdsMainTemplate,
-        formHelper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+        formHelper: uk.gov.hmrc.govukfrontend.views.html.helpers.formWithCSRF,
         exportsInputText: exportsInputText,
         govukButton: GovukButton,
         govukInsetText: GovukInsetText,
         bulletList: bulletList,
         pageTitle: pageTitle,
-        errorInline: ErrorInline,
         paragraphBody: paragraphBody,
         link: link,
+        errorInline: ErrorInLine,
         appConfig: AppConfig
 )
 
