@@ -55,7 +55,7 @@ class CdsFileUploadConnectorSpec extends UnitSpec with BeforeAndAfterEach with I
 
       "notification exists" in {
 
-        val notification = Notification("fileReference", "outcome", "fileName")
+        val notification = Notification("fileReference", "outcome", Some("fileName"))
 
         when(httpClient.GET[Option[Notification]](anyString(), any(), any())(any(), any(), any()))
           .thenReturn(Future.successful(Some(notification)))
