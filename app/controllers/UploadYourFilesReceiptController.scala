@@ -19,12 +19,10 @@ package controllers
 import com.google.inject.Singleton
 import connectors.CdsFileUploadConnector
 import controllers.actions._
-
-import javax.inject.Inject
 import metrics.MetricIdentifiers._
 import metrics.SfusMetrics
-import models.{FileUpload, MRN}
 import models.requests.VerifiedEmailRequest
+import models.{FileUpload, MRN}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import play.twirl.api.Html
@@ -33,6 +31,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.upload_your_files_confirmation
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -77,12 +76,12 @@ class UploadYourFilesReceiptController @Inject()(
 
   private def addFilenames(uploads: List[FileUpload])(implicit hc: HeaderCarrier): Future[List[FileUpload]] =
     Future
-      .sequence(uploads.map { u =>
+      .sequence(uploads.map { upload =>
         val timer = metrics.startTimer(fetchNotificationMetric)
-        cdsFileUploadConnector.getNotification(u.reference).map { notificationOpt =>
+        cdsFileUploadConnector.getNotification(upload.reference).map { notificationOpt =>
           timer.stop()
           notificationOpt.map { notification =>
-            u.copy(filename = notification.filename)
+            upload.copy(filename = notification.filename.getOrElse(""))
           }
         }
       })

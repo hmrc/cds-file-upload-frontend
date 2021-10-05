@@ -123,7 +123,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
         val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response))
 
         when(cdsFileUploadConnector.getNotification(any())(any()))
-          .thenReturn(Future.successful(Some(Notification("ref1", "SUCCESS", "file1.pdf"))))
+          .thenReturn(Future.successful(Some(Notification("ref1", "SUCCESS", Some("file1.pdf")))))
         val result = controller(fakeDataRetrievalAction(answers)).onPageLoad(fileUpload.reference)(fakeRequest)
 
         status(result) mustBe SEE_OTHER
@@ -152,7 +152,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val response = FileUploadResponse(List(fileUpload1, fileUpload2))
 
       when(cdsFileUploadConnector.getNotification(any())(any()))
-        .thenReturn(Future.successful(Some(Notification("ref1", "SUCCESS", "myfile.doc"))))
+        .thenReturn(Future.successful(Some(Notification("ref1", "SUCCESS", Some("myfile.doc")))))
       val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response))
 
       val result = controller(fakeDataRetrievalAction(answers)).success("ref1")(fakeRequest)
@@ -199,7 +199,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val response = FileUploadResponse(List(fileUpload))
 
       when(cdsFileUploadConnector.getNotification(any())(any()))
-        .thenReturn(Future.successful(Some(Notification("ref", "SUCCESS", "myfile.pdf"))))
+        .thenReturn(Future.successful(Some(Notification("ref", "SUCCESS", Some("myfile.pdf")))))
 
       val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response))
       await(controller(fakeDataRetrievalAction(answers)).success("ref")(fakeRequest))
@@ -234,11 +234,11 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
         FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
 
       when(cdsFileUploadConnector.getNotification(meq("fileRef1"))(any()))
-        .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", "file1.pdf"))))
+        .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", Some("file1.pdf")))))
       when(cdsFileUploadConnector.getNotification(meq("fileRef2"))(any()))
-        .thenReturn(Future.successful(Some(Notification("fileRef2", "SUCCESS", "file2.doc"))))
+        .thenReturn(Future.successful(Some(Notification("fileRef2", "SUCCESS", Some("file2.doc")))))
       when(cdsFileUploadConnector.getNotification(meq("fileRef3"))(any()))
-        .thenReturn(Future.successful(Some(Notification("fileRef3", "SUCCESS", "file3.png"))))
+        .thenReturn(Future.successful(Some(Notification("fileRef3", "SUCCESS", Some("file3.png")))))
 
       val result = controller(fakeDataRetrievalAction(answers)).success(lastFile.reference)(fakeRequest)
       status(result) mustBe SEE_OTHER
@@ -261,11 +261,11 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
         FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
 
       when(cdsFileUploadConnector.getNotification(meq("fileRef1"))(any()))
-        .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", "file1.pdf"))))
+        .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", Some("file1.pdf")))))
       when(cdsFileUploadConnector.getNotification(meq("fileRef2"))(any()))
-        .thenReturn(Future.successful(Some(Notification("fileRef2", "SUCCESS", "file2.doc"))))
+        .thenReturn(Future.successful(Some(Notification("fileRef2", "SUCCESS", Some("file2.doc")))))
       when(cdsFileUploadConnector.getNotification(meq("fileRef3"))(any()))
-        .thenReturn(Future.successful(Some(Notification("fileRef3", "SUCCESS", "file3.gif"))))
+        .thenReturn(Future.successful(Some(Notification("fileRef3", "SUCCESS", Some("file3.gif")))))
 
       val result = controller(fakeDataRetrievalAction(answers)).success(lastFile.reference)(fakeRequest)
       status(result) mustBe SEE_OTHER
@@ -285,11 +285,11 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
         FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
 
       when(cdsFileUploadConnector.getNotification(meq("fileRef1"))(any()))
-        .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", "file1.pdf"))))
+        .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", Some("file1.pdf")))))
       when(cdsFileUploadConnector.getNotification(meq("fileRef2"))(any()))
-        .thenReturn(Future.successful(Some(Notification("fileRef2", "FAIL", "file2.doc"))))
+        .thenReturn(Future.successful(Some(Notification("fileRef2", "FAIL", Some("file2.doc")))))
       when(cdsFileUploadConnector.getNotification(meq("fileRef3"))(any()))
-        .thenReturn(Future.successful(Some(Notification("fileRef3", "SUCCESS", "file3.gif"))))
+        .thenReturn(Future.successful(Some(Notification("fileRef3", "SUCCESS", Some("file3.gif")))))
 
       val result = controller(fakeDataRetrievalAction(answers)).success(lastFile.reference)(fakeRequest)
       result.map(_ => verify(mockFileUploadAnswersService).removeByEori(any()))
@@ -310,9 +310,9 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
         FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
 
       when(cdsFileUploadConnector.getNotification(meq("fileRef1"))(any()))
-        .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", "file1.pdf"))))
+        .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", Some("file1.pdf")))))
       when(cdsFileUploadConnector.getNotification(meq("fileRef2"))(any()))
-        .thenReturn(Future.successful(Some(Notification("fileRef2", "SUCCESS", "file2.doc"))))
+        .thenReturn(Future.successful(Some(Notification("fileRef2", "SUCCESS", Some("file2.doc")))))
       when(cdsFileUploadConnector.getNotification(meq("fileRef3"))(any()))
         .thenReturn(Future.successful(None))
 
