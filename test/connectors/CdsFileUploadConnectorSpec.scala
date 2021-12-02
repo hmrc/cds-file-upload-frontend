@@ -18,7 +18,7 @@ package connectors
 
 import base.{Injector, UnitSpec}
 import config.AppConfig
-import models.{EORI, MRN, Notification, VerifiedEmailAddress}
+import models.{EORI, Email, MRN, Notification}
 import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.BeforeAndAfterEach
@@ -27,7 +27,6 @@ import play.mvc.Http.Status.{INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
 import testdata.CommonTestData
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 
-import java.time.ZonedDateTime
 import scala.concurrent.ExecutionContext.global
 import scala.concurrent.Future
 
@@ -137,19 +136,19 @@ class CdsFileUploadConnectorSpec extends UnitSpec with BeforeAndAfterEach with I
   "CdsFileUploadConnector on getVerifiedEmail" should {
     lazy val sampleEori = EORI("12345")
 
-    "handle a 200 response by returning a VerifiedEmailAddress" in {
-      val expectedVerifiedEmailAddress = VerifiedEmailAddress("some@email.com", ZonedDateTime.now())
+    "handle a 200 response by returning a Email" in {
+      val expectedEmail = Email("some@email.com", true)
 
-      when(httpClient.GET[Option[VerifiedEmailAddress]](anyString(), any(), any())(any(), any(), any()))
-        .thenReturn(Future.successful(Some(expectedVerifiedEmailAddress)))
+      when(httpClient.GET[Option[Email]](anyString(), any(), any())(any(), any(), any()))
+        .thenReturn(Future.successful(Some(expectedEmail)))
 
       val result = cdsFileUploadConnector.getVerifiedEmailAddress(sampleEori)(hc).futureValue
 
-      result mustBe Some(expectedVerifiedEmailAddress)
+      result mustBe Some(expectedEmail)
     }
 
     "handle a 404 response by returning None" in {
-      when(httpClient.GET[Option[VerifiedEmailAddress]](anyString(), any(), any())(any(), any(), any()))
+      when(httpClient.GET[Option[Email]](anyString(), any(), any())(any(), any(), any()))
         .thenReturn(Future.successful(None))
 
       val result = cdsFileUploadConnector.getVerifiedEmailAddress(sampleEori)(hc).futureValue
@@ -158,7 +157,7 @@ class CdsFileUploadConnectorSpec extends UnitSpec with BeforeAndAfterEach with I
     }
 
     "handle a 'non 404' 4XX response by throwing an exception" in {
-      when(httpClient.GET[Option[VerifiedEmailAddress]](anyString(), any(), any())(any(), any(), any()))
+      when(httpClient.GET[Option[Email]](anyString(), any(), any())(any(), any(), any()))
         .thenReturn(Future.failed(UpstreamErrorResponse("", 410)))
 
       val result = cdsFileUploadConnector.getVerifiedEmailAddress(sampleEori)(hc)
@@ -167,7 +166,7 @@ class CdsFileUploadConnectorSpec extends UnitSpec with BeforeAndAfterEach with I
     }
 
     "handle a 5XX response by throwing an exception" ignore {
-      when(httpClient.GET[Option[VerifiedEmailAddress]](anyString())(any(), any(), any()))
+      when(httpClient.GET[Option[Email]](anyString())(any(), any(), any()))
         .thenReturn(Future.failed(UpstreamErrorResponse("", 500)))
 
       val result = cdsFileUploadConnector.getVerifiedEmailAddress(sampleEori)(hc)

@@ -20,7 +20,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import config.{AppConfig, CDSFileUpload}
 import javax.inject.Inject
-import models.{EORI, MRN, Notification, VerifiedEmailAddress}
+import models.{EORI, Email, MRN, Notification}
 import play.api.Logging
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
@@ -45,13 +45,15 @@ class CdsFileUploadConnector @Inject()(appConfig: AppConfig, httpClient: HttpCli
   def getDeclarationStatus(mrn: MRN)(implicit hc: HeaderCarrier): Future[HttpResponse] =
     httpClient.GET[HttpResponse](cdsFileUploadConfig.fetchDeclarationStatusEndpoint(mrn.value))
 
-  def getVerifiedEmailAddress(eori: EORI)(implicit hc: HeaderCarrier): Future[Option[VerifiedEmailAddress]] =
+  def getVerifiedEmailAddress(eori: EORI)(implicit hc: HeaderCarrier): Future[Option[Email]] =
     httpClient
-      .GET[Option[VerifiedEmailAddress]](cdsFileUploadConfig.fetchVerifiedEmailEndpoint(eori.value))
+      .GET[Option[Email]](cdsFileUploadConfig.fetchVerifiedEmailEndpoint(eori.value))
       .map { maybeVerifiedEmail =>
         maybeVerifiedEmail match {
-          case Some(_) =>
+          case Some(Email(_, true)) =>
             logger.debug(s"Found verified email for eori: $eori")
+          case Some(Email(_, false)) =>
+            logger.debug(s"Undeliverable email for eori: $eori")
           case None =>
             logger.info(s"No verified email for eori: $eori")
         }
