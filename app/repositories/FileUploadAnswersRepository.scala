@@ -16,34 +16,39 @@
 
 package repositories
 
+import com.mongodb.client.model.Indexes.ascending
 import config.AppConfig
-import javax.inject.{Inject, Singleton}
 import models.FileUploadAnswers
-import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
-import reactivemongo.play.json.collection.JSONCollection
-import uk.gov.hmrc.mongo.ReactiveRepository
-import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
+import org.mongodb.scala.model.{IndexModel, IndexOptions}
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
+
+import java.util.concurrent.TimeUnit
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext
+import scala.reflect.ClassTag
 
 @Singleton
-class FileUploadAnswersRepository @Inject()(mc: ReactiveMongoComponent, appConfig: AppConfig)
-    extends ReactiveRepository[FileUploadAnswers, BSONObjectID](
-      collectionName = "answers",
-      mongo = mc.mongoConnector.db,
-      domainFormat = FileUploadAnswers.answersFormat,
-      idFormat = ReactiveMongoFormats.objectIdFormats
-    ) {
+class FileUploadAnswersRepository @Inject()(mongoComponent: MongoComponent, appConfig: AppConfig)(implicit ec: ExecutionContext)
+  extends PlayMongoRepository[FileUploadAnswers](
+    mongoComponent = mongoComponent,
+    collectionName = "answers",
+    domainFormat = FileUploadAnswers.format,
+    indexes = FileUploadAnswersRepository.indexes(appConfig)
+) with RepositoryOps[FileUploadAnswers] {
 
-  override lazy val collection: JSONCollection =
-    mongo().collection[JSONCollection](collectionName, failoverStrategy = RepositorySettings.failoverStrategy)
+  override def classTag: ClassTag[FileUploadAnswers] = implicitly[ClassTag[FileUploadAnswers]]
+  implicit val executionContext = ec
+}
 
-  override def indexes: Seq[Index] = Seq(
-    Index(Seq("eori" -> IndexType.Ascending), name = Some("eoriIdx")),
-    Index(
-      key = Seq("updated" -> IndexType.Ascending),
-      name = Some("ttl"),
-      options = BSONDocument("expireAfterSeconds" -> appConfig.fileUploadAnswersRepository.ttlSeconds)
+object FileUploadAnswersRepository {
+
+  def indexes(appConfig: AppConfig): Seq[IndexModel] = Seq(
+    IndexModel(ascending("eori"), IndexOptions().name("eoriIdx")),
+    IndexModel(
+      ascending("updated"),
+      IndexOptions().name("ttl")
+        .expireAfter(appConfig.fileUploadAnswersRepository.ttlSeconds, TimeUnit.SECONDS)
     )
   )
 }

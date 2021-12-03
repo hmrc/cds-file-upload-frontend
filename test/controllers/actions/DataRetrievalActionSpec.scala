@@ -37,7 +37,7 @@ class DataRetrievalActionSpec extends ControllerSpecBase {
     super.beforeEach()
 
     reset(answersService)
-    when(answersService.findOrCreate(eqTo(eori))) thenReturn Future.successful(answers)
+    when(answersService.findOneOrCreate(eqTo(eori))) thenReturn Future.successful(answers)
   }
 
   override def afterEach(): Unit = {

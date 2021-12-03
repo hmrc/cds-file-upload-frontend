@@ -83,7 +83,7 @@ class UpscanStatusController @Inject()(
         case Some(upload) =>
           val updatedFiles = upload.copy(state = Uploaded) :: uploads.filterNot(_.id == id)
           val answers = req.userAnswers.copy(fileUploadResponse = Some(FileUploadResponse(updatedFiles)))
-          answersService.upsert(answers).flatMap { _ =>
+          answersService.findOneAndReplace(answers).flatMap { _ =>
             nextPage(upload.reference, uploads)
           }
         case None =>
@@ -157,7 +157,7 @@ class UpscanStatusController @Inject()(
     retrieveNotifications()
   }
 
-  private def clearUserCache(eori: String) = answersService.removeByEori(eori)
+  private def clearUserCache(eori: String): Future[Unit] = answersService.remove(eori)
 
   private def getPosition(ref: String, refs: List[String]): Position = refs match {
     case head :: _ if head == ref => First(refs.size)

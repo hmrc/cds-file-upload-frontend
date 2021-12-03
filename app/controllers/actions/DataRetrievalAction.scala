@@ -28,7 +28,7 @@ class DataRetrievalActionImpl @Inject()(val answersService: FileUploadAnswersSer
   implicit val executionContext: ExecutionContext = mcc.executionContext
 
   override protected def transform[A](request: VerifiedEmailRequest[A]): Future[DataRequest[A]] =
-    answersService.findOrCreate(request.eori).map(DataRequest(request, _))
+    answersService.findOneOrCreate(request.eori).map(DataRequest(request, _))
 }
 
 trait DataRetrievalAction extends ActionTransformer[VerifiedEmailRequest, DataRequest]

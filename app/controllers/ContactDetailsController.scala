@@ -54,7 +54,7 @@ class ContactDetailsController @Inject()(
       .fold(
         errorForm => Future.successful(BadRequest(contactDetails(errorForm, req.mrn))),
         contactDetails => {
-          answersService.upsert(req.userAnswers.copy(contactDetails = Some(contactDetails))).map { _ =>
+          answersService.findOneAndReplace(req.userAnswers.copy(contactDetails = Some(contactDetails))).map { _ =>
             Redirect(routes.HowManyFilesUploadController.onPageLoad)
           }
         }

@@ -1,4 +1,3 @@
-import play.core.PlayVersion.current
 import uk.gov.hmrc.SbtArtifactory
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
@@ -10,7 +9,7 @@ PlayKeys.devSettings := Seq("play.server.http.port" -> "6793")
 
 lazy val microservice = (project in file("."))
   .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
-  .settings(libraryDependencies ++= compileDependencies ++ testDependencies)
+  .settings(libraryDependencies ++= Dependencies.compile ++ Dependencies.test)
   .settings(scalaVersion := "2.12.12")
   .settings(publishingSettings: _*)
   .settings(
@@ -31,31 +30,6 @@ lazy val microservice = (project in file("."))
   )
   .settings(silencerSettings)
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
-
-val httpComponentsVersion = "4.5.13"
-
-val compileDependencies = Seq(
-  "uk.gov.hmrc"               %% "bootstrap-frontend-play-28" % "5.10.0",
-  "uk.gov.hmrc"               %% "govuk-template"             % "5.69.0-play-28",
-  "uk.gov.hmrc"               %% "play-frontend-hmrc"         % "0.94.0-play-28",
-  "uk.gov.hmrc"               %% "crypto"                     % "5.6.0",
-  "uk.gov.hmrc"               %% "simple-reactivemongo"       % "8.0.0-play-28",
-  "com.github.pureconfig"     %% "pureconfig"                 % "0.15.0",
-  "com.typesafe.play"         %% "play-json"                  % "2.9.2",
-  "org.apache.httpcomponents" %  "httpclient"                 % httpComponentsVersion,
-  "org.apache.httpcomponents" %  "httpmime"                   % httpComponentsVersion
-)
-
-val testDependencies = Seq(
-  "org.scalatest"          %% "scalatest"           % "3.2.9"   % "test",
-  "org.jsoup"              %  "jsoup"               % "1.13.1"  % "test",
-  "com.typesafe.play"      %% "play-test"           % current   % "test",
-  "org.scalatestplus.play" %% "scalatestplus-play"  % "5.1.0"   % "test",
-  "org.scalatestplus"      %% "mockito-3-4"         % "3.2.9.0" % "test",
-  "org.scalatestplus"      %% "scalacheck-1-15"     % "3.2.9.0" % "test",
-  "com.vladsch.flexmark"   %  "flexmark-all"        % "0.36.8"  % "test",
-  "com.github.tomakehurst" %  "wiremock-standalone" % "2.27.2"  % "test"
-)
 
 lazy val silencerSettings: Seq[Setting[_]] = {
   val silencerVersion = "1.7.0"

@@ -17,22 +17,22 @@
 package services
 
 import models.SecureMessageAnswers
-import org.joda.time.{DateTime, DateTimeZone}
 import play.api.Logging
-import play.api.libs.json.{JsObject, Json}
 import repositories.SecureMessageAnswersRepository
 
+import java.time.{ZoneOffset, ZonedDateTime}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class SecureMessageAnswersService @Inject()(val repository: SecureMessageAnswersRepository)(implicit ec: ExecutionContext) extends Logging {
 
-  def findByEori(eori: String): Future[Option[SecureMessageAnswers]] = repository.find("eori" -> eori).map(_.headOption)
+  def findOne(eori: String): Future[Option[SecureMessageAnswers]] = repository.findOne("eori", eori)
 
-  def upsert(answers: SecureMessageAnswers): Future[Option[SecureMessageAnswers]] = {
-    val updated = answers.copy(created = DateTime.now.withZone(DateTimeZone.UTC))
-    repository
-      .findAndUpdate(Json.obj("eori" -> updated.eori), Json.toJson(updated).as[JsObject], upsert = true)
-      .map(_.value.map(_.as[SecureMessageAnswers]))
+  def findOneAndReplace(answers: SecureMessageAnswers): Future[Option[SecureMessageAnswers]] = {
+    val updated = answers.copy(created = ZonedDateTime.now(ZoneOffset.UTC))
+    repository.findOneAndReplace("eori", answers.eori, updated) map { result =>
+      if (result.isEmpty) logger.warn(s"Errors when upserting $updated")
+      result
+    }
   }
 }

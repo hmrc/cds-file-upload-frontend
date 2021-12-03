@@ -53,7 +53,7 @@ class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
 
     reset(inboxChoice, secureMessageAnswersService)
     when(inboxChoice.apply(any[Form[InboxChoiceForm]])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
-    when(secureMessageAnswersService.upsert(any())).thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
+    when(secureMessageAnswersService.findOneAndReplace(any())).thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
   }
 
   "InboxChoiceController on onPageLoad" should {
@@ -117,15 +117,15 @@ class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
         val request = postRequest(Json.obj(InboxChoiceKey -> Values.ExportsMessages))
 
         "call SecureMessageAnswerService" in {
-          when(secureMessageAnswersService.findByEori(anyString())).thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
+          when(secureMessageAnswersService.findOne(anyString())).thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
 
           controller.onSubmit()(request).futureValue
 
-          verify(secureMessageAnswersService).upsert(SecureMessageAnswers(any(), ExportMessages))
+          verify(secureMessageAnswersService).findOneAndReplace(SecureMessageAnswers(any(), ExportMessages))
         }
 
         "return SEE_OTHER (303)" in {
-          when(secureMessageAnswersService.findByEori(anyString())).thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
+          when(secureMessageAnswersService.findOne(anyString())).thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
 
           val result = controller.onSubmit()(request)
 
@@ -133,7 +133,7 @@ class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
         }
 
         "redirect to /messages" in {
-          when(secureMessageAnswersService.findByEori(anyString())).thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
+          when(secureMessageAnswersService.findOne(anyString())).thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
 
           val result = controller.onSubmit()(request)
 
@@ -163,16 +163,16 @@ class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
   "InboxChoiceController on onExportsMessageChoice" should {
 
     "call SecureMessageAnswerService" in {
-      when(secureMessageAnswersService.findByEori(any[String]))
+      when(secureMessageAnswersService.findOne(any[String]))
         .thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
 
       controller.onExportsMessageChoice()(getRequest).futureValue
 
-      verify(secureMessageAnswersService).upsert(SecureMessageAnswers(any(), ExportMessages))
+      verify(secureMessageAnswersService).findOneAndReplace(SecureMessageAnswers(any(), ExportMessages))
     }
 
     "return SEE_OTHER (303)" in {
-      when(secureMessageAnswersService.findByEori(any[String]))
+      when(secureMessageAnswersService.findOne(any[String]))
         .thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
 
       val result = controller.onExportsMessageChoice()(getRequest)
@@ -180,7 +180,7 @@ class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
     }
 
     "redirect to /messages" in {
-      when(secureMessageAnswersService.findByEori(any[String]))
+      when(secureMessageAnswersService.findOne(any[String]))
         .thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
 
       val result = controller.onExportsMessageChoice()(getRequest)

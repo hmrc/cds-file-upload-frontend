@@ -16,35 +16,39 @@
 
 package repositories
 
+import com.mongodb.client.model.Indexes.ascending
 import config.AppConfig
 import models.SecureMessageAnswers
-import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
-import reactivemongo.play.json.collection.JSONCollection
-import uk.gov.hmrc.mongo.ReactiveRepository
-import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
+import org.mongodb.scala.model.{IndexModel, IndexOptions}
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
+import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext
+import scala.reflect.ClassTag
 
 @Singleton
-class SecureMessageAnswersRepository @Inject()(mc: ReactiveMongoComponent, appConfig: AppConfig)
-    extends ReactiveRepository[SecureMessageAnswers, BSONObjectID](
-      collectionName = "answers-secure-message",
-      mongo = mc.mongoConnector.db,
-      domainFormat = SecureMessageAnswers.format,
-      idFormat = ReactiveMongoFormats.objectIdFormats
-    ) {
+class SecureMessageAnswersRepository @Inject()(mongoComponent: MongoComponent, appConfig: AppConfig)(implicit ec: ExecutionContext)
+  extends PlayMongoRepository[SecureMessageAnswers](
+    mongoComponent = mongoComponent,
+    collectionName = "answers-secure-message",
+    domainFormat = SecureMessageAnswers.format,
+    indexes = SecureMessageAnswersRepository.indexes(appConfig)
+) with RepositoryOps[SecureMessageAnswers] {
 
-  override lazy val collection: JSONCollection =
-    mongo().collection[JSONCollection](collectionName, failoverStrategy = RepositorySettings.failoverStrategy)
+  override def classTag: ClassTag[SecureMessageAnswers] = implicitly[ClassTag[SecureMessageAnswers]]
+  implicit val executionContext = ec
+}
 
-  override def indexes: Seq[Index] = Seq(
-    Index(Seq("eori" -> IndexType.Ascending), name = Some("eoriIdx")),
-    Index(
-      key = Seq("created" -> IndexType.Ascending),
-      name = Some("ttl"),
-      options = BSONDocument("expireAfterSeconds" -> appConfig.secureMessageAnswersRepository.ttlSeconds)
+object SecureMessageAnswersRepository {
+
+  def indexes(appConfig: AppConfig): Seq[IndexModel] = Seq(
+    IndexModel(ascending("eori"), IndexOptions().name("eoriIdx")),
+    IndexModel(
+      ascending("created"),
+      IndexOptions().name("ttl")
+        .expireAfter(appConfig.secureMessageAnswersRepository.ttlSeconds, TimeUnit.SECONDS)
     )
   )
 }

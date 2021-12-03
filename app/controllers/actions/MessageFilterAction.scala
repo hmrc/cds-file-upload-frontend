@@ -34,7 +34,7 @@ class MessageFilterActionImpl @Inject()(val answersService: SecureMessageAnswers
   private lazy val onError = Redirect(routes.InboxChoiceController.onPageLoad)
 
   override protected def refine[A](request: VerifiedEmailRequest[A]): Future[Either[Result, MessageFilterRequest[A]]] =
-    answersService.findByEori(request.eori).map { maybeFilter =>
+    answersService.findOne(request.eori).map { maybeFilter =>
       maybeFilter match {
         case Some(filter) =>
           Right(MessageFilterRequest(request, filter))

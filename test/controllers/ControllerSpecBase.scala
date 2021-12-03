@@ -16,8 +16,6 @@
 
 package controllers
 
-import java.net.URLEncoder
-
 import base.SpecBase
 import controllers.actions.{ContactDetailsRequiredAction, DataRetrievalAction, FakeActions}
 import models.requests.SignedInUser
@@ -25,10 +23,12 @@ import models.{ContactDetails, FileUploadAnswers, SecureMessageAnswers}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, verify, when}
+import org.mockito.stubbing.OngoingStubbing
 import services.{FileUploadAnswersService, SecureMessageAnswersService}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException, Enrolments}
 
+import java.net.URLEncoder
 import scala.concurrent.Future
 
 abstract class ControllerSpecBase extends SpecBase with FakeActions {
@@ -44,7 +44,7 @@ abstract class ControllerSpecBase extends SpecBase with FakeActions {
     test
   }
 
-  def withUserWithoutEori(user: SignedInUser)(test: => Unit): Unit = {
+  def withUserWithoutEori(test: => Unit): Unit = {
     when(mockAuthConnector.authorise(any(), eqTo(allEnrolments))(any(), any()))
       .thenReturn(Future.successful(Enrolments(Set())))
 
@@ -63,20 +63,21 @@ abstract class ControllerSpecBase extends SpecBase with FakeActions {
     reset(mockAuthConnector, mockSecureMessageAnswersService)
   }
 
-  def resetAnswersService() = {
+  def resetAnswersService(): OngoingStubbing[Future[Option[FileUploadAnswers]]] = {
     reset(mockFileUploadAnswersService)
-    when(mockFileUploadAnswersService.upsert(any[FileUploadAnswers])).thenReturn(Future.successful(Some(FileUploadAnswers(""))))
+    when(mockFileUploadAnswersService.findOneAndReplace(any[FileUploadAnswers]))
+      .thenReturn(Future.successful(Some(FileUploadAnswers(""))))
   }
 
   def theSavedFileUploadAnswers: FileUploadAnswers = {
     val captor = ArgumentCaptor.forClass(classOf[FileUploadAnswers])
-    verify(mockFileUploadAnswersService).upsert(captor.capture())
+    verify(mockFileUploadAnswersService).findOneAndReplace(captor.capture())
     captor.getValue
   }
 
   def theSavedSecureMessageAnswers: SecureMessageAnswers = {
     val captor = ArgumentCaptor.forClass(classOf[SecureMessageAnswers])
-    verify(mockSecureMessageAnswersService).upsert(captor.capture())
+    verify(mockSecureMessageAnswersService).findOneAndReplace(captor.capture())
     captor.getValue
   }
 

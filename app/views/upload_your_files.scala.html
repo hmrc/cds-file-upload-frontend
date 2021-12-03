@@ -21,17 +21,17 @@
 @import views.Title
 
 @this(
-        mainTemplate: gdsMainTemplate,
-        formHelper: uk.gov.hmrc.govukfrontend.views.html.helpers.formWithCSRF,
-        exportsInputText: exportsInputText,
-        govukButton: GovukButton,
-        govukInsetText: GovukInsetText,
-        bulletList: bulletList,
-        pageTitle: pageTitle,
-        paragraphBody: paragraphBody,
-        link: link,
-        errorInline: ErrorInLine,
-        appConfig: AppConfig
+    mainTemplate: gdsMainTemplate,
+    formHelper: uk.gov.hmrc.govukfrontend.views.html.helpers.formWithCSRF,
+    exportsInputText: exportsInputText,
+    govukButton: GovukButton,
+    govukInsetText: GovukInsetText,
+    bulletList: bulletList,
+    pageTitle: pageTitle,
+    paragraphBody: paragraphBody,
+    link: link,
+    errorInline: ErrorInLine,
+    appConfig: AppConfig
 )
 
 @(uploadRequest: UploadRequest, refPosition: Position, mrn: MRN)(implicit request: Request[_], messages: Messages, flash: Flash)

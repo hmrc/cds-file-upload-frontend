@@ -32,14 +32,12 @@ class CdsFileUploadConnector @Inject()(appConfig: AppConfig, httpClient: HttpCli
   def getNotification(reference: String)(implicit hc: HeaderCarrier): Future[Option[Notification]] =
     httpClient
       .GET[Option[Notification]](cdsFileUploadConfig.fetchNotificationEndpoint(reference))
-      .map { notificationOpt =>
-        notificationOpt match {
-          case Some(notification) =>
-            logger.info(s"Fetched notification: $notification")
-          case None =>
-            logger.info(s"There is no notification with reference: $reference")
+      .map { maybeNotification =>
+        maybeNotification match {
+          case Some(notification) => logger.info(s"Fetched notification: $notification")
+          case None               => logger.info(s"There is no notification with reference: $reference")
         }
-        notificationOpt
+        maybeNotification
       }
 
   def getDeclarationStatus(mrn: MRN)(implicit hc: HeaderCarrier): Future[HttpResponse] =
@@ -50,12 +48,9 @@ class CdsFileUploadConnector @Inject()(appConfig: AppConfig, httpClient: HttpCli
       .GET[Option[Email]](cdsFileUploadConfig.fetchVerifiedEmailEndpoint(eori.value))
       .map { maybeVerifiedEmail =>
         maybeVerifiedEmail match {
-          case Some(Email(_, true)) =>
-            logger.debug(s"Found verified email for eori: $eori")
-          case Some(Email(_, false)) =>
-            logger.debug(s"Undeliverable email for eori: $eori")
-          case None =>
-            logger.info(s"No verified email for eori: $eori")
+          case Some(Email(_, true))  => logger.debug(s"Found verified email for eori: $eori")
+          case Some(Email(_, false)) => logger.debug(s"Undeliverable email for eori: $eori")
+          case None                  => logger.info(s"No verified email for eori: $eori")
         }
         maybeVerifiedEmail
       }

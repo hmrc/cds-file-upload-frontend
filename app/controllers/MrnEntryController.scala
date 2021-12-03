@@ -63,7 +63,7 @@ class MrnEntryController @Inject()(
 
     sanitisedRefererUrl.map { backLink =>
       answersService
-        .upsert(req.userAnswers.copy(mrnPageRefererUrl = Some(backLink)))
+        .findOneAndReplace(req.userAnswers.copy(mrnPageRefererUrl = Some(backLink)))
         .map(_ => Ok(mrnEntry(populatedForm, getBackLink(Some(backLink)))))
     }.getOrElse(Future.successful(Ok(mrnEntry(populatedForm, getBackLink(req.userAnswers.mrnPageRefererUrl)))))
   }
@@ -95,7 +95,7 @@ class MrnEntryController @Inject()(
     mrnDisValidator.validate(mrn, EORI(req.request.eori)).flatMap {
       case false => invalidMrnResponse(mrn.value)
       case true =>
-        answersService.upsert(userAnswers.copy(mrn = Some(mrn))).map { _ =>
+        answersService.findOneAndReplace(userAnswers.copy(mrn = Some(mrn))).map { _ =>
           Redirect(routes.ContactDetailsController.onPageLoad)
         }
     }
