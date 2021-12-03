@@ -22,18 +22,21 @@ import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import views.html.unverified_email
-
+import views.html.{undeliverable_email, unverified_email}
 @Singleton
 class UnverifiedEmailController @Inject()(
   authenticate: AuthAction,
   mcc: MessagesControllerComponents,
   unverified_email: unverified_email,
+  undeliverable_email: undeliverable_email,
   config: ExternalServicesConfig
 ) extends FrontendController(mcc) with I18nSupport {
 
-  val informUser: Action[AnyContent] = authenticate { implicit req =>
-    val redirectUrl = config.emailFrontendUrl
-    Ok(unverified_email(redirectUrl))
+  val informUserUnverified: Action[AnyContent] = authenticate { implicit req =>
+    Ok(unverified_email(config.emailFrontendUrl))
+  }
+
+  val informUserUndeliverable: Action[AnyContent] = authenticate { implicit req =>
+    Ok(undeliverable_email(config.emailFrontendUrl))
   }
 }
