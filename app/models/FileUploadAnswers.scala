@@ -34,7 +34,8 @@ case class FileUploadAnswers(
 object FileUploadAnswers {
 
   implicit val format = {
-    implicit val mongoZonedDateTimeFormat: Format[ZonedDateTime] = Format(zonedDateTimeReads, zonedDateTimeWrites)
+    implicit val zonedDateTimeFormat: Format[ZonedDateTime] = Format(zonedDateTimeReads, zonedDateTimeWrites)
+
     OFormat[FileUploadAnswers](Json.reads[FileUploadAnswers], Json.writes[FileUploadAnswers])
   }
 }

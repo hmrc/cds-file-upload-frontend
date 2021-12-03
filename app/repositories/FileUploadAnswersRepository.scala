@@ -25,30 +25,44 @@ import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
 
 @Singleton
 class FileUploadAnswersRepository @Inject()(mongoComponent: MongoComponent, appConfig: AppConfig)(implicit ec: ExecutionContext)
-  extends PlayMongoRepository[FileUploadAnswers](
-    mongoComponent = mongoComponent,
-    collectionName = "answers",
-    domainFormat = FileUploadAnswers.format,
-    indexes = FileUploadAnswersRepository.indexes(appConfig)
-) with RepositoryOps[FileUploadAnswers] {
+    extends PlayMongoRepository[FileUploadAnswers](
+      mongoComponent = mongoComponent,
+      collectionName = "answers",
+      domainFormat = FileUploadAnswers.format,
+      indexes = FileUploadAnswersRepository.indexes(appConfig)
+    ) with RepositoryOps[FileUploadAnswers] {
 
   override def classTag: ClassTag[FileUploadAnswers] = implicitly[ClassTag[FileUploadAnswers]]
   implicit val executionContext = ec
+
+  def findOne(eori: String): Future[Option[FileUploadAnswers]] = findOne("eori", eori)
+
+  def findOneAndRemove(eori: String): Future[Option[FileUploadAnswers]] = findOneAndRemove("eori", eori)
+
+  def findOneOrCreate(eori: String): Future[FileUploadAnswers] =
+    findOneOrCreate("eori", eori, FileUploadAnswers(eori))
+
+  def findOneAndReplace(answers: FileUploadAnswers): Future[FileUploadAnswers] =
+    findOneAndReplace("eori", answers.eori, answers)
+
+  def remove(eori: String): Future[Unit] = removeEvery("eori", eori)
 }
 
 object FileUploadAnswersRepository {
 
-  def indexes(appConfig: AppConfig): Seq[IndexModel] = Seq(
-    IndexModel(ascending("eori"), IndexOptions().name("eoriIdx")),
-    IndexModel(
-      ascending("updated"),
-      IndexOptions().name("ttl")
-        .expireAfter(appConfig.fileUploadAnswersRepository.ttlSeconds, TimeUnit.SECONDS)
+  def indexes(appConfig: AppConfig): Seq[IndexModel] =
+    List(
+      IndexModel(ascending("eori"), IndexOptions().name("eoriIdx")),
+      IndexModel(
+        ascending("updated"),
+        IndexOptions()
+          .name("ttl")
+          .expireAfter(appConfig.fileUploadAnswersRepository.ttlSeconds, TimeUnit.SECONDS)
+      )
     )
-  )
 }

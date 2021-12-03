@@ -25,30 +25,37 @@ import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
 
 @Singleton
 class SecureMessageAnswersRepository @Inject()(mongoComponent: MongoComponent, appConfig: AppConfig)(implicit ec: ExecutionContext)
-  extends PlayMongoRepository[SecureMessageAnswers](
-    mongoComponent = mongoComponent,
-    collectionName = "answers-secure-message",
-    domainFormat = SecureMessageAnswers.format,
-    indexes = SecureMessageAnswersRepository.indexes(appConfig)
-) with RepositoryOps[SecureMessageAnswers] {
+    extends PlayMongoRepository[SecureMessageAnswers](
+      mongoComponent = mongoComponent,
+      collectionName = "answers-secure-message",
+      domainFormat = SecureMessageAnswers.format,
+      indexes = SecureMessageAnswersRepository.indexes(appConfig)
+    ) with RepositoryOps[SecureMessageAnswers] {
 
   override def classTag: ClassTag[SecureMessageAnswers] = implicitly[ClassTag[SecureMessageAnswers]]
   implicit val executionContext = ec
+
+  def findOne(eori: String): Future[Option[SecureMessageAnswers]] = findOne("eori", eori)
+
+  def findOneAndReplace(answers: SecureMessageAnswers): Future[SecureMessageAnswers] =
+    findOneAndReplace("eori", answers.eori, answers)
 }
 
 object SecureMessageAnswersRepository {
 
-  def indexes(appConfig: AppConfig): Seq[IndexModel] = Seq(
-    IndexModel(ascending("eori"), IndexOptions().name("eoriIdx")),
-    IndexModel(
-      ascending("created"),
-      IndexOptions().name("ttl")
-        .expireAfter(appConfig.secureMessageAnswersRepository.ttlSeconds, TimeUnit.SECONDS)
+  def indexes(appConfig: AppConfig): Seq[IndexModel] =
+    List(
+      IndexModel(ascending("eori"), IndexOptions().name("eoriIdx")),
+      IndexModel(
+        ascending("created"),
+        IndexOptions()
+          .name("ttl")
+          .expireAfter(appConfig.secureMessageAnswersRepository.ttlSeconds, TimeUnit.SECONDS)
+      )
     )
-  )
 }

@@ -1,4 +1,3 @@
-import uk.gov.hmrc.SbtArtifactory
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
@@ -8,7 +7,7 @@ majorVersion := 0
 PlayKeys.devSettings := Seq("play.server.http.port" -> "6793")
 
 lazy val microservice = (project in file("."))
-  .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
+  .enablePlugins(PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
   .settings(libraryDependencies ++= Dependencies.compile ++ Dependencies.test)
   .settings(scalaVersion := "2.12.12")
   .settings(publishingSettings: _*)

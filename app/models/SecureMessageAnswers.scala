@@ -21,16 +21,13 @@ import repositories.ZonedDateTimeFormat.{zonedDateTimeReads, zonedDateTimeWrites
 
 import java.time.{ZoneOffset, ZonedDateTime}
 
-case class SecureMessageAnswers(
-  eori: String,
-  filter: MessageFilterTag,
-  created: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC)
-)
+case class SecureMessageAnswers(eori: String, filter: MessageFilterTag, created: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC))
 
 object SecureMessageAnswers {
 
   implicit val format = {
-    implicit val mongoZonedDateTimeFormat: Format[ZonedDateTime] = Format(zonedDateTimeReads, zonedDateTimeWrites)
+    implicit val zonedDateTimeFormat: Format[ZonedDateTime] = Format(zonedDateTimeReads, zonedDateTimeWrites)
+
     OFormat[SecureMessageAnswers](Json.reads[SecureMessageAnswers], Json.writes[SecureMessageAnswers])
   }
 }

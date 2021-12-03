@@ -162,9 +162,10 @@ trait ViewMatchers {
   class ContainErrorElementWithClassMatcher(tag: String, href: String) extends Matcher[Element] {
     override def apply(left: Element): MatchResult =
       MatchResult(
-        left != null && left.
-          getElementsByClass("govuk-list govuk-error-summary__list")
-          .get(0).getElementsByTag(tag)
+        left != null && left
+          .getElementsByClass("govuk-list govuk-error-summary__list")
+          .get(0)
+          .getElementsByTag(tag)
           .eachAttr("href")
           .contains(href),
         s"Document did not contain element with class {$tag}\n${actualContentWas(left)}",

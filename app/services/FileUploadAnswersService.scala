@@ -22,29 +22,18 @@ import repositories.FileUploadAnswersRepository
 
 import java.time.{ZoneOffset, ZonedDateTime}
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-class FileUploadAnswersService @Inject()(val repository: FileUploadAnswersRepository)(implicit ec: ExecutionContext) extends Logging {
+class FileUploadAnswersService @Inject()(val repository: FileUploadAnswersRepository) extends Logging {
 
-  def findOne(eori: String): Future[Option[FileUploadAnswers]] = repository.findOne("eori", eori)
+  def findOne(eori: String): Future[Option[FileUploadAnswers]] = repository.findOne(eori)
 
-  def findOneAndRemove(eori: String): Future[Option[FileUploadAnswers]] = repository.findOneAndRemove("eori", eori)
+  def findOneAndRemove(eori: String): Future[Option[FileUploadAnswers]] = repository.findOneAndRemove(eori)
 
-  def findOneOrCreate(eori: String): Future[FileUploadAnswers] =
-    repository.findOneOrCreate("eori", eori, FileUploadAnswers(eori)) map {
-      case Some(answers) => answers
-      case None =>
-        logger.warn(s"Error when persisting file upload answers for eori($eori)")
-        FileUploadAnswers(eori)
-    }
+  def findOneOrCreate(eori: String): Future[FileUploadAnswers] = repository.findOneOrCreate(eori)
 
-  def findOneAndReplace(answers: FileUploadAnswers): Future[Option[FileUploadAnswers]] = {
-    val updated = answers.copy(updated = ZonedDateTime.now(ZoneOffset.UTC))
-    repository.findOneAndReplace("eori", answers.eori, updated) map { result =>
-      if (result.isEmpty) logger.warn(s"Error when upserting $updated")
-      result
-    }
-  }
+  def findOneAndReplace(answers: FileUploadAnswers): Future[FileUploadAnswers] =
+    repository.findOneAndReplace(answers.copy(updated = ZonedDateTime.now(ZoneOffset.UTC)))
 
-  def remove(eori: String): Future[Unit] = repository.removeEvery("eori", eori)
+  def remove(eori: String): Future[Unit] = repository.remove(eori)
 }

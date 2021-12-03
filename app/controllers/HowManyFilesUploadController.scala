@@ -88,7 +88,9 @@ class HowManyFilesUploadController @Inject()(
       logger.info("remainingFileUploads " + remainingFileUploads)
 
       answersService
-        .findOneAndReplace(req.userAnswers.copy(fileUploadCount = Some(fileUploadCount), fileUploadResponse = Some(FileUploadResponse(remainingFileUploads))))
+        .findOneAndReplace(
+          req.userAnswers.copy(fileUploadCount = Some(fileUploadCount), fileUploadResponse = Some(FileUploadResponse(remainingFileUploads)))
+        )
         .map { _ =>
           logger.info("saving remaining uploads")
 

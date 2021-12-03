@@ -22,17 +22,12 @@ import repositories.SecureMessageAnswersRepository
 
 import java.time.{ZoneOffset, ZonedDateTime}
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-class SecureMessageAnswersService @Inject()(val repository: SecureMessageAnswersRepository)(implicit ec: ExecutionContext) extends Logging {
+class SecureMessageAnswersService @Inject()(val repository: SecureMessageAnswersRepository) extends Logging {
 
-  def findOne(eori: String): Future[Option[SecureMessageAnswers]] = repository.findOne("eori", eori)
+  def findOne(eori: String): Future[Option[SecureMessageAnswers]] = repository.findOne(eori)
 
-  def findOneAndReplace(answers: SecureMessageAnswers): Future[Option[SecureMessageAnswers]] = {
-    val updated = answers.copy(created = ZonedDateTime.now(ZoneOffset.UTC))
-    repository.findOneAndReplace("eori", answers.eori, updated) map { result =>
-      if (result.isEmpty) logger.warn(s"Errors when upserting $updated")
-      result
-    }
-  }
+  def findOneAndReplace(answers: SecureMessageAnswers): Future[SecureMessageAnswers] =
+    repository.findOneAndReplace(answers.copy(created = ZonedDateTime.now(ZoneOffset.UTC)))
 }

@@ -21,13 +21,14 @@ import com.mongodb.client.model.{ReturnDocument, Updates}
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.{FindOneAndReplaceOptions, FindOneAndUpdateOptions}
-import org.mongodb.scala.{MongoCollection, MongoWriteException}
+import org.mongodb.scala.{Document, MongoCollection, MongoWriteException}
+import play.api.Logging
 import play.api.libs.json.{Json, Writes}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
 
-trait RepositoryOps[T] {
+trait RepositoryOps[T] extends Logging {
 
   implicit def classTag: ClassTag[T]
   implicit val executionContext: ExecutionContext
@@ -43,31 +44,46 @@ trait RepositoryOps[T] {
   def findOne[V](keyId: String, keyValue: V): Future[Option[T]] =
     collection.find(equal(keyId, keyValue)).toFuture.map(_.headOption)
 
-  def findOneOrCreate[V](keyId: String, keyValue: V, document: => T)(implicit writes: Writes[T]): Future[Option[T]] =
-    collection.findOneAndUpdate(
-      filter = equal(keyId, keyValue),
-      update = Updates.setOnInsert(BsonDocument(Json.toJson(document).toString)),
-      options = FindOneAndUpdateOptions().upsert(true).returnDocument(ReturnDocument.AFTER)
-    ).toFutureOption
+  /*
+   Find one and return if a document with keyId=keyValue exists,
+   or create "document: T" if a document with keyId=keyValue does NOT exists.
+   */
+  def findOneOrCreate[V](keyId: String, keyValue: V, document: => T)(implicit writes: Writes[T]): Future[T] =
+    collection
+      .findOneAndUpdate(
+        filter = equal(keyId, keyValue),
+        update = Updates.setOnInsert(BsonDocument(Json.toJson(document).toString)),
+        options = FindOneAndUpdateOptions().upsert(true).returnDocument(ReturnDocument.AFTER)
+      )
+      .toFuture
 
-  def findOneAndReplace[V](keyId: String, keyValue: V, document: T): Future[Option[T]] =
-    collection.findOneAndReplace(
-      filter = equal(keyId, keyValue),
-      replacement = document,
-      options = FindOneAndReplaceOptions().upsert(true).returnDocument(ReturnDocument.AFTER)
-    ).toFutureOption
+  /*
+   Find one and replace with "document: T" if a document with keyId=keyValue exists,
+   or create "document: T" if a document with keyId=keyValue does NOT exists.
+   */
+  def findOneAndReplace[V](keyId: String, keyValue: V, document: T): Future[T] =
+    collection
+      .findOneAndReplace(
+        filter = equal(keyId, keyValue),
+        replacement = document,
+        options = FindOneAndReplaceOptions().upsert(true).returnDocument(ReturnDocument.AFTER)
+      )
+      .toFuture
 
   def findOneAndRemove[V](keyId: String, keyValue: V): Future[Option[T]] =
     collection.findOneAndDelete(equal(keyId, keyValue)).toFutureOption
 
-  def insertOne(document: T): Future[Either[MongoError, T]] =
-    collection.insertOne(document).toFuture
+  def indexList: Future[Seq[Document]] = collection.listIndexes.toFuture
+
+  def insertOne(document: T): Future[Either[WriteError, T]] =
+    collection
+      .insertOne(document)
+      .toFuture
       .map(_ => Right(document))
       .recover {
-        case exc: MongoWriteException =>
-          Left(if (exc.getError.getCategory == DUPLICATE_KEY) DuplicateKey else WriteError)
+        case exc: MongoWriteException if (exc.getError.getCategory == DUPLICATE_KEY) =>
+          Left(DuplicateKey(exc.getError.getMessage))
       }
-
 
   def removeAll: Future[Unit] =
     collection.deleteMany(BsonDocument()).toFuture.map(_ => ())
@@ -77,9 +93,10 @@ trait RepositoryOps[T] {
 
   def removeOne[V](keyId: String, keyValue: V): Future[Unit] =
     collection.deleteOne(equal(keyId, keyValue)).toFuture.map(_ => ())
+
+  def size: Future[Long] = collection.countDocuments.toFuture
 }
 
-trait MongoError
+sealed abstract class WriteError(message: String)
 
-case object DuplicateKey extends MongoError
-case object WriteError extends MongoError
+case class DuplicateKey(message: String) extends WriteError(message)

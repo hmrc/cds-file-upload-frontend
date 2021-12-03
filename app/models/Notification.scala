@@ -31,7 +31,7 @@ case class Notification(
 object Notification {
 
   implicit val format = {
-    implicit val mongoZonedDateTimeFormat: Format[ZonedDateTime] = Format(zonedDateTimeReads, zonedDateTimeWrites)
+    implicit val zonedDateTimeFormat: Format[ZonedDateTime] = Format(zonedDateTimeReads, zonedDateTimeWrites)
     OFormat[Notification](Json.reads[Notification], Json.writes[Notification])
   }
 }

@@ -16,25 +16,34 @@
 
 package repositories
 
-import play.api.libs.json.{Format, JsError, JsValue, Reads, Writes, __}
-import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.instantWrites
+import play.api.libs.json._
 
-import java.time.{Instant, ZoneId, ZonedDateTime}
+import java.time.{Instant, ZoneId, ZoneOffset, ZonedDateTime}
 import scala.util.Try
 
 object ZonedDateTimeFormat {
 
-  final val instantReads: Reads[Instant] = Reads.at[Long](__ \ "$date") map Instant.ofEpochMilli
-
-  val zonedDateTimeReads: Reads[ZonedDateTime] = (json: JsValue) => {
-    Try(json.validate[ZonedDateTime] {
-      instantReads.map(ZonedDateTime.ofInstant(_, ZoneId.of("UTC")))
-    })
-    .getOrElse(JsError())
-  }
+  lazy val zonedDateTimeReads: Reads[ZonedDateTime] =
+    fromDateObj.orElse(fromNumberLongObj).orElse(fromDateTimeStringWithZone)
 
   val zonedDateTimeWrites: Writes[ZonedDateTime] =
-    instantWrites.contramap(_.withZoneSameInstant(ZoneId.of("UTC")).toInstant)
+    instantWrites.contramap(res => res.withZoneSameInstant(ZoneId.of("UTC")).toInstant)
 
   lazy val zonedDateTimeFormat: Format[ZonedDateTime] = Format(zonedDateTimeReads, zonedDateTimeWrites)
+
+  private val fromNumberLongObj: Reads[ZonedDateTime] =
+    Reads.at[String](__ \ "$date" \ "$numberLong").map(s => Instant.ofEpochMilli(s.toLong).atZone(ZoneOffset.UTC))
+
+  private val fromDateObj: Reads[ZonedDateTime] =
+    Reads.at[Long](__ \ "$date").map(Instant.ofEpochMilli(_).atZone(ZoneOffset.UTC))
+
+  private val fromDateTimeStringWithZone: Reads[ZonedDateTime] =
+    (value: JsValue) =>
+      Try {
+        JsSuccess(ZonedDateTime.parse(value.as[String]))
+      }.getOrElse(JsError(s"[$value] cannot be parsed to ZonedDateTime"))
+
+  lazy val instantWrites: Writes[Instant] = Writes.at[Long](__ \ "$date").contramap(_.toEpochMilli)
 }
+
+case class JsZonedDateTime(value: ZonedDateTime)

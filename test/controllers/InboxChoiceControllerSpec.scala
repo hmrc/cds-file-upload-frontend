@@ -53,7 +53,7 @@ class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
 
     reset(inboxChoice, secureMessageAnswersService)
     when(inboxChoice.apply(any[Form[InboxChoiceForm]])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
-    when(secureMessageAnswersService.findOneAndReplace(any())).thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
+    when(secureMessageAnswersService.findOneAndReplace(any())).thenReturn(Future.successful(SecureMessageAnswers("", ExportMessages)))
   }
 
   "InboxChoiceController on onPageLoad" should {

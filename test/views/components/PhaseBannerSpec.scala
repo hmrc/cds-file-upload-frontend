@@ -39,5 +39,4 @@ class PhaseBannerSpec extends UnitViewSpec with Injector {
       createBanner().getElementsByClass("phase-banner").first().getElementsByTag("a").first() must haveHref(expectedHrefValue)
     }
   }
-
 }
