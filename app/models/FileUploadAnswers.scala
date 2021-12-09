@@ -16,9 +16,10 @@
 
 package models
 
-import org.joda.time.{DateTime, DateTimeZone}
-import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
+import play.api.libs.json.{Format, Json, OFormat}
+import repositories.ZonedDateTimeFormat.{zonedDateTimeReads, zonedDateTimeWrites}
+
+import java.time.{ZoneOffset, ZonedDateTime}
 
 case class FileUploadAnswers(
   eori: String,
@@ -26,11 +27,15 @@ case class FileUploadAnswers(
   contactDetails: Option[ContactDetails] = None,
   fileUploadCount: Option[FileUploadCount] = None,
   fileUploadResponse: Option[FileUploadResponse] = None,
-  updated: DateTime = DateTime.now.withZone(DateTimeZone.UTC),
+  updated: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC),
   mrnPageRefererUrl: Option[String] = None
 )
 
 object FileUploadAnswers {
-  implicit val dateFormat: Format[DateTime] = ReactiveMongoFormats.dateTimeFormats
-  implicit val answersFormat = Json.format[FileUploadAnswers]
+
+  implicit val format = {
+    implicit val zonedDateTimeFormat: Format[ZonedDateTime] = Format(zonedDateTimeReads, zonedDateTimeWrites)
+
+    OFormat[FileUploadAnswers](Json.reads[FileUploadAnswers], Json.writes[FileUploadAnswers])
+  }
 }

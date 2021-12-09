@@ -49,7 +49,7 @@ class MessageFilterActionSpec extends ControllerSpecBase {
   "MessageFilterAction" when {
     "the repository finds the user's filter selection" must {
       "build a SecureMessageAnswers object and add it to the MessageFilterRequest" in {
-        when(answersService.findByEori(eqTo(eori))) thenReturn Future.successful(Some(answers))
+        when(answersService.findOne(eqTo(eori))) thenReturn Future.successful(Some(answers))
         val request = VerifiedEmailRequest(AuthenticatedRequest(fakeRequest, signedInUser), verifiedEmail)
 
         val result = action.callRefine(request).futureValue
@@ -61,7 +61,7 @@ class MessageFilterActionSpec extends ControllerSpecBase {
 
     "the repository does not find the user's filter selection" must {
       "redirect the user to the message filter choice page" in {
-        when(answersService.findByEori(eqTo(eori_2))) thenReturn Future.successful(None)
+        when(answersService.findOne(eqTo(eori_2))) thenReturn Future.successful(None)
         val request = VerifiedEmailRequest(AuthenticatedRequest(fakeRequest, signedInUser.copy(eori = eori_2)), verifiedEmail)
 
         val result = action.callRefine(request).futureValue

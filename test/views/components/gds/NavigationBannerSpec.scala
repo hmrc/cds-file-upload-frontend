@@ -42,5 +42,4 @@ class NavigationBannerSpec extends SpecBase with ViewMatchers {
       messagesLink must haveHref(controllers.routes.MrnEntryController.onPageLoad())
     }
   }
-
 }

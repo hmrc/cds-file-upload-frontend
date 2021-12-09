@@ -67,7 +67,7 @@ class InboxChoiceController @Inject()(
         Future.successful(BadRequest(inboxChoice(InboxChoiceForm.form)))
 
       case Some(tag) =>
-        answersService.upsert(SecureMessageAnswers(req.eori, tag)).map { _ =>
+        answersService.findOneAndReplace(SecureMessageAnswers(req.eori, tag)).map { _ =>
           Redirect(routes.SecureMessagingController.displayInbox)
         }
     }

@@ -16,13 +16,18 @@
 
 package models
 
-import org.joda.time.{DateTime, DateTimeZone}
-import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
+import play.api.libs.json.{Format, Json, OFormat}
+import repositories.ZonedDateTimeFormat.{zonedDateTimeReads, zonedDateTimeWrites}
 
-case class SecureMessageAnswers(eori: String, filter: MessageFilterTag, created: DateTime = DateTime.now.withZone(DateTimeZone.UTC))
+import java.time.{ZoneOffset, ZonedDateTime}
+
+case class SecureMessageAnswers(eori: String, filter: MessageFilterTag, created: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC))
 
 object SecureMessageAnswers {
-  implicit val dateFormat: Format[DateTime] = ReactiveMongoFormats.dateTimeFormats
-  implicit val format = Json.format[SecureMessageAnswers]
+
+  implicit val format = {
+    implicit val zonedDateTimeFormat: Format[ZonedDateTime] = Format(zonedDateTimeReads, zonedDateTimeWrites)
+
+    OFormat[SecureMessageAnswers](Json.reads[SecureMessageAnswers], Json.writes[SecureMessageAnswers])
+  }
 }

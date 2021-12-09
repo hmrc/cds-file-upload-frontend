@@ -16,66 +16,43 @@
 
 package views.components.gds
 
-import base.{OverridableInjector, UnitViewSpec}
-import base.AppConfigMockHelper._
-import config._
-import org.mockito.Mockito._
-import org.scalatest.BeforeAndAfterEach
-import play.api.inject.bind
+import base.SpecBase
+import config.{AppConfig, Frontend, Platform}
 import play.api.test.FakeRequest
-import play.twirl.api.Html
+import play.twirl.api.HtmlFormat.Appendable
+import uk.gov.hmrc.govukfrontend.views.html.components.govukPhaseBanner
 import views.html.components.gds.phaseBanner
+import views.matchers.ViewMatchers
 
-class PhaseBannerSpec extends UnitViewSpec with BeforeAndAfterEach {
+class PhaseBannerSpec extends SpecBase with ViewMatchers {
 
-  private val appConfigFrontend = mock[Frontend]
-  private val appConfigContactFrontend = mock[ContactFrontend]
+  private val govukPhaseBanner = instanceOf[govukPhaseBanner]
 
-  private val requestPath = "/customs-declare-exports/any-page"
-  private implicit val fakeRequest = FakeRequest("GET", requestPath)
+  private val requestUri = "/customs-declare-exports/any-page"
 
-  private val selfBaseUrlTest = "selfBaseUrlTest"
-  private val giveFeedbackLinkTest = "giveFeedbackLinkTest"
-
-  private val appConfig = generateMockConfig(
-    microservice = Microservice(generateMockServices(contactFrontend = appConfigContactFrontend)),
-    platform = Platform(appConfigFrontend)
-  )
-  private val injector = new OverridableInjector(bind[AppConfig].toInstance(appConfig))
-
-  private val bannerPartial = injector.instanceOf[phaseBanner]
-
-  private def createBanner(): Html = bannerPartial("")(fakeRequest, messages)
-
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-
-    reset(appConfigFrontend)
-    when(appConfigFrontend.host).thenReturn(Some(selfBaseUrlTest))
-
-    reset(appConfigContactFrontend)
-    when(appConfigContactFrontend.giveFeedbackLink).thenReturn(giveFeedbackLinkTest)
-  }
-
-  override def afterEach(): Unit = {
-    reset(appConfigFrontend)
-    reset(appConfigContactFrontend)
-    super.afterEach()
+  private def appendable(appConfig: AppConfig): Appendable = {
+    val phaseBanner = new phaseBanner(govukPhaseBanner, appConfig)
+    phaseBanner("")(FakeRequest("GET", requestUri), messages)
   }
 
   "phaseBanner" should {
 
     "display feedback link with correct href" when {
 
-      "selfBaseUrl is defined" in {
-        createBanner().getElementsByClass("govuk-phase-banner__text").first().getElementsByTag("a").first() must haveHref(
-          s"$giveFeedbackLinkTest&backUrl=$selfBaseUrlTest$requestPath"
-        )
+      val giveFeedbackLink = appConfig.microservice.services.contactFrontend.giveFeedbackLink
+
+      "appConfig.platform.frontend.host is defined" in {
+        val expectedHost = "http://localhost:6793"
+
+        val element = appendable(appConfig).getElementsByClass("govuk-phase-banner__text").first
+        val href = s"$giveFeedbackLink&backUrl=$expectedHost$requestUri"
+        element.getElementsByTag("a").first must haveHref(href)
       }
 
-      "selfBaseUrl is not defined" in {
-        when(appConfig.platform.frontend.host).thenReturn(None)
-        createBanner().getElementsByClass("govuk-phase-banner__text").first().getElementsByTag("a").first() must haveHref(s"$giveFeedbackLinkTest")
+      "appConfig.platform.frontend.host is not defined" in {
+        val configNoHost = appConfig.copy(platform = Platform(Frontend(None)))
+        val element = appendable(configNoHost).getElementsByClass("govuk-phase-banner__text").first
+        element.getElementsByTag("a").first must haveHref(s"$giveFeedbackLink")
       }
     }
   }

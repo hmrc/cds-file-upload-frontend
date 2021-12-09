@@ -17,22 +17,17 @@
 package services
 
 import models.SecureMessageAnswers
-import org.joda.time.{DateTime, DateTimeZone}
 import play.api.Logging
-import play.api.libs.json.{JsObject, Json}
 import repositories.SecureMessageAnswersRepository
 
+import java.time.{ZoneOffset, ZonedDateTime}
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-class SecureMessageAnswersService @Inject()(val repository: SecureMessageAnswersRepository)(implicit ec: ExecutionContext) extends Logging {
+class SecureMessageAnswersService @Inject()(val repository: SecureMessageAnswersRepository) extends Logging {
 
-  def findByEori(eori: String): Future[Option[SecureMessageAnswers]] = repository.find("eori" -> eori).map(_.headOption)
+  def findOne(eori: String): Future[Option[SecureMessageAnswers]] = repository.findOne(eori)
 
-  def upsert(answers: SecureMessageAnswers): Future[Option[SecureMessageAnswers]] = {
-    val updated = answers.copy(created = DateTime.now.withZone(DateTimeZone.UTC))
-    repository
-      .findAndUpdate(Json.obj("eori" -> updated.eori), Json.toJson(updated).as[JsObject], upsert = true)
-      .map(_.value.map(_.as[SecureMessageAnswers]))
-  }
+  def findOneAndReplace(answers: SecureMessageAnswers): Future[SecureMessageAnswers] =
+    repository.findOneAndReplace(answers.copy(created = ZonedDateTime.now(ZoneOffset.UTC)))
 }

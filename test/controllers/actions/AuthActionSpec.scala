@@ -78,10 +78,7 @@ class AuthActionSpec extends ControllerSpecBase {
       }
 
       "user does not have an eori number" in {
-
-        val user = CommonTestData.signedInUser
-
-        withUserWithoutEori(user) {
+        withUserWithoutEori {
 
           val response = authController().action(FakeRequest())
 

@@ -46,9 +46,7 @@ class UploadYourFilesReceiptController @Inject()(
     extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (authenticate andThen verifiedEmail).async { implicit req =>
-    answersService.findByEori(req.eori).flatMap { maybeUserAnswers =>
-      answersService.removeByEori(req.eori)
-
+    answersService.findOneAndRemove(req.eori).flatMap { maybeUserAnswers =>
       val result = for {
         userAnswers <- getOrRedirect(maybeUserAnswers, routes.RootController.displayPage)
         fileUploads <- getOrRedirect(userAnswers.fileUploadResponse, routes.ErrorPageController.error)
