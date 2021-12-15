@@ -24,7 +24,8 @@
     formHelper: uk.gov.hmrc.govukfrontend.views.html.helpers.formWithCSRF,
     exportsInputText: exportsInputText,
     govukButton: GovukButton,
-    pageTitle: pageTitle
+    pageTitle: pageTitle,
+    paragraphBody: paragraphBody
 )
 
 @(form: Form[MRN], backLink: String)(implicit request: Request[_], messages: Messages)
@@ -43,11 +44,12 @@
 
                 @pageTitle(text = messages("mrnEntryPage.heading"))
 
+                @paragraphBody(messages("mrnEntryPage.paragraph"))
+
                 @exportsInputText(
                     field = form("value"),
-                    labelKey = "mrnEntryPage.heading",
-                    labelClasses = "visually-hidden",
-                    hintKey = Some("mrnEntryPage.hint")
+                    labelKey = "mrnEntryPage.label",
+                    labelClasses = "visually-hidden"
                 )
 
                 </br>
