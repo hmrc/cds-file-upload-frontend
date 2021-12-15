@@ -42,6 +42,16 @@ class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with Sca
     behave like normalPage(() => view, messagePrefix)
 
     behave like stringPage(createViewUsingForm, "value", messagePrefix)
+    
+    val doc = asDocument(createViewUsingForm(form))
+
+    "include a paragraph" in {
+      doc.getElementsByClass("govuk-body").first.text.contains(messages("mrnEntryPage.paragraph"))
+    }
+
+    "include a hidden label" in {
+      doc.getElementsByTag("label").first.text.contains(messages("mrnEntryPage.label"))
+    }
 
     "include the 'Sign out' link if the user is authorised" in {
       forAll { user: SignedInUser =>
