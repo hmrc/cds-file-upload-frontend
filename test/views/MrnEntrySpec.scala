@@ -42,7 +42,7 @@ class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with Sca
     behave like normalPage(() => view, messagePrefix)
 
     behave like stringPage(createViewUsingForm, "value", messagePrefix)
-    
+
     val doc = asDocument(createViewUsingForm(form))
 
     "include a paragraph" in {
