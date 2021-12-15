@@ -66,7 +66,8 @@ greyBox.uploadFiles = Upload and attach documents to a declaration
 ## MRN Entry Page
 
 mrnEntryPage.heading=What is the MRN of the declaration you want to attach files to?
-mrnEntryPage.hint=The movement reference number (MRN) is 18 digits long, and is made up of current year, 2-letter country code, and 14 numbers. You are given this when you submit a declaration to the Customs Declaration Service.</br></br>For example, 21GB45454545454545.
+mrnEntryPage.paragraph=The movement reference number (MRN) is 18 digits long, and is made up of current year, 2-letter country code, and 14 randomly generated letters and numbers. You are given this when you submit a declaration to the Customs Declaration Service.
+mrnEntryPage.label=What is the MRN of the declaration you want to attach files to?
 mrn.missing=Enter a movement reference number (MRN)
 mrn.invalid=Movement reference number (MRN) must be in the correct format
 
