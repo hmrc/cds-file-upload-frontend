@@ -17,57 +17,19 @@
 package controllers.test
 
 import config.AppConfig
-import javax.inject.{Inject, Singleton}
-import models.Field._
-import models._
 import play.api.http.{ContentTypes, HeaderNames}
-import play.api.mvc.{Action, Codec, MessagesControllerComponents}
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import play.api.mvc.{Codec, MessagesControllerComponents}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
-import scala.xml._
 
 @Singleton
 class CustomsDeclarationsStubController @Inject()(appConfig: AppConfig, httpClient: HttpClient, mcc: MessagesControllerComponents)(
   implicit ec: ExecutionContext
 ) extends FrontendController(mcc) {
-
-  def waiting(ref: String) = {
-    val customsDeclarationsConfig = appConfig.microservice.services.customsDeclarations
-    val customsDeclarationsBaseUrl =
-      s"${customsDeclarationsConfig.protocol.get}://${customsDeclarationsConfig.host}:${customsDeclarationsConfig.port.get}"
-
-    Waiting(
-      UploadRequest(
-        href = s"$customsDeclarationsBaseUrl/cds-file-upload-service/test-only/s3-bucket",
-        fields = Map(
-          Algorithm.toString -> "AWS4-HMAC-SHA256",
-          Signature.toString -> "xxxx",
-          Key.toString -> "xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-          ACL.toString -> "private",
-          Credentials.toString -> "ASIAxxxxxxxxx/20180202/eu-west-2/s3/aws4_request",
-          Policy.toString -> "xxxxxxxx==",
-          SuccessRedirect.toString -> s"$customsDeclarationsBaseUrl/cds-file-upload-service/upload/upscan-success/${ref}",
-          ErrorRedirect.toString -> s"$customsDeclarationsBaseUrl/cds-file-upload-service/upload/upscan-error/${ref}"
-        )
-      )
-    )
-  }
-
-  // for now, we will just return some random
-  def handleBatchFileUploadRequest: Action[NodeSeq] = Action(parse.xml) { implicit req =>
-    Thread.sleep(100)
-
-    val fileGroupSize = (scala.xml.XML.loadString(req.body.mkString) \ "FileGroupSize").text.toInt
-
-    val resp = FileUploadResponse((1 to fileGroupSize).map { i =>
-      FileUpload(i.toString, waiting(i.toString), id = s"$i")
-    }.toList)
-
-    Ok(XmlHelper.toXml(resp)).as(ContentTypes.XML)
-  }
 
   def handleS3FileUploadRequest = Action(parse.multipartFormData) { implicit req =>
     val redirectLocation = req.body.dataParts("success_action_redirect").head
@@ -89,49 +51,10 @@ class CustomsDeclarationsStubController @Inject()(appConfig: AppConfig, httpClie
       </Root>
 
     val cdsFileUploadConfig = appConfig.microservice.services.cdsFileUpload
-
     val cdsFileUploadBaseUrl = s"${cdsFileUploadConfig.protocol.get}://${cdsFileUploadConfig.host}:${cdsFileUploadConfig.port.get}"
-
     val url = cdsFileUploadBaseUrl + "/internal/notification"
-
     val header: (String, String) = HeaderNames.CONTENT_TYPE -> ContentTypes.XML(Codec.utf_8)
 
     httpClient.POSTString[HttpResponse](url, notification.toString(), Seq(header))
   }
-}
-
-object XmlHelper {
-
-  def toXml(field: (String, String)): Elem =
-    <a/>.copy(label = field._1, child = Seq(Text(field._2)))
-
-  def toXml(uploadRequest: UploadRequest): Elem =
-    <UploadRequest>
-      <Href>
-        {uploadRequest.href}
-      </Href>
-      <Fields>
-        {uploadRequest.fields.map(toXml)}
-      </Fields>
-    </UploadRequest>
-
-  def toXml(upload: FileUpload): Elem = {
-    val request = upload.state match {
-      case Waiting(req) => toXml(req)
-      case _            => NodeSeq.Empty
-    }
-    <File>
-      <Reference>
-        {upload.reference}
-      </Reference>{request}
-    </File>
-  }
-
-  def toXml(response: FileUploadResponse): Elem =
-    <FileUploadResponse xmlns="hmrc:fileupload">
-      <Files>
-        {response.uploads.map(toXml)}
-      </Files>
-    </FileUploadResponse>
-
 }
