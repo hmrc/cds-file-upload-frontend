@@ -80,7 +80,7 @@ mrnAccessDenied.link.enterDifferentMrn=Enter a different MRN
 
 ## Unverified email waring page
 
-emailUnverified.heading=You need to verify the registered CDS email address
+emailUnverified.heading=You need to verify your email address for the Customs Declaration Service
 emailUnverified.paragraph1=This is the email address your organisation has registered for the Customs Declaration Service (CDS). You need to verify this email address or change it. You can verify the email instantly provided you have access to the email account.
 emailUnverified.paragraph2=This will be the only email address we use for:
 emailUnverified.bullets.item1=updates on changes to the Customs Declaration Service
