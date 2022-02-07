@@ -5,12 +5,16 @@ This app allows users to upload files to support their import or export declarat
 The [Notification Service](https://github.com/hmrc/customs-notification) will send a notification about the result of this scan via a callback URL. This is persisted by the app. After all files are submitted, the app will check that all files have success notifications before proceeding to the final File Receipt page.
 
 See [here](https://confluence.tools.tax.service.gov.uk/display/CD/Secure+File+Upload+UI+Service+-+Solution+Design) for more details.
- 
+
+##How we fake the downstream services
+We use the [customs-declaration-stub](https://github.com/hmrc/customs-declarations-stub) '/file-upload' endpoint to stub-out the call the service makes to the [customs-declaration](https://github.com/hmrc/customs-declarations) API service that fetches the
+list of S3 bucket urls to upload to. The `customs-declaration-stub` '/file-upload' endpoint response returns fake S3 urls that actually point to the testOnly
+endpoint '/cds-file-upload-service/test-only/s3-bucket' here on the CDS File Upload Frontend service.
+
+So if you're running this service locally or in an environment that uses stubs you must start this service using `sbt -Dapplication.router=testOnlyDoNotUseInAppConf.Routes` because
+the test routes contains the fake S3 endpoint (that stubs the upscan service used in production like environments when users upload files from their browser).
 
 ## Running the app locally
-
-The app simulates the Upscan service locally using a stub.
-
 
 In order to run CDS File Upload Frontend with the stubbed endpoints you will need to be running service manager and run the following commands
 
@@ -20,11 +24,10 @@ In order to run CDS File Upload Frontend with the stubbed endpoints you will nee
 ./run-with-stubs.sh
 ```
 
-If you're running service manually without using the bash scripts on localhost you must use `sbt -Dapplication.router=testOnlyDoNotUseInAppConf.Routes` because test routes contains endpoints that are treated like a stub for uploading files.
+If you're running service manually without using the bash scripts on localhost you must use `sbt -Dapplication.router=testOnlyDoNotUseInAppConf.Routes` to
+enable the test-only S3 upload endpoint.
 
-Inside `application.conf` you can find that `customs-declarations` settings not point to the different repo but to the endpoints that are in the test routes.
-
-### Config settings
+## Config settings
 
 The following settings are used to configure the notifications persistance and retrieval.
 
@@ -44,12 +47,12 @@ notifications {
 }
 ```
 
-### Feature flags
+## Feature flags
 To set a feature flag via system properties
 
 `sbt "run -Dmicroservice.services.features.secureMessaging=enabled"`
 
-### Accessibility Statement
+## Accessibility Statement
 
 As a developer we rarely have the need to test it locally, therefore we should not add the 
 [Accessibility Statement Frontend](https://github.com/hmrc/accessibility-statement-frontend) microservice to our service
@@ -65,6 +68,6 @@ sm --start ACCESSIBILITY_STATEMENT_FRONTEND
 
 It is then accessible [here](http://localhost:12346/accessibility-statement/cds-file-upload). 
 
-### License
+## License
 
 This code is open source software licensed under the [Apache 2.0 License]("http://www.apache.org/licenses/LICENSE-2.0.html").
