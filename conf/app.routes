@@ -48,3 +48,6 @@ GET         /sign-out                                       controllers.SignOutC
 
 # Session Timeout
 GET         /session-timeout                                controllers.SignOutController.sessionTimeout
+
+# HMRC Frontend Static Assets
+->          /hmrc-frontend                                   hmrcfrontend.Routes
