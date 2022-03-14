@@ -20,13 +20,13 @@ import base.SpecBase
 import config.{AppConfig, Frontend, Platform}
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
-import uk.gov.hmrc.govukfrontend.views.html.components.govukPhaseBanner
+import uk.gov.hmrc.govukfrontend.views.html.components.GovukPhaseBanner
 import views.html.components.gds.phaseBanner
 import views.matchers.ViewMatchers
 
 class PhaseBannerSpec extends SpecBase with ViewMatchers {
 
-  private val govukPhaseBanner = instanceOf[govukPhaseBanner]
+  private val govukPhaseBanner = instanceOf[GovukPhaseBanner]
 
   private val requestUri = "/customs-declare-exports/any-page"
 
