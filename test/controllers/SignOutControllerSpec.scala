@@ -28,7 +28,7 @@ class SignOutControllerSpec extends ControllerSpecBase {
 
   def view(): String = page()(fakeRequest, messages).toString
 
-  def controller() = new SignOutController(new FakeAuthAction(), mcc, page)
+  val controller = new SignOutController(mcc, page)
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
@@ -44,14 +44,14 @@ class SignOutControllerSpec extends ControllerSpecBase {
 
     "return the expected signed_out page" when {
       "signOut is invoked" in {
-        val result = controller().signOut(fakeRequest)
+        val result = controller.signOut(fakeRequest)
         status(result) mustBe OK
       }
     }
 
     "sign out the user" when {
       "signOut is invoked" in {
-        val result = controller().signOut(fakeRequest)
+        val result = controller.signOut(fakeRequest)
         status(result) mustBe OK
         await(result).newSession mustBe 'defined
       }
