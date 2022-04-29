@@ -38,7 +38,9 @@ trait ViewBehaviours extends DomAssertions {
 
         "display the correct browser title" in {
           val doc = asDocument(view())
-          assertEqualsMessage(doc, "title", s"$messageKeyPrefix.heading")
+          val message = messages(s"$messageKeyPrefix.heading")
+          val service = messages("common.service.name")
+          assertEqualsMessage(doc, "title", "common.title.format", message, service)
         }
       }
     }

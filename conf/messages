@@ -1,5 +1,8 @@
 ## common
-common.service.name= CDS document uploads and secure messages
+
+common.title.format = {0} - {1} - GOV.UK
+
+common.service.name = CDS document uploads and secure messages
 common.phase=Beta
 common.continue=Continue
 

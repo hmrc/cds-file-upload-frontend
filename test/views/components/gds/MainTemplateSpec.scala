@@ -38,18 +38,23 @@ class MainTemplateSpec extends SpecBase with ViewMatchers {
     )(fakeRequest, messages)
 
   "Main Template" should {
+
+    "display the expected title as part of the <head> tag" in {
+      val view: Document = createView()
+      val serviceName = messages("common.service.name")
+      view.getElementsByTag("title").first.text mustBe messages("common.title.format", serviceName, serviceName)
+    }
+
     "display NavigationBanner" when {
       "withNavigationBanner flag set to true" in {
         val view: Document = createView(withNavigationBanner = true)
-
         view must containElementWithID("navigation-banner")
       }
     }
 
     "not display NavigationBanner" when {
       "withNavigationBanner flag set to false" in {
-        val view: Document = createView(withNavigationBanner = false)
-
+        val view: Document = createView()
         view mustNot containElementWithID("navigation-banner")
       }
     }
@@ -58,7 +63,7 @@ class MainTemplateSpec extends SpecBase with ViewMatchers {
       "contain the JQuery validation script files" in {
         val view: Document = createView(withFileUploadFlag = true)
 
-        val scripts = view.getElementsByTag("script").asScala.toSeq
+        val scripts = view.getElementsByTag("script").asScala
         val scriptAttribs = scripts.map(_.attr("src").replaceFirst("^/cds-file-upload-service", ""))
         scriptAttribs must contain("/assets/javascripts/jquery-3.6.0.min.js")
         scriptAttribs must contain("/assets/javascripts/jquery.validate.min.js")

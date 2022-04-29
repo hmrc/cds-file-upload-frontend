@@ -59,25 +59,26 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCh
     }
 
     "show title" when {
+      val service = messages("common.service.name")
 
       "first file upload is shown" in {
-
         forAll { total: Int =>
-          assertEqualsMessage(asDocument(view(First(total))), "title", s"$messagePrefix.heading.first")
+          val message = messages(s"$messagePrefix.heading.first")
+          assertEqualsMessage(asDocument(view(First(total))), "title", "common.title.format", message, service)
         }
       }
 
       "a middle file upload is shown" in {
-
         forAll { (index: Int, total: Int) =>
-          assertEqualsMessage(asDocument(view(Middle(index, total))), "title", s"$messagePrefix.heading.middle")
+          val message = messages(s"$messagePrefix.heading.middle")
+          assertEqualsMessage(asDocument(view(Middle(index, total))), "title", "common.title.format", message, service)
         }
       }
 
       "the last file upload is shown" in {
-
         forAll { total: Int =>
-          assertEqualsMessage(asDocument(view(Last(total))), "title", s"$messagePrefix.heading.last")
+          val message = messages(s"$messagePrefix.heading.last")
+          assertEqualsMessage(asDocument(view(Last(total))), "title", "common.title.format", message, service)
         }
       }
     }
@@ -85,21 +86,18 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCh
     "show heading" when {
 
       "first file upload is shown" in {
-
         forAll { total: Int =>
           assertH1EqualsMessage(asDocument(view(First(total))), s"$messagePrefix.heading.first")
         }
       }
 
       "a middle file upload is shown" in {
-
         forAll { (index: Int, total: Int) =>
           assertH1EqualsMessage(asDocument(view(Middle(index, total))), s"$messagePrefix.heading.middle")
         }
       }
 
       "the last file upload is shown" in {
-
         forAll { total: Int =>
           assertH1EqualsMessage(asDocument(view(Last(total))), s"$messagePrefix.heading.last")
         }
@@ -109,7 +107,6 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCh
     "show file upload counter" when {
 
       "a file middle is requested" in {
-
         forAll { (index: Int, total: Int) =>
           val doc = asDocument(view(Middle(index, total)))
           assertContainsMessage(doc, s"$messagePrefix.filesUploaded", index - 1, total)
@@ -117,7 +114,6 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCh
       }
 
       "the last file is requested" in {
-
         forAll { total: Int =>
           val doc = asDocument(view(Last(total)))
           assertContainsMessage(doc, s"$messagePrefix.filesUploaded", total - 1, total)
@@ -125,5 +121,4 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCh
       }
     }
   }
-
 }
