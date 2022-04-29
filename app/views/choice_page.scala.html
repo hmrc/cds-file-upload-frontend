@@ -36,7 +36,7 @@
 @mainTemplate(title = Title("choicePage.heading")) {
 
   @formHelper(action = routes.ChoiceController.onSubmit, 'autoComplete -> "off") {
-    @errorSummary(radioGroupErrors("choice", SecureMessageInbox, form.errors))
+    @errorSummary(radioGroupErrors(ChoiceKey, SecureMessageInbox, form.errors))
 
     @govukRadios(Radios(
       name = ChoiceKey,
@@ -60,7 +60,8 @@
           content = Text(messages("choicePage.input.documentUpload")),
           checked = form(ChoiceKey).value.contains(DocumentUpload)
         )
-      )
+      ),
+      errorMessage = form(ChoiceKey).error.map(err => ErrorMessage(content = Text(messages(err.message, err.args:_*))))
     ))
 
     @govukButton(Button(content = Text(messages("common.continue")), attributes = Map("id" -> "submit", "name" -> "continue")))

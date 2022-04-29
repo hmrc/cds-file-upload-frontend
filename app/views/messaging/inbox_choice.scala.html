@@ -36,7 +36,7 @@
 @mainTemplate(title = Title("inboxChoice.heading"), backLinkUrl = Some(routes.ChoiceController.onPageLoad.url)) {
 
   @formHelper(action = routes.InboxChoiceController.onSubmit, 'autoComplete -> "off") {
-    @errorSummary(radioGroupErrors("choice", ExportsMessages, form.errors))
+    @errorSummary(radioGroupErrors(InboxChoiceKey, ExportsMessages, form.errors))
 
     @govukRadios(Radios(
       name = InboxChoiceKey,
@@ -60,7 +60,8 @@
           content = Text(messages("inboxChoice.input.importsMessages")),
           checked = form(InboxChoiceKey).value.contains(ImportsMessages)
         )
-      )
+      ),
+      errorMessage = form(InboxChoiceKey).error.map(err => ErrorMessage(content = Text(messages(err.message, err.args:_*))))
     ))
 
     @govukButton(Button(content = Text(messages("common.continue")), attributes = Map("id" -> "submit", "name" -> "continue")))
