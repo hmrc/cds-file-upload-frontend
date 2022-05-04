@@ -215,6 +215,10 @@ uploadError.bullet.3=corrupted, or contain a virus
 uploadError.button=Start your upload again
 uploadError.guidance=You may be asked to check or re-enter the contact details.
 
+notFoundError.heading = Page not found
+notFoundError.paragraph.1 = If you typed the web address, check it is correct.
+notFoundError.paragraph.2 = If you selected a link or button and arrived at this page, you can report a technical problem on the link at the base of this page. Include details about what you did.
+
 feedback.header = Tell us what you think
 feedback.line.1 = This is a new service and we want to know what you think of it.
 feedback.line.2 = {0}. Your thoughts and ideas will help us to make improvements.

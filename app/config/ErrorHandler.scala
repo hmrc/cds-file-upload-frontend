@@ -16,7 +16,6 @@
 
 package config
 
-import javax.inject.{Inject, Singleton}
 import models.exceptions.InvalidFeatureStateException
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Results.NotFound
@@ -25,11 +24,16 @@ import play.twirl.api.Html
 import uk.gov.hmrc.play.bootstrap.frontend.http.FrontendErrorHandler
 import views.html.error_template
 
+import javax.inject.{Inject, Singleton}
+
 @Singleton
 class ErrorHandler @Inject()(override val messagesApi: MessagesApi, errorTemplate: error_template) extends FrontendErrorHandler with I18nSupport {
 
   override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]): Html =
     errorTemplate(pageTitle, heading, message)
+
+  override def notFoundTemplate(implicit request: Request[_]): Html =
+    errorTemplate("notFoundError.heading", "notFoundError.heading", "notFoundError.paragraph.1", "notFoundError.paragraph.2")
 
   override def resolveError(rh: RequestHeader, ex: Throwable): Result =
     ex match {
