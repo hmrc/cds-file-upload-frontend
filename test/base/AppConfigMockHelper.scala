@@ -33,7 +33,7 @@ object AppConfigMockHelper extends MockitoSugar {
     answersRepository: FileUploadAnswersRepository = mock[FileUploadAnswersRepository],
     secureMessageAnswersRepository: SecureMessageAnswersRepository = mock[SecureMessageAnswersRepository],
     trackingConsentFrontend: TrackingConsentFrontend = mock[TrackingConsentFrontend],
-    platform: Platform = mock[Platform],
+    play: Play = mock[Play],
     allowList: AllowList = mock[AllowList]
   ) = AppConfig(
     appName,
@@ -48,7 +48,7 @@ object AppConfigMockHelper extends MockitoSugar {
     answersRepository,
     secureMessageAnswersRepository,
     trackingConsentFrontend,
-    platform,
+    play,
     allowList
   )
 

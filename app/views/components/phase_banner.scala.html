@@ -20,7 +20,7 @@
 
 @(phase: String)(implicit request: Request[_], messages: Messages)
 
-@backUrl = @{ appConfig.platform.frontend.host.map(url => s"&backUrl=$url${request.uri}").getOrElse("") }
+@backUrl = @{ appConfig.play.frontend.host.map(url => s"&backUrl=$url${request.uri}").getOrElse("") }
 @betaFeedbackUrl = @{s"${appConfig.microservice.services.contactFrontend.giveFeedbackLink}$backUrl"}
 @link = {<a href="@betaFeedbackUrl">@messages("common.feedback.link")</a>}
 

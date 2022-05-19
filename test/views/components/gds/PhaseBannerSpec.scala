@@ -17,7 +17,7 @@
 package views.components.gds
 
 import base.SpecBase
-import config.{AppConfig, Frontend, Platform}
+import config.{AppConfig, Frontend, Play}
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
 import uk.gov.hmrc.govukfrontend.views.html.components.GovukPhaseBanner
@@ -41,7 +41,7 @@ class PhaseBannerSpec extends SpecBase with ViewMatchers {
 
       val giveFeedbackLink = appConfig.microservice.services.contactFrontend.giveFeedbackLink
 
-      "appConfig.platform.frontend.host is defined" in {
+      "appConfig.play.frontend.host is defined" in {
         val expectedHost = "http://localhost:6793"
 
         val element = appendable(appConfig).getElementsByClass("govuk-phase-banner__text").first
@@ -49,8 +49,8 @@ class PhaseBannerSpec extends SpecBase with ViewMatchers {
         element.getElementsByTag("a").first must haveHref(href)
       }
 
-      "appConfig.platform.frontend.host is not defined" in {
-        val configNoHost = appConfig.copy(platform = Platform(Frontend(None)))
+      "appConfig.play.frontend.host is not defined" in {
+        val configNoHost = appConfig.copy(play = Play(Frontend(None)))
         val element = appendable(configNoHost).getElementsByClass("govuk-phase-banner__text").first
         element.getElementsByTag("a").first must haveHref(s"$giveFeedbackLink")
       }

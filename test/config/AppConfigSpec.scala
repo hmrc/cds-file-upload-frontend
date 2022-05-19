@@ -159,11 +159,11 @@ class AppConfigSpec extends PlaySpec {
       |
       |tracking-consent-frontend {
       |  gtm.container = "a"
-      |  url = "http://localhost:12345/tracking-consent/tracking.js"
+      |  host = "http://localhost:12345"
       |}
       |
       |# Default value for local environment
-      |platform.frontend.host = "http://localhost:6793"
+      |play.frontend.host = "http://localhost:6793"
       |
     """.stripMargin).loadOrThrow[AppConfig]
 
@@ -193,9 +193,9 @@ class AppConfigSpec extends PlaySpec {
 
     "have tracking-consent-frontend url" in {
 
-      val expectedUrl = "http://localhost:12345/tracking-consent/tracking.js"
+      val expectedUrl = "http://localhost:12345"
 
-      config.trackingConsentFrontend.url mustBe expectedUrl
+      config.trackingConsentFrontend.host mustBe expectedUrl
     }
 
     "have link to contact-frontend" in {
