@@ -32,7 +32,7 @@ case class AppConfig(
   fileUploadAnswersRepository: FileUploadAnswersRepository,
   secureMessageAnswersRepository: SecureMessageAnswersRepository,
   trackingConsentFrontend: TrackingConsentFrontend,
-  platform: Platform,
+  play: Play,
   allowList: AllowList
 )
 
@@ -111,9 +111,9 @@ case class SecureMessageAnswersRepository(ttlSeconds: Int)
 
 case class Gtm(container: String)
 
-case class TrackingConsentFrontend(gtm: Gtm, url: String)
+case class TrackingConsentFrontend(gtm: Gtm, host: String)
 
-case class Platform(frontend: Frontend)
+case class Play(frontend: Frontend)
 
 case class Frontend(host: Option[String])
 
