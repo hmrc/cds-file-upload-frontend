@@ -16,7 +16,8 @@
 
 package controllers.actions
 
-import controllers.ControllerSpecBase
+import controllers.{ControllerSpecBase, routes}
+import models.UnauthorisedReason.UserIsAgent
 import play.api.mvc.{Action, AnyContent}
 import play.api.test.Helpers._
 import play.api.test._
@@ -127,6 +128,17 @@ class AuthActionSpec extends ControllerSpecBase {
         }
       }
     }
+
+    "redirect to /you-cannot-use-this-service when user is an Agent" in {
+      withSignedInAgent() {
+
+        val result = authController(Seq("GB1111231")).action(FakeRequest())
+
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result) mustBe Some(routes.UnauthorisedController.onAgentKickOut(UserIsAgent).url)
+      }
+    }
+
   }
 
   class TestController(actions: AuthAction) extends FrontendController(mcc) {

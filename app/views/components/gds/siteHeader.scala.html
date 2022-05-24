@@ -21,7 +21,14 @@
 
 @this(hmrcHeader: HmrcHeader)
 
-@()(implicit request: Request[_], messages: Messages)
+@(displaySignOut: Boolean = false)(implicit request: Request[_], messages: Messages)
+
+@signOutHref = @{
+    if (request.isInstanceOf[Authenticated] || displaySignOut)
+        Some(controllers.routes.SignOutController.signOut.url)
+    else
+        None
+}
 
 @hmrcHeader(Header(
     homepageUrl = "https://www.gov.uk",
@@ -29,5 +36,5 @@
     serviceUrl = controllers.routes.RootController.displayPage.url,
     language = language.En,
     containerClasses = "govuk-width-container",
-    signOutHref = if (request.isInstanceOf[Authenticated]) Some(routes.SignOutController.signOut.url) else None
+    signOutHref = signOutHref
 ))

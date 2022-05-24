@@ -25,7 +25,9 @@ import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, verify, when}
 import org.mockito.stubbing.OngoingStubbing
 import services.{FileUploadAnswersService, SecureMessageAnswersService}
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
+import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Individual}
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{affinityGroup, allEnrolments}
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException, Enrolments}
 
 import java.net.URLEncoder
@@ -38,15 +40,22 @@ abstract class ControllerSpecBase extends SpecBase with FakeActions {
   val mockSecureMessageAnswersService: SecureMessageAnswersService = mock[SecureMessageAnswersService]
 
   def withSignedInUser(user: SignedInUser)(test: => Unit): Unit = {
-    when(mockAuthConnector.authorise(any(), eqTo(allEnrolments))(any(), any()))
-      .thenReturn(Future.successful(user.enrolments))
+    when(mockAuthConnector.authorise(any(), eqTo(allEnrolments and affinityGroup))(any(), any()))
+      .thenReturn(Future.successful(new ~(user.enrolments, Some(Individual))))
+
+    test
+  }
+
+  def withSignedInAgent()(test: => Unit): Unit = {
+    when(mockAuthConnector.authorise(any(), eqTo(allEnrolments and affinityGroup))(any(), any()))
+      .thenReturn(Future.successful(new ~(Enrolments(Set.empty), Some(Agent))))
 
     test
   }
 
   def withUserWithoutEori(test: => Unit): Unit = {
-    when(mockAuthConnector.authorise(any(), eqTo(allEnrolments))(any(), any()))
-      .thenReturn(Future.successful(Enrolments(Set())))
+    when(mockAuthConnector.authorise(any(), eqTo(allEnrolments and affinityGroup))(any(), any()))
+      .thenReturn(Future.successful(new ~(Enrolments(Set()), Some(Individual))))
 
     test
   }

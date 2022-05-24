@@ -42,7 +42,8 @@
   useCustomContentWidth: Boolean = false,
   withNavigationBanner: Boolean = false,
   backLinkUrl: Option[String] = None,
-  withFileUploadValidation: Boolean = false
+  withFileUploadValidation: Boolean = false,
+  displaySignOut: Boolean = false
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages)
 
 @head = {
@@ -98,7 +99,7 @@
     beforeContentBlock = Some(beforeContentBlock),
     bodyEndBlock = None,
     scriptsBlock = Some(scripts),
-    headerBlock = Some(siteHeader()),
+    headerBlock = Some(siteHeader(displaySignOut = displaySignOut)),
     footerBlock = Some(hmrcFooter())
   )(content)
 } else {
@@ -108,7 +109,7 @@
     beforeContentBlock = Some(beforeContentBlock),
     bodyEndBlock = None,
     scriptsBlock = Some(scripts),
-    headerBlock = Some(siteHeader()),
+    headerBlock = Some(siteHeader(displaySignOut = displaySignOut)),
     footerBlock = Some(hmrcFooter())
   )(content)
 }

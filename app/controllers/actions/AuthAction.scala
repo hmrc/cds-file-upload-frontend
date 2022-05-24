@@ -20,17 +20,20 @@ import com.google.inject.ProvidedBy
 import config.AppConfig
 import controllers.routes
 import models.AuthKey
+import models.UnauthorisedReason.UserIsAgent
 import models.requests.{AuthenticatedRequest, SignedInUser}
 import play.api.mvc.Results.Redirect
 import play.api.mvc._
 import play.api.{Configuration, Environment}
+import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.allEnrolments
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{affinityGroup, allEnrolments}
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
+
 import javax.inject.{Inject, Provider}
 import scala.concurrent.{ExecutionContext, Future}
-
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 class AuthActionImpl @Inject()(
@@ -52,7 +55,11 @@ class AuthActionImpl @Inject()(
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
     authorised(Enrolment(AuthKey.enrolment))
-      .retrieve(allEnrolments) { allEnrolments: Enrolments =>
+      .retrieve(allEnrolments and affinityGroup) {
+        case allEnrolments ~ Some(Agent) =>
+          Future.successful(Left(Redirect(routes.UnauthorisedController.onAgentKickOut(UserIsAgent))))
+        case allEnrolments ~ _ =>
+
         allEnrolments.getEnrolment(AuthKey.enrolment).flatMap(_.getIdentifier(AuthKey.identifierKey)) match {
 
           case Some(eori) if eoriAllowList.allows(eori.value) =>

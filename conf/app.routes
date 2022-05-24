@@ -9,6 +9,7 @@ GET         /error                                          controllers.ErrorPag
 GET         /upload-error                                   controllers.ErrorPageController.uploadError
 
 GET         /unauthorised                                   controllers.UnauthorisedController.onPageLoad
+GET         /you-cannot-use-service                         controllers.UnauthorisedController.onAgentKickOut(unauthorisedReason: models.UnauthorisedReason)
 
 GET         /what-do-you-want-to-do                         controllers.ChoiceController.onPageLoad
 POST        /what-do-you-want-to-do                         controllers.ChoiceController.onSubmit

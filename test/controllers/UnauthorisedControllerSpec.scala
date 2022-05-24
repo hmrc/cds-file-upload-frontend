@@ -16,17 +16,19 @@
 
 package controllers
 
+import models.UnauthorisedReason.{UrlDirect, UserIsAgent}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, verify, when}
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
-import views.html.unauthorised
+import views.html.{unauthorised, unauthorisedAgent}
 
 class UnauthorisedControllerSpec extends ControllerSpecBase {
 
   val page = mock[unauthorised]
+  val agentPage = mock[unauthorisedAgent]
 
-  def controller = new UnauthorisedController(mcc, page)
+  def controller = new UnauthorisedController(mcc, page, agentPage)
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
@@ -47,6 +49,22 @@ class UnauthorisedControllerSpec extends ControllerSpecBase {
 
       status(result) mustBe OK
       verify(page).apply()(any(), any())
+    }
+
+  }
+
+  "onAgentKickOut method is invoked and" when {
+
+    "User has agent affinity group" in {
+      when(agentPage(any())(any(), any())).thenReturn(HtmlFormat.empty)
+      val result = controller.onAgentKickOut(UserIsAgent)(fakeRequest)
+      status(result) must be(OK)
+    }
+
+    "someone travels to the URL directly" in {
+      when(agentPage(any())(any(), any())).thenReturn(HtmlFormat.empty)
+      val result = controller.onAgentKickOut(UrlDirect)(fakeRequest)
+      status(result) must be(OK)
     }
   }
 }
