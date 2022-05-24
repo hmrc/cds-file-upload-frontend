@@ -16,7 +16,7 @@
 
 package controllers.actions
 
-import controllers.{ControllerSpecBase, routes}
+import controllers.{routes, ControllerSpecBase}
 import models.UnauthorisedReason.UserIsAgent
 import play.api.mvc.{Action, AnyContent}
 import play.api.test.Helpers._
