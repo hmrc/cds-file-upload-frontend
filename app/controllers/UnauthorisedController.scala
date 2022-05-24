@@ -18,12 +18,12 @@ package controllers
 
 import models.UnauthorisedReason
 import models.UnauthorisedReason.UserIsAgent
-
-import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.{unauthorised, unauthorisedAgent}
+
+import javax.inject.{Inject, Singleton}
 
 @Singleton
 class UnauthorisedController @Inject()(mcc: MessagesControllerComponents, unauthorised: unauthorised, unauthorisedAgent: unauthorisedAgent)
@@ -36,7 +36,7 @@ class UnauthorisedController @Inject()(mcc: MessagesControllerComponents, unauth
   def onAgentKickOut(unauthorisedReason: UnauthorisedReason): Action[AnyContent] = Action { implicit request =>
     unauthorisedReason match {
       case UserIsAgent => Ok(unauthorisedAgent(displaySignOut = true))
-      case _ => Ok(unauthorisedAgent(displaySignOut = false))
+      case _           => Ok(unauthorisedAgent(displaySignOut = false))
     }
   }
 

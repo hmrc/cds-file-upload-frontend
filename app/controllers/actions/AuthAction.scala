@@ -31,10 +31,10 @@ import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{affinityGroup, allEnrolment
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import javax.inject.{Inject, Provider}
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 class AuthActionImpl @Inject()(
   val authConnector: AuthConnector,
@@ -59,16 +59,15 @@ class AuthActionImpl @Inject()(
         case allEnrolments ~ Some(Agent) =>
           Future.successful(Left(Redirect(routes.UnauthorisedController.onAgentKickOut(UserIsAgent))))
         case allEnrolments ~ _ =>
+          allEnrolments.getEnrolment(AuthKey.enrolment).flatMap(_.getIdentifier(AuthKey.identifierKey)) match {
 
-        allEnrolments.getEnrolment(AuthKey.enrolment).flatMap(_.getIdentifier(AuthKey.identifierKey)) match {
+            case Some(eori) if eoriAllowList.allows(eori.value) =>
+              val signedInUser = SignedInUser(eori.value, allEnrolments)
+              Future.successful(Right(AuthenticatedRequest(request, signedInUser)))
 
-          case Some(eori) if eoriAllowList.allows(eori.value) =>
-            val signedInUser = SignedInUser(eori.value, allEnrolments)
-            Future.successful(Right(AuthenticatedRequest(request, signedInUser)))
-
-          case Some(_) => throw new UnauthorizedException("User is not authorized to use this service")
-          case None    => throw InsufficientEnrolments()
-        }
+            case Some(_) => throw new UnauthorizedException("User is not authorized to use this service")
+            case None    => throw InsufficientEnrolments()
+          }
       }
       .recover {
         case _: NoActiveSession => Left(Redirect(loginUrl, Map("continue" -> Seq(continueLoginUrl))))
