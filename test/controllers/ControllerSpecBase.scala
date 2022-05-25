@@ -28,7 +28,7 @@ import services.{FileUploadAnswersService, SecureMessageAnswersService}
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Individual}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{affinityGroup, allEnrolments}
 import uk.gov.hmrc.auth.core.retrieve.~
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException, Enrolments}
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException, Enrolments, UnsupportedAffinityGroup}
 
 import java.net.URLEncoder
 import scala.concurrent.Future
@@ -48,7 +48,7 @@ abstract class ControllerSpecBase extends SpecBase with FakeActions {
 
   def withSignedInAgent()(test: => Unit): Unit = {
     when(mockAuthConnector.authorise(any(), eqTo(allEnrolments and affinityGroup))(any(), any()))
-      .thenReturn(Future.successful(new ~(Enrolments(Set.empty), Some(Agent))))
+      .thenReturn(Future.failed(UnsupportedAffinityGroup()))
 
     test
   }

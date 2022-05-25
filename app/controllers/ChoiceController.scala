@@ -37,6 +37,7 @@ class ChoiceController @Inject()(
   val actions = authenticate andThen verifiedEmail
 
   val onPageLoad: Action[AnyContent] = actions { implicit request =>
+    println("????")
     Ok(choicePage(ChoiceForm.form))
   }
 

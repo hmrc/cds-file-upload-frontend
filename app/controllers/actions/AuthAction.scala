@@ -25,7 +25,7 @@ import models.requests.{AuthenticatedRequest, SignedInUser}
 import play.api.mvc.Results.Redirect
 import play.api.mvc._
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.auth.core.AffinityGroup.Agent
+import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{affinityGroup, allEnrolments}
 import uk.gov.hmrc.auth.core.retrieve.~
@@ -54,10 +54,8 @@ class AuthActionImpl @Inject()(
   override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    authorised(Enrolment(AuthKey.enrolment))
+    authorised((Individual or Organisation) and Enrolment(AuthKey.enrolment))
       .retrieve(allEnrolments and affinityGroup) {
-        case allEnrolments ~ Some(Agent) =>
-          Future.successful(Left(Redirect(routes.UnauthorisedController.onAgentKickOut(UserIsAgent))))
         case allEnrolments ~ _ =>
           allEnrolments.getEnrolment(AuthKey.enrolment).flatMap(_.getIdentifier(AuthKey.identifierKey)) match {
 
@@ -70,9 +68,11 @@ class AuthActionImpl @Inject()(
           }
       }
       .recover {
-        case _: NoActiveSession => Left(Redirect(loginUrl, Map("continue" -> Seq(continueLoginUrl))))
-        case _                  => Left(Redirect(routes.UnauthorisedController.onPageLoad))
+        case _: UnsupportedAffinityGroup => Left(Results.Redirect(routes.UnauthorisedController.onAgentKickOut(UserIsAgent)))
+        case _: NoActiveSession          => Left(Redirect(loginUrl, Map("continue" -> Seq(continueLoginUrl))))
+        case _                           => Left(Redirect(routes.UnauthorisedController.onPageLoad))
       }
+
   }
 }
 
