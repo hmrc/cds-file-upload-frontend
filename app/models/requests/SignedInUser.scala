@@ -16,6 +16,7 @@
 
 package models.requests
 
-import uk.gov.hmrc.auth.core.Enrolments
+import uk.gov.hmrc.auth.core.AffinityGroup.Individual
+import uk.gov.hmrc.auth.core.{AffinityGroup, Enrolments}
 
-case class SignedInUser(eori: String, enrolments: Enrolments)
+case class SignedInUser(eori: String, enrolments: Enrolments, affinityGroup: AffinityGroup = Individual)

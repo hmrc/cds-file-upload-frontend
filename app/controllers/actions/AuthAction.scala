@@ -20,18 +20,21 @@ import com.google.inject.ProvidedBy
 import config.AppConfig
 import controllers.routes
 import models.AuthKey
+import models.UnauthorisedReason.UserIsAgent
 import models.requests.{AuthenticatedRequest, SignedInUser}
 import play.api.mvc.Results.Redirect
 import play.api.mvc._
 import play.api.{Configuration, Environment}
+import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.allEnrolments
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{affinityGroup, allEnrolments}
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
+
 import javax.inject.{Inject, Provider}
 import scala.concurrent.{ExecutionContext, Future}
-
-import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 class AuthActionImpl @Inject()(
   val authConnector: AuthConnector,
@@ -51,22 +54,25 @@ class AuthActionImpl @Inject()(
   override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    authorised(Enrolment(AuthKey.enrolment))
-      .retrieve(allEnrolments) { allEnrolments: Enrolments =>
-        allEnrolments.getEnrolment(AuthKey.enrolment).flatMap(_.getIdentifier(AuthKey.identifierKey)) match {
+    authorised((Individual or Organisation) and Enrolment(AuthKey.enrolment))
+      .retrieve(allEnrolments and affinityGroup) {
+        case allEnrolments ~ _ =>
+          allEnrolments.getEnrolment(AuthKey.enrolment).flatMap(_.getIdentifier(AuthKey.identifierKey)) match {
 
-          case Some(eori) if eoriAllowList.allows(eori.value) =>
-            val signedInUser = SignedInUser(eori.value, allEnrolments)
-            Future.successful(Right(AuthenticatedRequest(request, signedInUser)))
+            case Some(eori) if eoriAllowList.allows(eori.value) =>
+              val signedInUser = SignedInUser(eori.value, allEnrolments)
+              Future.successful(Right(AuthenticatedRequest(request, signedInUser)))
 
-          case Some(_) => throw new UnauthorizedException("User is not authorized to use this service")
-          case None    => throw InsufficientEnrolments()
-        }
+            case Some(_) => throw new UnauthorizedException("User is not authorized to use this service")
+            case None    => throw InsufficientEnrolments()
+          }
       }
       .recover {
-        case _: NoActiveSession => Left(Redirect(loginUrl, Map("continue" -> Seq(continueLoginUrl))))
-        case _                  => Left(Redirect(routes.UnauthorisedController.onPageLoad))
+        case _: UnsupportedAffinityGroup => Left(Results.Redirect(routes.UnauthorisedController.onAgentKickOut(UserIsAgent)))
+        case _: NoActiveSession          => Left(Redirect(loginUrl, Map("continue" -> Seq(continueLoginUrl))))
+        case _                           => Left(Redirect(routes.UnauthorisedController.onPageLoad))
       }
+
   }
 }
 
