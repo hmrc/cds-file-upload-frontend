@@ -85,7 +85,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
     "return an see other when valid data is submitted" in {
 
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
-        val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
+        val postRequest = fakePostRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
         val answers = FileUploadAnswers(eori, mrn = Some(mrn))
         val result = controller(user, eori, fakeDataRetrievalAction(answers)).onSubmit(postRequest)
 
@@ -100,7 +100,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
         val badData = contactDetails.copy(name = invalidName)
         val answers = FileUploadAnswers(eori, mrn = Some(mrn))
 
-        val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(badData): _*)
+        val postRequest = fakePostRequest.withFormUrlEncodedBody(asFormParams(badData): _*)
         val badForm = form.fillAndValidate(badData)
 
         val result = controller(user, eori, fakeDataRetrievalAction(answers)).onSubmit(postRequest)
@@ -114,7 +114,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
 
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
         resetAnswersService()
-        val postRequest = fakeRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
+        val postRequest = fakePostRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
         val answers = FileUploadAnswers(eori, mrn = Some(mrn))
 
         await(controller(user, eori, fakeDataRetrievalAction(answers)).onSubmit(postRequest))

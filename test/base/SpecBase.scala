@@ -43,6 +43,8 @@ trait SpecBase
   implicit val mcc: MessagesControllerComponents = stubMessagesControllerComponents()
 
   lazy val fakeRequest = FakeRequest("", "")
+  lazy val fakePostRequest = FakeRequest("", "").withMethod("POST")
+  lazy val fakeGetRequest = FakeRequest("", "").withMethod("GET")
 
   implicit lazy val messages: Messages =
     new AllMessageKeysAreMandatoryMessages(SpecBase.messagesApi.preferred(fakeRequest))

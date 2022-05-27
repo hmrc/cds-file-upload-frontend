@@ -18,7 +18,6 @@ package controllers
 
 import scala.concurrent.Future
 
-import base.TestRequests
 import connectors.SecureMessageFrontendConnector
 import models.{ConversationPartial, InboxPartial, ReplyResultPartial}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -31,7 +30,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.FakeRequestCSRFSupport._
 import views.html.messaging.{inbox_wrapper, partial_wrapper}
 
-class SecureMessagingControllerSpec extends ControllerSpecBase with TestRequests {
+class SecureMessagingControllerSpec extends ControllerSpecBase {
 
   private val partialWrapperPage = mock[inbox_wrapper]
   private val partial_wrapper = mock[partial_wrapper]
