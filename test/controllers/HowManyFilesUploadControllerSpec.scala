@@ -167,7 +167,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
       when(mockUpscanConnector.upload(any(), any())).thenReturn(Future.successful(wsResponse))
 
-      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2").withCSRFToken
+      val postRequest = fakePostRequest.withFormUrlEncodedBody("value" -> "2").withCSRFToken
 
       val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
 
@@ -197,7 +197,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
       when(mockUpscanConnector.upload(any(), any())).thenReturn(Future.successful(wsResponse))
 
-      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2").withCSRFToken
+      val postRequest = fakePostRequest.withFormUrlEncodedBody("value" -> "2").withCSRFToken
 
       val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
 
@@ -221,7 +221,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
       when(mockUpscanConnector.upload(any(), any())).thenReturn(Future.successful(wsResponse))
 
-      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2").withCSRFToken
+      val postRequest = fakePostRequest.withFormUrlEncodedBody("value" -> "2").withCSRFToken
 
       val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
 
@@ -230,7 +230,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
     }
 
     "make a request to customs declarations" in {
-      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "2")
+      val postRequest = fakePostRequest.withFormUrlEncodedBody("value" -> "2")
       await(controller(fakeContactDetailsRequiredAction).onSubmit(postRequest.withCSRFToken))
 
       val Some(fileUploadCount) = FileUploadCount(2)

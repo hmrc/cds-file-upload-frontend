@@ -18,7 +18,6 @@ package controllers
 
 import scala.concurrent.Future
 
-import base.TestRequests
 import forms.InboxChoiceForm
 import forms.InboxChoiceForm.{InboxChoiceKey, Values}
 import models.{ExportMessages, SecureMessageAnswers}
@@ -26,14 +25,13 @@ import org.mockito.ArgumentMatchers.{any, anyString, eq => eqTo}
 import org.mockito.Mockito._
 import play.api.data.Form
 import play.api.i18n.Messages
-import play.api.libs.json.Json
 import play.api.mvc.Request
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
 import services.SecureMessageAnswersService
 import views.html.messaging.inbox_choice
 
-class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
+class InboxChoiceControllerSpec extends ControllerSpecBase {
 
   private val inboxChoice = mock[inbox_choice]
   private val secureMessageAnswersService = mock[SecureMessageAnswersService]
@@ -76,7 +74,7 @@ class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
 
     "provided with incorrect form" should {
 
-      val request = postRequest(Json.obj(InboxChoiceKey -> "Incorrect Choice"))
+      val request = fakePostRequest.withFormUrlEncodedBody(InboxChoiceKey -> "Incorrect Choice")
 
       "return a 400(BAD_REQUEST) status code" in {
         val result = controller.onSubmit()(request)
@@ -94,7 +92,7 @@ class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
 
     "provided with an empty form" should {
 
-      val request = postRequest(Json.obj(InboxChoiceKey -> ""))
+      val request = fakePostRequest.withFormUrlEncodedBody(InboxChoiceKey -> "")
 
       "return a 400(BAD_REQUEST) status code" in {
         val result = controller.onSubmit()(request)
@@ -114,7 +112,7 @@ class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
 
       "specifies the choice to show the Exports Messages" should {
 
-        val request = postRequest(Json.obj(InboxChoiceKey -> Values.ExportsMessages))
+        val request = fakePostRequest.withFormUrlEncodedBody(InboxChoiceKey -> Values.ExportsMessages)
 
         "call SecureMessageAnswerService" in {
           when(secureMessageAnswersService.findOne(anyString())).thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
@@ -143,7 +141,7 @@ class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
 
       "specifies the choice to show the Imports Messages" should {
 
-        val request = postRequest(Json.obj(InboxChoiceKey -> Values.ImportsMessages))
+        val request = fakePostRequest.withFormUrlEncodedBody(InboxChoiceKey -> Values.ImportsMessages)
 
         "return SeeOther (303)" in {
           val result = controller.onSubmit()(request)
@@ -166,7 +164,7 @@ class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
       when(secureMessageAnswersService.findOne(any[String]))
         .thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
 
-      controller.onExportsMessageChoice()(getRequest).futureValue
+      controller.onExportsMessageChoice()(fakeGetRequest).futureValue
 
       verify(secureMessageAnswersService).findOneAndReplace(SecureMessageAnswers(any(), ExportMessages))
     }
@@ -175,7 +173,7 @@ class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
       when(secureMessageAnswersService.findOne(any[String]))
         .thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
 
-      val result = controller.onExportsMessageChoice()(getRequest)
+      val result = controller.onExportsMessageChoice()(fakeGetRequest)
       status(result) mustBe SEE_OTHER
     }
 
@@ -183,7 +181,7 @@ class InboxChoiceControllerSpec extends ControllerSpecBase with TestRequests {
       when(secureMessageAnswersService.findOne(any[String]))
         .thenReturn(Future.successful(Some(SecureMessageAnswers("", ExportMessages))))
 
-      val result = controller.onExportsMessageChoice()(getRequest)
+      val result = controller.onExportsMessageChoice()(fakeGetRequest)
       redirectLocation(result) mustBe Some(routes.SecureMessagingController.displayInbox.url)
     }
   }

@@ -150,7 +150,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
 
       "return BadRequest (400) response" in {
 
-        val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "Invalid MRN")
+        val postRequest = fakePostRequest.withFormUrlEncodedBody("value" -> "Invalid MRN")
 
         val result = controller.onSubmit(postRequest)
 
@@ -162,7 +162,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
 
       "fails MRN DIS validation" should {
 
-        val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn)
+        val postRequest = fakePostRequest.withFormUrlEncodedBody("value" -> mrn)
 
         "return BadRequest (400) response" in {
 
@@ -177,7 +177,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
 
       "passes MRN DIS validation" should {
 
-        val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> mrn)
+        val postRequest = fakePostRequest.withFormUrlEncodedBody("value" -> mrn)
 
         "call AnswersService" in {
 

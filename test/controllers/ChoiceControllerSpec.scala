@@ -16,19 +16,17 @@
 
 package controllers
 
-import base.TestRequests
 import forms.ChoiceForm
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import play.api.data.Form
 import play.api.i18n.Messages
-import play.api.libs.json.Json
 import play.api.mvc.Request
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
 import views.html.choice_page
 
-class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
+class ChoiceControllerSpec extends ControllerSpecBase {
 
   private val choicePage = mock[choice_page]
 
@@ -67,7 +65,7 @@ class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
 
     "provided with incorrect form" should {
 
-      val request = postRequest(Json.obj("choice" -> "Incorrect Choice"))
+      val request = fakePostRequest.withFormUrlEncodedBody("choice" -> "Incorrect Choice")
 
       "return BadRequest (400)" in {
         val result = controller.onSubmit()(request)
@@ -85,7 +83,7 @@ class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
 
     "provided with empty form" should {
 
-      val request = postRequest(Json.obj("choice" -> ""))
+      val request = fakePostRequest.withFormUrlEncodedBody("choice" -> "")
 
       "return BadRequest (400)" in {
         val result = controller.onSubmit()(request)
@@ -105,7 +103,7 @@ class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
 
       "contains value for Secure Inbox" should {
 
-        val request = postRequest(Json.obj("choice" -> ChoiceForm.AllowedChoiceValues.SecureMessageInbox))
+        val request = fakePostRequest.withFormUrlEncodedBody("choice" -> ChoiceForm.AllowedChoiceValues.SecureMessageInbox)
 
         "return SEE_OTHER (303)" in {
           val result = controller.onSubmit()(request)
@@ -122,7 +120,7 @@ class ChoiceControllerSpec extends ControllerSpecBase with TestRequests {
 
       "contains value for submitting documents" should {
 
-        val request = postRequest(Json.obj("choice" -> ChoiceForm.AllowedChoiceValues.DocumentUpload))
+        val request = fakePostRequest.withFormUrlEncodedBody("choice" -> ChoiceForm.AllowedChoiceValues.DocumentUpload)
 
         "return SeeOther (303)" in {
           val result = controller.onSubmit()(request)
