@@ -27,7 +27,7 @@
 
 @govukLayout(title = Title(title)) {
 
-  @pageTitle(text = messages(heading), classes = "govuk-heading-xl")
+  @pageTitle(text = messages(heading))
   @messageKeys.map { key =>
     <p class="govuk-body-m">@messages(key)</p>
   }
