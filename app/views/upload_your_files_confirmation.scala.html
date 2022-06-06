@@ -71,7 +71,7 @@
         <a class="govuk-link govuk-link--visually-hidden govuk-!-display-none-print" href="javascript:if(window.print)window.print()">@messages("fileUploadConfirmationPage.printPage")</a>
     </p>
 
-    <h3 class="govuk-heading-m">@messages("fileUploadConfirmationPage.section1.title")</h3>
+    <h2 class="govuk-heading-m">@messages("fileUploadConfirmationPage.section1.title")</h2>
 
     @paragraphBody(message = messages("fileUploadConfirmationPage.section1.paragraph1",
         link(text = messages("fileUploadConfirmationPage.section1.paragraph1.linkText"),
@@ -82,7 +82,7 @@
         link(text = messages("fileUploadConfirmationPage.section1.paragraph2.linkText"),
             call = Call("GET", controllers.routes.InboxChoiceController.onPageLoad.url))))
 
-    <h3 class="govuk-heading-m">@messages("fileUploadConfirmationPage.section2.title")</h3>
+    <h2 class="govuk-heading-m">@messages("fileUploadConfirmationPage.section2.title")</h2>
 
     @paragraphBody(message = messages("fileUploadConfirmationPage.section2.paragraph1"))
     @bulletList(
