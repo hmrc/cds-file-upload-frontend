@@ -82,7 +82,13 @@ class ContactDetailsSpec extends DomAssertions with ViewBehaviours with ScalaChe
 
       forAll { contactDetails: ContactDetails =>
         val popForm = form.fillAndValidate(contactDetails)
-        val input = exportsInputText(field = popForm("phoneNumber"), labelKey = "contactDetails.phoneNumber", labelClasses = "govuk-label", inputmode = "numeric", pattern = "[0-9]*")
+        val input = exportsInputText(
+          field = popForm("phoneNumber"),
+          labelKey = "contactDetails.phoneNumber",
+          labelClasses = "govuk-label",
+          inputmode = "numeric",
+          pattern = "[0-9]*"
+        )
 
         viewAsString(popForm) must include(input.toString())
       }
