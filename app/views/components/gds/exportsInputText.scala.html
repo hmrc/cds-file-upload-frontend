@@ -30,7 +30,9 @@
         labelClasses: String = "govuk-label--m",
         defaultInputClasses: String = "govuk-!-width-two-thirds",
         inputClasses: Option[String] = None,
-        sectionHeaderKey: Option[String] = None
+        sectionHeaderKey: Option[String] = None,
+        inputmode: String = "",
+        pattern: String = ""
 )(implicit messages: Messages)
 
 @buildLabel = @{
@@ -55,5 +57,7 @@
     label = buildLabel,
     hint = hintKey.map(key => Hint(content = HtmlContent(Html(messages(key, hintKeyLinks:_*))))),
     errorMessage = field.error.map(err => ErrorMessage(content = Text(messages(err.message)))),
-    classes = inputClasses.map(clazz => s" $clazz").getOrElse(defaultInputClasses)
+    classes = inputClasses.map(clazz => s" $clazz").getOrElse(defaultInputClasses),
+    inputmode = Some(inputmode),
+    pattern = Some(pattern)
 ))
