@@ -25,7 +25,8 @@
         exportsInputText: exportsInputText,
         govukButton: GovukButton,
         pageTitle: pageTitle,
-        paragraphBody: paragraphBody
+        paragraphBody: paragraphBody,
+        govukInput: GovukInput
 )
 
 @(form: Form[ContactDetails], mrn: MRN)(implicit request: Request[_], messages: Messages)
@@ -54,15 +55,15 @@
                 @exportsInputText(
                     field = form("companyName"),
                     labelKey = "contactDetails.companyName",
-                    labelClasses = "govuk-label",
+                    labelClasses = "govuk-label"
                 )
 
                 @exportsInputText(
                     field = form("phoneNumber"),
                     labelKey = "contactDetails.phoneNumber",
                     labelClasses = "govuk-label",
-                    inputmode = "numeric",
                     pattern = "[0-9]*",
+                    inputmode = "numeric"
                 )
 
                 </br>
