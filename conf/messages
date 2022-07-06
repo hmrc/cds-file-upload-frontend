@@ -106,11 +106,11 @@ emailUndeliverable.link-text=Verify or change email address
 ## Contact details page
 
 contactDetails.heading=Your contact details
-contactDetails.name=Name
+contactDetails.name=Full name
 contactDetails.name.missing=Enter a name
 contactDetails.companyName=Company name
 contactDetails.companyName.missing=Enter a company name
-contactDetails.phoneNumber=Phone number
+contactDetails.phoneNumber=UK telephone number
 contactDetails.name.invalid=Name must contain 35 characters or fewer
 contactDetails.companyName.invalid=Company name must contain 35 characters or fewer
 contactDetails.phoneNumber.missing=Enter a telephone number
