@@ -20,20 +20,18 @@ import com.google.inject.Singleton
 import config.AppConfig
 import controllers.actions._
 import forms.MRNFormProvider
-import models.{EORI, FileUploadAnswers, MRN}
 import models.requests.DataRequest
+import models.{FileUploadAnswers, MRN}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import services.{FileUploadAnswersService, MrnDisValidator}
-import uk.gov.hmrc.http.HeaderCarrier
+import services.FileUploadAnswersService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.RefererUrlValidator
-
-import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
 import views.html.{mrn_access_denied, mrn_entry}
 
 import java.net.URLDecoder.decode
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class MrnEntryController @Inject()(
@@ -44,14 +42,13 @@ class MrnEntryController @Inject()(
   answersService: FileUploadAnswersService,
   mcc: MessagesControllerComponents,
   mrnEntry: mrn_entry,
-  mrnDisValidator: MrnDisValidator,
   mrnAccessDenied: mrn_access_denied
 )(implicit ec: ExecutionContext, appConf: AppConfig)
     extends FrontendController(mcc) with I18nSupport {
 
   private val form = formProvider()
 
-  private def getBackLink(refererUrl: Option[String]) = refererUrl.getOrElse(routes.ChoiceController.onPageLoad.url)
+  private def getBackLink(refererUrl: Option[String]): String = refererUrl.getOrElse(routes.ChoiceController.onPageLoad.url)
 
   def onPageLoad(refererUrl: Option[String] = None): Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData).async { implicit req =>
     val populatedForm = req.userAnswers.mrn.fold(form)(form.fill)
@@ -73,7 +70,7 @@ class MrnEntryController @Inject()(
       .bindFromRequest()
       .fold(
         errorForm => Future.successful(BadRequest(mrnEntry(errorForm, getBackLink(req.userAnswers.mrnPageRefererUrl)))),
-        mrn => checkMrnExistenceAndOwnership(mrn, req.userAnswers)
+        updateUserAnswersAndRedirect(_, req.userAnswers)
       )
   }
 
@@ -84,20 +81,13 @@ class MrnEntryController @Inject()(
         .getOrElse(req.userAnswers)
 
       MRN(mrn)
-        .map(checkMrnExistenceAndOwnership(_, updatedAnswers))
+        .map(updateUserAnswersAndRedirect(_, updatedAnswers))
         .getOrElse(invalidMrnResponse(mrn))
   }
 
-  private def checkMrnExistenceAndOwnership(
-    mrn: MRN,
-    userAnswers: FileUploadAnswers
-  )(implicit hc: HeaderCarrier, req: DataRequest[AnyContent]): Future[Result] =
-    mrnDisValidator.validate(mrn, EORI(req.request.eori)).flatMap {
-      case false => invalidMrnResponse(mrn.value)
-      case true =>
-        answersService.findOneAndReplace(userAnswers.copy(mrn = Some(mrn))).map { _ =>
-          Redirect(routes.ContactDetailsController.onPageLoad)
-        }
+  private def updateUserAnswersAndRedirect(mrn: MRN, userAnswers: FileUploadAnswers): Future[Result] =
+    answersService.findOneAndReplace(userAnswers.copy(mrn = Some(mrn))).map { _ =>
+      Redirect(routes.ContactDetailsController.onPageLoad)
     }
 
   private def invalidMrnResponse(mrn: String)(implicit req: DataRequest[AnyContent]): Future[Result] =

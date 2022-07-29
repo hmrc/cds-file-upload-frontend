@@ -16,14 +16,14 @@
 
 package connectors
 
-import scala.concurrent.{ExecutionContext, Future}
-
 import config.{AppConfig, CDSFileUpload}
-import javax.inject.Inject
-import models.{EORI, Email, MRN, Notification}
+import models.{EORI, Email, Notification}
 import play.api.Logging
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
 class CdsFileUploadConnector @Inject()(appConfig: AppConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) extends Logging {
 
@@ -39,9 +39,6 @@ class CdsFileUploadConnector @Inject()(appConfig: AppConfig, httpClient: HttpCli
         }
         maybeNotification
       }
-
-  def getDeclarationStatus(mrn: MRN)(implicit hc: HeaderCarrier): Future[HttpResponse] =
-    httpClient.GET[HttpResponse](cdsFileUploadConfig.fetchDeclarationStatusEndpoint(mrn.value))
 
   def getVerifiedEmailAddress(eori: EORI)(implicit hc: HeaderCarrier): Future[Option[Email]] =
     httpClient
