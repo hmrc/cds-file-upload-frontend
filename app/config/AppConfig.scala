@@ -71,19 +71,9 @@ case class CDSFileUploadFrontend(protocol: Option[String], host: String, port: O
   val uri: String = s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}"
 }
 
-case class CDSFileUpload(
-  protocol: Option[String],
-  host: String,
-  port: Option[Int],
-  fetchNotificationUri: String,
-  fetchDeclarationStatus: String,
-  fetchVerifiedEmail: String
-) {
+case class CDSFileUpload(protocol: Option[String], host: String, port: Option[Int], fetchNotificationUri: String, fetchVerifiedEmail: String) {
   def fetchNotificationEndpoint(reference: String): String =
     s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$fetchNotificationUri/$reference"
-
-  def fetchDeclarationStatusEndpoint(mrn: String): String =
-    s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$fetchDeclarationStatus/$mrn"
 
   def fetchVerifiedEmailEndpoint(eori: String): String =
     s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$fetchVerifiedEmail/$eori"

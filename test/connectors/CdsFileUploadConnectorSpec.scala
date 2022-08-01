@@ -18,14 +18,12 @@ package connectors
 
 import base.{Injector, UnitSpec}
 import config.AppConfig
-import models.{EORI, Email, MRN, Notification}
+import models.{EORI, Email, Notification}
 import org.mockito.ArgumentMatchers.{any, anyString}
-import org.mockito.Mockito.{reset, verify, when}
+import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
-import play.mvc.Http.Status.{INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
-import testdata.CommonTestData
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, UpstreamErrorResponse}
 
 import scala.concurrent.ExecutionContext.global
 import scala.concurrent.Future
@@ -51,84 +49,24 @@ class CdsFileUploadConnectorSpec extends UnitSpec with BeforeAndAfterEach with I
   "CdsFileUploadConnector on getNotification" should {
 
     "return notification" when {
-
       "notification exists" in {
-
         val notification = Notification("fileReference", "outcome", Some("fileName"))
 
         when(httpClient.GET[Option[Notification]](anyString(), any(), any())(any(), any(), any()))
           .thenReturn(Future.successful(Some(notification)))
 
         val result = cdsFileUploadConnector.getNotification("fileReference")(hc).futureValue
-
         result mustBe Some(notification)
       }
     }
 
     "return None" when {
-
       "there is no notification with specific reference" in {
-
         when(httpClient.GET[Option[Notification]](anyString(), any(), any())(any(), any(), any()))
           .thenReturn(Future.successful(None))
 
         val result = cdsFileUploadConnector.getNotification("fileReference")(hc).futureValue
-
         result mustBe None
-      }
-    }
-  }
-
-  "CdsFileUploadConnector on getDeclarationStatus" should {
-
-    "call HttpClient" in {
-
-      val httpResponse = HttpResponse(status = OK, body = "")
-
-      when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
-        .thenReturn(Future.successful(httpResponse))
-
-      cdsFileUploadConnector.getDeclarationStatus(MRN(CommonTestData.mrn).get)(hc).futureValue
-
-      verify(httpClient).GET[HttpResponse](anyString(), any(), any())(any(), any(), any())
-    }
-
-    "return value returned from HttpClient" when {
-
-      "response has Ok (200) status" in {
-
-        val httpResponse = HttpResponse(status = OK, body = "")
-
-        when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
-          .thenReturn(Future.successful(httpResponse))
-
-        val result = cdsFileUploadConnector.getDeclarationStatus(MRN(CommonTestData.mrn).get)(hc).futureValue
-
-        result mustBe httpResponse
-      }
-
-      "response has NotFound (404) status" in {
-
-        val httpResponse = HttpResponse(status = NOT_FOUND, body = "")
-
-        when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
-          .thenReturn(Future.successful(httpResponse))
-
-        val result = cdsFileUploadConnector.getDeclarationStatus(MRN(CommonTestData.mrn).get)(hc).futureValue
-
-        result mustBe httpResponse
-      }
-
-      "response has InternalServerError (500) status" in {
-
-        val httpResponse = HttpResponse(status = INTERNAL_SERVER_ERROR, body = "")
-
-        when(httpClient.GET[HttpResponse](anyString(), any(), any())(any(), any(), any()))
-          .thenReturn(Future.successful(httpResponse))
-
-        val result = cdsFileUploadConnector.getDeclarationStatus(MRN(CommonTestData.mrn).get)(hc).futureValue
-
-        result mustBe httpResponse
       }
     }
   }
@@ -143,7 +81,6 @@ class CdsFileUploadConnectorSpec extends UnitSpec with BeforeAndAfterEach with I
         .thenReturn(Future.successful(Some(expectedEmail)))
 
       val result = cdsFileUploadConnector.getVerifiedEmailAddress(sampleEori)(hc).futureValue
-
       result mustBe Some(expectedEmail)
     }
 
@@ -152,7 +89,6 @@ class CdsFileUploadConnectorSpec extends UnitSpec with BeforeAndAfterEach with I
         .thenReturn(Future.successful(None))
 
       val result = cdsFileUploadConnector.getVerifiedEmailAddress(sampleEori)(hc).futureValue
-
       result mustBe None
     }
 
@@ -161,7 +97,6 @@ class CdsFileUploadConnectorSpec extends UnitSpec with BeforeAndAfterEach with I
         .thenReturn(Future.failed(UpstreamErrorResponse("", 410)))
 
       val result = cdsFileUploadConnector.getVerifiedEmailAddress(sampleEori)(hc)
-
       assert(result.failed.futureValue.isInstanceOf[UpstreamErrorResponse])
     }
 
@@ -170,7 +105,6 @@ class CdsFileUploadConnectorSpec extends UnitSpec with BeforeAndAfterEach with I
         .thenReturn(Future.failed(UpstreamErrorResponse("", 500)))
 
       val result = cdsFileUploadConnector.getVerifiedEmailAddress(sampleEori)(hc)
-
       assert(result.failed.futureValue.isInstanceOf[UpstreamErrorResponse])
     }
   }

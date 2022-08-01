@@ -24,9 +24,7 @@ object MRN {
 
   def validRegex: String = "\\d{2}[a-zA-Z]{2}[a-zA-Z0-9]{14}"
 
-  def apply(value: String): Option[MRN] =
-    if (value.matches(validRegex)) Some(new MRN(value) {})
-    else None
+  def apply(value: String): Option[MRN] = if (value.matches(validRegex)) Some(new MRN(value) {}) else None
 
   implicit val reads: Reads[MRN] =
     __.read[String]

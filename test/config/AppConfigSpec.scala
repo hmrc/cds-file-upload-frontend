@@ -75,7 +75,6 @@ class AppConfigSpec extends PlaySpec {
       |      host = localhost
       |      port = 6795
       |      fetch-notification-uri = /cds-file-upload/notification
-      |      fetch-declaration-status = /cds-file-upload/declaration-information
       |      fetch-verified-email = /cds-file-upload/eori-email
       |    }
       |
@@ -170,43 +169,32 @@ class AppConfigSpec extends PlaySpec {
   "App Config" should {
 
     "have test-only batch upload endpoint in packaged configuration" in {
-
       val customsDeclarations = config.microservice.services.customsDeclarations
-
       val expectedUrl = "http://localhost:6793/cds-file-upload-service/test-only/batch-file-upload"
-
       customsDeclarations.batchUploadEndpoint mustBe expectedUrl
     }
 
     "have a correct configuration for CDS File Upload" in {
       val cdsFileUpload = config.microservice.services.cdsFileUpload
-
       cdsFileUpload.fetchNotificationEndpoint("reference") mustBe "http://localhost:6795/cds-file-upload/notification/reference"
-      cdsFileUpload.fetchDeclarationStatusEndpoint("sampleMrn") mustBe "http://localhost:6795/cds-file-upload/declaration-information/sampleMrn"
       cdsFileUpload.fetchVerifiedEmailEndpoint("sampleEori") mustBe "http://localhost:6795/cds-file-upload/eori-email/sampleEori"
     }
 
     "have gtm container" in {
-
       config.trackingConsentFrontend.gtm.container mustBe "a"
     }
 
     "have tracking-consent-frontend url" in {
-
       val expectedUrl = "http://localhost:12345"
-
       config.trackingConsentFrontend.host mustBe expectedUrl
     }
 
     "have link to contact-frontend" in {
-
       val expectedUrl = "http://localhost:9250/contact/beta-feedback-unauthenticated?service=SFUS"
-
       config.microservice.services.contactFrontend.giveFeedbackLink mustBe expectedUrl
     }
 
     "have a correct configuration for secure-message-frontend" in {
-
       val secureMessaging = config.microservice.services.secureMessaging
 
       secureMessaging.fetchInboxEndpoint mustBe "http://localhost:9055/secure-message-frontend/cds-file-upload-service/messages"
