@@ -50,7 +50,7 @@ class SecureMessagingControllerSpec extends ControllerSpecBase {
   override def beforeEach(): Unit = {
     super.beforeEach()
 
-    reset(partial_wrapper, partialWrapperPage, connector)
+    reset[Object](partial_wrapper, partialWrapperPage, connector)
 
     when(partialWrapperPage.apply(any[HtmlFormat.Appendable])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
     when(partial_wrapper.apply(any[HtmlFormat.Appendable], any[String], any[String], any[Option[String]])(any[Request[_]], any[Messages]))

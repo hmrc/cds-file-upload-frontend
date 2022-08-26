@@ -38,7 +38,7 @@ class ErrorPageControllerSpec extends ControllerSpecBase {
   }
 
   override protected def afterEach(): Unit = {
-    reset(uploadErrorPage, errorHandler)
+    reset[Object](uploadErrorPage, errorHandler)
 
     super.afterEach()
   }

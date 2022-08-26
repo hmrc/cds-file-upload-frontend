@@ -49,7 +49,7 @@ class InboxChoiceControllerSpec extends ControllerSpecBase {
   override def beforeEach(): Unit = {
     super.beforeEach()
 
-    reset(inboxChoice, secureMessageAnswersService)
+    reset[Object](inboxChoice, secureMessageAnswersService)
     when(inboxChoice.apply(any[Form[InboxChoiceForm]])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
     when(secureMessageAnswersService.findOneAndReplace(any())).thenReturn(Future.successful(SecureMessageAnswers("", ExportMessages)))
   }

@@ -50,7 +50,7 @@ trait AuthSuite extends ScalaFutures {
                |  ]
                |}""".stripMargin
 
-  def authenticate(app: Application)(implicit ec: ExecutionContext): Future[Map[String, Seq[String]]] = {
+  def authenticate(app: Application)(implicit ec: ExecutionContext): Future[Map[String, scala.collection.Seq[String]]] = {
     val ws = app.injector.instanceOf[WSClient]
     ws.url("http://localhost:8585/government-gateway/session/login").post(Json.parse(json)).map(_.headers)
   }

@@ -69,11 +69,11 @@ abstract class ControllerSpecBase extends SpecBase with FakeActions {
 
   override protected def beforeEach(): Unit = {
     resetAnswersService()
-    reset(mockAuthConnector, mockSecureMessageAnswersService)
+    reset[Object](mockAuthConnector, mockSecureMessageAnswersService)
   }
 
   def resetAnswersService(): OngoingStubbing[Future[FileUploadAnswers]] = {
-    reset(mockFileUploadAnswersService)
+    reset[Object](mockFileUploadAnswersService)
     when(mockFileUploadAnswersService.findOneAndReplace(any[FileUploadAnswers]))
       .thenReturn(Future.successful(FileUploadAnswers("")))
   }

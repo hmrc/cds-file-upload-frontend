@@ -16,7 +16,7 @@
 
 package views.components.gds
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 import base.SpecBase
 import config.AppConfig

@@ -53,7 +53,7 @@ class SignOutControllerSpec extends ControllerSpecBase {
       "signOut is invoked" in {
         val result = controller.signOut(fakeRequest)
         status(result) mustBe OK
-        await(result).newSession mustBe 'defined
+        await(result).newSession mustBe defined
       }
     }
   }

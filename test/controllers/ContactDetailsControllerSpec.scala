@@ -49,7 +49,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
     )(mcc.executionContext)
 
   override protected def beforeEach(): Unit = {
-    super.beforeEach
+    super.beforeEach()
 
     when(page.apply(any(), any())(any(), any())).thenReturn(HtmlFormat.empty)
   }

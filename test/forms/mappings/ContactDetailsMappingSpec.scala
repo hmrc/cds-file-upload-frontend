@@ -59,7 +59,7 @@ class ContactDetailsMappingSpec extends SpecBase with Matchers with ScalaCheckPr
         }
 
         "is empty" in {
-          val formData = contactDetailsMapping.unbind(validContactDetails).filterKeys(_ != "name")
+          val formData = contactDetailsMapping.unbind(validContactDetails).view.filterKeys(_ != "name").toMap
           form
             .bind(formData)
             .fold(errors => errorMessage(errors) mustBe "contactDetails.name.missing", _ => fail("Form binding must not fail!"))
@@ -85,7 +85,7 @@ class ContactDetailsMappingSpec extends SpecBase with Matchers with ScalaCheckPr
         }
 
         "is empty" in {
-          val formData = contactDetailsMapping.unbind(validContactDetails).filterKeys(_ != "companyName")
+          val formData = contactDetailsMapping.unbind(validContactDetails).view.filterKeys(_ != "companyName").toMap
           form
             .bind(formData)
             .fold(errors => errorMessage(errors) mustBe "contactDetails.companyName.missing", _ => fail("Form binding must not fail!"))
@@ -121,7 +121,7 @@ class ContactDetailsMappingSpec extends SpecBase with Matchers with ScalaCheckPr
         }
 
         "is empty" in {
-          val formData = contactDetailsMapping.unbind(validContactDetails).filterKeys(_ != "phoneNumber")
+          val formData = contactDetailsMapping.unbind(validContactDetails).view.filterKeys(_ != "phoneNumber").toMap
           form
             .bind(formData)
             .fold(errors => errorMessage(errors) mustBe "contactDetails.phoneNumber.missing", _ => fail("Form binding must not fail!"))

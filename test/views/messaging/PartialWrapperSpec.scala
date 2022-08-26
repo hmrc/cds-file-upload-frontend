@@ -16,7 +16,7 @@
 
 package views.messaging
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 import controllers.routes
 import org.jsoup.nodes.{Document, Element}

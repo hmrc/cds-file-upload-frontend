@@ -83,7 +83,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
   }
 
   override protected def afterEach(): Unit = {
-    reset(auditService, cdsFileUploadConnector, uploadYourFiles, uploadError, mockFileUploadAnswersService)
+    reset[Object](auditService, cdsFileUploadConnector, uploadYourFiles, uploadError, mockFileUploadAnswersService)
 
     super.afterEach()
   }
@@ -204,8 +204,8 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response))
       await(controller(fakeDataRetrievalAction(answers)).success("ref")(fakeRequest))
 
-      val Some(updateResponse) = theSavedFileUploadAnswers.fileUploadResponse
-      val Some(updatedFile) = updateResponse.uploads.find(_.id == "ref")
+      val updateResponse = theSavedFileUploadAnswers.fileUploadResponse.get
+      val updatedFile = updateResponse.uploads.find(_.id == "ref").get
       updatedFile.state mustBe Uploaded
     }
 
@@ -228,7 +228,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val lastFile = FileUpload("fileRef3", Waiting(UploadRequest("another href", Map.empty)), id = "fileRef3")
       val response = FileUploadResponse(List(file1, file2, lastFile))
 
-      val Some(mrn) = MRN("34GB1234567ABCDEFG")
+      val mrn = MRN("34GB1234567ABCDEFG").get
       val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456")
       val answers =
         FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
@@ -255,7 +255,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val lastFile = FileUpload("fileRef3", Waiting(UploadRequest("another href", Map.empty)), id = "fileRef3")
       val response = FileUploadResponse(List(file1, file2, lastFile))
 
-      val Some(mrn) = MRN("34GB1234567ABCDEFG")
+      val mrn = MRN("34GB1234567ABCDEFG").get
       val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456")
       val answers =
         FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
@@ -279,7 +279,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val lastFile = FileUpload("fileRef3", Waiting(UploadRequest("another href", Map.empty)), id = "fileRef3")
       val response = FileUploadResponse(List(file1, file2, lastFile))
 
-      val Some(mrn) = MRN("34GB1234567ABCDEFG")
+      val mrn = MRN("34GB1234567ABCDEFG").get
       val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456")
       val answers =
         FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
@@ -304,7 +304,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val lastFile = FileUpload("fileRef3", Waiting(UploadRequest("another href", Map.empty)), id = "fileRef3")
       val response = FileUploadResponse(List(file1, file2, lastFile))
 
-      val Some(mrn) = MRN("34GB1234567ABCDEFG")
+      val mrn = MRN("34GB1234567ABCDEFG").get
       val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456")
       val answers =
         FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))

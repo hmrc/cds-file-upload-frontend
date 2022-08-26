@@ -19,7 +19,7 @@ package views
 import base.SpecBase
 import views.html.unverified_email
 import views.matchers.ViewMatchers
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class UnverifiedEmailSpec extends SpecBase with ViewMatchers {
 

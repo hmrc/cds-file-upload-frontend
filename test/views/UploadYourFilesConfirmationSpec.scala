@@ -23,7 +23,7 @@ import org.jsoup.nodes.Document
 import views.html.upload_your_files_confirmation
 import views.matchers.ViewMatchers
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers with FilesUploadedSpec {
 

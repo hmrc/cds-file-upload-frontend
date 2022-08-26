@@ -25,9 +25,9 @@ class Module extends AbstractModule {
 
   import pureconfig.ConfigSource
 
-  val cfg = ConfigSource.default.loadOrThrow[AppConfig]
+  val cfg: AppConfig = ConfigSource.default.loadOrThrow[AppConfig]
 
-  val csrfConfig = CSRFConfig(shouldProtect = !_.uri.matches("*test-only*"))
+  val csrfConfig: CSRFConfig = CSRFConfig(shouldProtect = !_.uri.matches("*test-only*"))
 
   override def configure(): Unit = {
     // Bind the actions for DI
