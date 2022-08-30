@@ -55,7 +55,7 @@ class MessageFilterActionSpec extends ControllerSpecBase {
         val result = action.callRefine(request).futureValue
 
         result.isRight mustBe true
-        result.right.get.secureMessageAnswers mustBe answers
+        result.toOption.get.secureMessageAnswers mustBe answers
       }
     }
 
@@ -67,7 +67,7 @@ class MessageFilterActionSpec extends ControllerSpecBase {
         val result = action.callRefine(request).futureValue
 
         result.isLeft mustBe true
-        result.left.get mustBe Redirect(routes.InboxChoiceController.onPageLoad)
+        result.swap.getOrElse("") mustBe Redirect(routes.InboxChoiceController.onPageLoad)
       }
     }
   }

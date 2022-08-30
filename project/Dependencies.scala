@@ -2,18 +2,16 @@ import sbt._
 
 object Dependencies {
 
-  val bootstrapPlayVersion = "5.24.0"
+  val bootstrapPlayVersion = "7.1.0"
   val hmrcMongoVersion = "0.68.0"
   val httpComponentsVersion = "4.5.13"
 
   val compile = Seq(
     "uk.gov.hmrc"               %% "bootstrap-frontend-play-28" % bootstrapPlayVersion,
     "uk.gov.hmrc"               %% "play-frontend-hmrc"         % "3.20.0-play-28",
-    "uk.gov.hmrc"               %% "crypto"                     % "5.6.0",
+    "uk.gov.hmrc"               %% "crypto"                     % "7.1.0",
     "uk.gov.hmrc.mongo"         %% "hmrc-mongo-play-28"         % hmrcMongoVersion,
     "com.github.pureconfig"     %% "pureconfig"                 % "0.17.1",
-    // We still need this artifact due to external deps, e.g. Auth
-    "joda-time"                 %  "joda-time"                  % "2.10.13",
     "org.apache.httpcomponents" %  "httpclient"                 % httpComponentsVersion,
     "org.apache.httpcomponents" %  "httpmime"                   % httpComponentsVersion
   ).map(_.withSources)

@@ -30,6 +30,7 @@ class AllowListFilter @Inject()(config: Configuration, override val mat: Materia
       .split(",")
       .map(_.trim)
       .filter(_.nonEmpty)
+      .toIndexedSeq
 
   override val destination: Call = {
     val path = config.underlying.getString("filters.allowList.destination")
@@ -37,7 +38,7 @@ class AllowListFilter @Inject()(config: Configuration, override val mat: Materia
   }
 
   override val excludedPaths: Seq[Call] =
-    config.underlying.getString("filters.allowList.excluded").split(",").map { path =>
+    config.underlying.getString("filters.allowList.excluded").split(",").toIndexedSeq.map { path =>
       Call("GET", path.trim)
     }
 }

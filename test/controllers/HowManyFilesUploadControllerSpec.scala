@@ -89,14 +89,14 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
   override protected def beforeEach(): Unit = {
     super.beforeEach()
 
-    reset(mockCustomsDeclarationsService, mockUpscanConnector, page)
+    reset[Object](mockCustomsDeclarationsService, mockUpscanConnector, page)
 
     when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(FileUploadResponse(List())))
     when(page(any[Form[FileUploadCount]], any())(any(), any())).thenReturn(HtmlFormat.empty)
   }
 
   override protected def afterEach(): Unit = {
-    reset(mockCustomsDeclarationsService, mockUpscanConnector, page)
+    reset[Object](mockCustomsDeclarationsService, mockUpscanConnector, page)
 
     super.afterEach()
   }
@@ -176,7 +176,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       redirectLocation(result) mustBe Some(routes.UpscanStatusController.onPageLoad(nextRef).url)
 
       val savedAnswers = theSavedFileUploadAnswers
-      val Some(fileUploadCount) = FileUploadCount(2)
+      val fileUploadCount = FileUploadCount(2).get
       savedAnswers.fileUploadCount mustBe Some(fileUploadCount)
       savedAnswers.fileUploadResponse mustBe Some(FileUploadResponse(fileUploadResponse.uploads.tail))
     }
@@ -233,7 +233,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
       val postRequest = fakePostRequest.withFormUrlEncodedBody("value" -> "2")
       await(controller(fakeContactDetailsRequiredAction).onSubmit(postRequest.withCSRFToken))
 
-      val Some(fileUploadCount) = FileUploadCount(2)
+      val fileUploadCount = FileUploadCount(2).get
       verify(mockCustomsDeclarationsService).batchFileUpload(any(), eqTo(mrn), eqTo(fileUploadCount))(any())
     }
   }

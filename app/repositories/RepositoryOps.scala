@@ -36,13 +36,13 @@ trait RepositoryOps[T] extends Logging {
   val collection: MongoCollection[T]
 
   def findAll: Future[Seq[T]] =
-    collection.find().toFuture
+    collection.find().toFuture()
 
   def findAll[V](keyId: String, keyValue: V): Future[Seq[T]] =
-    collection.find(equal(keyId, keyValue)).toFuture
+    collection.find(equal(keyId, keyValue)).toFuture()
 
   def findOne[V](keyId: String, keyValue: V): Future[Option[T]] =
-    collection.find(equal(keyId, keyValue)).toFuture.map(_.headOption)
+    collection.find(equal(keyId, keyValue)).toFuture().map(_.headOption)
 
   /*
    Find one and return if a document with keyId=keyValue exists,
@@ -55,7 +55,7 @@ trait RepositoryOps[T] extends Logging {
         update = Updates.setOnInsert(BsonDocument(Json.toJson(document).toString)),
         options = FindOneAndUpdateOptions().upsert(true).returnDocument(ReturnDocument.AFTER)
       )
-      .toFuture
+      .toFuture()
 
   /*
    Find one and replace with "document: T" if a document with keyId=keyValue exists,
@@ -68,17 +68,17 @@ trait RepositoryOps[T] extends Logging {
         replacement = document,
         options = FindOneAndReplaceOptions().upsert(true).returnDocument(ReturnDocument.AFTER)
       )
-      .toFuture
+      .toFuture()
 
   def findOneAndRemove[V](keyId: String, keyValue: V): Future[Option[T]] =
-    collection.findOneAndDelete(equal(keyId, keyValue)).toFutureOption
+    collection.findOneAndDelete(equal(keyId, keyValue)).toFutureOption()
 
-  def indexList: Future[Seq[Document]] = collection.listIndexes.toFuture
+  def indexList: Future[Seq[Document]] = collection.listIndexes().toFuture()
 
   def insertOne(document: T): Future[Either[WriteError, T]] =
     collection
       .insertOne(document)
-      .toFuture
+      .toFuture()
       .map(_ => Right(document))
       .recover {
         case exc: MongoWriteException if (exc.getError.getCategory == DUPLICATE_KEY) =>
@@ -86,15 +86,15 @@ trait RepositoryOps[T] extends Logging {
       }
 
   def removeAll: Future[Unit] =
-    collection.deleteMany(BsonDocument()).toFuture.map(_ => ())
+    collection.deleteMany(BsonDocument()).toFuture().map(_ => ())
 
   def removeEvery[V](keyId: String, keyValue: V): Future[Unit] =
-    collection.deleteMany(equal(keyId, keyValue)).toFuture.map(_ => ())
+    collection.deleteMany(equal(keyId, keyValue)).toFuture().map(_ => ())
 
   def removeOne[V](keyId: String, keyValue: V): Future[Unit] =
-    collection.deleteOne(equal(keyId, keyValue)).toFuture.map(_ => ())
+    collection.deleteOne(equal(keyId, keyValue)).toFuture().map(_ => ())
 
-  def size: Future[Long] = collection.countDocuments.toFuture
+  def size: Future[Long] = collection.countDocuments().toFuture()
 }
 
 sealed abstract class WriteError(message: String)

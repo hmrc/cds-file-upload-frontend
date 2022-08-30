@@ -33,7 +33,7 @@ class CustomsDeclarationsServiceSpec extends SpecBase with MockitoSugar with Bef
   lazy val mockConnector = mock[CustomsDeclarationsConnector]
   lazy val service = new CustomsDeclarationsService(mockConnector, appConfig, sfusMetrics)
 
-  override protected def beforeEach: Unit = {
+  override protected def beforeEach(): Unit = {
     super.beforeEach()
 
     when(mockConnector.requestFileUpload(any(), any())(any())).thenReturn(Future.successful(FileUploadResponse(List())))

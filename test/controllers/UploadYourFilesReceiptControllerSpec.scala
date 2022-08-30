@@ -47,7 +47,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
   override protected def beforeEach(): Unit = {
     super.beforeEach()
 
-    reset(cdsFileUploadConnector, confirmationPage)
+    reset[Object](cdsFileUploadConnector, confirmationPage)
   }
 
   "UploadYourFilesReceiptController onPageLoad" should {

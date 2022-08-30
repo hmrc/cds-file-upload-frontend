@@ -40,7 +40,7 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
-    reset(httpClient, mockAuditService)
+    reset[Object](httpClient, mockAuditService)
   }
 
   val connector = new SecureMessageFrontendConnector(httpClient, appConfig, mockAuditService)
