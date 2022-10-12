@@ -19,6 +19,7 @@ package controllers.test
 import config.AppConfig
 import play.api.http.{ContentTypes, HeaderNames}
 import play.api.mvc.{Codec, MessagesControllerComponents}
+import play.api.Logging
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -29,7 +30,7 @@ import scala.concurrent.ExecutionContext
 @Singleton
 class CustomsDeclarationsStubController @Inject()(appConfig: AppConfig, httpClient: HttpClient, mcc: MessagesControllerComponents)(
   implicit ec: ExecutionContext
-) extends FrontendController(mcc) {
+) extends FrontendController(mcc) with Logging {
 
   def handleS3FileUploadRequest = Action(parse.multipartFormData) { implicit req =>
     val redirectLocation = req.body.dataParts("success_action_redirect").head
@@ -39,7 +40,7 @@ class CustomsDeclarationsStubController @Inject()(appConfig: AppConfig, httpClie
   }
 
   def callBack(ref: String)(implicit hc: HeaderCarrier) = {
-    Thread.sleep(1000)
+    //Thread.sleep(1000)
 
     val notification =
       <Root>
@@ -56,5 +57,6 @@ class CustomsDeclarationsStubController @Inject()(appConfig: AppConfig, httpClie
     val header: (String, String) = HeaderNames.CONTENT_TYPE -> ContentTypes.XML(Codec.utf_8)
 
     httpClient.POSTString[HttpResponse](url, notification.toString(), Seq(header))
+    logger.debug(s"Sent notification for file ${ref} to ${url}")
   }
 }

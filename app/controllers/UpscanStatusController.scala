@@ -141,7 +141,9 @@ class UpscanStatusController @Inject()(
             Future.successful(Redirect(routes.UploadYourFilesReceiptController.onPageLoad))
 
           case ns if retries < notificationsMaxRetries =>
-            logger.info(s"Retrieved ${ns.length} of ${uploads.length} notifications. Retrying in $notificationsRetryPause ms ...")
+            logger.info(
+              s"Retrieved ${ns.length} of ${uploads.length} notifications. Retried $retries times. Retrying in $notificationsRetryPause ms ..."
+            )
             Thread.sleep(notificationsRetryPause)
             retrieveNotifications(retries + 1)
 
