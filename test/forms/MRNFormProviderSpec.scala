@@ -18,7 +18,7 @@ package forms
 
 import base.SpecBase
 import play.api.data.Form
-import testdata.CommonTestData.mrn
+import testdata.CommonTestData.{mrn, mrn_3}
 
 class MRNFormProviderSpec extends SpecBase {
 
@@ -43,6 +43,10 @@ class MRNFormProviderSpec extends SpecBase {
 
       form.bind(Map.empty[String, String]).fold(errors => errorMessage(errors) mustBe "mrn.missing", _ => fail("Form binding must fail!"))
       form.bind(Map("value" -> "   ")).fold(errors => errorMessage(errors) mustBe "mrn.missing", _ => fail("Form binding must fail!"))
+    }
+
+    "automatically capitalise the entered MRN when binding to request" in {
+      form.bind(Map("value" -> mrn_3)).fold(_ => fail("Form binding must not fail!"), result => result.value mustEqual mrn_3.toUpperCase)
     }
   }
 }

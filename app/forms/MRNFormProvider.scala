@@ -42,7 +42,7 @@ class MRNFormProvider {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], MRN] =
       for {
         value <- isMissing(key, data)
-        mrn <- isInvalid(key, value)
+        mrn <- isInvalid(key, value.toUpperCase)
       } yield mrn
 
     override def unbind(key: String, value: MRN): Map[String, String] =
