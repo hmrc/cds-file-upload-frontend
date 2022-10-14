@@ -24,6 +24,7 @@ object CommonTestData {
 
   val mrn = "18GB9JLC3CU1LFGVR1"
   val mrn_2 = "18GB9JLC3CU1LFGVR2"
+  val mrn_3 = "18gb9jlc3cu1lfgvr2"
   val eori = "GB123456789012000"
   val eori_2 = "GB123456789012001"
   val ucr = "20GBAKZ81EQJ2WXYZ"
