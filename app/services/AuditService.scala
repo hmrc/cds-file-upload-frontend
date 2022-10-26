@@ -54,7 +54,7 @@ class AuditService @Inject()(connector: AuditConnector, appConfig: AppConfig)(im
     maybeMrn: Option[MRN],
     maybeFileUploadCount: Option[FileUploadCount],
     uploads: List[FileUpload]
-  )(implicit hc: HeaderCarrier): Unit = {
+  )(implicit hc: HeaderCarrier): Future[AuditResult] = {
     val auditType = UploadSuccess
 
     def auditDetails: Map[String, String] = {

@@ -42,7 +42,7 @@ GET         /upload/upscan-error/                           controllers.UpscanSt
 GET         /upload/upscan-success/:id                      controllers.UpscanStatusController.success(id: String)
 
 GET         /unverified-email                               controllers.UnverifiedEmailController.informUserUnverified
-GET         /undeliverable-email                           controllers.UnverifiedEmailController.informUserUndeliverable
+GET         /undeliverable-email                            controllers.UnverifiedEmailController.informUserUndeliverable
 
 # Sign out
 GET         /sign-out                                       controllers.SignOutController.signOut

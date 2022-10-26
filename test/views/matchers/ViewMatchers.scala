@@ -25,8 +25,10 @@ import play.api.i18n.Messages
 import play.api.mvc.{Call, Result}
 import play.api.test.Helpers.{contentAsString, _}
 import play.twirl.api.Html
-import scala.jdk.CollectionConverters._
+
 import scala.concurrent.Future
+import scala.jdk.CollectionConverters._
+import scala.language.implicitConversions
 import scala.util.Try
 
 //noinspection ScalaStyle

@@ -8,8 +8,7 @@ PlayKeys.devSettings := Seq("play.server.http.port" -> "6793")
 
 lazy val microservice = (project in file("."))
   .enablePlugins(PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
-  .settings(libraryDependencies ++= Dependencies.compile ++ Dependencies.test)
-  .settings(scalaVersion := "2.13.8")
+  .settings(commonSettings: _*)
   .settings(publishingSettings: _*)
   .settings(
     // concatenate js
@@ -40,3 +39,20 @@ lazy val silencerSettings: Seq[Setting[_]] = {
     scalacOptions += s"-P:silencer:sourceRoots=${baseDirectory.value.getCanonicalPath}"
   )
 }
+
+lazy val commonSettings = Seq(
+  scalaVersion := "2.13.8",
+  scalacOptions ++= scalacFlags,
+  libraryDependencies ++= Dependencies.compile ++ Dependencies.test
+)
+
+lazy val scalacFlags = Seq(
+  "-deprecation",         // warn about use of deprecated APIs
+  "-encoding", "UTF-8",   // source files are in UTF-8
+  "-feature",             // warn about misused language features
+  "-unchecked",           // warn about unchecked type parameters
+  "-Ywarn-numeric-widen",
+  "-Xfatal-warnings",     // warnings are fatal!!
+  "-Wconf:site=Module.*&cat=lint-byname-implicit:s"  // Avoid warnings from Pureconfig/Shapeless
+)
+

@@ -20,10 +20,12 @@ import org.scalatestplus.play.PlaySpec
 import pureconfig.ConfigSource
 import pureconfig.generic.auto._
 
+import scala.annotation.nowarn
+
 class AppConfigSpec extends PlaySpec {
 
-  val config =
-    ConfigSource.string("""
+  @nowarn("cat=lint-byname-implicit")
+  val config = ConfigSource.string("""
       |appName="cds-file-upload-frontend"
       |developerHubClientId="cds-file-upload-frontend"
       |

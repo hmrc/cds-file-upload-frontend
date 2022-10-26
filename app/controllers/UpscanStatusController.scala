@@ -144,7 +144,7 @@ class UpscanStatusController @Inject()(
             logger.info(
               s"Retrieved ${ns.length} of ${uploads.length} notifications. Retried $retries times. Retrying in $notificationsRetryPause ms ..."
             )
-            Thread.sleep(notificationsRetryPause)
+            Thread.sleep(notificationsRetryPause.toLong)
             retrieveNotifications(retries + 1)
 
           case ns =>
