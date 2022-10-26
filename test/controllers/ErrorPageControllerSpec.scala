@@ -18,7 +18,7 @@ package controllers
 
 import config.ErrorHandler
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{reset, verify, when}
+import org.mockito.MockitoSugar.{mock, reset, verify, when}
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
 import views.html._
@@ -38,7 +38,7 @@ class ErrorPageControllerSpec extends ControllerSpecBase {
   }
 
   override protected def afterEach(): Unit = {
-    reset[Object](uploadErrorPage, errorHandler)
+    reset(uploadErrorPage, errorHandler)
 
     super.afterEach()
   }

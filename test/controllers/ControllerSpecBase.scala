@@ -22,8 +22,7 @@ import models.requests.SignedInUser
 import models.{ContactDetails, FileUploadAnswers, SecureMessageAnswers}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{reset, verify, when}
-import org.mockito.stubbing.OngoingStubbing
+import org.mockito.MockitoSugar.{mock, reset, verify, when}
 import services.{FileUploadAnswersService, SecureMessageAnswersService}
 import uk.gov.hmrc.auth.core.AffinityGroup.Individual
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{affinityGroup, allEnrolments}
@@ -67,13 +66,15 @@ abstract class ControllerSpecBase extends SpecBase with FakeActions {
     test
   }
 
-  override protected def beforeEach(): Unit = {
-    resetAnswersService()
-    reset[Object](mockAuthConnector, mockSecureMessageAnswersService)
-  }
+  override protected def beforeEach(): Unit =
+    when(mockFileUploadAnswersService.findOneAndReplace(any[FileUploadAnswers]))
+      .thenReturn(Future.successful(FileUploadAnswers("")))
 
-  def resetAnswersService(): OngoingStubbing[Future[FileUploadAnswers]] = {
-    reset[Object](mockFileUploadAnswersService)
+  override protected def afterEach(): Unit =
+    reset(mockAuthConnector, mockFileUploadAnswersService, mockSecureMessageAnswersService)
+
+  protected def resetFileUploadAnswersService(): Unit = {
+    reset(mockFileUploadAnswersService)
     when(mockFileUploadAnswersService.findOneAndReplace(any[FileUploadAnswers]))
       .thenReturn(Future.successful(FileUploadAnswers("")))
   }

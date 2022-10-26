@@ -20,7 +20,7 @@ import base.{Injector, UnitSpec}
 import config.AppConfig
 import models.{EORI, Email, Notification}
 import org.mockito.ArgumentMatchers.{any, anyString}
-import org.mockito.Mockito.{reset, when}
+import org.mockito.MockitoSugar.{mock, reset, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, UpstreamErrorResponse}

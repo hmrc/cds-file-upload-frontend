@@ -19,7 +19,8 @@ package controllers
 import forms.MRNFormProvider
 import models.{FileUploadAnswers, MRN}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito._
+import org.mockito.Mockito.verifyNoInteractions
+import org.mockito.MockitoSugar.{mock, reset, verify, when}
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
 import testdata.CommonTestData._

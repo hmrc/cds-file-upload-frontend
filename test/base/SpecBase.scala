@@ -22,7 +22,6 @@ import config.AppConfig
 import generators.Generators
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.i18n.{Lang, Messages, MessagesApi}
@@ -34,8 +33,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.ExecutionContext
 
 trait SpecBase
-    extends PlaySpec with MockitoSugar with BeforeAndAfterEach with ScalaCheckPropertyChecks with Generators with ScalaFutures
-    with IntegrationPatience with Injector {
+    extends PlaySpec with BeforeAndAfterEach with ScalaCheckPropertyChecks with Generators with ScalaFutures with IntegrationPatience with Injector {
 
   SharedMetricRegistries.clear()
 

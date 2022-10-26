@@ -22,7 +22,7 @@ import connectors.CdsFileUploadConnector
 import controllers.actions.{DataRetrievalAction, FileUploadResponseRequiredAction}
 import models._
 import org.mockito.ArgumentMatchers.{eq => meq, _}
-import org.mockito.Mockito._
+import org.mockito.MockitoSugar.{mock, reset, verify, when}
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen
 import play.api.test.Helpers._
@@ -83,7 +83,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
   }
 
   override protected def afterEach(): Unit = {
-    reset[Object](auditService, cdsFileUploadConnector, uploadYourFiles, uploadError, mockFileUploadAnswersService)
+    reset(auditService, cdsFileUploadConnector, uploadYourFiles, uploadError, mockFileUploadAnswersService)
 
     super.afterEach()
   }

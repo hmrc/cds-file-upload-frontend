@@ -25,7 +25,8 @@ import scala.annotation.nowarn
 class AppConfigSpec extends PlaySpec {
 
   @nowarn("cat=lint-byname-implicit")
-  val config = ConfigSource.string("""
+  val config =
+    ConfigSource.string("""
       |appName="cds-file-upload-frontend"
       |developerHubClientId="cds-file-upload-frontend"
       |

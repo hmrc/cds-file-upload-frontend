@@ -17,9 +17,9 @@
 package base
 
 import config._
-import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.MockitoSugar.mock
 
-object AppConfigMockHelper extends MockitoSugar {
+object AppConfigMockHelper {
   def generateMockConfig(
     appName: String = "",
     developerHubClientId: String = "",

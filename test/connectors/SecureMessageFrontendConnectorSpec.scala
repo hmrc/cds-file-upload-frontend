@@ -21,9 +21,10 @@ import config.AppConfig
 import models._
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, anyString}
-import org.mockito.Mockito.{reset, verify, verifyNoInteractions, when}
-import org.scalatest.concurrent.ScalaFutures
+import org.mockito.Mockito.verifyNoInteractions
+import org.mockito.MockitoSugar.{mock, reset, verify, when}
 import org.scalatest.BeforeAndAfterEach
+import org.scalatest.concurrent.ScalaFutures
 import play.mvc.Http.Status.{BAD_GATEWAY, BAD_REQUEST, OK}
 import services.AuditService
 import testdata.CommonTestData
@@ -40,7 +41,7 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
-    reset[Object](httpClient, mockAuditService)
+    reset(httpClient, mockAuditService)
   }
 
   val connector = new SecureMessageFrontendConnector(httpClient, appConfig, mockAuditService)
