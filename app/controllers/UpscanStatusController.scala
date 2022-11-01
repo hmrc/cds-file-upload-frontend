@@ -23,7 +23,7 @@ import metrics.MetricIdentifiers.fetchNotificationMetric
 import metrics.SfusMetrics
 import models._
 import models.requests.FileUploadResponseRequest
-import play.api.Logger
+import play.api.Logging
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import services.{AuditService, FileUploadAnswersService}
@@ -47,51 +47,50 @@ class UpscanStatusController @Inject()(
   metrics: SfusMetrics,
   uploadYourFiles: upload_your_files,
   uploadError: upload_error
-)(implicit ec: ExecutionContext)
-    extends FrontendController(mcc) with I18nSupport {
-
-  private val logger = Logger(this.getClass)
+)(implicit ec: ExecutionContext) extends FrontendController(mcc) with I18nSupport with Logging {
 
   private val notificationsMaxRetries = appConfig.notifications.maxRetries
   private val notificationsRetryPause = appConfig.notifications.retryPauseMillis
 
-  def onPageLoad(ref: String): Action[AnyContent] =
-    (authenticate andThen verifiedEmail andThen getData andThen requireMrn andThen requireResponse).async { implicit req =>
-      val references = req.fileUploadResponse.uploads.map(_.reference)
-      val refPosition = getPosition(ref, references)
+  val actions = authenticate andThen verifiedEmail andThen getData andThen requireMrn andThen requireResponse
 
-      req.fileUploadResponse.uploads.find(_.reference == ref) match {
-        case Some(upload) =>
-          upload.state match {
-            case Waiting(ur) => Future.successful(Ok(uploadYourFiles(ur, refPosition, req.request.mrn)))
-            case _           => nextPage(upload.reference, req.fileUploadResponse.uploads)
-          }
+  def onPageLoad(ref: String): Action[AnyContent] = actions.async { implicit request =>
+    val references = request.fileUploadResponse.uploads.map(_.reference)
+    val refPosition = getPosition(ref, references)
 
-        case None =>
-          Future.successful(Redirect(routes.ErrorPageController.error))
-      }
+    request.fileUploadResponse.uploads.find(_.reference == ref) match {
+      case Some(upload) =>
+        upload.state match {
+          case Waiting(uploadRequest) => Future.successful(Ok(uploadYourFiles(uploadRequest, refPosition, request.request.mrn)))
+          case                      _ => nextPage(upload.reference, request.fileUploadResponse.uploads)
+        }
+
+      case None =>
+        Future.successful(Redirect(routes.ErrorPageController.error))
     }
+  }
 
-  def error(): Action[AnyContent] = authenticate { implicit req =>
+  def error(): Action[AnyContent] = authenticate { implicit request =>
     Ok(uploadError())
   }
 
-  def success(id: String): Action[AnyContent] =
-    (authenticate andThen verifiedEmail andThen getData andThen requireMrn andThen requireResponse).async { implicit req =>
-      val uploads = req.fileUploadResponse.uploads
-      uploads.find(_.id == id) match {
-        case Some(upload) =>
-          val updatedFiles = upload.copy(state = Uploaded) :: uploads.filterNot(_.id == id)
-          val answers = req.userAnswers.copy(fileUploadResponse = Some(FileUploadResponse(updatedFiles)))
-          answersService.findOneAndReplace(answers).flatMap { _ =>
-            nextPage(upload.reference, uploads)
-          }
-        case None =>
-          Future.successful(Redirect(routes.ErrorPageController.error))
-      }
-    }
+  def success(id: String): Action[AnyContent] = actions.async { implicit request =>
+    val uploads = request.fileUploadResponse.uploads
+    uploads.find(_.id == id) match {
 
-  private def nextPage(ref: String, files: List[FileUpload])(implicit req: FileUploadResponseRequest[_]): Future[Result] = {
+      case Some(upload) =>
+        val updatedFiles = upload.copy(state = Uploaded) :: uploads.filterNot(_.id == id)
+        val answers = request.userAnswers.copy(fileUploadResponse = Some(FileUploadResponse(updatedFiles)))
+        answersService.findOneAndReplace(answers).flatMap { _ =>
+          nextPage(upload.reference, uploads)
+        }
+
+      case None =>
+        Future.successful(Redirect(routes.ErrorPageController.error))
+    }
+  }
+
+  private def nextPage(ref: String, files: List[FileUpload])(implicit request: FileUploadResponseRequest[_]): Future[Result] = {
     def nextFile(file: FileUpload): Call = routes.UpscanStatusController.onPageLoad(file.reference)
 
     val nextFileToUpload = files.collectFirst {
@@ -106,12 +105,12 @@ class UpscanStatusController @Inject()(
     }
   }
 
-  private def allFilesUploaded(implicit req: FileUploadResponseRequest[_]): Future[Result] = {
+  private def allFilesUploaded(implicit request: FileUploadResponseRequest[_]): Future[Result] = {
     def failedUpload(notification: Notification): Boolean = notification.outcome != "SUCCESS"
 
     def prettyPrint: List[Notification] => String = _.map(n => s"(${n.fileReference}, ${n.outcome})").mkString(",")
 
-    val uploads = req.fileUploadResponse.uploads
+    val uploads = request.fileUploadResponse.uploads
 
     def retrieveNotifications(retries: Int = 0): Future[Result] = {
       val timer = metrics.startTimer(fetchNotificationMetric)
@@ -126,17 +125,17 @@ class UpscanStatusController @Inject()(
           case ns if ns.exists(failedUpload) =>
             logger.warn("Failed notification received for an upload.")
             logger.warn(s"Notifications: ${prettyPrint(ns)}")
-            clearUserCache(req.eori)
+            clearUserCache(request.eori)
             Future.successful(Redirect(routes.ErrorPageController.uploadError))
 
           case ns if ns.length == uploads.length =>
             logger.info("All notifications successful.")
             auditservice.auditUploadSuccess(
-              req.eori,
-              req.userAnswers.contactDetails,
-              req.userAnswers.mrn,
-              req.userAnswers.fileUploadCount,
-              req.fileUploadResponse.uploads
+              request.eori,
+              request.userAnswers.contactDetails,
+              request.userAnswers.mrn,
+              request.userAnswers.fileUploadCount,
+              request.fileUploadResponse.uploads
             )
             Future.successful(Redirect(routes.UploadYourFilesReceiptController.onPageLoad))
 
@@ -150,7 +149,7 @@ class UpscanStatusController @Inject()(
           case ns =>
             logger.warn(s"Maximum number of retries exceeded. Retrieved ${ns.length} of ${uploads.length} notifications.")
             logger.warn(s"Notifications: ${prettyPrint(ns)}")
-            clearUserCache(req.eori)
+            clearUserCache(request.eori)
             Future.successful(Redirect(routes.ErrorPageController.uploadError))
         }
       }

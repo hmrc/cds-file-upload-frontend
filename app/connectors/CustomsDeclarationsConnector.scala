@@ -48,6 +48,7 @@ class CustomsDeclarationsConnector @Inject()(config: AppConfig, httpClient: Http
             case Success(value) =>
               logger.info(s"Got initiate response: $FileUploadResponse")
               FileUploadResponse.fromXml(value)
+
             case Failure(exception) =>
               logger.warn(s"Failed to load XML with exception: $exception")
               throw exception
@@ -55,7 +56,7 @@ class CustomsDeclarationsConnector @Inject()(config: AppConfig, httpClient: Http
       )
   }
 
-  private def headers(eori: String) = List(
+  private def headers(eori: String): Seq[(String, String)] = List(
     "X-Client-ID" -> clientId,
     HeaderNames.ACCEPT -> s"application/vnd.hmrc.$apiVersion+xml",
     HeaderNames.CONTENT_TYPE -> ContentTypes.XML(Codec.utf_8),

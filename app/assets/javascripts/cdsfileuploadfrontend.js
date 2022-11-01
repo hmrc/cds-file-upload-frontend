@@ -3,8 +3,8 @@
 $.validator.addMethod('file-extensions', function (value, element, param) {
     return this.optional(element) || param.split(",").some(function(ext) {
         return element.files[0].name.toLowerCase().endsWith(ext) })
-}, 'File must have an ext of {0}');
+}, 'File must have an extension of {0}');
 
 $.validator.addMethod('filesize', function (value, element, param) {
     return this.optional(element) || (element.files[0].size / 1024 / 1024 <= param)
-}, 'File size must be less than {0}');
+}, 'File size must not be bigger than {0}');

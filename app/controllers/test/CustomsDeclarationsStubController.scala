@@ -32,21 +32,21 @@ class CustomsDeclarationsStubController @Inject()(appConfig: AppConfig, httpClie
   implicit ec: ExecutionContext
 ) extends FrontendController(mcc) with Logging {
 
-  def handleS3FileUploadRequest = Action(parse.multipartFormData) { implicit req =>
-    val redirectLocation = req.body.dataParts("success_action_redirect").head
+  val handleS3FileUploadRequest = Action(parse.multipartFormData) { implicit request =>
+    val redirectLocation = request.body.dataParts("success_action_redirect").head
     val reference = redirectLocation.split("/").last
     callBack(reference)
     SeeOther(redirectLocation).withHeaders("Location" -> redirectLocation)
   }
 
-  def callBack(ref: String)(implicit hc: HeaderCarrier) = {
+  def callBack(reference: String)(implicit hc: HeaderCarrier): Unit = {
     //Thread.sleep(1000)
 
     val notification =
       <Root>
-        <FileReference>{ref}</FileReference>
+        <FileReference>{reference}</FileReference>
         <BatchId>5e634e09-77f6-4ff1-b92a-8a9676c715c4</BatchId>
-        <FileName>File_{ref}.pdf</FileName>
+        <FileName>File_{reference}.pdf</FileName>
         <Outcome>SUCCESS</Outcome>
         <Details>[detail block]</Details>
       </Root>
@@ -57,6 +57,6 @@ class CustomsDeclarationsStubController @Inject()(appConfig: AppConfig, httpClie
     val header: (String, String) = HeaderNames.CONTENT_TYPE -> ContentTypes.XML(Codec.utf_8)
 
     httpClient.POSTString[HttpResponse](url, notification.toString(), Seq(header))
-    logger.debug(s"Sent notification for file ${ref} to ${url}")
+    logger.debug(s"Sent notification for file ${reference} to ${url}")
   }
 }
