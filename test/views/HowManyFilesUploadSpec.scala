@@ -32,7 +32,7 @@ class HowManyFilesUploadSpec extends DomAssertions with IntViewBehaviours[FileUp
   val form = new FileUploadCountProvider()()
   val mrn: MRN = arbitraryMrn.arbitrary.sample.get
   val page = instanceOf[how_many_files_upload]
-  val view = page(form, mrn)(fakeRequest.withCSRFToken, messages)
+  val view = asDocument(page(form, mrn)(fakeRequest.withCSRFToken, messages))
 
   val messagePrefix = "howManyFilesUpload"
 
@@ -46,11 +46,11 @@ class HowManyFilesUploadSpec extends DomAssertions with IntViewBehaviours[FileUp
 
     "display the correct guidance" in {
       val expectedGuidanceKeys: List[String] = List("paragraph1", "paragraph2", "paragraph3", "listItem1", "listItem2", "listItem3", "listItem4")
-      for (key <- expectedGuidanceKeys) assertContainsText(asDocument(view), messages(s"$messagePrefix.$key"))
+      for (key <- expectedGuidanceKeys) assertContainsText(view, messages(s"$messagePrefix.$key"))
     }
 
     "display inset text" in {
-      assertContainsMessage(asDocument(view), s"$messagePrefix.insetText")
+      assertContainsMessage(view, s"$messagePrefix.insetText")
     }
 
     "include the 'Sign out' link if the user is authorised" in {
@@ -61,7 +61,7 @@ class HowManyFilesUploadSpec extends DomAssertions with IntViewBehaviours[FileUp
     }
 
     "display the 'Back' link" in {
-      assertBackLinkIsIncluded(asDocument(view), routes.ContactDetailsController.onPageLoad.url)
+      assertBackLinkIsIncluded(view, routes.ContactDetailsController.onPageLoad.url)
     }
   }
 }

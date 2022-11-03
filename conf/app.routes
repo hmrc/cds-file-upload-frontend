@@ -38,7 +38,7 @@ GET         /upload/receipt                                 controllers.UploadYo
 
 GET         /upload/:ref                                    controllers.UpscanStatusController.onPageLoad(ref: String)
 
-GET         /upload/upscan-error/                           controllers.UpscanStatusController.error()
+GET         /upload/upscan-error/:id                        controllers.UpscanStatusController.error(id: String)
 GET         /upload/upscan-success/:id                      controllers.UpscanStatusController.success(id: String)
 
 GET         /unverified-email                               controllers.UnverifiedEmailController.informUserUnverified

@@ -35,7 +35,7 @@
 
 @mainTemplate(title = Title("inboxChoice.heading"), backLinkUrl = Some(routes.ChoiceController.onPageLoad.url)) {
 
-  @formHelper(action = routes.InboxChoiceController.onSubmit, 'autoComplete -> "off") {
+  @formHelper(action = routes.InboxChoiceController.onSubmit, args = Symbol("autoComplete") -> "off") {
     @errorSummary(radioGroupErrors(InboxChoiceKey, ExportsMessages, form.errors))
 
     @govukRadios(Radios(

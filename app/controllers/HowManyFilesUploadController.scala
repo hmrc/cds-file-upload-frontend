@@ -45,7 +45,8 @@ class HowManyFilesUploadController @Inject()(
   customsDeclarationsService: CustomsDeclarationsService,
   mcc: MessagesControllerComponents,
   howManyFilesUpload: how_many_files_upload
-)(implicit ec: ExecutionContext) extends FrontendController(mcc) with I18nSupport with Logging {
+)(implicit ec: ExecutionContext)
+    extends FrontendController(mcc) with I18nSupport with Logging {
 
   val form = formProvider()
 
@@ -83,10 +84,8 @@ class HowManyFilesUploadController @Inject()(
       val remainingFileUploads = fileUploadResponse.uploads.tail
       logger.info("remainingFileUploads " + remainingFileUploads)
 
-      val answers = request.userAnswers.copy(
-        fileUploadCount = Some(fileUploadCount),
-        fileUploadResponse = Some(FileUploadResponse(remainingFileUploads))
-      )
+      val answers =
+        request.userAnswers.copy(fileUploadCount = Some(fileUploadCount), fileUploadResponse = Some(FileUploadResponse(remainingFileUploads)))
 
       answersService
         .findOneAndReplace(answers)

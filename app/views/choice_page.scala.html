@@ -35,7 +35,7 @@
 
 @mainTemplate(title = Title("choicePage.heading")) {
 
-  @formHelper(action = routes.ChoiceController.onSubmit, 'autoComplete -> "off") {
+  @formHelper(action = routes.ChoiceController.onSubmit, Symbol("autoComplete") -> "off") {
     @errorSummary(radioGroupErrors(ChoiceKey, SecureMessageInbox, form.errors))
 
     @govukRadios(Radios(

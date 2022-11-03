@@ -78,7 +78,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
   override protected def beforeEach(): Unit = {
     super.beforeEach()
 
-    when(uploadYourFiles.apply(any(), any(), any())(any(), any(), any())).thenReturn(HtmlFormat.empty)
+    when(uploadYourFiles.apply(any(), any(), any())(any(), any())).thenReturn(HtmlFormat.empty)
     when(uploadError.apply()(any(), any())).thenReturn(HtmlFormat.empty)
   }
 
@@ -91,7 +91,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
   "Upscan Status error" should {
 
     "return error page" in {
-      val result = controller().error()(fakeRequest)
+      val result = controller().error("2")(fakeRequest)
 
       status(result) mustBe OK
       verify(uploadError).apply()(any(), any())
@@ -101,9 +101,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
   ".onPageLoad" should {
 
     "load the view" when {
-
       "request file exists in response" in {
-
         forAll(waitingGen) {
           case (file, _, response) =>
             val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response))
@@ -165,7 +163,6 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
   "redirect to error page" when {
 
     "no responses are in the cache" in {
-
       val result = controller(new FakeDataRetrievalAction(None)).success("someRef")(fakeRequest)
 
       result.map(_ => verify(mockFileUploadAnswersService).remove(any()))
@@ -175,7 +172,6 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
     }
 
     "file reference is not in response" in {
-
       forAll { (ref: String, response: FileUploadResponse) =>
         whenever(!response.uploads.exists(_.reference == ref)) {
 
@@ -194,7 +190,6 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
   ".success" should {
 
     "update file status to Uploaded" in {
-
       val fileUpload = FileUpload("ref", Waiting(UploadRequest("href", Map.empty)), id = "ref")
       val response = FileUploadResponse(List(fileUpload))
 
@@ -210,7 +205,6 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
     }
 
     "redirect user to the next upload page" in {
-
       val fileUploaded = FileUpload("ref1", Uploaded, id = "ref1")
       val fileUploadWaiting = FileUpload("ref2", Waiting(UploadRequest("href", Map.empty)), id = "ref2")
       val response = FileUploadResponse(List(fileUploaded, fileUploadWaiting))
@@ -249,7 +243,6 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
     }
 
     "load receipt page when all notifications are successful" in {
-
       val file1 = FileUpload("fileRef1", Waiting(UploadRequest("some href", Map.empty)), id = "fileRef1")
       val file2 = FileUpload("fileRef2", Waiting(UploadRequest("some other href", Map.empty)), id = "fileRef2")
       val lastFile = FileUpload("fileRef3", Waiting(UploadRequest("another href", Map.empty)), id = "fileRef3")
@@ -262,8 +255,10 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
 
       when(cdsFileUploadConnector.getNotification(meq("fileRef1"))(any()))
         .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", Some("file1.pdf")))))
+
       when(cdsFileUploadConnector.getNotification(meq("fileRef2"))(any()))
         .thenReturn(Future.successful(Some(Notification("fileRef2", "SUCCESS", Some("file2.doc")))))
+
       when(cdsFileUploadConnector.getNotification(meq("fileRef3"))(any()))
         .thenReturn(Future.successful(Some(Notification("fileRef3", "SUCCESS", Some("file3.gif")))))
 
@@ -273,7 +268,6 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
     }
 
     "load upload error page when we get a fail notification" in {
-
       val file1 = FileUpload("fileRef1", Waiting(UploadRequest("some href", Map.empty)), id = "fileRef1")
       val file2 = FileUpload("fileRef2", Waiting(UploadRequest("some other href", Map.empty)), id = "fileRef2")
       val lastFile = FileUpload("fileRef3", Waiting(UploadRequest("another href", Map.empty)), id = "fileRef3")
@@ -282,12 +276,14 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val mrn = MRN("34GB1234567ABCDEFG").get
       val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456")
       val answers =
-        FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
+        FileUploadAnswers(eori, mrn = Some(mrn), contactDetails = Some(cd), FileUploadCount(3), fileUploadResponse = Some(response))
 
       when(cdsFileUploadConnector.getNotification(meq("fileRef1"))(any()))
         .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", Some("file1.pdf")))))
+
       when(cdsFileUploadConnector.getNotification(meq("fileRef2"))(any()))
         .thenReturn(Future.successful(Some(Notification("fileRef2", "FAIL", Some("file2.doc")))))
+
       when(cdsFileUploadConnector.getNotification(meq("fileRef3"))(any()))
         .thenReturn(Future.successful(Some(Notification("fileRef3", "SUCCESS", Some("file3.gif")))))
 
@@ -298,7 +294,6 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
     }
 
     "load upload error page when notification retries are exceeded" in {
-
       val file1 = FileUpload("fileRef1", Waiting(UploadRequest("some href", Map.empty)), id = "fileRef1")
       val file2 = FileUpload("fileRef2", Waiting(UploadRequest("some other href", Map.empty)), id = "fileRef2")
       val lastFile = FileUpload("fileRef3", Waiting(UploadRequest("another href", Map.empty)), id = "fileRef3")
@@ -307,14 +302,15 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val mrn = MRN("34GB1234567ABCDEFG").get
       val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456")
       val answers =
-        FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
+        FileUploadAnswers(eori, mrn = Some(mrn), contactDetails = Some(cd), FileUploadCount(3), fileUploadResponse = Some(response))
 
       when(cdsFileUploadConnector.getNotification(meq("fileRef1"))(any()))
         .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", Some("file1.pdf")))))
+
       when(cdsFileUploadConnector.getNotification(meq("fileRef2"))(any()))
         .thenReturn(Future.successful(Some(Notification("fileRef2", "SUCCESS", Some("file2.doc")))))
-      when(cdsFileUploadConnector.getNotification(meq("fileRef3"))(any()))
-        .thenReturn(Future.successful(None))
+
+      when(cdsFileUploadConnector.getNotification(meq("fileRef3"))(any())).thenReturn(Future.successful(None))
 
       val result = controller(fakeDataRetrievalAction(answers)).success(lastFile.reference)(fakeRequest)
       result.map(_ => verify(mockFileUploadAnswersService).remove(any()))

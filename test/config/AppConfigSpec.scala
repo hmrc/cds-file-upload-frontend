@@ -118,7 +118,7 @@ class AppConfigSpec extends PlaySpec {
       |}
       |
       |file-formats {
-      |  max-file-size-mb = 10
+      |  max-file-size = 10485760
       |  approved-file-extensions = ".jpeg,.jpg,.png,.pdf,.txt"
       |  approved-file-types = "image/jpeg,image/png,application/pdf,text/plain"
       |}

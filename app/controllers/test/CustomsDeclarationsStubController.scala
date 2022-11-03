@@ -17,11 +17,11 @@
 package controllers.test
 
 import config.AppConfig
-import play.api.http.{ContentTypes, HeaderNames}
-import play.api.mvc.{Codec, MessagesControllerComponents}
 import play.api.Logging
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import play.api.http.{ContentTypes, HeaderNames}
+import play.api.mvc.{Codec, MessagesControllerComponents, MessagesRequest, MultipartFormData}
 import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import javax.inject.{Inject, Singleton}
@@ -33,20 +33,26 @@ class CustomsDeclarationsStubController @Inject()(appConfig: AppConfig, httpClie
 ) extends FrontendController(mcc) with Logging {
 
   val handleS3FileUploadRequest = Action(parse.multipartFormData) { implicit request =>
-    val redirectLocation = request.body.dataParts("success_action_redirect").head
+    val filename = request.body.files.head.filename
+    val redirectLocation = redirectionAccordingTo(filename)
     val reference = redirectLocation.split("/").last
-    callBack(reference)
+    callBack(filename, reference)
     SeeOther(redirectLocation).withHeaders("Location" -> redirectLocation)
   }
 
-  def callBack(reference: String)(implicit hc: HeaderCarrier): Unit = {
+  private def redirectionAccordingTo(filename: String)(implicit request: MessagesRequest[MultipartFormData[_]]): String = {
+    val isTestErrorPage = filename.toLowerCase.startsWith("test-error-page.")
+    request.body.dataParts(if (isTestErrorPage) "error_action_redirect" else "success_action_redirect").head
+  }
+
+  private def callBack(filename: String, reference: String)(implicit hc: HeaderCarrier): Unit = {
     //Thread.sleep(1000)
 
     val notification =
       <Root>
         <FileReference>{reference}</FileReference>
         <BatchId>5e634e09-77f6-4ff1-b92a-8a9676c715c4</BatchId>
-        <FileName>File_{reference}.pdf</FileName>
+        <FileName>{filename}</FileName>
         <Outcome>SUCCESS</Outcome>
         <Details>[detail block]</Details>
       </Root>

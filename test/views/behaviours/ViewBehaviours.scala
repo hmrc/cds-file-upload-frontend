@@ -16,31 +16,27 @@
 
 package views.behaviours
 
-import play.twirl.api.HtmlFormat
+import org.jsoup.nodes.Document
 import views.DomAssertions
 
 trait ViewBehaviours extends DomAssertions {
 
-  def normalPage(view: () => HtmlFormat.Appendable, messageKeyPrefix: String, expectedGuidanceKeys: String*) = {
+  def normalPage(view: () => Document, messageKeyPrefix: String, expectedGuidanceKeys: String*): Unit = {
 
     "behave like a page with a heading" when {
       "rendered" must {
-
         "display the correct page title" in {
-          val doc = asDocument(view())
-          assertH1EqualsMessage(doc, s"$messageKeyPrefix.heading")
+          assertH1EqualsMessage(view(), s"$messageKeyPrefix.heading")
         }
       }
     }
 
     "behave like a page with a title" when {
       "rendered" must {
-
         "display the correct browser title" in {
-          val doc = asDocument(view())
           val message = messages(s"$messageKeyPrefix.heading")
           val service = messages("common.service.name")
-          assertEqualsMessage(doc, "title", "common.title.format", message, service)
+          assertEqualsMessage(view(), "title", "common.title.format", message, service)
         }
       }
     }
@@ -48,28 +44,25 @@ trait ViewBehaviours extends DomAssertions {
     behave like pageWithoutHeading(view, messageKeyPrefix, expectedGuidanceKeys: _*)
   }
 
-  def pageWithoutHeading(view: () => HtmlFormat.Appendable, messageKeyPrefix: String, expectedGuidanceKeys: String*) =
+  def pageWithoutHeading(view: () => Document, messageKeyPrefix: String, expectedGuidanceKeys: String*): Unit =
     "behave like a normal page" when {
       "rendered" must {
         "have the correct banner title" in {
-          val doc = asDocument(view())
-
-          val element = doc.getElementsByClass("hmrc-header__service-name")
+          val element = view().getElementsByClass("hmrc-header__service-name")
           element.text mustBe messages("common.service.name")
         }
 
         "display the correct guidance" in {
-          val doc = asDocument(view())
-          for (key <- expectedGuidanceKeys) assertContainsText(doc, messages(s"$messageKeyPrefix.$key"))
+          val document = view()
+          for (key <- expectedGuidanceKeys) assertContainsText(document, messages(s"$messageKeyPrefix.$key"))
         }
       }
     }
 
-  def pageWithBackLink(view: () => HtmlFormat.Appendable) =
+  def pageWithBackLink(view: () => Document): Unit =
     "behave like a page with a back link" must {
       "have a back link" in {
-        val doc = asDocument(view())
-        assertRenderedById(doc, "back-link")
+        assertRenderedById(view(), "back-link")
       }
     }
 }

@@ -37,7 +37,7 @@
         <div class="govuk-grid-column-full">
             <div class="govuk-form-group">
 
-            @formHelper(action = routes.MrnEntryController.onSubmit, 'autoComplete -> "off") {
+            @formHelper(action = routes.MrnEntryController.onSubmit, args = Symbol("autoComplete") -> "off") {
                 @helper.CSRF.formField
 
                 @errorSummary(form.errors)

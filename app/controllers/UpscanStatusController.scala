@@ -47,22 +47,23 @@ class UpscanStatusController @Inject()(
   metrics: SfusMetrics,
   uploadYourFiles: upload_your_files,
   uploadError: upload_error
-)(implicit ec: ExecutionContext) extends FrontendController(mcc) with I18nSupport with Logging {
+)(implicit ec: ExecutionContext)
+    extends FrontendController(mcc) with I18nSupport with Logging {
 
   private val notificationsMaxRetries = appConfig.notifications.maxRetries
   private val notificationsRetryPause = appConfig.notifications.retryPauseMillis
 
   val actions = authenticate andThen verifiedEmail andThen getData andThen requireMrn andThen requireResponse
 
-  def onPageLoad(ref: String): Action[AnyContent] = actions.async { implicit request =>
+  def onPageLoad(reference: String): Action[AnyContent] = actions.async { implicit request =>
     val references = request.fileUploadResponse.uploads.map(_.reference)
-    val refPosition = getPosition(ref, references)
+    val refPosition = getPosition(reference, references)
 
-    request.fileUploadResponse.uploads.find(_.reference == ref) match {
+    request.fileUploadResponse.uploads.find(_.reference == reference) match {
       case Some(upload) =>
         upload.state match {
           case Waiting(uploadRequest) => Future.successful(Ok(uploadYourFiles(uploadRequest, refPosition, request.request.mrn)))
-          case                      _ => nextPage(upload.reference, request.fileUploadResponse.uploads)
+          case _                      => nextPage(upload.reference, request.fileUploadResponse.uploads)
         }
 
       case None =>
@@ -70,7 +71,7 @@ class UpscanStatusController @Inject()(
     }
   }
 
-  def error(): Action[AnyContent] = authenticate { implicit request =>
+  def error(reference: String): Action[AnyContent] = authenticate { implicit request =>
     Ok(uploadError())
   }
 

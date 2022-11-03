@@ -216,7 +216,8 @@ uploadError.heading = One of your files has been rejected
 uploadError.paragraph = At least one of your files may be:
 uploadError.bullet.1 = larger than 10MB
 uploadError.bullet.2 = not an accepted file type
-uploadError.bullet.3 = corrupted, or contain a virus
+uploadError.bullet.3 = corrupted, or containing a virus
+uploadError.bullet.4 = an encrypted PDF file
 uploadError.button = Start your upload again
 uploadError.guidance = You may be asked to check or re-enter the contact details.
 

@@ -35,7 +35,7 @@ class ContactDetailsSpec extends DomAssertions with ViewBehaviours with ScalaChe
   val contactDetails: contact_details = instanceOf[contact_details]
   val exportsInputText = instanceOf[exportsInputText]
 
-  val view = contactDetails(form, mrn)(fakeRequest.withCSRFToken, messages)
+  val view = asDocument(contactDetails(form, mrn)(fakeRequest.withCSRFToken, messages))
 
   def viewAsString(form: Form[ContactDetails] = form): String = contactDetails(form, mrn)(fakeRequest.withCSRFToken, messages).toString
 
@@ -55,7 +55,7 @@ class ContactDetailsSpec extends DomAssertions with ViewBehaviours with ScalaChe
     }
 
     "display the 'Back' link" in {
-      assertBackLinkIsIncluded(asDocument(view), routes.MrnEntryController.onPageLoad().url)
+      assertBackLinkIsIncluded(view, routes.MrnEntryController.onPageLoad().url)
     }
 
     "display name input" in {
