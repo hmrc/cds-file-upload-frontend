@@ -1,4 +1,7 @@
 (() => {
+    const errorSummary = document.getElementsByClassName('govuk-error-summary')[0]
+    const errorSummaryList = document.getElementsByClassName('govuk-error-summary__list')[0]
+
     const group = document.getElementsByClassName('govuk-form-group')[0]
     document.getElementsByClassName('govuk-form-group')[1].classList.remove("govuk-form-group--error")
 
@@ -10,12 +13,14 @@
     const maxFileSize = Number(file2Upload.dataset.maxFileSize)
     const fileExtensions = file2Upload.getAttribute("file-extensions").toLowerCase().split(',')
 
+    const submitButton = document.querySelector('[name="submit"]')
+
     const regex = /^[0-9a-zA-Z][0-9a-zA-Z\.\-_ ]+$/
 
     file2Upload.onchange = function() {
-        reset()
+        resetError()
         const file = this.files[0]
-        if (!regex.test(file.name)) showHtmlError("File name must start with a letter or number,<br>and only contain hyphen, underscore or dot as special characters")
+        if (!regex.test(file.name)) showError("File name must start with a letter or number,<br>and only contain hyphen, underscore or dot as special characters")
         else if (file.size == 0) showError("The selected file is empty")
         else if (file.size > maxFileSize) showError(`File size must not be bigger than ${maxFileSize/1024/1024} Megabytes (MB)`)
         else if (!hasExpectedExtension(file)) showError(`File must have an extension of ${fileExtensions.join(", ")}`)
@@ -43,21 +48,38 @@
         return fileExtensions.includes(extension)
     }
 
-    function showError(error) {
-        group.classList.add("govuk-form-group--error")
-        errorMessage.textContent = error
-        file2Upload.value = ""
+    function resetError() {
+        errorSummary.classList.add("govuk-visually-hidden")
+        while (errorSummaryList.firstChild) errorSummaryList.removeChild(errorSummaryList.firstChild)
+
+        errorMessage.innerHTML = ""
+        group.classList.remove("govuk-form-group--error")
+
+        submitButton.disabled = false
     }
 
-    function showHtmlError(error) {
+    function showError(error) {
+        showErrorSummary(error)
+
         group.classList.add("govuk-form-group--error")
         errorMessage.innerHTML = error
-        file2Upload.value = ""
+
+        submitButton.disabled = true
     }
 
-    function reset() {
-        errorMessage.innerHTML = ""
-        errorMessage.textContent = ""
-        group.classList.remove("govuk-form-group--error")
+    function showErrorSummary(error) {
+        const errorLink = document.createElement('a')
+        errorLink.setAttribute('href', '#file-upload-component')
+
+        const nodes = error.split('<br>')
+        for (let ix = 0; ix < nodes.length; ) {
+            errorLink.appendChild(document.createTextNode(nodes[ix]))
+            if (++ix < nodes.length) errorLink.appendChild(document.createElement('br'))
+        }
+
+        const errorSummaryItem = document.createElement('li');
+        errorSummaryItem.appendChild(errorLink)
+        errorSummaryList.appendChild(errorSummaryItem)
+        errorSummary.classList.remove("govuk-visually-hidden")
     }
 })()

@@ -22,9 +22,10 @@
 @this(
     mainTemplate: gdsMainTemplate,
     formHelper: FormWithCSRF,
-    govukInsetText: GovukInsetText,
-    govukFileUpload : GovukFileUpload,
     govukButton: GovukButton,
+    govukErrorSummary: GovukErrorSummary,
+    govukFileUpload : GovukFileUpload,
+    govukInsetText: GovukInsetText,
     bulletList: bulletList,
     pageTitle: pageTitle,
     paragraphBody: paragraphBody,
@@ -45,6 +46,14 @@
 @fileUploadId = @{"file-upload-component"}
 
 @mainTemplate(title = Title(s"fileUploadPage.heading.$positionModifier")) {
+
+    @govukErrorSummary(
+        ErrorSummary(
+            classes = "govuk-visually-hidden",
+            errorList = List.empty,
+            title = Text(messages("error.summary.title"))
+        )
+    )
 
     <span class="govuk-caption-l">@{mrn.value}</span>
     @pageTitle(text = messages(s"fileUploadPage.heading.$positionModifier"))
