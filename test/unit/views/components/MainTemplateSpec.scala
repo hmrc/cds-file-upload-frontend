@@ -16,66 +16,63 @@
 
 package views.components.gds
 
-import base.SpecBase
+import base.{OverridableInjector, SpecBase, TestModule}
+import config.{Frontend, I18n, Play}
 import org.jsoup.nodes.Document
-import org.scalatest.BeforeAndAfterEach
 import play.twirl.api.HtmlFormat
 import views.Title
 import views.html.components.gds.gdsMainTemplate
 import views.matchers.ViewMatchers
-import base.{OverridableInjector, TestModule}
-import config.{Frontend, I18n, Play}
 
 class MainTemplateSpec extends SpecBase with ViewMatchers {
 
-class MainTemplateSpec extends SpecBase with ViewMatchers with BeforeAndAfterEach {
+  class MainTemplateSpec extends SpecBase with ViewMatchers {
 
-  private val injector = new OverridableInjector(new TestModule(_.copy(play = Play(Frontend(None), I18n(List("en"))))))
-  private implicit val mainTemplate = injector.instanceOf[gdsMainTemplate]
-  private val testContent = HtmlFormat.empty
+    private val injector = new OverridableInjector(new TestModule(_.copy(play = Play(Frontend(None), I18n(List("en"))))))
+    private implicit val mainTemplate = injector.instanceOf[gdsMainTemplate]
+    private val testContent = HtmlFormat.empty
 
-  private def createView(withNavigationBanner: Boolean = false)(implicit template: gdsMainTemplate): Document =
-    template(title = Title("common.service.name"), withNavigationBanner = withNavigationBanner)(
-      testContent
-    )(fakeRequest, messages)
+    private def createView(withNavigationBanner: Boolean = false)(implicit template: gdsMainTemplate): Document =
+      template(title = Title("common.service.name"), withNavigationBanner = withNavigationBanner)(testContent)(fakeRequest, messages)
 
-  "Main Template" should {
+    "Main Template" should {
 
-    "display the expected title as part of the <head> tag" in {
-      val view: Document = createView()
-      val serviceName = messages("common.service.name")
-      view.getElementsByTag("title").first.text mustBe messages("common.title.format", serviceName, serviceName)
-    }
-
-    "display NavigationBanner" when {
-      "withNavigationBanner flag set to true" in {
-        val view: Document = createView(withNavigationBanner = true)
-        view must containElementWithID("navigation-banner")
-      }
-    }
-
-    "not display NavigationBanner" when {
-      "withNavigationBanner flag set to false" in {
+      "display the expected title as part of the <head> tag" in {
         val view: Document = createView()
-        view mustNot containElementWithID("navigation-banner")
+        val serviceName = messages("common.service.name")
+        view.getElementsByTag("title").first.text mustBe messages("common.title.format", serviceName, serviceName)
       }
-    }
 
-    "welsh is not in the languages config" should {
-      "not display the language toggle" in {
-        val view: Document = createView()
-
-        view mustNot containElementWithClass("hmrc-language-select")
+      "display NavigationBanner" when {
+        "withNavigationBanner flag set to true" in {
+          val view: Document = createView(withNavigationBanner = true)
+          view must containElementWithID("navigation-banner")
+        }
       }
-    }
 
-    "welsh is in the languages config" should {
-      "display the language toggle" in {
-        val injectorWithWelsh = new OverridableInjector(new TestModule(_.copy(play = Play(Frontend(None), I18n(List("en", "cy"))))))
-        val templateWithWelsh = injectorWithWelsh.instanceOf[gdsMainTemplate]
-        val view: Document = createView()(templateWithWelsh)
+      "not display NavigationBanner" when {
+        "withNavigationBanner flag set to false" in {
+          val view: Document = createView()
+          view mustNot containElementWithID("navigation-banner")
+        }
+      }
 
-        view must containElementWithClass("hmrc-language-select")
+      "welsh is not in the languages config" should {
+        "not display the language toggle" in {
+          val view: Document = createView()
+
+          view mustNot containElementWithClass("hmrc-language-select")
+        }
+      }
+
+      "welsh is in the languages config" should {
+        "display the language toggle" in {
+          val injectorWithWelsh = new OverridableInjector(new TestModule(_.copy(play = Play(Frontend(None), I18n(List("en", "cy"))))))
+          val templateWithWelsh = injectorWithWelsh.instanceOf[gdsMainTemplate]
+          val view: Document = createView()(templateWithWelsh)
+
+          view must containElementWithClass("hmrc-language-select")
+        }
       }
     }
   }

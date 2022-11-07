@@ -43,7 +43,8 @@
   useCustomContentWidth: Boolean = false,
   withNavigationBanner: Boolean = false,
   backLinkUrl: Option[String] = None,
-  displaySignOut: Boolean = false
+  displaySignOut: Boolean = false,
+  showLanguageSwitch: Boolean = true
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages)
 
 @head = {
@@ -78,7 +79,7 @@
     @if(withNavigationBanner) {
       @navigationBanner()
     }
-    @if(appConfig.play.i18n.langs.contains("cy")){
+    @if(appConfig.play.i18n.langs.contains("cy") && showLanguageSwitch){
         @hmrcLanguageSelectHelper()
     }
 
@@ -93,7 +94,6 @@
         serviceCode = appConfig.appName,
         language = if(messages.lang.code == "en") En else Cy)
   )
-    <p>@appConfig.play.i18n.langs</p>
 }
 
 @if(useCustomContentWidth) {

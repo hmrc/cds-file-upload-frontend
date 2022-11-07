@@ -55,6 +55,6 @@ lazy val scalacFlags = Seq(
   "-Xfatal-warnings",        // warnings are fatal!!
   "-Wconf:cat=unused-imports&src=routes/.*:s",       // silent "unused import" warnings from Play routes
   "-Wconf:cat=unused-imports&src=twirl/.*:is",       // silent "unused import" warnings from Twirl templates
-  "-Wconf:site=Module.*&cat=lint-byname-implicit:s"  // silent warnings from Pureconfig/Shapeless
+  "-Wconf:site=.*Module.*&cat=lint-byname-implicit:s"  // silent warnings from Pureconfig/Shapeless
 )
 
