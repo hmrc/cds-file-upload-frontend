@@ -17,21 +17,27 @@
 package views.components.gds
 
 import base.SpecBase
-import config.AppConfig
 import org.jsoup.nodes.Document
+import org.scalatest.BeforeAndAfterEach
 import play.twirl.api.HtmlFormat
 import views.Title
 import views.html.components.gds.gdsMainTemplate
 import views.matchers.ViewMatchers
+import base.{OverridableInjector, TestModule}
+import config.{Frontend, I18n, Play}
 
 class MainTemplateSpec extends SpecBase with ViewMatchers {
 
-  override implicit lazy val appConfig: AppConfig = instanceOf[AppConfig]
-  private val mainTemplate = instanceOf[gdsMainTemplate]
+class MainTemplateSpec extends SpecBase with ViewMatchers with BeforeAndAfterEach {
+
+  private val injector = new OverridableInjector(new TestModule(_.copy(play = Play(Frontend(None), I18n(List("en"))))))
+  private implicit val mainTemplate = injector.instanceOf[gdsMainTemplate]
   private val testContent = HtmlFormat.empty
 
-  private def createView(withNavigationBanner: Boolean = false): Document =
-    mainTemplate(Title("common.service.name"), withNavigationBanner = withNavigationBanner)(testContent)(fakeRequest, messages)
+  private def createView(withNavigationBanner: Boolean = false)(implicit template: gdsMainTemplate): Document =
+    template(title = Title("common.service.name"), withNavigationBanner = withNavigationBanner)(
+      testContent
+    )(fakeRequest, messages)
 
   "Main Template" should {
 
@@ -52,6 +58,24 @@ class MainTemplateSpec extends SpecBase with ViewMatchers {
       "withNavigationBanner flag set to false" in {
         val view: Document = createView()
         view mustNot containElementWithID("navigation-banner")
+      }
+    }
+
+    "welsh is not in the languages config" should {
+      "not display the language toggle" in {
+        val view: Document = createView()
+
+        view mustNot containElementWithClass("hmrc-language-select")
+      }
+    }
+
+    "welsh is in the languages config" should {
+      "display the language toggle" in {
+        val injectorWithWelsh = new OverridableInjector(new TestModule(_.copy(play = Play(Frontend(None), I18n(List("en", "cy"))))))
+        val templateWithWelsh = injectorWithWelsh.instanceOf[gdsMainTemplate]
+        val view: Document = createView()(templateWithWelsh)
+
+        view must containElementWithClass("hmrc-language-select")
       }
     }
   }

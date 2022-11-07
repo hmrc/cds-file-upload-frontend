@@ -108,7 +108,7 @@ class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers wi
       }
 
       "have a bullet list" in {
-        val bulletList = view.getElementsByTag("ul").get(0)
+        val bulletList = view.getElementsByTag("ul").get(1)
 
         bulletList must containMessage("fileUploadConfirmationPage.section2.listitem1")
         bulletList must containMessage("fileUploadConfirmationPage.section2.listitem2")

@@ -30,6 +30,8 @@ class AppConfigSpec extends PlaySpec {
       |appName="cds-file-upload-frontend"
       |developerHubClientId="cds-file-upload-frontend"
       |
+      |play.i18n.langs = []
+      |
       |google-analytics {
       |  token=N/A
       |  host=auto

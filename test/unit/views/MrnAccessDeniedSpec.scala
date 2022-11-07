@@ -55,7 +55,7 @@ class MrnAccessDeniedSpec extends SpecBase with ViewMatchers {
     }
 
     "display link to /mrn-entry page" in {
-      val link = testView.getElementsByClass("govuk-link").first()
+      val link = testView.getElementsByClass("govuk-link").get(1)
 
       link must containMessage("mrnAccessDenied.link.enterDifferentMrn")
       link must haveHref(controllers.routes.MrnEntryController.onPageLoad())
