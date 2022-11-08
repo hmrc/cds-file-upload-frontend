@@ -18,7 +18,6 @@ package views
 
 import config.ExternalServicesConfig
 import controllers.routes
-import play.twirl.api.HtmlFormat
 import views.behaviours.ViewBehaviours
 import views.html.signed_out
 
@@ -26,8 +25,7 @@ class SignedOutSpec extends DomAssertions with ViewBehaviours {
 
   val page = instanceOf[signed_out]
 
-  val view: HtmlFormat.Appendable = page()(fakeRequest, messages)
-  val document = asDocument(view)
+  val view = asDocument(page()(fakeRequest, messages))
 
   val messageKeyPrefix = "signedOut"
 
@@ -36,26 +34,25 @@ class SignedOutSpec extends DomAssertions with ViewBehaviours {
     behave like normalPage(() => view, messageKeyPrefix)
 
     "display the expected page header" in {
-      val h1 = document.getElementsByTag("h1").text()
-      h1 mustBe messages("signedOut.heading")
+      view.getElementsByTag("h1").text() mustBe messages("signedOut.heading")
     }
 
     "display information and link to the Start page" in {
-      assertContainsText(document, messages("signedOut.information", messages("signedOut.startPageLink")))
-      assertContainsLink(document, messages("signedOut.startPageLink"), routes.RootController.displayPage.url)
+      assertContainsText(view, messages("signedOut.information", messages("signedOut.startPageLink")))
+      assertContainsLink(view, messages("signedOut.startPageLink"), routes.RootController.displayPage.url)
     }
 
     "display feedback-related information" in {
-      assertContainsText(document, messages("feedback.header"))
-      assertContainsText(document, messages("feedback.line.1"))
+      assertContainsText(view, messages("feedback.header"))
+      assertContainsText(view, messages("feedback.line.1"))
 
       val config = instanceOf[ExternalServicesConfig]
-      assertContainsLink(document, messages("feedback.link"), config.feedbackFrontend)
-      assertContainsText(document, messages("feedback.line.2", messages("feedback.link")))
+      assertContainsLink(view, messages("feedback.link"), config.feedbackFrontend)
+      assertContainsText(view, messages("feedback.line.2", messages("feedback.link")))
     }
 
     "display the 'Back to GOV.UK' link" in {
-      assertContainsLink(document, messages("signedOut.backToGovUk"), "https://www.gov.uk/")
+      assertContainsLink(view, messages("signedOut.backToGovUk"), "https://www.gov.uk/")
     }
   }
 }

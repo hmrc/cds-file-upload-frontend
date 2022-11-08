@@ -20,7 +20,7 @@ import base.{FilesUploadedSpec, SfusMetricsMock}
 import connectors.CdsFileUploadConnector
 import models._
 import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito._
+import org.mockito.MockitoSugar.{mock, reset, verify, when}
 import play.api.i18n.Messages
 import play.api.mvc.Request
 import play.api.test.Helpers._
@@ -47,7 +47,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
   override protected def beforeEach(): Unit = {
     super.beforeEach()
 
-    reset[Object](cdsFileUploadConnector, confirmationPage)
+    reset(cdsFileUploadConnector, confirmationPage)
   }
 
   "UploadYourFilesReceiptController onPageLoad" should {

@@ -24,7 +24,7 @@ class NavigationBannerSpec extends SpecBase with ViewMatchers {
 
   private val navigationBanner = instanceOf[navigationBanner]
 
-  private val component = navigationBanner()(fakeRequest, messages)
+  private val component = navigationBanner()(messages)
 
   "Navigation Banner component" should {
 

@@ -17,7 +17,7 @@
 package controllers
 
 import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito.{reset, when}
+import org.mockito.MockitoSugar.{mock, reset, when}
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
 import views.html.signed_out

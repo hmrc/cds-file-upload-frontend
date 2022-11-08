@@ -16,15 +16,12 @@
 
 package connectors
 
-import scala.concurrent.Future
-
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import base.{SfusMetricsMock, SpecBase}
 import models.{ContactDetails, UploadRequest}
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}
-import org.mockito.Mockito._
-import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.MockitoSugar.{mock, times, verify, when}
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
@@ -35,7 +32,9 @@ import play.api.mvc.MultipartFormData
 import play.shaded.ahc.org.asynchttpclient.Response
 import play.shaded.ahc.org.asynchttpclient.uri.Uri
 
-class UpscanConnectorTest extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar with SpecBase with SfusMetricsMock {
+import scala.concurrent.Future
+
+class UpscanConnectorTest extends PlaySpec with GuiceOneAppPerSuite with SpecBase with SfusMetricsMock {
 
   val uploadUrl = "http://localhost/theUploadUrl"
   val contactDetails = ContactDetails("a", "b", "c")

@@ -22,7 +22,7 @@ import forms.FileUploadCountProvider
 import models._
 import models.requests.SignedInUser
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}
-import org.mockito.Mockito._
+import org.mockito.MockitoSugar.{mock, reset, verify, when}
 import org.scalacheck.Arbitrary._
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -89,14 +89,14 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
   override protected def beforeEach(): Unit = {
     super.beforeEach()
 
-    reset[Object](mockCustomsDeclarationsService, mockUpscanConnector, page)
+    reset(mockCustomsDeclarationsService, mockUpscanConnector, page)
 
     when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(FileUploadResponse(List())))
     when(page(any[Form[FileUploadCount]], any())(any(), any())).thenReturn(HtmlFormat.empty)
   }
 
   override protected def afterEach(): Unit = {
-    reset[Object](mockCustomsDeclarationsService, mockUpscanConnector, page)
+    reset(mockCustomsDeclarationsService, mockUpscanConnector, page)
 
     super.afterEach()
   }

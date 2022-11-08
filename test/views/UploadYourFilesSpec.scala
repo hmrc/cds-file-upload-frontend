@@ -19,10 +19,12 @@ package views
 import generators.Generators
 import models._
 import models.requests.{AuthenticatedRequest, SignedInUser}
+import org.jsoup.nodes.Document
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import play.twirl.api.Html
 import views.behaviours.ViewBehaviours
 import views.html.upload_your_files
+
+import scala.jdk.CollectionConverters.ListHasAsScala
 
 class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCheckPropertyChecks with Generators {
 
@@ -30,32 +32,32 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCh
   val mrn: MRN = arbitraryMrn.arbitrary.sample.get
   val uploadRequest = UploadRequest("", Map.empty)
 
-  def view(pos: Position): Html = page(uploadRequest, pos, mrn)(fakeRequest, messages, fakeRequest.flash)
+  def view(pos: Position = First(3)): Document = asDocument(page(uploadRequest, pos, mrn)(fakeRequest, messages))
 
   val messagePrefix = "fileUploadPage"
 
   "Upload your files page" must {
 
-    behave like pageWithoutHeading(() => view(First(3)), messagePrefix, "paragraph1", "listItem1", "listItem2", "listItem3", "listItem4")
+    behave like pageWithoutHeading(() => view(), messagePrefix, "paragraph1", "listItem1", "listItem2", "listItem3", "listItem4")
 
     "include the 'Sign out' link if the user is authorised" in {
       forAll { user: SignedInUser =>
         val request = AuthenticatedRequest(fakeRequest, user)
-        val view = page(uploadRequest, First(3), mrn)(request, messages, request.flash)
+        val view = page(uploadRequest, First(3), mrn)(request, messages)
         assertSignoutLinkIsIncluded(view)
       }
     }
 
     "not display the 'Back' link" in {
-      assertBackLinkIsNotIncluded(asDocument(view(First(3))))
+      assertBackLinkIsNotIncluded(view())
     }
 
     "display the 'Cancel upload' link" in {
-      assertContainsLink(asDocument(view(First(3))), "Cancel upload", controllers.routes.HowManyFilesUploadController.onPageLoad.url)
+      assertContainsLink(view(), "Cancel upload", controllers.routes.HowManyFilesUploadController.onPageLoad.url)
     }
 
     "display inset text" in {
-      assertContainsMessage(asDocument(view(First(3))), s"$messagePrefix.insetText")
+      assertContainsMessage(view(), s"$messagePrefix.insetText")
     }
 
     "show title" when {
@@ -64,21 +66,21 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCh
       "first file upload is shown" in {
         forAll { total: Int =>
           val message = messages(s"$messagePrefix.heading.first")
-          assertEqualsMessage(asDocument(view(First(total))), "title", "common.title.format", message, service)
+          assertEqualsMessage(view(First(total)), "title", "common.title.format", message, service)
         }
       }
 
       "a middle file upload is shown" in {
         forAll { (index: Int, total: Int) =>
           val message = messages(s"$messagePrefix.heading.middle")
-          assertEqualsMessage(asDocument(view(Middle(index, total))), "title", "common.title.format", message, service)
+          assertEqualsMessage(view(Middle(index, total)), "title", "common.title.format", message, service)
         }
       }
 
       "the last file upload is shown" in {
         forAll { total: Int =>
           val message = messages(s"$messagePrefix.heading.last")
-          assertEqualsMessage(asDocument(view(Last(total))), "title", "common.title.format", message, service)
+          assertEqualsMessage(view(Last(total)), "title", "common.title.format", message, service)
         }
       }
     }
@@ -87,19 +89,19 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCh
 
       "first file upload is shown" in {
         forAll { total: Int =>
-          assertH1EqualsMessage(asDocument(view(First(total))), s"$messagePrefix.heading.first")
+          assertH1EqualsMessage(view(First(total)), s"$messagePrefix.heading.first")
         }
       }
 
       "a middle file upload is shown" in {
         forAll { (index: Int, total: Int) =>
-          assertH1EqualsMessage(asDocument(view(Middle(index, total))), s"$messagePrefix.heading.middle")
+          assertH1EqualsMessage(view(Middle(index, total)), s"$messagePrefix.heading.middle")
         }
       }
 
       "the last file upload is shown" in {
         forAll { total: Int =>
-          assertH1EqualsMessage(asDocument(view(Last(total))), s"$messagePrefix.heading.last")
+          assertH1EqualsMessage(view(Last(total)), s"$messagePrefix.heading.last")
         }
       }
     }
@@ -108,17 +110,22 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCh
 
       "a file middle is requested" in {
         forAll { (index: Int, total: Int) =>
-          val doc = asDocument(view(Middle(index, total)))
+          val doc = view(Middle(index, total))
           assertContainsMessage(doc, s"$messagePrefix.filesUploaded", index - 1, total)
         }
       }
 
       "the last file is requested" in {
         forAll { total: Int =>
-          val doc = asDocument(view(Last(total)))
+          val doc = view(Last(total))
           assertContainsMessage(doc, s"$messagePrefix.filesUploaded", total - 1, total)
         }
       }
+    }
+
+    "contain the Javascript file for validating files to upload" in {
+      val scripts = view().getElementsByTag("script").asScala
+      scripts.last.attr("src") mustBe "/cds-file-upload-service/assets/javascripts/validation.min.js"
     }
   }
 }

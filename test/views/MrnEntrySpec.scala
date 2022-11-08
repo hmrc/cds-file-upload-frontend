@@ -33,7 +33,7 @@ class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with Sca
   val messagePrefix = "mrnEntryPage"
 
   val page = instanceOf[mrn_entry]
-  val view = createViewUsingForm(form)
+  val view = asDocument(createViewUsingForm(form))
 
   def createViewUsingForm: Form[MRN] => HtmlFormat.Appendable =
     form => page(form, testBackLink)(fakeRequest.withCSRFToken, messages)
@@ -63,7 +63,6 @@ class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with Sca
 
     "display the 'Back' link with URL provided" in {
       val view = page(form, testBackLink)(fakeRequest.withCSRFToken, messages)
-
       assertBackLinkIsIncluded(asDocument(view), testBackLink)
     }
   }

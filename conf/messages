@@ -3,11 +3,11 @@
 common.title.format = {0} - {1} - GOV.UK
 
 common.service.name = CDS document uploads and secure messages
-common.phase=Beta
-common.continue=Continue
+common.phase = Beta
+common.continue = Continue
 
-common.feedback=This is a new service - your {0} will help us to improve it.
-common.feedback.link=feedback
+common.feedback = This is a new service - your {0} will help us to improve it.
+common.feedback.link = feedback
 
 common.navigation.messages = Messages
 common.navigation.uploadFiles = Upload files
@@ -15,11 +15,11 @@ common.navigation.uploadFiles = Upload files
 common.back.link = Back
 
 ## common buttons with shared labels
-common.button.startNow=Start now
+common.button.startNow = Start now
 
 ## errors
-error.browser.heading.prefix=Error:
-error.summary.title=There is a problem
+error.browser.heading.prefix = Error:
+error.summary.title = There is a problem
 error.required = Please enter a value.
 
 ## Sign-out
@@ -68,131 +68,132 @@ greyBox.uploadFiles = Upload and attach documents to a declaration
 
 ## MRN Entry Page
 
-mrnEntryPage.heading=What is the MRN of the declaration you want to attach files to?
-mrnEntryPage.paragraph=The movement reference number (MRN) is 18 characters, starting with 2 numbers for the year the declaration was created, the letters ‘GB’, then 14 letters and numbers. For example, 22GB123456789AB012.
-mrnEntryPage.label=What is the MRN of the declaration you want to attach files to?
-mrn.missing=Enter a movement reference number (MRN)
-mrn.invalid=Movement reference number (MRN) must be in the correct format
+mrnEntryPage.heading = What is the MRN of the declaration you want to attach files to?
+mrnEntryPage.paragraph = The movement reference number (MRN) is 18 characters, starting with 2 numbers for the year the declaration was created, the letters ‘GB’, then 14 letters and numbers. For example, 22GB123456789AB012.
+mrnEntryPage.label = What is the MRN of the declaration you want to attach files to?
+mrn.missing = Enter a movement reference number (MRN)
+mrn.invalid = Movement reference number (MRN) must be in the correct format
 
 ## MRN access denied page
 
-mrnAccessDenied.heading=You do not have access to any declaration with MRN {0}
-mrnAccessDenied.paragraph.1=If the MRN is correct and current, this may mean the documents need to be uploaded by the same person that made the declaration.
-mrnAccessDenied.paragraph.2=The documents can also be uploaded by another person from the same business, using a Gateway ID that has been given access to the Customs Declaration Service by that business.
-mrnAccessDenied.link.enterDifferentMrn=Enter a different MRN
+mrnAccessDenied.heading = You do not have access to any declaration with MRN {0}
+mrnAccessDenied.paragraph.1 = If the MRN is correct and current, this may mean the documents need to be uploaded by the same person that made the declaration.
+mrnAccessDenied.paragraph.2 = The documents can also be uploaded by another person from the same business, using a Gateway ID that has been given access to the Customs Declaration Service by that business.
+mrnAccessDenied.link.enterDifferentMrn = Enter a different MRN
 
 ## Unverified email waring page
 
-emailUnverified.heading=You need to verify your email address for the Customs Declaration Service
-emailUnverified.paragraph1=This is the email address your organisation has registered for the Customs Declaration Service (CDS). You need to verify this email address or change it. You can verify the email instantly provided you have access to the email account.
-emailUnverified.paragraph2=This will be the only email address we use for:
-emailUnverified.bullets.item1=updates on changes to the Customs Declaration Service
-emailUnverified.bullets.item2=urgent updates about goods in customs
-emailUnverified.bullets.item3=some financial notifications, including Direct Debit notices and VAT
-emailUnverified.link=Verify or change email address
+emailUnverified.heading = You need to verify your email address for the Customs Declaration Service
+emailUnverified.paragraph1 = This is the email address your organisation has registered for the Customs Declaration Service (CDS). You need to verify this email address or change it. You can verify the email instantly provided you have access to the email account.
+emailUnverified.paragraph2 = This will be the only email address we use for:
+emailUnverified.bullets.item1 = updates on changes to the Customs Declaration Service
+emailUnverified.bullets.item2 = urgent updates about goods in customs
+emailUnverified.bullets.item3 = some financial notifications, including Direct Debit notices and VAT
+emailUnverified.link = Verify or change email address
 
 ## Undeliverable email warning page
 
-emailUndeliverable.title=There’s a problem with the CDS registered email address
-emailUndeliverable.heading=There’s a problem with the CDS registered email address
-emailUndeliverable.p1=We tried to send you an email but it could not be delivered. This could be because the inbox is full, or due to a technical problem with your email provider.
-emailUndeliverable.p2=This is the email address your organisation has registered for the Customs Declaration Service (CDS). You need to verify this email address or change it. You can verify the email instantly provided you have access to the email account.
-emailUndeliverable.p3=This will be the only email address we use for:
-emailUndeliverable.list.1=updates on changes to the Customs Declaration Service
-emailUndeliverable.list.2=urgent updates about goods in customs
-emailUndeliverable.list.3=some financial notifications, including Direct Debit notices and VAT
-emailUndeliverable.link-text=Verify or change email address
+emailUndeliverable.title = There’s a problem with the CDS registered email address
+emailUndeliverable.heading = There’s a problem with the CDS registered email address
+emailUndeliverable.p1 = We tried to send you an email but it could not be delivered. This could be because the inbox is full, or due to a technical problem with your email provider.
+emailUndeliverable.p2 = This is the email address your organisation has registered for the Customs Declaration Service (CDS). You need to verify this email address or change it. You can verify the email instantly provided you have access to the email account.
+emailUndeliverable.p3 = This will be the only email address we use for:
+emailUndeliverable.list.1 = updates on changes to the Customs Declaration Service
+emailUndeliverable.list.2 = urgent updates about goods in customs
+emailUndeliverable.list.3 = some financial notifications, including Direct Debit notices and VAT
+emailUndeliverable.link-text = Verify or change email address
 
 ## Contact details page
 
-contactDetails.heading=Your contact details
-contactDetails.name=Full name
-contactDetails.name.missing=Enter a name
-contactDetails.companyName=Company name
-contactDetails.companyName.missing=Enter a company name
-contactDetails.phoneNumber=UK telephone number
-contactDetails.name.invalid=Name must contain 35 characters or fewer
-contactDetails.companyName.invalid=Company name must contain 35 characters or fewer
-contactDetails.phoneNumber.missing=Enter a telephone number
-contactDetails.phoneNumber.invalid=Number must contain 15 digits or fewer
-contactDetails.phoneNumber.invalidPattern=Telephone number must contain only numbers
-contactDetails.paragraph1=Provide these details so we can contact you if there are any issues with the documents you submit.
+contactDetails.heading = Your contact details
+contactDetails.name = Full name
+contactDetails.name.missing = Enter a name
+contactDetails.companyName = Company name
+contactDetails.companyName.missing = Enter a company name
+contactDetails.phoneNumber = UK telephone number
+contactDetails.name.invalid = Name must contain 35 characters or fewer
+contactDetails.companyName.invalid = Company name must contain 35 characters or fewer
+contactDetails.phoneNumber.missing = Enter a telephone number
+contactDetails.phoneNumber.invalid = Number must contain 15 digits or fewer
+contactDetails.phoneNumber.invalidPattern = Telephone number must contain only numbers
+contactDetails.paragraph1 = Provide these details so we can contact you if there are any issues with the documents you submit.
 
 ## file warning page
 
-fileWarning.heading=Count your files
-fileWarning.paragraph1=HMRC need to know how many files you want to upload before you start uploading them.
-fileWarning.paragraph2=This is not the same as the number of documents.
-fileWarning.panel=You need to enter the correct number of files - you cannot amend your answer so if you get it wrong you will have to start again.
-fileWarning.button=I understand
+fileWarning.heading = Count your files
+fileWarning.paragraph1 = HMRC need to know how many files you want to upload before you start uploading them.
+fileWarning.paragraph2 = This is not the same as the number of documents.
+fileWarning.panel = You need to enter the correct number of files - you cannot amend your answer so if you get it wrong you will have to start again.
+fileWarning.button = I understand
 
 ## How many files do you need to upload page
 
-howManyFilesUpload.heading=How many files do you need to upload?
-howManyFilesUpload.missing=Enter a number of files to upload
-howManyFilesUpload.invalid=Enter a number between 1 and 10
-howManyFilesUpload.paragraph1=Tell us the exact number of files you intend to upload. Count the files, not the actual documents. For example, if you have saved one packing list as 2 jpegs, this is 2 files.
-howManyFilesUpload.paragraph2=Make sure that file names start with a letter or number, not a space, and do not contain any special characters. Hyphens and underscores are acceptable.
-howManyFilesUpload.paragraph3=Each file you upload must be less than 10 megabytes (MB), and must be in one of the following formats:
-howManyFilesUpload.listItem1=jpeg (image)
-howManyFilesUpload.listItem2=png (image)
-howManyFilesUpload.listItem3=PDF
-howManyFilesUpload.listItem4=txt (plain text)
-howManyFilesUpload.insetText=You cannot change this number once you select continue. If you input the wrong number, you will have to start again.
+howManyFilesUpload.heading = How many files do you need to upload?
+howManyFilesUpload.missing = Enter a number of files to upload
+howManyFilesUpload.invalid = Enter a number between 1 and 10
+howManyFilesUpload.paragraph1 = Tell us the exact number of files you intend to upload. Count the files, not the actual documents. For example, if you have saved one packing list as 2 jpegs, this is 2 files.
+howManyFilesUpload.paragraph2 = Make sure that file names start with a letter or number, not a space, and do not contain any special characters. Hyphens and underscores are acceptable.
+howManyFilesUpload.paragraph3 = Each file you upload must not be bigger than 10 megabytes (MB), and must be in one of the following formats:
+howManyFilesUpload.listItem1 = jpeg (image)
+howManyFilesUpload.listItem2 = png (image)
+howManyFilesUpload.listItem3 = PDF (unencrypted)
+howManyFilesUpload.listItem4 = txt (plain text)
+howManyFilesUpload.insetText = You cannot change this number once you select continue. If you input the wrong number, you will have to start again.
 
-fileUploadPage.heading.first=Upload your first file
-fileUploadPage.heading.middle=Upload your next file
-fileUploadPage.heading.last=Upload your last file
-fileUploadPage.listItem1=jpeg (image)
-fileUploadPage.listItem2=png (image)
-fileUploadPage.listItem3=PDF
-fileUploadPage.listItem4=txt (plain text)
-fileUploadPage.filesUploaded=You have uploaded {0} of {1} files
-fileUploadPage.validation.required=Select the file you want to upload
-fileUploadPage.validation.accept=File is not an accepted file type
-fileUploadPage.validation.filesize=File size is bigger than 10 Megabytes (MB)
-fileUploadPage.paragraph1=Each file you upload must be less than 10 megabytes (MB), and must be in one of the following formats:
-fileUploadPage.button=Upload and continue
-fileUploadPage.insetText=If you have a Word or Excel document to upload, you need to 'save as' a PDF first. Word and Excel formats are not allowed on this service.
-fileUploadPage.cancel=Cancel upload
+fileUploadPage.heading.first = Upload your first file
+fileUploadPage.heading.middle = Upload your next file
+fileUploadPage.heading.last = Upload your last file
+fileUploadPage.listItem1 = jpeg (image)
+fileUploadPage.listItem2 = png (image)
+fileUploadPage.listItem3 = PDF (unencrypted)
+fileUploadPage.listItem4 = txt (plain text)
+fileUploadPage.label = Upload a file
+fileUploadPage.filesUploaded = You have uploaded {0} of {1} files
+fileUploadPage.validation.required = Select the file you want to upload
+fileUploadPage.validation.accept = File is not an accepted file type
+fileUploadPage.validation.filesize = File size is bigger than 10 Megabytes (MB)
+fileUploadPage.paragraph1 = Each file you upload must not be bigger than 10 megabytes (MB), and must be in one of the following formats:
+fileUploadPage.button = Upload and continue
+fileUploadPage.insetText = If you have a Word or Excel document to upload, you need to 'save as' a PDF first. Word and Excel formats are not allowed on this service.
+fileUploadPage.cancel = Cancel upload
 
-fileUploadReceiptPage.heading=Files have been uploaded and sent to HMRC
-fileUploadReceiptPage.mrn=Movement reference number:
-fileUploadReceiptPage.tableTitle=Uploaded files
-fileUploadReceiptPage.fileName=File name
-fileUploadReceiptPage.receipt=Receipt
-fileUploadReceiptPage.printPage=Print this page for your records
-fileUploadReceiptPage.whatHappensNext=What happens next?
-fileUploadReceiptPage.paragraph1=As long as you have provided the documents that customs needs to clear your goods, they should be cleared within these time limits from arriving goods or uploading documents (whichever is later):
-fileUploadReceiptPage.listitem1=2 hours for air freight imports, road freight imports, all exports
-fileUploadReceiptPage.listitem2=3 hours if received between 8am and 3pm - for maritime freight imports
-fileUploadReceiptPage.listitem3=by 8am the following day if received after 3pm - for maritime freight imports
-fileUploadReceiptPage.paragraph2=If the status of your declaration has not changed within the specified time, you should
-fileUploadReceiptPage.listitem4=first check your email
-fileUploadReceiptPage.listitem5=email the National Clearance Hub on {0}
-fileUploadReceiptPage.uploadAnother=Upload documents for another declaration
-fileUploadReceiptPage.paragraph3=You only need to add documents that are required by HMRC: this will show in the status of the declaration or in a message to you from HMRC.
-fileUploadReceiptPage.finalButton.text=Upload documents for another declaration
+fileUploadReceiptPage.heading = Files have been uploaded and sent to HMRC
+fileUploadReceiptPage.mrn = Movement reference number:
+fileUploadReceiptPage.tableTitle = Uploaded files
+fileUploadReceiptPage.fileName = File name
+fileUploadReceiptPage.receipt = Receipt
+fileUploadReceiptPage.printPage = Print this page for your records
+fileUploadReceiptPage.whatHappensNext = What happens next?
+fileUploadReceiptPage.paragraph1 = As long as you have provided the documents that customs needs to clear your goods, they should be cleared within these time limits from arriving goods or uploading documents (whichever is later):
+fileUploadReceiptPage.listitem1 = 2 hours for air freight imports, road freight imports, all exports
+fileUploadReceiptPage.listitem2 = 3 hours if received between 8am and 3pm - for maritime freight imports
+fileUploadReceiptPage.listitem3 = by 8am the following day if received after 3pm - for maritime freight imports
+fileUploadReceiptPage.paragraph2 = If the status of your declaration has not changed within the specified time, you should
+fileUploadReceiptPage.listitem4 = first check your email
+fileUploadReceiptPage.listitem5 = email the National Clearance Hub on {0}
+fileUploadReceiptPage.uploadAnother = Upload documents for another declaration
+fileUploadReceiptPage.paragraph3 = You only need to add documents that are required by HMRC: this will show in the status of the declaration or in a message to you from HMRC.
+fileUploadReceiptPage.finalButton.text = Upload documents for another declaration
 
-fileUploadConfirmationPage.heading=Files uploaded
-fileUploadConfirmationPage.mrn=Movement reference number:
-fileUploadConfirmationPage.tableTitle=Uploaded files
-fileUploadConfirmationPage.fileName=File name
-fileUploadConfirmationPage.receipt=Receipt
-fileUploadConfirmationPage.printPage=Save or print this page for your records (opens in new tab).
-fileUploadConfirmationPage.section1.title=What to do with queries
-fileUploadConfirmationPage.section1.paragraph1=If a query is raised by customs authorities about your goods or documents, the query will be sent to your {0}. You will be notified about the query on {1} which is your registered CDS email address. You should also be notified in your customs software.
-fileUploadConfirmationPage.section1.paragraph1.linkText=CDS secure inbox
-fileUploadConfirmationPage.section1.paragraph2=If you have just uploaded documents in response to a query, you should now {0} to tell customs authorities your documents are ready to be checked.
-fileUploadConfirmationPage.section1.paragraph2.linkText=reply to the message
+fileUploadConfirmationPage.heading = Files uploaded
+fileUploadConfirmationPage.mrn = Movement reference number:
+fileUploadConfirmationPage.tableTitle = Uploaded files
+fileUploadConfirmationPage.fileName = File name
+fileUploadConfirmationPage.receipt = Receipt
+fileUploadConfirmationPage.printPage = Save or print this page for your records (opens in new tab).
+fileUploadConfirmationPage.section1.title = What to do with queries
+fileUploadConfirmationPage.section1.paragraph1 = If a query is raised by customs authorities about your goods or documents, the query will be sent to your {0}. You will be notified about the query on {1} which is your registered CDS email address. You should also be notified in your customs software.
+fileUploadConfirmationPage.section1.paragraph1.linkText = CDS secure inbox
+fileUploadConfirmationPage.section1.paragraph2 = If you have just uploaded documents in response to a query, you should now {0} to tell customs authorities your documents are ready to be checked.
+fileUploadConfirmationPage.section1.paragraph2.linkText = reply to the message
 
-fileUploadConfirmationPage.section2.title=What happens next?
-fileUploadConfirmationPage.section2.paragraph1=As long as you have provided the documents that customs needs to clear your goods, they should be cleared within these time limits from arriving goods or uploading documents (whichever is later):
-fileUploadConfirmationPage.section2.listitem1=2 hours for air freight imports, road freight imports, all exports
-fileUploadConfirmationPage.section2.listitem2=3 hours if received between 8am and 3pm - for maritime freight imports
-fileUploadConfirmationPage.section2.listitem3=by 8am the following day if received after 3pm - for maritime freight imports
-fileUploadConfirmationPage.section2.paragraph2=If the status of your declaration has not changed within the specified time, you should email the National Clearance Hub on {0}
-fileUploadConfirmationPage.finalButton.text=Back to start
+fileUploadConfirmationPage.section2.title = What happens next?
+fileUploadConfirmationPage.section2.paragraph1 = As long as you have provided the documents that customs needs to clear your goods, they should be cleared within these time limits from arriving goods or uploading documents (whichever is later):
+fileUploadConfirmationPage.section2.listitem1 = 2 hours for air freight imports, road freight imports, all exports
+fileUploadConfirmationPage.section2.listitem2 = 3 hours if received between 8am and 3pm - for maritime freight imports
+fileUploadConfirmationPage.section2.listitem3 = by 8am the following day if received after 3pm - for maritime freight imports
+fileUploadConfirmationPage.section2.paragraph2 = If the status of your declaration has not changed within the specified time, you should email the National Clearance Hub on {0}
+fileUploadConfirmationPage.finalButton.text = Back to start
 
 unauthorised.heading = To continue, you need to get access to the Customs Declaration Service (CDS)
 unauthorised.paragraph.1 = To use this service, you’ll need to:
@@ -211,13 +212,14 @@ notImplemented.message = We are working hard to make it available to you. Please
 
 
 ## Errors
-uploadError.heading=One of your files has been rejected
-uploadError.paragraph=At least one of your files may be:
-uploadError.bullet.1=larger than 10MB
-uploadError.bullet.2=not an accepted file type
-uploadError.bullet.3=corrupted, or contain a virus
-uploadError.button=Start your upload again
-uploadError.guidance=You may be asked to check or re-enter the contact details.
+uploadError.heading = One of your files has been rejected
+uploadError.paragraph = At least one of your files may be:
+uploadError.bullet.1 = larger than 10MB
+uploadError.bullet.2 = not an accepted file type
+uploadError.bullet.3 = corrupted, or containing a virus
+uploadError.bullet.4 = an encrypted PDF file
+uploadError.button = Start your upload again
+uploadError.guidance = You may be asked to check or re-enter the contact details.
 
 notFoundError.heading = Page not found
 notFoundError.paragraph.1 = If you typed the web address, check it is correct.

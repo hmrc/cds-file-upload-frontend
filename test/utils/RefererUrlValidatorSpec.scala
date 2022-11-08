@@ -19,10 +19,9 @@ package utils
 import base.AppConfigMockHelper.generateMockConfig
 import base.Injector
 import config.AllowList
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 
-class RefererUrlValidatorSpec extends PlaySpec with Injector with MockitoSugar {
+class RefererUrlValidatorSpec extends PlaySpec with Injector {
 
   private val allowedService1 = "service1"
   private val allowedService2 = "service2"

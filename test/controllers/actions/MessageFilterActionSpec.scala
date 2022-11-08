@@ -17,16 +17,16 @@
 package controllers.actions
 
 import controllers.{routes, ControllerSpecBase}
-import models.{ExportMessages, SecureMessageAnswers}
 import models.requests.{AuthenticatedRequest, MessageFilterRequest, VerifiedEmailRequest}
+import models.{ExportMessages, SecureMessageAnswers}
 import org.mockito.ArgumentMatchers.{eq => eqTo}
-import org.mockito.Mockito._
+import org.mockito.MockitoSugar.{mock, reset, when}
 import play.api.mvc.Result
+import play.api.mvc.Results.Redirect
 import services.SecureMessageAnswersService
 import testdata.CommonTestData._
-import scala.concurrent.Future
 
-import play.api.mvc.Results.Redirect
+import scala.concurrent.Future
 
 class MessageFilterActionSpec extends ControllerSpecBase {
 
@@ -34,12 +34,6 @@ class MessageFilterActionSpec extends ControllerSpecBase {
   private val action: ActionTestWrapper = new ActionTestWrapper(answersService)
 
   private val answers = SecureMessageAnswers(eori, ExportMessages)
-
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-
-    reset(answersService)
-  }
 
   override def afterEach(): Unit = {
     reset(answersService)

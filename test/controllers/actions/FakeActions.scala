@@ -20,13 +20,12 @@ import generators.Generators
 import models._
 import models.requests._
 import org.scalacheck.Arbitrary._
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.{Request, Result}
 import play.api.test.Helpers.stubBodyParser
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait FakeActions extends Generators with MockitoSugar {
+trait FakeActions extends Generators {
 
   class FakeAuthAction(user: SignedInUser = arbitrary[SignedInUser].sample.get) extends AuthAction {
     protected def executionContext = ExecutionContext.global

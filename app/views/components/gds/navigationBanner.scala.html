@@ -18,7 +18,7 @@
 
 @this(link: link)
 
-@()(implicit request: Request[_], messages: Messages)
+@()(implicit messages: Messages)
 
 <div id="navigation-banner" class="govuk-!-padding-bottom-3 govuk-!-padding-top-3">
   @link(text = messages("common.navigation.messages"), call = routes.InboxChoiceController.onPageLoad, classes="govuk-link govuk-link--no-visited-state right-margin--30")

@@ -17,15 +17,14 @@
 package controllers.actions
 
 import connectors.CdsFileUploadConnector
-import controllers.ControllerSpecBase
-import controllers.routes
+import controllers.{routes, ControllerSpecBase}
 import models.requests.{AuthenticatedRequest, VerifiedEmailRequest}
 import models.{EORI, Email}
 import org.mockito.ArgumentMatchers.{eq => meq, _}
-import org.mockito.Mockito.{reset, when}
+import org.mockito.MockitoSugar.{mock, reset, when}
 import org.scalatest.{BeforeAndAfterEach, Inside}
-import play.api.mvc.{MessagesControllerComponents, Result}
 import play.api.mvc.Results.Redirect
+import play.api.mvc.{MessagesControllerComponents, Result}
 import play.api.test.FakeRequest
 import play.api.{Configuration, Environment}
 import testdata.CommonTestData._

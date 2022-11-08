@@ -39,7 +39,7 @@
         <div class="govuk-grid-column-full">
             <div class="govuk-form-group">
 
-            @formHelper(action = routes.HowManyFilesUploadController.onSubmit, 'autoComplete -> "off") {
+            @formHelper(action = routes.HowManyFilesUploadController.onSubmit, args = Symbol("autoComplete") -> "off") {
 
                 @errorSummary(form.errors)
 

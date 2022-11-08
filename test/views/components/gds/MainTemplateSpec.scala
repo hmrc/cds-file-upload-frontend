@@ -16,8 +16,6 @@
 
 package views.components.gds
 
-import scala.jdk.CollectionConverters._
-
 import base.SpecBase
 import config.AppConfig
 import org.jsoup.nodes.Document
@@ -32,10 +30,8 @@ class MainTemplateSpec extends SpecBase with ViewMatchers {
   private val mainTemplate = instanceOf[gdsMainTemplate]
   private val testContent = HtmlFormat.empty
 
-  private def createView(withNavigationBanner: Boolean = false, withFileUploadFlag: Boolean = false): Document =
-    mainTemplate(title = Title("common.service.name"), withNavigationBanner = withNavigationBanner, withFileUploadValidation = withFileUploadFlag)(
-      testContent
-    )(fakeRequest, messages)
+  private def createView(withNavigationBanner: Boolean = false): Document =
+    mainTemplate(Title("common.service.name"), withNavigationBanner = withNavigationBanner)(testContent)(fakeRequest, messages)
 
   "Main Template" should {
 
@@ -58,34 +54,5 @@ class MainTemplateSpec extends SpecBase with ViewMatchers {
         view mustNot containElementWithID("navigation-banner")
       }
     }
-
-    "fileUploadFlag is set on" should {
-      "contain the JQuery validation script files" in {
-        val view: Document = createView(withFileUploadFlag = true)
-
-        val scripts = view.getElementsByTag("script").asScala
-        val scriptAttribs = scripts.map(_.attr("src").replaceFirst("^/cds-file-upload-service", ""))
-        scriptAttribs must contain("/assets/javascripts/jquery-3.6.0.min.js")
-        scriptAttribs must contain("/assets/javascripts/jquery.validate.min.js")
-        scriptAttribs must contain("/assets/javascripts/cdsfileuploadfrontend.js")
-
-        scripts.map(_.data()) must contain("""$("form").validate();""")
-      }
-    }
-
-    "fileUploadFlag is set off" should {
-      "not contain the JQuery validation script files" in {
-        val view: Document = createView(withFileUploadFlag = false)
-
-        val scripts = view.getElementsByTag("script").asScala.toSeq
-        val scriptAttribs = scripts.map(_.attr("src"))
-        scriptAttribs mustNot contain("/assets/javascripts/jquery-3.6.0.min.js")
-        scriptAttribs mustNot contain("/assets/javascripts/jquery.validate.min.js")
-        scriptAttribs mustNot contain("/assets/javascripts/cdsfileuploadfrontend.js")
-
-        scripts.map(_.data()) mustNot contain("""$("form").validate();""")
-      }
-    }
   }
-
 }

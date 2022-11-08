@@ -21,14 +21,13 @@ import connectors.CustomsDeclarationsConnector
 import models._
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}
-import org.mockito.Mockito.{verify, _}
+import org.mockito.MockitoSugar.{mock, reset, times, verify, when}
 import org.scalatest._
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.Helpers._
 
 import scala.concurrent.Future
 
-class CustomsDeclarationsServiceSpec extends SpecBase with MockitoSugar with BeforeAndAfterEach with SfusMetricsMock {
+class CustomsDeclarationsServiceSpec extends SpecBase with BeforeAndAfterEach with SfusMetricsMock {
 
   lazy val mockConnector = mock[CustomsDeclarationsConnector]
   lazy val service = new CustomsDeclarationsService(mockConnector, appConfig, sfusMetrics)

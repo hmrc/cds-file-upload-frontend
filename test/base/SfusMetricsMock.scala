@@ -19,12 +19,11 @@ package base
 import com.codahale.metrics.{Counter, Timer}
 import metrics.SfusMetrics
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{doNothing, reset, when}
+import org.mockito.MockitoSugar.{doNothing, mock, reset, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatestplus.mockito.MockitoSugar
 
-trait SfusMetricsMock extends AnyWordSpec with MockitoSugar with BeforeAndAfterEach {
+trait SfusMetricsMock extends AnyWordSpec with BeforeAndAfterEach {
 
   val sfusMetrics = mock[SfusMetrics]
 
@@ -34,7 +33,7 @@ trait SfusMetricsMock extends AnyWordSpec with MockitoSugar with BeforeAndAfterE
     when(sfusMetrics.counters).thenReturn(Map.empty[String, Counter])
     when(sfusMetrics.timers).thenReturn(Map.empty[String, Timer])
     when(sfusMetrics.startTimer(any())).thenReturn(mock[Timer.Context])
-    doNothing().when(sfusMetrics).incrementCounter(any())
+    doNothing.when(sfusMetrics).incrementCounter(any())
   }
 
   override protected def afterEach(): Unit = {

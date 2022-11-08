@@ -87,7 +87,7 @@ case class ContactFrontend(url: String, serviceId: String) {
   lazy val giveFeedbackLink: String = s"$url?service=$serviceId"
 }
 
-case class FileFormats(maxFileSizeMb: Int, approvedFileTypes: String, approvedFileExtensions: String)
+case class FileFormats(maxFileSize: Int, approvedFileTypes: String, approvedFileExtensions: String)
 
 case class Notifications(maxRetries: Int, retryPauseMillis: Int)
 

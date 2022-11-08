@@ -21,7 +21,7 @@ import forms.mappings.ContactDetailsMapping._
 import models._
 import models.requests.SignedInUser
 import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito.{reset, when}
+import org.mockito.MockitoSugar.{mock, reset, when}
 import org.scalacheck.Arbitrary._
 import play.api.data.Form
 import play.api.test.Helpers._
@@ -37,7 +37,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
 
   def view(form: Form[ContactDetails] = form): String = page(form, mrn)(fakeRequest, messages).toString
 
-  def controller(signedInUser: SignedInUser, eori: String, dataRetrieval: DataRetrievalAction = new FakeDataRetrievalAction(None)) =
+  def controller(signedInUser: SignedInUser, dataRetrieval: DataRetrievalAction = new FakeDataRetrievalAction(None)) =
     new ContactDetailsController(
       new FakeAuthAction(signedInUser),
       dataRetrieval,
@@ -50,44 +50,39 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
-
     when(page.apply(any(), any())(any(), any())).thenReturn(HtmlFormat.empty)
   }
 
   override protected def afterEach(): Unit = {
     reset(page)
-
     super.afterEach()
   }
 
   "Contact details page" should {
 
     "load the correct page when user is logged in" in {
-
       forAll { (user: SignedInUser, eori: String) =>
         val answers = FileUploadAnswers(eori, mrn = Some(mrn))
-        val result = controller(user, eori, fakeDataRetrievalAction(answers)).onPageLoad(fakeRequest)
+        val result = controller(user, fakeDataRetrievalAction(answers)).onPageLoad(fakeRequest)
 
         status(result) mustBe OK
       }
     }
 
     "contact details should be displayed if they exist in the cache" in {
-
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
         val answers = FileUploadAnswers(eori, mrn = Some(mrn), contactDetails = Some(contactDetails))
-        val result = controller(user, eori, fakeDataRetrievalAction(answers)).onPageLoad(fakeRequest)
+        val result = controller(user, fakeDataRetrievalAction(answers)).onPageLoad(fakeRequest)
 
         contentAsString(result) mustBe view(form.fill(contactDetails))
       }
     }
 
     "return an see other when valid data is submitted" in {
-
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
         val postRequest = fakePostRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
         val answers = FileUploadAnswers(eori, mrn = Some(mrn))
-        val result = controller(user, eori, fakeDataRetrievalAction(answers)).onSubmit(postRequest)
+        val result = controller(user, fakeDataRetrievalAction(answers)).onSubmit(postRequest)
 
         status(result) mustBe SEE_OTHER
         redirectLocation(result) mustBe Some(routes.HowManyFilesUploadController.onPageLoad.url)
@@ -95,7 +90,6 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
     }
 
     "return a bad request when invalid data is submitted" in {
-
       forAll(arbitrary[SignedInUser], eoriString, arbitrary[ContactDetails], minStringLength(36)) { (user, eori, contactDetails, invalidName) =>
         val badData = contactDetails.copy(name = invalidName)
         val answers = FileUploadAnswers(eori, mrn = Some(mrn))
@@ -103,7 +97,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
         val postRequest = fakePostRequest.withFormUrlEncodedBody(asFormParams(badData): _*)
         val badForm = form.fillAndValidate(badData)
 
-        val result = controller(user, eori, fakeDataRetrievalAction(answers)).onSubmit(postRequest)
+        val result = controller(user, fakeDataRetrievalAction(answers)).onSubmit(postRequest)
 
         status(result) mustBe BAD_REQUEST
         contentAsString(result) mustBe view(badForm)
@@ -111,13 +105,12 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
     }
 
     "save data in cache when valid" in {
-
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
-        resetAnswersService()
+        resetFileUploadAnswersService()
         val postRequest = fakePostRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
         val answers = FileUploadAnswers(eori, mrn = Some(mrn))
 
-        await(controller(user, eori, fakeDataRetrievalAction(answers)).onSubmit(postRequest))
+        await(controller(user, fakeDataRetrievalAction(answers)).onSubmit(postRequest))
 
         theSavedFileUploadAnswers.contactDetails mustBe Some(contactDetails)
       }

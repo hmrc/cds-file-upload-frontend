@@ -26,9 +26,11 @@ class NotFoundErrorSpec extends ViewBehaviours with ViewMatchers {
   val page = instanceOf[error_template]
 
   val view = () =>
-    page("notFoundError.heading", "notFoundError.heading", "notFoundError.paragraph.1", "notFoundError.paragraph.2")(
-      fakeRequest.withCSRFToken,
-      messages
+    asDocument(
+      page("notFoundError.heading", "notFoundError.heading", "notFoundError.paragraph.1", "notFoundError.paragraph.2")(
+        fakeRequest.withCSRFToken,
+        messages
+      )
   )
 
   val messageKeyPrefix = "notFoundError"
@@ -37,14 +39,12 @@ class NotFoundErrorSpec extends ViewBehaviours with ViewMatchers {
     behave like normalPage(view, messageKeyPrefix)
 
     "have first paragraph" in {
-      val paragraph = asDocument(view()).getElementsByTag("p").get(1)
-
+      val paragraph = view().getElementsByTag("p").get(1)
       paragraph must containMessage(s"$messageKeyPrefix.paragraph.1")
     }
 
     "have second paragraph" in {
-      val paragraph = asDocument(view()).getElementsByTag("p").get(2)
-
+      val paragraph = view().getElementsByTag("p").get(2)
       paragraph must containMessage(s"$messageKeyPrefix.paragraph.2")
     }
   }

@@ -22,7 +22,7 @@ import forms.InboxChoiceForm
 import forms.InboxChoiceForm.{InboxChoiceKey, Values}
 import models.{ExportMessages, SecureMessageAnswers}
 import org.mockito.ArgumentMatchers.{any, anyString, eq => eqTo}
-import org.mockito.Mockito._
+import org.mockito.MockitoSugar.{mock, reset, verify, when}
 import play.api.data.Form
 import play.api.i18n.Messages
 import play.api.mvc.Request
@@ -49,7 +49,7 @@ class InboxChoiceControllerSpec extends ControllerSpecBase {
   override def beforeEach(): Unit = {
     super.beforeEach()
 
-    reset[Object](inboxChoice, secureMessageAnswersService)
+    reset(inboxChoice, secureMessageAnswersService)
     when(inboxChoice.apply(any[Form[InboxChoiceForm]])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
     when(secureMessageAnswersService.findOneAndReplace(any())).thenReturn(Future.successful(SecureMessageAnswers("", ExportMessages)))
   }

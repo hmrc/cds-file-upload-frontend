@@ -21,7 +21,7 @@ import scala.concurrent.Future
 import connectors.SecureMessageFrontendConnector
 import models.{ConversationPartial, InboxPartial, ReplyResultPartial}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{reset, verify, when}
+import org.mockito.MockitoSugar.{mock, reset, verify, when}
 import play.api.i18n.Messages
 import play.api.mvc.Request
 import play.api.test.Helpers._
@@ -50,7 +50,7 @@ class SecureMessagingControllerSpec extends ControllerSpecBase {
   override def beforeEach(): Unit = {
     super.beforeEach()
 
-    reset[Object](partial_wrapper, partialWrapperPage, connector)
+    reset(partial_wrapper, partialWrapperPage, connector)
 
     when(partialWrapperPage.apply(any[HtmlFormat.Appendable])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
     when(partial_wrapper.apply(any[HtmlFormat.Appendable], any[String], any[String], any[Option[String]])(any[Request[_]], any[Messages]))

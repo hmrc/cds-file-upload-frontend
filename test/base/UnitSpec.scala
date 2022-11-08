@@ -18,6 +18,5 @@ package base
 
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatestplus.mockito.MockitoSugar
 
-trait UnitSpec extends AnyWordSpec with Matchers with MockitoSugar
+trait UnitSpec extends AnyWordSpec with Matchers

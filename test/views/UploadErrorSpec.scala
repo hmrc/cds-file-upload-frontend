@@ -26,7 +26,7 @@ class UploadErrorSpec extends ViewBehaviours with ViewMatchers {
 
   val page = instanceOf[upload_error]
 
-  val view = () => page()(fakeRequest.withCSRFToken, messages)
+  val view = () => asDocument(page()(fakeRequest.withCSRFToken, messages))
 
   val messageKeyPrefix = "uploadError"
 
@@ -42,31 +42,28 @@ class UploadErrorSpec extends ViewBehaviours with ViewMatchers {
     }
 
     "have a paragraph" in {
-      val paragraph = asDocument(view()).getElementsByTag("p").get(1)
-
-      paragraph must containMessage("uploadError.paragraph")
+      view().getElementsByTag("p").get(1) must containMessage("uploadError.paragraph")
     }
 
     "have a bullet list" in {
-      val bulletList = asDocument(view()).getElementsByClass("list list-bullet").first()
+      val bulletList = view().getElementsByClass("list list-bullet").first()
 
       bulletList must containMessage("uploadError.bullet.1")
       bulletList must containMessage("uploadError.bullet.2")
       bulletList must containMessage("uploadError.bullet.3")
+      bulletList must containMessage("uploadError.bullet.4")
     }
 
     "have a button that links to root page" in {
-      val button = asDocument(view()).getElementsByClass("govuk-button").first()
+      val button = view().getElementsByClass("govuk-button").first()
 
       button must containMessage("uploadError.button")
       button must haveHref(controllers.routes.RootController.displayPage)
     }
 
     "have a guidance" in {
-      val guidance = asDocument(view()).getElementsByTag("p").get(2)
-
+      val guidance = view().getElementsByTag("p").get(2)
       guidance must containMessage("uploadError.guidance")
     }
   }
-
 }

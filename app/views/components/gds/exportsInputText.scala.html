@@ -20,19 +20,19 @@
 @this(govukInput: GovukInput, headingContent: headingContent)
 
 @(
-        field: play.api.data.Field,
-        labelKey: String,
-        labelArg: String = "",
-        hintKey: Option[String] = None,
-        hintKeyLinks: Seq[Html] = Seq.empty,
-        isPageHeading: Boolean = false,
-        headingClasses: String = gdsPageLabel,
-        labelClasses: String = "govuk-label--m",
-        defaultInputClasses: String = "govuk-!-width-two-thirds",
-        inputClasses: Option[String] = None,
-        sectionHeaderKey: Option[String] = None,
-        inputmode: String = "",
-        pattern: String = ""
+    field: play.api.data.Field,
+    labelKey: String,
+    labelArg: String = "",
+    hintKey: Option[String] = None,
+    hintKeyLinks: Seq[Html] = Seq.empty,
+    isPageHeading: Boolean = false,
+    headingClasses: String = gdsPageLabel,
+    labelClasses: String = "govuk-label--m",
+    defaultInputClasses: String = "govuk-!-width-two-thirds",
+    inputClasses: Option[String] = None,
+    sectionHeaderKey: Option[String] = None,
+    inputmode: String = "",
+    pattern: String = ""
 )(implicit messages: Messages)
 
 @buildLabel = @{

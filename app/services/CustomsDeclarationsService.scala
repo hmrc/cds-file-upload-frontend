@@ -16,16 +16,16 @@
 
 package services
 
-import scala.concurrent.{ExecutionContext, Future}
-
 import config.AppConfig
 import connectors.CustomsDeclarationsConnector
-import javax.inject.Inject
 import metrics.MetricIdentifiers.fileUploadRequestMetric
 import metrics.SfusMetrics
 import models._
 import play.api.Logging
 import uk.gov.hmrc.http.HeaderCarrier
+
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
 class CustomsDeclarationsService @Inject()(customsDeclarationsConnector: CustomsDeclarationsConnector, appConfig: AppConfig, metrics: SfusMetrics)(
   implicit ec: ExecutionContext

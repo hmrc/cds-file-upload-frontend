@@ -20,8 +20,11 @@ import org.scalatestplus.play.PlaySpec
 import pureconfig.ConfigSource
 import pureconfig.generic.auto._
 
+import scala.annotation.nowarn
+
 class AppConfigSpec extends PlaySpec {
 
+  @nowarn("cat=lint-byname-implicit")
   val config =
     ConfigSource.string("""
       |appName="cds-file-upload-frontend"
@@ -115,7 +118,7 @@ class AppConfigSpec extends PlaySpec {
       |}
       |
       |file-formats {
-      |  max-file-size-mb = 10
+      |  max-file-size = 10485760
       |  approved-file-extensions = ".jpeg,.jpg,.png,.pdf,.txt"
       |  approved-file-types = "image/jpeg,image/png,application/pdf,text/plain"
       |}
