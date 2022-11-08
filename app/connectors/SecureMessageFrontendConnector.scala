@@ -19,7 +19,7 @@ package connectors
 import scala.concurrent.{ExecutionContext, Future}
 import com.google.inject.Inject
 import config.AppConfig
-import models.{AuthKey, ConversationPartial, InboxPartial, MessageFilterTag, ReplyResultPartial}
+import models._
 import play.api.Logging
 import play.api.http.Status
 import services.AuditService

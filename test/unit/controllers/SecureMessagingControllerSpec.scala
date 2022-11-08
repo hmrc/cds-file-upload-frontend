@@ -17,7 +17,6 @@
 package controllers
 
 import scala.concurrent.Future
-
 import connectors.SecureMessageFrontendConnector
 import models.{ConversationPartial, InboxPartial, ReplyResultPartial}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -27,6 +26,7 @@ import play.api.mvc.Request
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.partials.HeaderCarrierForPartialsConverter
 import utils.FakeRequestCSRFSupport._
 import views.html.messaging.{inbox_wrapper, partial_wrapper}
 
@@ -44,7 +44,8 @@ class SecureMessagingControllerSpec extends ControllerSpecBase {
       connector,
       mcc,
       partialWrapperPage,
-      partial_wrapper
+      partial_wrapper,
+      new HeaderCarrierForPartialsConverter {}
     )
 
   override def beforeEach(): Unit = {

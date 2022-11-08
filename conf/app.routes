@@ -2,6 +2,8 @@
 
 GET         /assets/*file                                   controllers.Assets.versioned(path="/public", file: Asset)
 
+GET        /language/:lang                                  controllers.LanguageSwitchController.switchToLanguage(lang: String)
+
 GET         /                                               controllers.RootController.displayPage
 GET         /start                                          controllers.RootController.displayPage
 

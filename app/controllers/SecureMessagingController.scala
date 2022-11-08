@@ -22,6 +22,7 @@ import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.play.partials.HeaderCarrierForPartialsConverter
 import views.html.messaging.{inbox_wrapper, partial_wrapper}
 
 import java.net.URLEncoder.encode
@@ -35,13 +36,15 @@ class SecureMessagingController @Inject()(
   messageConnector: SecureMessageFrontendConnector,
   mcc: MessagesControllerComponents,
   inbox_wrapper: inbox_wrapper,
-  partial_wrapper: partial_wrapper
+  partial_wrapper: partial_wrapper,
+  headerCarrierForPartialsConverter: HeaderCarrierForPartialsConverter
 )(implicit ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
   val actions = authenticate andThen verifiedEmail andThen messageFilterAction
 
   val displayInbox: Action[AnyContent] = actions.async { implicit request =>
+    implicit val hc = headerCarrierForPartialsConverter.fromRequestWithEncryptedCookie(request)
     messageConnector
       .retrieveInboxPartial(request.secureMessageAnswers.eori, request.secureMessageAnswers.filter)
       .map { partial =>
@@ -50,6 +53,7 @@ class SecureMessagingController @Inject()(
   }
 
   def displayConversation(client: String, conversationId: String): Action[AnyContent] = actions.async { implicit request =>
+    implicit val hc = headerCarrierForPartialsConverter.fromRequestWithEncryptedCookie(request)
     messageConnector
       .retrieveConversationPartial(client, conversationId)
       .map(
@@ -66,6 +70,7 @@ class SecureMessagingController @Inject()(
   }
 
   def displayReplyResult(client: String, conversationId: String): Action[AnyContent] = actions.async { implicit request =>
+    implicit val hc = headerCarrierForPartialsConverter.fromRequestWithEncryptedCookie(request)
     messageConnector
       .retrieveReplyResult(client, conversationId)
       .map(

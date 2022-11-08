@@ -15,7 +15,7 @@
  *@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTrackingConsentSnippet
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcTrackingConsentSnippet, HmrcLanguageSelectHelper}
 @import uk.gov.hmrc.hmrcfrontend.views.html.components.HmrcReportTechnicalIssue
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.reporttechnicalissue.ReportTechnicalIssue
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.language.{En, Cy}
@@ -32,6 +32,7 @@
   phaseBanner: components.gds.phaseBanner,
   navigationBanner: components.gds.navigationBanner,
   hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet,
+  hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
   hmrcReportTechnicalIssue: HmrcReportTechnicalIssue,
   hmrcFooter: HmrcStandardFooter,
   appConfig: AppConfig
@@ -42,7 +43,8 @@
   useCustomContentWidth: Boolean = false,
   withNavigationBanner: Boolean = false,
   backLinkUrl: Option[String] = None,
-  displaySignOut: Boolean = false
+  displaySignOut: Boolean = false,
+  showLanguageSwitch: Boolean = true
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages)
 
 @head = {
@@ -77,8 +79,11 @@
     @if(withNavigationBanner) {
       @navigationBanner()
     }
+    @if(appConfig.play.i18n.langs.contains("cy") && showLanguageSwitch){
+        @hmrcLanguageSelectHelper()
+    }
 
-    @backLinkUrl.map(href => govukBackLink(BackLink(href = href)))
+    @backLinkUrl.map(href => govukBackLink(BackLink(href = href, content = Text(messages("common.back.link")))))
 }
 
 @content = {

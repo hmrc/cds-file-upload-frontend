@@ -23,6 +23,13 @@
 
 @(displaySignOut: Boolean = false)(implicit request: Request[_], messages: Messages)
 
+@lang = @{
+    messages.lang.code match {
+        case "cy" => language.Cy
+        case _ => language.En
+    }
+}
+
 @signOutHref = @{
     if (request.isInstanceOf[Authenticated] || displaySignOut)
         Some(controllers.routes.SignOutController.signOut.url)
@@ -34,7 +41,7 @@
     homepageUrl = "https://www.gov.uk",
     serviceName = Some(messages("common.service.name")),
     serviceUrl = controllers.routes.RootController.displayPage.url,
-    language = language.En,
+    language = lang,
     containerClasses = "govuk-width-container",
     signOutHref = signOutHref
 ))

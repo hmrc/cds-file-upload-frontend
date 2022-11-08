@@ -16,8 +16,9 @@
 
 package config
 
+import play.api.i18n.Lang
 import pureconfig.generic.ProductHint
-import pureconfig.{CamelCase, KebabCase}
+import pureconfig.{CamelCase, ConfigFieldMapping, KebabCase}
 
 case class AppConfig(
   appName: String,
@@ -37,13 +38,13 @@ case class AppConfig(
 )
 
 object AppConfig {
-  implicit val appNameHint: ProductHint[AppConfig] = ProductHint(
-    (fieldName: String) =>
-      fieldName match {
-        case "appName" | "developerHubClientId" => fieldName
-        case _                                  => KebabCase.fromTokens(CamelCase.toTokens(fieldName))
-    }
-  )
+  implicit val appNameHint: ProductHint[AppConfig] = ProductHint {
+    case fieldName @ ("appName" | "developerHubClientId") => fieldName
+    case fieldName                                        => KebabCase.fromTokens(CamelCase.toTokens(fieldName))
+  }
+
+  def languageMap: Map[String, Lang] =
+    Map("english" -> Lang("en"), "cymraeg" -> Lang("cy"))
 }
 
 case class Assets(version: String, url: String) {
@@ -103,7 +104,12 @@ case class Gtm(container: String)
 
 case class TrackingConsentFrontend(gtm: Gtm, host: String)
 
-case class Play(frontend: Frontend)
+case class Play(frontend: Frontend, i18n: I18n)
+
+object Play {
+  implicit val i18nHint: ProductHint[Play] = ProductHint.apply[Play](fieldMapping = ConfigFieldMapping(identity))
+}
+case class I18n(langs: List[String])
 
 case class Frontend(host: Option[String])
 
