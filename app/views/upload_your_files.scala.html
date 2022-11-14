@@ -87,7 +87,7 @@
 
             @govukFileUpload(FileUploadComponent(
                 id = fileUploadId,
-                name = fileUploadId,
+                name = "file",
                 label = Label(content = Text(messages("fileUploadPage.label"))),
                 attributes = Map(
                     "accept" -> appConfig.fileFormats.approvedFileTypes,
