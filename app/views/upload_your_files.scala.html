@@ -78,8 +78,7 @@
         }.map(msg => <p class="govuk-body"><strong>{msg}</strong></p>)
     }
 
-    @formHelper(Call("POST", uploadRequest.href), args = Symbol("enctype") -> "multipart/form-data") {
-
+    <form action="@uploadRequest.href" method="POST" enctype="multipart/form-data">
         <div class="govuk-form-group">
             @uploadRequest.fields.map { case (key, value) =>
                 <input type="hidden" name="@key" value="@value"/>
@@ -106,7 +105,7 @@
             text = messages("fileUploadPage.cancel"),
             call = routes.HowManyFilesUploadController.onPageLoad
         )
-    }
+    </form>
 }
 
 <script src="@routes.Assets.versioned("javascripts/validation.min.js")"></script>
