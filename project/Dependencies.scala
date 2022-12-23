@@ -9,7 +9,6 @@ object Dependencies {
     "uk.gov.hmrc"               %% "bootstrap-frontend-play-28" % bootstrapPlayVersion,
     "uk.gov.hmrc"               %% "play-frontend-hmrc"         % "3.33.0-play-28",
     "uk.gov.hmrc"               %% "play-partials"              % "8.3.0-play-28",
-    "uk.gov.hmrc"               %% "crypto"                     % "7.1.0",
     "uk.gov.hmrc.mongo"         %% "hmrc-mongo-play-28"         % hmrcMongoVersion,
     "com.github.pureconfig"     %% "pureconfig"                 % "0.17.1"
   ).map(_.withSources)

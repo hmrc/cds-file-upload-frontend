@@ -16,8 +16,7 @@
 
 package models
 
-import play.api.libs.json.{Format, Json, OFormat}
-import repositories.ZonedDateTimeFormat.{zonedDateTimeReads, zonedDateTimeWrites}
+import play.api.libs.json.Json
 
 import java.time.{ZoneOffset, ZonedDateTime}
 
@@ -30,8 +29,5 @@ case class Notification(
 
 object Notification {
 
-  implicit val format = {
-    implicit val zonedDateTimeFormat: Format[ZonedDateTime] = Format(zonedDateTimeReads, zonedDateTimeWrites)
-    OFormat[Notification](Json.reads[Notification], Json.writes[Notification])
-  }
+  implicit val format = Json.format[Notification]
 }

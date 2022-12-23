@@ -1,7 +1,6 @@
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 import uk.gov.hmrc.DefaultBuildSettings._
-import uk.gov.hmrc.ForkedJvmPerTestSettings
 
 name := "cds-file-upload-frontend"
 majorVersion := 0
@@ -35,7 +34,7 @@ lazy val microservice = (project in file("."))
       (Test / baseDirectory).value / "test/util"
     ),
     addTestReportOption(IntegrationTest, "int-test-reports"),
-    IntegrationTest / testGrouping := ForkedJvmPerTestSettings.oneForkedJvmPerTest((IntegrationTest / definedTests).value),
+    IntegrationTest / testGrouping := oneForkedJvmPerTest((IntegrationTest / definedTests).value),
     IntegrationTest / parallelExecution := false
   )
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
@@ -57,4 +56,3 @@ lazy val scalacFlags = Seq(
   "-Wconf:cat=unused-imports&src=twirl/.*:is",       // silent "unused import" warnings from Twirl templates
   "-Wconf:site=.*Module.*&cat=lint-byname-implicit:s"  // silent warnings from Pureconfig/Shapeless
 )
-
