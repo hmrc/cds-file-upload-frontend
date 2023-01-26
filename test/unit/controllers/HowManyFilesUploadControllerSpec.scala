@@ -57,9 +57,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase with DomAssert
     Arbitrary {
       for {
         details <- arbitrary[ContactDetails]
-      } yield {
-        new FakeContactDetailsRequiredAction(details)
-      }
+      } yield new FakeContactDetailsRequiredAction(details)
     }
 
   private val fakeContactDetailsRequiredAction = arbitraryFakeContactDetailsActions.arbitrary.retryUntil(_ => true).sample.get

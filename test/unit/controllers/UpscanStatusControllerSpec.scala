@@ -48,14 +48,13 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       upload = response.uploads(index)
     } yield (upload, response)
 
-  private val waitingGen: Gen[(FileUpload, UploadRequest, FileUploadResponse)] = responseGen.flatMap {
-    case (file, response) =>
-      arbitrary[Waiting].map { waiting =>
-        val uploadedFile = file.copy(state = waiting)
-        val updatedFiles = uploadedFile :: response.uploads.filterNot(_ == file)
+  private val waitingGen: Gen[(FileUpload, UploadRequest, FileUploadResponse)] = responseGen.flatMap { case (file, response) =>
+    arbitrary[Waiting].map { waiting =>
+      val uploadedFile = file.copy(state = waiting)
+      val updatedFiles = uploadedFile :: response.uploads.filterNot(_ == file)
 
-        (uploadedFile, waiting.uploadRequest, FileUploadResponse(updatedFiles))
-      }
+      (uploadedFile, waiting.uploadRequest, FileUploadResponse(updatedFiles))
+    }
   }
 
   def controller(getData: DataRetrievalAction = fakeDataRetrievalAction()) =
@@ -102,12 +101,11 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
 
     "load the view" when {
       "request file exists in response" in {
-        forAll(waitingGen) {
-          case (file, _, response) =>
-            val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response))
-            val result = controller(fakeDataRetrievalAction(answers)).onPageLoad(file.reference)(fakeRequest)
+        forAll(waitingGen) { case (file, _, response) =>
+          val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response))
+          val result = controller(fakeDataRetrievalAction(answers)).onPageLoad(file.reference)(fakeRequest)
 
-            status(result) mustBe OK
+          status(result) mustBe OK
         }
       }
     }

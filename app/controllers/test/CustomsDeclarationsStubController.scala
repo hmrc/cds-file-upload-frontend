@@ -28,7 +28,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class CustomsDeclarationsStubController @Inject()(appConfig: AppConfig, httpClient: HttpClient, mcc: MessagesControllerComponents)(
+class CustomsDeclarationsStubController @Inject() (appConfig: AppConfig, httpClient: HttpClient, mcc: MessagesControllerComponents)(
   implicit ec: ExecutionContext
 ) extends FrontendController(mcc) with Logging {
 
@@ -46,7 +46,7 @@ class CustomsDeclarationsStubController @Inject()(appConfig: AppConfig, httpClie
   }
 
   private def callBack(filename: String, reference: String)(implicit hc: HeaderCarrier): Unit = {
-    //Thread.sleep(1000)
+    // Thread.sleep(1000)
 
     val notification =
       <Root>

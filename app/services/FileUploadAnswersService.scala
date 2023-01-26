@@ -24,7 +24,7 @@ import java.time.{ZoneOffset, ZonedDateTime}
 import javax.inject.Inject
 import scala.concurrent.Future
 
-class FileUploadAnswersService @Inject()(val repository: FileUploadAnswersRepository) extends Logging {
+class FileUploadAnswersService @Inject() (val repository: FileUploadAnswersRepository) extends Logging {
 
   def findOne(eori: String): Future[Option[FileUploadAnswers]] = repository.findOne(eori)
 

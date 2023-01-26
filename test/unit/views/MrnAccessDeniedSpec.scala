@@ -17,6 +17,8 @@
 package views
 
 import base.SpecBase
+import controllers.routes.SignOutController
+import models.SignOutReason
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 import testdata.CommonTestData
@@ -51,7 +53,7 @@ class MrnAccessDeniedSpec extends SpecBase with ViewMatchers {
       val signOutButton = testView.getElementsByClass("govuk-button").first()
 
       signOutButton must containMessage("signOut.link")
-      signOutButton must haveHref(controllers.routes.SignOutController.signOut)
+      signOutButton must haveHref(SignOutController.signOut(SignOutReason.UserAction))
     }
 
     "display link to /mrn-entry page" in {

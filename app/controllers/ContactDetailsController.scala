@@ -30,7 +30,7 @@ import views.html.contact_details
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ContactDetailsController @Inject()(
+class ContactDetailsController @Inject() (
   authenticate: AuthAction,
   getData: DataRetrievalAction,
   requireMrn: MrnRequiredAction,
@@ -53,11 +53,10 @@ class ContactDetailsController @Inject()(
       .bindFromRequest()
       .fold(
         errorForm => Future.successful(BadRequest(contactDetails(errorForm, req.mrn))),
-        contactDetails => {
+        contactDetails =>
           answersService.findOneAndReplace(req.userAnswers.copy(contactDetails = Some(contactDetails))).map { _ =>
             Redirect(routes.HowManyFilesUploadController.onPageLoad)
           }
-        }
       )
   }
 }

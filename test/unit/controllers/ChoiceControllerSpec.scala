@@ -30,8 +30,7 @@ class ChoiceControllerSpec extends ControllerSpecBase {
 
   private val choicePage = mock[choice_page]
 
-  private val controller =
-    new ChoiceController(stubMessagesControllerComponents(), new FakeAuthAction(), new FakeVerifiedEmailAction(), choicePage)
+  private val controller = new ChoiceController(stubMessagesControllerComponents(), new FakeAuthAction(), new FakeVerifiedEmailAction(), choicePage)
 
   override def beforeEach(): Unit = {
     super.beforeEach()

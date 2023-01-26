@@ -16,22 +16,30 @@
 
 package controllers
 
+import models.SignOutReason
 import play.api.i18n.I18nSupport
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, WrappedRequest}
+import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import views.html.signed_out
+import views.html.user_signed_out
 
 import javax.inject.Inject
 
-class SignOutController @Inject()(mcc: MessagesControllerComponents, signedOutPage: signed_out) extends FrontendController(mcc) with I18nSupport {
+class SignOutController @Inject() (mcc: MessagesControllerComponents, userSignedOutPage: user_signed_out)
+    extends FrontendController(mcc) with I18nSupport {
 
-  val signOut: Action[AnyContent] = Action { request =>
-    implicit val newRequest = new WrappedRequest(request)
-    Ok(signedOutPage()).withNewSession
+  def signOut(signOutReason: SignOutReason): Action[AnyContent] = Action { _ =>
+    val redirectionTarget: Call = signOutReason match {
+      case SignOutReason.SessionTimeout => routes.SignOutController.sessionTimeoutSignedOut
+      case SignOutReason.UserAction     => routes.SignOutController.userSignedOut
+    }
+    Redirect(redirectionTarget).withNewSession
   }
 
-  val sessionTimeout: Action[AnyContent] = Action { request =>
-    implicit val newRequest = new WrappedRequest(request)
-    Ok(signedOutPage()).withNewSession
+  val sessionTimeoutSignedOut: Action[AnyContent] = Action { implicit request =>
+    Ok(userSignedOutPage("session.timeout.heading"))
+  }
+
+  val userSignedOut: Action[AnyContent] = Action { implicit request =>
+    Ok(userSignedOutPage("signed.out.heading"))
   }
 }

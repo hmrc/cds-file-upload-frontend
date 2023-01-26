@@ -23,7 +23,7 @@ import play.api.mvc._
 import scala.concurrent.Future
 
 @Singleton
-class CsrfFilter @Inject()(implicit val mat: Materializer) extends Filter {
+class CsrfFilter @Inject() (implicit val mat: Materializer) extends Filter {
 
   override def apply(f: RequestHeader => Future[Result])(rh: RequestHeader): Future[Result] = {
     val headers =

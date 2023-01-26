@@ -1,6 +1,8 @@
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
+import sbt.Keys.{scalacOptions, _}
+import sbt._
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 import uk.gov.hmrc.DefaultBuildSettings._
+import uk.gov.hmrc.SbtAutoBuildPlugin
 
 name := "cds-file-upload-frontend"
 majorVersion := 0
@@ -10,7 +12,6 @@ PlayKeys.devSettings := Seq("play.server.http.port" -> "6793")
 lazy val microservice = (project in file("."))
   .enablePlugins(PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
   .settings(commonSettings: _*)
-  .settings(publishingSettings: _*)
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
   .settings(
@@ -37,6 +38,7 @@ lazy val microservice = (project in file("."))
     IntegrationTest / testGrouping := oneForkedJvmPerTest((IntegrationTest / definedTests).value),
     IntegrationTest / parallelExecution := false
   )
+  .settings(scoverageSettings)
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
 
 lazy val commonSettings = Seq(
@@ -55,4 +57,20 @@ lazy val scalacFlags = Seq(
   "-Wconf:cat=unused-imports&src=routes/.*:s",       // silent "unused import" warnings from Play routes
   "-Wconf:cat=unused-imports&src=twirl/.*:is",       // silent "unused import" warnings from Twirl templates
   "-Wconf:site=.*Module.*&cat=lint-byname-implicit:s"  // silent warnings from Pureconfig/Shapeless
+)
+
+lazy val scoverageSettings: Seq[Setting[_]] = Seq(
+  coverageExcludedPackages := List(
+    "<empty>",
+    "Reverse.*",
+    "metrics\\..*",
+    "features\\..*",
+    "test\\..*",
+    ".*(BuildInfo|Routes|Options|TestingUtilitiesController).*",
+    "logger.*\\(.*\\)"
+  ).mkString(";"),
+  coverageMinimumStmtTotal := 75, // Minimum threshold to be increased
+  coverageFailOnMinimum := true,
+  coverageHighlighting := true,
+  Test / parallelExecution := false
 )

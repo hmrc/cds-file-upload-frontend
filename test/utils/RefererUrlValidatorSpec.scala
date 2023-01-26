@@ -60,10 +60,9 @@ class RefererUrlValidatorSpec extends PlaySpec with Injector {
       val prohibitedChars =
         Seq('`', '¬', '\'', '!', '"', '£', '$', '%', '^', '*', '(', ')', '+', '[', ']', '{', '}', ';', ':', '@', '#', '~', '<', '>', ',', '.', '\\')
 
-      prohibitedChars.foreach(
-        char =>
-          withClue(s"including char '${char}'") {
-            validator.isValid(s"${validRefererUrl}${char}") mustBe false
+      prohibitedChars.foreach(char =>
+        withClue(s"including char '${char}'") {
+          validator.isValid(s"${validRefererUrl}${char}") mustBe false
         }
       )
     }
@@ -71,10 +70,9 @@ class RefererUrlValidatorSpec extends PlaySpec with Injector {
     "allow referer urls that contain allowed non-alphanumeric ASCII characters" in {
       val allowedChars = Seq('_', '-', '/', '?', '&', '=')
 
-      allowedChars.foreach(
-        char =>
-          withClue(s"including char '${char}'") {
-            validator.isValid(s"${validRefererUrl}${char}") mustBe true
+      allowedChars.foreach(char =>
+        withClue(s"including char '${char}'") {
+          validator.isValid(s"${validRefererUrl}${char}") mustBe true
         }
       )
     }
@@ -82,10 +80,9 @@ class RefererUrlValidatorSpec extends PlaySpec with Injector {
     "deny referer urls that contain extended characters" in {
       val prohibitedChars = Seq('\u200B', '¥', 'ä')
 
-      prohibitedChars.foreach(
-        char =>
-          withClue(s"including char '${char}'") {
-            validator.isValid(s"${validRefererUrl}${char}") mustBe false
+      prohibitedChars.foreach(char =>
+        withClue(s"including char '${char}'") {
+          validator.isValid(s"${validRefererUrl}${char}") mustBe false
         }
       )
     }

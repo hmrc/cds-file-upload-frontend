@@ -29,11 +29,11 @@ object MRN {
   implicit val reads: Reads[MRN] =
     __.read[String]
       .map(MRN(_))
-      .collect(JsonValidationError("MRN did not pass validation")) {
-        case Some(mrn) => mrn
+      .collect(JsonValidationError("MRN did not pass validation")) { case Some(mrn) =>
+        mrn
       }
 
-  implicit val writes: Writes[MRN] = Writes {
-    case MRN(value) => JsString(value)
+  implicit val writes: Writes[MRN] = Writes { case MRN(value) =>
+    JsString(value)
   }
 }

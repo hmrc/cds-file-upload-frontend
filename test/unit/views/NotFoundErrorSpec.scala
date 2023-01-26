@@ -31,7 +31,7 @@ class NotFoundErrorSpec extends ViewBehaviours with ViewMatchers {
         fakeRequest.withCSRFToken,
         messages
       )
-  )
+    )
 
   val messageKeyPrefix = "notFoundError"
 

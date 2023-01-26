@@ -34,7 +34,7 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class MrnEntryController @Inject()(
+class MrnEntryController @Inject() (
   authenticate: AuthAction,
   getData: DataRetrievalAction,
   verifiedEmail: VerifiedEmailAction,

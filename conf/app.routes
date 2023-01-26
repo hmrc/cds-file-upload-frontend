@@ -47,10 +47,10 @@ GET         /unverified-email                               controllers.Unverifi
 GET         /undeliverable-email                            controllers.UnverifiedEmailController.informUserUndeliverable
 
 # Sign out
-GET         /sign-out                                       controllers.SignOutController.signOut
+GET         /sign-out                                      controllers.SignOutController.signOut(signOutReason: models.SignOutReason)
 
-# Session Timeout
-GET         /session-timeout                                controllers.SignOutController.sessionTimeout
+GET         /we-signed-you-out                             controllers.SignOutController.sessionTimeoutSignedOut
+GET         /you-have-signed-out                           controllers.SignOutController.userSignedOut
 
 # HMRC Frontend Static Assets
-->          /hmrc-frontend                                   hmrcfrontend.Routes
+->          /hmrc-frontend                                 hmrcfrontend.Routes

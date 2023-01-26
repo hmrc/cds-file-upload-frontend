@@ -26,7 +26,7 @@ import services.AuditService
 import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 
-class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: AppConfig, auditService: AuditService)(implicit ec: ExecutionContext)
+class SecureMessageFrontendConnector @Inject() (httpClient: HttpClient, config: AppConfig, auditService: AuditService)(implicit ec: ExecutionContext)
     extends Logging with Status {
 
   def retrieveInboxPartial(eori: String, filter: MessageFilterTag)(implicit hc: HeaderCarrier): Future[InboxPartial] =
@@ -59,12 +59,11 @@ class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: A
             Future.failed(UpstreamErrorResponse(s"Unhappy response($statusCode) posting reply form to secure-messaging-frontend", statusCode))
         }
       }
-      .recoverWith {
-        case exc: UpstreamErrorResponse =>
-          logger.warn(
-            s"Received a ${exc.statusCode} response from secure-messaging-frontend while submitting a reply for '$client/$conversationId'. ${exc.message}"
-          )
-          Future.failed(exc)
+      .recoverWith { case exc: UpstreamErrorResponse =>
+        logger.warn(
+          s"Received a ${exc.statusCode} response from secure-messaging-frontend while submitting a reply for '$client/$conversationId'. ${exc.message}"
+        )
+        Future.failed(exc)
       }
 
   def retrieveReplyResult(client: String, conversationId: String)(implicit hc: HeaderCarrier): Future[ReplyResultPartial] =
@@ -85,10 +84,9 @@ class SecureMessageFrontendConnector @Inject()(httpClient: HttpClient, config: A
             Future.failed(UpstreamErrorResponse(s"Unhappy response($statusCode) fetching $errorInfo", statusCode))
         }
       }
-      .recoverWith {
-        case exc: UpstreamErrorResponse =>
-          logger.warn(s"Received a ${exc.statusCode} response from secure-messaging-frontend while retrieving $errorInfo. ${exc.message}")
-          Future.failed(exc)
+      .recoverWith { case exc: UpstreamErrorResponse =>
+        logger.warn(s"Received a ${exc.statusCode} response from secure-messaging-frontend while retrieving $errorInfo. ${exc.message}")
+        Future.failed(exc)
       }
 
   private def constructInboxEndpointQueryParams(enrolment: String, eori: String, filter: MessageFilterTag): Seq[(String, String)] = {

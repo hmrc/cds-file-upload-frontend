@@ -29,7 +29,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
 
 @Singleton
-class SecureMessageAnswersRepository @Inject()(mongoComponent: MongoComponent, appConfig: AppConfig)(implicit ec: ExecutionContext)
+class SecureMessageAnswersRepository @Inject() (mongoComponent: MongoComponent, appConfig: AppConfig)(implicit ec: ExecutionContext)
     extends PlayMongoRepository[SecureMessageAnswers](
       mongoComponent = mongoComponent,
       collectionName = "answers-secure-message",

@@ -36,7 +36,7 @@ import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import javax.inject.{Inject, Provider}
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuthActionImpl @Inject()(
+class AuthActionImpl @Inject() (
   val authConnector: AuthConnector,
   val config: Configuration,
   val env: Environment,
@@ -55,17 +55,16 @@ class AuthActionImpl @Inject()(
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
     authorised((Individual or Organisation) and Enrolment(AuthKey.enrolment))
-      .retrieve(allEnrolments and affinityGroup) {
-        case allEnrolments ~ _ =>
-          allEnrolments.getEnrolment(AuthKey.enrolment).flatMap(_.getIdentifier(AuthKey.identifierKey)) match {
+      .retrieve(allEnrolments and affinityGroup) { case allEnrolments ~ _ =>
+        allEnrolments.getEnrolment(AuthKey.enrolment).flatMap(_.getIdentifier(AuthKey.identifierKey)) match {
 
-            case Some(eori) if eoriAllowList.allows(eori.value) =>
-              val signedInUser = SignedInUser(eori.value, allEnrolments)
-              Future.successful(Right(AuthenticatedRequest(request, signedInUser)))
+          case Some(eori) if eoriAllowList.allows(eori.value) =>
+            val signedInUser = SignedInUser(eori.value, allEnrolments)
+            Future.successful(Right(AuthenticatedRequest(request, signedInUser)))
 
-            case Some(_) => throw new UnauthorizedException("User is not authorized to use this service")
-            case None    => throw InsufficientEnrolments()
-          }
+          case Some(_) => throw new UnauthorizedException("User is not authorized to use this service")
+          case None    => throw InsufficientEnrolments()
+        }
       }
       .recover {
         case _: UnsupportedAffinityGroup => Left(Results.Redirect(routes.UnauthorisedController.onAgentKickOut(UserIsAgent)))
@@ -83,7 +82,7 @@ class EoriAllowList(val values: Seq[String]) {
   def allows(eori: String): Boolean = values.isEmpty || values.contains(eori)
 }
 
-class EoriAllowListProvider @Inject()(config: AppConfig) extends Provider[EoriAllowList] {
+class EoriAllowListProvider @Inject() (config: AppConfig) extends Provider[EoriAllowList] {
   override def get(): EoriAllowList =
     new EoriAllowList(config.allowList.eori)
 }

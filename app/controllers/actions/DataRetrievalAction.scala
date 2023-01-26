@@ -23,7 +23,8 @@ import services.FileUploadAnswersService
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class DataRetrievalActionImpl @Inject()(val answersService: FileUploadAnswersService, mcc: MessagesControllerComponents) extends DataRetrievalAction {
+class DataRetrievalActionImpl @Inject() (val answersService: FileUploadAnswersService, mcc: MessagesControllerComponents)
+    extends DataRetrievalAction {
 
   implicit val executionContext: ExecutionContext = mcc.executionContext
 

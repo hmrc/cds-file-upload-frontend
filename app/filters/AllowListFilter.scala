@@ -22,7 +22,7 @@ import play.api.Configuration
 import play.api.mvc.Call
 import uk.gov.hmrc.allowlist.AkamaiAllowlistFilter
 
-class AllowListFilter @Inject()(config: Configuration, override val mat: Materializer) extends AkamaiAllowlistFilter {
+class AllowListFilter @Inject() (config: Configuration, override val mat: Materializer) extends AkamaiAllowlistFilter {
 
   override val allowlist: Seq[String] =
     config.underlying

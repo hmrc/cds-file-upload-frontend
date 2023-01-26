@@ -27,14 +27,12 @@ import uk.gov.hmrc.http.HeaderCarrier
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class CustomsDeclarationsService @Inject()(customsDeclarationsConnector: CustomsDeclarationsConnector, appConfig: AppConfig, metrics: SfusMetrics)(
+class CustomsDeclarationsService @Inject() (customsDeclarationsConnector: CustomsDeclarationsConnector, appConfig: AppConfig, metrics: SfusMetrics)(
   implicit ec: ExecutionContext
 ) extends Logging {
 
   def batchFileUpload(eori: String, mrn: MRN, fileUploadCount: FileUploadCount)(implicit hc: HeaderCarrier): Future[FileUploadResponse] = {
-
     val uploadUrl = appConfig.microservice.services.cdsFileUploadFrontend.uri
-    logger.warn(s"uploadUrl: $uploadUrl")
     val files = for (i <- 1 to fileUploadCount.value + 1) yield FileUploadFile(i, "", uploadUrl)
     val fileSeq = files.flatten
 

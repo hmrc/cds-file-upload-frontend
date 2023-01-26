@@ -24,7 +24,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.{undeliverable_email, unverified_email}
 @Singleton
-class UnverifiedEmailController @Inject()(
+class UnverifiedEmailController @Inject() (
   authenticate: AuthAction,
   mcc: MessagesControllerComponents,
   unverified_email: unverified_email,

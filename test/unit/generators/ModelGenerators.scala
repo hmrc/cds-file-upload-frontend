@@ -34,9 +34,7 @@ trait ModelGenerators extends SignedInUserGen with OptionValues {
     for {
       decId <- arbitrary[MRN]
       files <- Gen.listOf(arbitrary[FileUploadFile]) suchThat (_.nonEmpty)
-    } yield {
-      FileUploadRequest(decId, files)
-    }
+    } yield FileUploadRequest(decId, files)
 
   implicit val arbitraryFileUploadRequest: Arbitrary[FileUploadRequest] =
     Arbitrary(fileUploadRequestGen)
@@ -45,9 +43,7 @@ trait ModelGenerators extends SignedInUserGen with OptionValues {
     for {
       seqNo <- intsAboveValue(0)
       doctype <- alphaNumString()
-    } yield {
-      FileUploadFile(seqNo, doctype, "").value
-    }
+    } yield FileUploadFile(seqNo, doctype, "").value
 
   implicit val arbitraryFileUploadFile: Arbitrary[FileUploadFile] = Arbitrary(fileUploadFileGen)
 
@@ -56,9 +52,7 @@ trait ModelGenerators extends SignedInUserGen with OptionValues {
       for {
         i <- Gen.choose(1, 10)
         files <- Gen.listOfN(i, arbitrary[FileUpload])
-      } yield {
-        FileUploadResponse(files)
-      }
+      } yield FileUploadResponse(files)
     }
 
   implicit val arbitraryWaiting: Arbitrary[Waiting] = Arbitrary(arbitrary[UploadRequest].map(Waiting(_)))
@@ -74,9 +68,7 @@ trait ModelGenerators extends SignedInUserGen with OptionValues {
         ref <- alphaString(3)
         fileState <- arbitrary[FileState]
         id <- arbitrary[Int]
-      } yield {
-        FileUpload(ref, fileState, id = id.toString)
-      }
+      } yield FileUpload(ref, fileState, id = id.toString)
     }
 
   implicit val arbitraryField: Arbitrary[Field] =
@@ -92,8 +84,6 @@ trait ModelGenerators extends SignedInUserGen with OptionValues {
         href <- alphaNumString().map(_.trim)
         i <- Gen.choose(1, 10)
         fields <- Gen.listOfN(i, tupleGen).map(_.toMap)
-      } yield {
-        UploadRequest(href, fields)
-      }
+      } yield UploadRequest(href, fields)
     }
 }

@@ -26,7 +26,8 @@ class AppConfigSpec extends PlaySpec {
 
   @nowarn("cat=lint-byname-implicit")
   val config =
-    ConfigSource.string("""
+    ConfigSource
+      .string("""
       |appName="cds-file-upload-frontend"
       |developerHubClientId="cds-file-upload-frontend"
       |
@@ -169,7 +170,8 @@ class AppConfigSpec extends PlaySpec {
       |# Default value for local environment
       |play.frontend.host = "http://localhost:6793"
       |
-    """.stripMargin).loadOrThrow[AppConfig]
+    """.stripMargin)
+      .loadOrThrow[AppConfig]
 
   "App Config" should {
 

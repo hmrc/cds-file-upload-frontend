@@ -24,7 +24,7 @@ import java.time.{ZoneOffset, ZonedDateTime}
 import javax.inject.Inject
 import scala.concurrent.Future
 
-class SecureMessageAnswersService @Inject()(val repository: SecureMessageAnswersRepository) extends Logging {
+class SecureMessageAnswersService @Inject() (val repository: SecureMessageAnswersRepository) extends Logging {
 
   def findOne(eori: String): Future[Option[SecureMessageAnswers]] = repository.findOne(eori)
 

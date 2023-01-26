@@ -35,7 +35,7 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class UploadYourFilesReceiptController @Inject()(
+class UploadYourFilesReceiptController @Inject() (
   authenticate: AuthAction,
   verifiedEmail: VerifiedEmailAction,
   cdsFileUploadConnector: CdsFileUploadConnector,
@@ -50,9 +50,7 @@ class UploadYourFilesReceiptController @Inject()(
       val result = for {
         userAnswers <- getOrRedirect(maybeUserAnswers, routes.RootController.displayPage)
         fileUploads <- getOrRedirect(userAnswers.fileUploadResponse, routes.ErrorPageController.error)
-      } yield {
-        composeSuccessResult(fileUploads.uploads, userAnswers.mrn).map(Ok(_))
-      }
+      } yield composeSuccessResult(fileUploads.uploads, userAnswers.mrn).map(Ok(_))
 
       result match {
         case Right(successResult) => successResult
