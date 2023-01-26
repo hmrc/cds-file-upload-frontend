@@ -40,11 +40,11 @@ object MessageFilterTag {
   implicit val reads: Reads[MessageFilterTag] =
     __.read[String]
       .map(valueOf(_))
-      .collect(JsonValidationError("MessageFilterTag did not pass validation")) {
-        case Some(tag) => tag
+      .collect(JsonValidationError("MessageFilterTag did not pass validation")) { case Some(tag) =>
+        tag
       }
 
-  implicit val writesTag: Writes[MessageFilterTag] = Writes {
-    case value: MessageFilterTag => JsString(value.toString)
+  implicit val writesTag: Writes[MessageFilterTag] = Writes { case value: MessageFilterTag =>
+    JsString(value.toString)
   }
 }

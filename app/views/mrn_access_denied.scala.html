@@ -40,7 +40,7 @@
 
   @linkButton(
     messageKey = "signOut.link",
-    call = controllers.routes.SignOutController.signOut
+    call = controllers.routes.SignOutController.signOut(models.SignOutReason.UserAction)
   )
 
   <div class="govuk-!-margin-bottom-5">

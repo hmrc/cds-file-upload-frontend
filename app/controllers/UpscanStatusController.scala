@@ -33,7 +33,7 @@ import views.html.{upload_error, upload_your_files}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class UpscanStatusController @Inject()(
+class UpscanStatusController @Inject() (
   authenticate: AuthAction,
   getData: DataRetrievalAction,
   requireMrn: MrnRequiredAction,

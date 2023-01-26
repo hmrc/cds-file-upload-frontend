@@ -26,7 +26,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import play.api.mvc.Results.Redirect
 
 @Singleton
-class MessageFilterActionImpl @Inject()(val answersService: SecureMessageAnswersService, mcc: MessagesControllerComponents)
+class MessageFilterActionImpl @Inject() (val answersService: SecureMessageAnswersService, mcc: MessagesControllerComponents)
     extends MessageFilterAction {
 
   implicit val executionContext: ExecutionContext = mcc.executionContext

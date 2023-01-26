@@ -25,7 +25,7 @@ import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Result}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class MrnRequiredActionImpl @Inject()(mcc: MessagesControllerComponents) extends MrnRequiredAction {
+class MrnRequiredActionImpl @Inject() (mcc: MessagesControllerComponents) extends MrnRequiredAction {
 
   implicit val executionContext: ExecutionContext = mcc.executionContext
   private lazy val onError = Redirect(routes.ErrorPageController.error)

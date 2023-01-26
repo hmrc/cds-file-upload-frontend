@@ -31,7 +31,7 @@ import uk.gov.hmrc.play.audit.model.{DataEvent, ExtendedDataEvent}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuditService @Inject()(connector: AuditConnector, appConfig: AppConfig)(implicit ec: ExecutionContext) extends Logging {
+class AuditService @Inject() (connector: AuditConnector, appConfig: AppConfig)(implicit ec: ExecutionContext) extends Logging {
 
   def auditSecureMessageInbox(enrolment: String, eori: String, filter: MessageFilterTag, path: String)(
     implicit hc: HeaderCarrier

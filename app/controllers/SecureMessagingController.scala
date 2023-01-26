@@ -29,7 +29,7 @@ import java.net.URLEncoder.encode
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class SecureMessagingController @Inject()(
+class SecureMessagingController @Inject() (
   authenticate: AuthAction,
   verifiedEmail: VerifiedEmailAction,
   messageFilterAction: MessageFilterAction,
@@ -56,15 +56,14 @@ class SecureMessagingController @Inject()(
     implicit val hc = headerCarrierForPartialsConverter.fromRequestWithEncryptedCookie(request)
     messageConnector
       .retrieveConversationPartial(client, conversationId)
-      .map(
-        partial =>
-          Ok(
-            partial_wrapper(
-              HtmlFormat.raw(partial.body),
-              "conversation.heading",
-              defineUploadLink(routes.SecureMessagingController.displayConversation(client, conversationId).url),
-              Some(routes.SecureMessagingController.displayInbox.url)
-            )
+      .map(partial =>
+        Ok(
+          partial_wrapper(
+            HtmlFormat.raw(partial.body),
+            "conversation.heading",
+            defineUploadLink(routes.SecureMessagingController.displayConversation(client, conversationId).url),
+            Some(routes.SecureMessagingController.displayInbox.url)
+          )
         )
       )
   }
@@ -73,14 +72,13 @@ class SecureMessagingController @Inject()(
     implicit val hc = headerCarrierForPartialsConverter.fromRequestWithEncryptedCookie(request)
     messageConnector
       .retrieveReplyResult(client, conversationId)
-      .map(
-        partial =>
-          Ok(
-            partial_wrapper(
-              HtmlFormat.raw(partial.body),
-              "replyResult.heading",
-              defineUploadLink(routes.SecureMessagingController.displayReplyResult(client, conversationId).url)
-            )
+      .map(partial =>
+        Ok(
+          partial_wrapper(
+            HtmlFormat.raw(partial.body),
+            "replyResult.heading",
+            defineUploadLink(routes.SecureMessagingController.displayReplyResult(client, conversationId).url)
+          )
         )
       )
   }

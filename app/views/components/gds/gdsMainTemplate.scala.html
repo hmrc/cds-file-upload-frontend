@@ -14,14 +14,16 @@
  * limitations under the License.
  *@
 
+@import config.{AppConfig, TimeoutDialogConfig}
+@import controllers.routes.{Assets, SignOutController}
+@import models.requests.Authenticated
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcTrackingConsentSnippet, HmrcLanguageSelectHelper}
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
 @import uk.gov.hmrc.hmrcfrontend.views.html.components.HmrcReportTechnicalIssue
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.reporttechnicalissue.ReportTechnicalIssue
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.language.{En, Cy}
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcStandardFooter
 @import views.Title
-@import config.AppConfig
 
 @this(
   govukHeader: GovukHeader,
@@ -31,6 +33,9 @@
   siteHeader: components.gds.siteHeader,
   phaseBanner: components.gds.phaseBanner,
   navigationBanner: components.gds.navigationBanner,
+  timeoutDialogConfig: TimeoutDialogConfig,
+  hmrcHead: HmrcHead,
+  hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
   hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet,
   hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
   hmrcReportTechnicalIssue: HmrcReportTechnicalIssue,
@@ -47,13 +52,26 @@
   showLanguageSwitch: Boolean = true
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages)
 
-@head = {
-    @hmrcTrackingConsentSnippet()
+@userIsSignedIn = @{ request.isInstanceOf[Authenticated]}
 
-    <link rel="shortcut icon" href='@routes.Assets.versioned("/lib/govuk-frontend/govuk/assets/images/favicon.ico")' type="image/x-icon" />
+@head = {
+    @if(userIsSignedIn) {
+        @hmrcHead(
+            headBlock = Some(hmrcTimeoutDialogHelper(
+                signOutUrl = SignOutController.signOut(models.SignOutReason.SessionTimeout).url,
+                keepAliveUrl = Some(request.uri),
+                timeout = Some(timeoutDialogConfig.timeout.toSeconds.toInt),
+                countdown = Some(timeoutDialogConfig.countdown.toSeconds.toInt)
+            ))
+        )
+    } else {
+        @hmrcTrackingConsentSnippet()
+    }
+
+    <link rel="shortcut icon" href='@Assets.versioned("/lib/govuk-frontend/govuk/assets/images/favicon.ico")' type="image/x-icon" />
     <meta name="format-detection" content="telephone=no" />
-    <!--[if lte IE 8]><link href='@controllers.routes.Assets.versioned("stylesheets/application-ie-8.css")' rel="stylesheet" type="text/css" /><![endif]-->
-    <!--[if gt IE 8]><!--><link href='@routes.Assets.versioned("stylesheets/customsdecexfrontend-app.css")' media="all" rel="stylesheet" type="text/css" /><!--<![endif]-->
+    <!--[if lte IE 8]><link href='@Assets.versioned("stylesheets/application-ie-8.css")' rel="stylesheet" type="text/css" /><![endif]-->
+    <!--[if gt IE 8]><!--><link href='@Assets.versioned("stylesheets/customsdecexfrontend-app.css")' media="all" rel="stylesheet" type="text/css" /><!--<![endif]-->
 
     <noscript>
       <style>
@@ -66,9 +84,9 @@
 }
 
 @scripts = {
-    <script src="@routes.Assets.versioned("javascripts/show-hide-content.js")"></script>
-    <script src='@routes.Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
-    <script src='@routes.Assets.versioned("lib/hmrc-frontend/hmrc/all.js")'></script>
+    <script src="@Assets.versioned("javascripts/show-hide-content.js")"></script>
+    <script src='@Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
+    <script src='@Assets.versioned("lib/hmrc-frontend/hmrc/all.js")'></script>
     <script>window.HMRCFrontend.initAll();</script>
     <script>window.GOVUKFrontend.initAll();</script>
 }

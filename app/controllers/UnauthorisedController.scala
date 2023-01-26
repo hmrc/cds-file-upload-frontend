@@ -26,7 +26,7 @@ import views.html.{unauthorised, unauthorisedAgent}
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class UnauthorisedController @Inject()(mcc: MessagesControllerComponents, unauthorised: unauthorised, unauthorisedAgent: unauthorisedAgent)
+class UnauthorisedController @Inject() (mcc: MessagesControllerComponents, unauthorised: unauthorised, unauthorisedAgent: unauthorisedAgent)
     extends FrontendController(mcc) with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = Action { implicit req =>

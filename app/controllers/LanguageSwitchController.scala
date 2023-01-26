@@ -24,7 +24,7 @@ import uk.gov.hmrc.play.language.{LanguageController, LanguageUtils}
 
 import javax.inject.Inject
 
-class LanguageSwitchController @Inject()(
+class LanguageSwitchController @Inject() (
   config: Configuration,
   override implicit val messagesApi: MessagesApi,
   languageUtils: LanguageUtils,

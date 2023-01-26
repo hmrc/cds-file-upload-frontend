@@ -31,7 +31,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class InboxChoiceController @Inject()(
+class InboxChoiceController @Inject() (
   mcc: MessagesControllerComponents,
   authenticate: AuthAction,
   verifiedEmail: VerifiedEmailAction,
@@ -55,9 +55,7 @@ class InboxChoiceController @Inject()(
   val onSubmit: Action[AnyContent] = actions.async { implicit request =>
     InboxChoiceForm.form
       .bindFromRequest()
-      .fold(formWithErrors => Future.successful(BadRequest(inboxChoice(formWithErrors))), { form =>
-        checkMessageFilterTag(form.choice)
-      })
+      .fold(formWithErrors => Future.successful(BadRequest(inboxChoice(formWithErrors))), form => checkMessageFilterTag(form.choice))
   }
 
   private def checkMessageFilterTag(choice: String)(implicit req: VerifiedEmailRequest[AnyContent]): Future[Result] =

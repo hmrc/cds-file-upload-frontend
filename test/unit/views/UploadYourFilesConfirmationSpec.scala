@@ -67,10 +67,9 @@ class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers wi
         val tableRows = view.getElementsByTag("tbody").iterator().asScala.toList
         val rowsWithFiles = tableRows.zip(fileUploads)
 
-        rowsWithFiles.foreach {
-          case (row, file) =>
-            row must containText(file.filename)
-            row must containText(file.reference)
+        rowsWithFiles.foreach { case (row, file) =>
+          row must containText(file.filename)
+          row must containText(file.reference)
         }
       }
     }

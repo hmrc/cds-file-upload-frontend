@@ -16,45 +16,87 @@
 
 package controllers
 
-import org.mockito.ArgumentMatchers._
-import org.mockito.MockitoSugar.{mock, reset, when}
+import models.SignOutReason
+import org.mockito.ArgumentMatchers.{any, eq => equalTo}
+import org.mockito.MockitoSugar.{mock, reset, verify, when}
+import org.scalatest.concurrent.ScalaFutures
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
-import views.html.signed_out
+import views.html.user_signed_out
 
-class SignOutControllerSpec extends ControllerSpecBase {
+class SignOutControllerSpec extends ControllerSpecBase with ScalaFutures {
 
-  val page = mock[signed_out]
+  private val userSignedOutPage = mock[user_signed_out]
 
-  def view(): String = page()(fakeRequest, messages).toString
+  private val controller = new SignOutController(stubMessagesControllerComponents(), userSignedOutPage)
 
-  val controller = new SignOutController(mcc, page)
-
-  override protected def beforeEach(): Unit = {
+  override def beforeEach(): Unit = {
     super.beforeEach()
-    when(page.apply()(any(), any())).thenReturn(HtmlFormat.empty)
+    when(userSignedOutPage.apply(any())(any(), any())).thenReturn(HtmlFormat.empty)
   }
 
-  override protected def afterEach(): Unit = {
-    reset(page)
+  override def afterEach(): Unit = {
+    reset(userSignedOutPage)
+
     super.afterEach()
   }
 
-  "SignOut controller" should {
+  "SignOutController on signOut" when {
 
-    "return the expected signed_out page" when {
-      "signOut is invoked" in {
-        val result = controller.signOut(fakeRequest)
-        status(result) mustBe OK
+    "provided with SessionTimeout parameter" should {
+
+      "return 303 (SEE_OTHER) status" in {
+        val result = controller.signOut(SignOutReason.SessionTimeout)(fakeRequest)
+        status(result) mustBe SEE_OTHER
+      }
+
+      "redirect to /we-signed-you-out" in {
+        val result = controller.signOut(SignOutReason.SessionTimeout)(fakeRequest)
+        redirectLocation(result) mustBe Some(controllers.routes.SignOutController.sessionTimeoutSignedOut.url)
       }
     }
 
-    "sign out the user" when {
-      "signOut is invoked" in {
-        val result = controller.signOut(fakeRequest)
-        status(result) mustBe OK
-        await(result).newSession mustBe defined
+    "provided with UserAction parameter" should {
+
+      "return 303 (SEE_OTHER) status" in {
+        val result = controller.signOut(SignOutReason.UserAction)(fakeRequest)
+        status(result) mustBe SEE_OTHER
       }
+
+      "redirect to /you-have-signed-out" in {
+        val result = controller.signOut(SignOutReason.UserAction)(fakeRequest)
+        redirectLocation(result) mustBe Some(controllers.routes.SignOutController.userSignedOut.url)
+      }
+    }
+  }
+
+  "SignOutController on sessionTimeoutSignedOut" should {
+
+    val controller = new SignOutController(mcc, userSignedOutPage)
+
+    "call sessionTimedOutPage" in {
+      controller.sessionTimeoutSignedOut()(fakeRequest).futureValue
+      verify(userSignedOutPage).apply(equalTo("session.timeout.heading"))(any(), any())
+    }
+
+    "return 200 status" in {
+      val result = controller.sessionTimeoutSignedOut()(fakeRequest)
+      status(result) mustBe OK
+    }
+  }
+
+  "SignOutController on userSignedOut" should {
+
+    val controller = new SignOutController(mcc, userSignedOutPage)
+
+    "call userSignedOutPage" in {
+      controller.userSignedOut()(fakeRequest).futureValue
+      verify(userSignedOutPage).apply(equalTo("signed.out.heading"))(any(), any())
+    }
+
+    "return 200 status" in {
+      val result = controller.userSignedOut()(fakeRequest)
+      status(result) mustBe OK
     }
   }
 }

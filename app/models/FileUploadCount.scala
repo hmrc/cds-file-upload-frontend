@@ -32,11 +32,11 @@ object FileUploadCount {
   implicit val reads: Reads[FileUploadCount] =
     __.read[Int]
       .map(FileUploadCount(_))
-      .collect(JsonValidationError("FileUploadCount did not pass validation")) {
-        case Some(count) => count
+      .collect(JsonValidationError("FileUploadCount did not pass validation")) { case Some(count) =>
+        count
       }
 
-  implicit val writes: Writes[FileUploadCount] = Writes {
-    case FileUploadCount(value) => JsNumber(value)
+  implicit val writes: Writes[FileUploadCount] = Writes { case FileUploadCount(value) =>
+    JsNumber(value)
   }
 }

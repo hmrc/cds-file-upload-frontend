@@ -27,7 +27,7 @@ import views.html.choice_page
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class ChoiceController @Inject()(
+class ChoiceController @Inject() (
   mcc: MessagesControllerComponents,
   authenticate: AuthAction,
   verifiedEmail: VerifiedEmailAction,
@@ -50,7 +50,7 @@ class ChoiceController @Inject()(
             case SecureMessageInbox => Redirect(controllers.routes.InboxChoiceController.onPageLoad)
             case DocumentUpload     => Redirect(controllers.routes.MrnEntryController.onPageLoad())
             case _                  => throw new IllegalArgumentException
-        }
+          }
       )
   }
 }

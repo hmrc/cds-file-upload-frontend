@@ -28,7 +28,7 @@ object RefererUrlValidator {
   private def refersToServiceOnAllowList(refererUrl: String)(implicit config: AppConfig): Boolean = {
     val urlNamespaceParts = refererUrl.split("/").toList
     urlNamespaceParts match {
-      case first :: serviceName :: _ if (first.isEmpty) =>
+      case first :: serviceName :: _ if first.isEmpty =>
         config.allowList.refererServices.contains(serviceName)
       case _ => false
     }

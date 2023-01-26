@@ -33,7 +33,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class HowManyFilesUploadController @Inject()(
+class HowManyFilesUploadController @Inject() (
   authenticate: AuthAction,
   getData: DataRetrievalAction,
   requireMrn: MrnRequiredAction,
@@ -62,7 +62,7 @@ class HowManyFilesUploadController @Inject()(
       .bindFromRequest()
       .fold(
         errorForm => Future.successful(BadRequest(howManyFilesUpload(errorForm, request.request.mrn))),
-        fileUploadCount => {
+        fileUploadCount =>
           uploadContactDetails(request, fileUploadCount) map {
             case Right(firstUpload :: _) =>
               logger.info("uploadContactDetails success: " + firstUpload)
@@ -72,7 +72,6 @@ class HowManyFilesUploadController @Inject()(
               logger.warn("uploadContactDetails error: " + err)
               Redirect(routes.ErrorPageController.error)
           }
-        }
       )
   }
 

@@ -29,7 +29,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 import scala.xml.XML
 
-class CustomsDeclarationsConnector @Inject()(config: AppConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) {
+class CustomsDeclarationsConnector @Inject() (config: AppConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) {
 
   private val logger = Logger(this.getClass)
 
@@ -42,16 +42,15 @@ class CustomsDeclarationsConnector @Inject()(config: AppConfig, httpClient: Http
     logger.info(s"fileUploadUrl: $fileUploadUrl")
     httpClient
       .POSTString[HttpResponse](fileUploadUrl, request.toXml.mkString, headers(eori))
-      .map(
-        r =>
-          Try(XML.loadString(r.body)) match {
-            case Success(value) =>
-              logger.info(s"Got initiate response: $FileUploadResponse")
-              FileUploadResponse.fromXml(value)
+      .map(r =>
+        Try(XML.loadString(r.body)) match {
+          case Success(value) =>
+            logger.info(s"Got initiate response: $FileUploadResponse")
+            FileUploadResponse.fromXml(value)
 
-            case Failure(exception) =>
-              logger.warn(s"Failed to load XML with exception: $exception")
-              throw exception
+          case Failure(exception) =>
+            logger.warn(s"Failed to load XML with exception: $exception")
+            throw exception
         }
       )
   }

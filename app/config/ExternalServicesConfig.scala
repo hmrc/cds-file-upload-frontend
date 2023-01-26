@@ -20,15 +20,16 @@ import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 
 @Singleton
-class ExternalServicesConfig @Inject()(val configuration: Configuration) {
+class ExternalServicesConfig @Inject() (val configuration: Configuration) {
 
   private def loadUrl(key: String): String =
     configuration.getOptional[String](s"urls.$key").getOrElse(throw new Exception(s"Missing configuration key: urls.$key"))
 
-  lazy val eoriService = loadUrl("eoriService")
   lazy val cdsRegister = loadUrl("cdsRegister")
   lazy val cdsCheckStatus = loadUrl("cdsCheckStatus")
-  lazy val feedbackFrontend = loadUrl("feedbackFrontend")
-  lazy val nationalClearingHubLink = loadUrl("nationalClearingHubLink")
   lazy val emailFrontendUrl = loadUrl("emailFrontendUrl")
+  lazy val eoriService = loadUrl("eoriService")
+  lazy val feedbackFrontend = loadUrl("feedbackFrontend")
+  lazy val govUk = loadUrl("govUk")
+  lazy val nationalClearingHubLink = loadUrl("nationalClearingHubLink")
 }

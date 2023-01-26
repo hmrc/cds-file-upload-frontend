@@ -36,7 +36,7 @@ import play.api.mvc.MultipartFormData.{DataPart, FilePart}
 import play.core.formatters.Multipart
 
 @Singleton
-class UpscanConnector @Inject()(conf: AppConfig, wsClient: WSClient, metrics: SfusMetrics)(implicit ec: ExecutionContext, materializer: Materializer)
+class UpscanConnector @Inject() (conf: AppConfig, wsClient: WSClient, metrics: SfusMetrics)(implicit ec: ExecutionContext, materializer: Materializer)
     extends Logging {
 
   def upload(upload: UploadRequest, contactDetails: ContactDetails): Future[WSResponse] = {
@@ -55,10 +55,13 @@ class UpscanConnector @Inject()(conf: AppConfig, wsClient: WSClient, metrics: Sf
     implicit val multipartBodyWriter: BodyWritable[Source[MultipartFormData.Part[Source[ByteString, _]], _]] = {
       val boundary = Multipart.randomBoundary()
       val contentType = s"multipart/form-data; boundary=$boundary"
-      BodyWritable(body => {
-        val byteString = Multipart.transform(body, boundary).runFold(ByteString.empty)(_ ++ _)
-        InMemoryBody(Await.result(byteString, Duration(90, SECONDS)))
-      }, contentType)
+      BodyWritable(
+        body => {
+          val byteString = Multipart.transform(body, boundary).runFold(ByteString.empty)(_ ++ _)
+          InMemoryBody(Await.result(byteString, Duration(90, SECONDS)))
+        },
+        contentType
+      )
     }
 
     val filePart = FilePart("file", fileName, Some("text/plain"), Source.single(ByteString(contactDetails.toString)))

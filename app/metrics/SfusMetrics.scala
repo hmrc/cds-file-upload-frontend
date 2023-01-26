@@ -23,7 +23,7 @@ import javax.inject.Singleton
 import metrics.MetricIdentifiers._
 
 @Singleton
-class SfusMetrics @Inject()(metrics: Metrics) {
+class SfusMetrics @Inject() (metrics: Metrics) {
 
   val timers = Map(
     fetchNotificationMetric -> metrics.defaultRegistry.timer(s"$fetchNotificationMetric.timer"),

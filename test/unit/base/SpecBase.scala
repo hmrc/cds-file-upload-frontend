@@ -58,8 +58,8 @@ trait SpecBase
       (f.getName, f.get(cc))
     }.flatMap {
       case (n, l: List[_]) if l.headOption.exists(_.isInstanceOf[Product]) =>
-        l.zipWithIndex.flatMap {
-          case (x, i) => asFormParams(x.asInstanceOf[Product]).map { case (k, v) => (s"$n[$i].$k", v) }
+        l.zipWithIndex.flatMap { case (x, i) =>
+          asFormParams(x.asInstanceOf[Product]).map { case (k, v) => (s"$n[$i].$k", v) }
         }
       case (n, Some(p: Product)) => asFormParams(p).map { case (k, v) => (s"$n.$k", v) }
       case (n, Some(a))          => List((n, a.toString))

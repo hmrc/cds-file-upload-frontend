@@ -52,10 +52,9 @@ trait SignedInUserGen {
 
   case class EORIEnrolment(enrolment: Enrolment)
 
-  val eoriEnrolmentGen: Gen[EORIEnrolment] = {
+  val eoriEnrolmentGen: Gen[EORIEnrolment] =
     eoriString.map { eori =>
       val eoriIdentifier = EnrolmentIdentifier(AuthKey.identifierKey, eori)
       EORIEnrolment(Enrolment(AuthKey.enrolment, Seq(eoriIdentifier), ""))
     }
-  }
 }

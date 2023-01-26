@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package controllers
+package config
 
-import controllers.routes.ChoiceController
-import play.api.i18n.I18nSupport
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import javax.inject.Inject
+import scala.concurrent.duration.{Duration, FiniteDuration}
 
-class RootController @Inject() (mcc: MessagesControllerComponents) extends FrontendController(mcc) with I18nSupport {
+@Singleton
+class TimeoutDialogConfig @Inject() (config: ServicesConfig) {
 
-  val displayPage: Action[AnyContent] = Action {
-    Redirect(ChoiceController.onPageLoad)
-  }
+  val timeout: Duration = config.getDuration("timeoutDialog.timeout").asInstanceOf[FiniteDuration]
+  val countdown: Duration = config.getDuration("timeoutDialog.countdown").asInstanceOf[FiniteDuration]
 }

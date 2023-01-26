@@ -31,7 +31,7 @@ import scala.concurrent.{ExecutionContext, Future}
 trait VerifiedEmailAction extends ActionRefiner[AuthenticatedRequest, VerifiedEmailRequest]
 
 @Singleton
-class VerifiedEmailActionImpl @Inject()(backendConnector: CdsFileUploadConnector, mcc: MessagesControllerComponents) extends VerifiedEmailAction {
+class VerifiedEmailActionImpl @Inject() (backendConnector: CdsFileUploadConnector, mcc: MessagesControllerComponents) extends VerifiedEmailAction {
 
   implicit val executionContext: ExecutionContext = mcc.executionContext
   private lazy val onUnverified = Redirect(routes.UnverifiedEmailController.informUserUnverified)
