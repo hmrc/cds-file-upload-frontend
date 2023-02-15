@@ -94,6 +94,7 @@ fileUploadPage.listItem1=	JPEG (delwedd)
 fileUploadPage.listItem2=	PNG (delwedd)
 fileUploadPage.listItem3=	PDF
 fileUploadPage.listItem4=	txt (testun plaen)
+fileUploadPage.label = Uwchlwytho ffeil
 fileUploadPage.filesUploaded=	Rydych wedi uwchlwytho {0} o {1} ffeil
 fileUploadPage.validation.required=	Dewiswch y ffeil yr hoffech ei huwchlwytho
 fileUploadPage.validation.accept=	Ni ellir derbyn y math hwn o ffeil
