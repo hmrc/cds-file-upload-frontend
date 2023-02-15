@@ -24,8 +24,6 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import views.behaviours.ViewBehaviours
 import views.html.upload_your_files
 
-import scala.jdk.CollectionConverters.ListHasAsScala
-
 class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCheckPropertyChecks with Generators {
 
   val page = instanceOf[upload_your_files]
@@ -124,8 +122,13 @@ class UploadYourFilesSpec extends DomAssertions with ViewBehaviours with ScalaCh
     }
 
     "contain the Javascript file for validating files to upload" in {
-      val scripts = view().getElementsByTag("script").asScala
-      scripts.last.attr("src") mustBe "/cds-file-upload-service/assets/javascripts/validation.min.js"
+      val script = view().getElementById("validation")
+      script.attr("src") mustBe "/cds-file-upload-service/assets/javascripts/validation.min.js"
+    }
+
+    "contain the Javascript file defining validation error messages" in {
+      val script = view().getElementById("validation-messages")
+      Option(script).isDefined mustBe true
     }
   }
 }

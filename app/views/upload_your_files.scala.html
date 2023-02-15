@@ -46,7 +46,6 @@
 @fileUploadId = @{"file-upload-component"}
 
 @mainTemplate(title = Title(s"fileUploadPage.heading.$positionModifier")) {
-
     @govukErrorSummary(
         ErrorSummary(
             classes = "govuk-visually-hidden",
@@ -108,4 +107,13 @@
     </form>
 }
 
-<script src="@routes.Assets.versioned("javascripts/validation.min.js")"></script>
+<script id="validation" src="@routes.Assets.versioned("javascripts/validation.min.js")"></script>
+<script id="validation-messages" type="text/javascript">
+window.messages = {
+        "fileUploadPage.error.nameStart": "@messages("fileUploadPage.error.nameStart")",
+        "fileUploadPage.error.fileSize" : "@messages("fileUploadPage.error.fileSize")",
+        "fileUploadPage.error.extension" : "@messages("fileUploadPage.error.extension")",
+        "fileUploadPage.selectFile" : "@messages("fileUploadPage.error.selectFile")",
+        "fileUploadPage.error.emptyFile": "@messages("fileUploadPage.error.emptyFile")"
+}
+</script>

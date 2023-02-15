@@ -233,3 +233,10 @@ feedback.header = Tell us what you think
 feedback.line.1 = This is a new service and we want to know what you think of it.
 feedback.line.2 = {0}. Your thoughts and ideas will help us to make improvements.
 feedback.link = Send us your feedback
+
+## UploadFile Component (client)
+fileUploadPage.error.nameStart = File name must start with a letter or number, and only contain hyphen, underscore or dot as special characters
+fileUploadPage.error.fileSize = File size must not be bigger than {0} Megabytes (MB)
+fileUploadPage.error.extension = File must have an extension of {0}
+fileUploadPage.error.selectFile = Select a file
+fileUploadPage.error.emptyFile = The selected file is empty
