@@ -94,6 +94,7 @@ fileUploadPage.listItem1=	JPEG (delwedd)
 fileUploadPage.listItem2=	PNG (delwedd)
 fileUploadPage.listItem3=	PDF
 fileUploadPage.listItem4=	txt (testun plaen)
+fileUploadPage.label = Uwchlwytho ffeil
 fileUploadPage.filesUploaded=	Rydych wedi uwchlwytho {0} o {1} ffeil
 fileUploadPage.validation.required=	Dewiswch y ffeil yr hoffech ei huwchlwytho
 fileUploadPage.validation.accept=	Ni ellir derbyn y math hwn o ffeil
@@ -163,3 +164,10 @@ feedback.header =	Rhowch eich barn
 feedback.line.1 =	Mae hwn yn wasanaeth newydd ac rydym eisiau gwybod beth yw’ch barn amdano.
 feedback.line.2 =	{0}. Bydd eich meddyliau a’ch syniadau’n ein helpu i wneud gwelliannau.
 feedback.link =	Anfonwch eich adborth atom
+
+## UploadFile Component (client)
+fileUploadPage.error.nameStart = Mae’n rhaid i enw’r ffeil ddechrau gyda llythyren neu rif, a chynnwys cysylltnod, tanlinell, neu ddot yn unig fel cymeriadau arbennig
+fileUploadPage.error.fileSize = Mae’n rhaid i faint y ffeil beidio â bod yn fwy na {0} Megabeit (MB)
+fileUploadPage.error.extension = Mae’n rhaid i estyniad y ffeil fod yn {0}
+fileUploadPage.error.selectFile = Dewiswch ffeil
+fileUploadPage.error.emptyFile = Mae'r ffeil a ddewiswyd yn wag
