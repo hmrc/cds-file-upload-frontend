@@ -20,11 +20,7 @@ import play.api.data.FormError
 
 object ErrorMapper {
 
-  def eoriOrAddressErrors(groupKey: String, errors: Seq[FormError]) =
-    errors.map(err => err.copy(key = if (err.key == groupKey) s"$groupKey.eori" else err.key))
-
   def radioGroupErrors(groupKey: String, firstOption: String, errors: Seq[FormError]) =
     errors.map(err => err.copy(key = if (err.key == groupKey) firstOption else err.key))
 
-  def yesNoErrors(errors: Seq[FormError]): Seq[FormError] = radioGroupErrors("yesNo", "code_yes", errors)
 }

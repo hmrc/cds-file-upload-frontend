@@ -18,6 +18,6 @@ object Dependencies {
     "org.mockito"            %% "mockito-scala"           % "1.17.12"            % "test",
     "org.scalatestplus"      %% "scalacheck-1-15"         % "3.2.11.0"           % "test",
     "com.vladsch.flexmark"   %  "flexmark-all"            % "0.64.0"             % "test",
-    "org.jsoup"              %  "jsoup"                   % "1.15.3"             % "test"
+    "org.jsoup"              %  "jsoup"                   % "1.15.4"             % "test"
   ).map(moduleID => if (moduleID.name.contains("flexmark")) moduleID else moduleID.withSources)
 }

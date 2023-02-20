@@ -19,8 +19,6 @@ package forms.mappings
 import play.api.data.FormError
 import play.api.data.format.Formatter
 
-import scala.util.control.Exception.nonFatalCatch
-
 trait Formatters {
 
   private[mappings] def stringFormatter(errorKey: String): Formatter[String] = new Formatter[String] {
@@ -35,45 +33,4 @@ trait Formatters {
       Map(key -> value)
   }
 
-  private[mappings] def booleanFormatter(requiredKey: String, invalidKey: String): Formatter[Boolean] =
-    new Formatter[Boolean] {
-
-      private val baseFormatter = stringFormatter(requiredKey)
-
-      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Boolean] =
-        baseFormatter
-          .bind(key, data)
-          .flatMap {
-            case "true"  => Right(true)
-            case "false" => Right(false)
-            case _       => Left(Seq(FormError(key, invalidKey)))
-          }
-
-      def unbind(key: String, value: Boolean): Map[String, String] = Map(key -> value.toString)
-    }
-
-  private[mappings] def intFormatter(requiredKey: String, wholeNumberKey: String, nonNumericKey: String): Formatter[Int] =
-    new Formatter[Int] {
-
-      val decimalRegexp = """^(\d*\.\d*)$"""
-
-      private val baseFormatter = stringFormatter(requiredKey)
-
-      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Int] =
-        baseFormatter
-          .bind(key, data)
-          .map(_.replace(",", ""))
-          .flatMap {
-            case s if s.matches(decimalRegexp) =>
-              Left(Seq(FormError(key, wholeNumberKey)))
-            case s =>
-              nonFatalCatch
-                .either(s.toInt)
-                .left
-                .map(_ => Seq(FormError(key, nonNumericKey)))
-          }
-
-      override def unbind(key: String, value: Int): Map[String, String] =
-        baseFormatter.unbind(key, value.toString)
-    }
 }

@@ -65,11 +65,13 @@ lazy val scoverageSettings: Seq[Setting[_]] = Seq(
     "Reverse.*",
     "metrics\\..*",
     "features\\..*",
+    "views.html.components\\..*",
+    "controllers.test\\..*",
     "test\\..*",
     ".*(BuildInfo|Routes|Options|TestingUtilitiesController).*",
     "logger.*\\(.*\\)"
   ).mkString(";"),
-  coverageMinimumStmtTotal := 75, // Minimum threshold to be increased
+  coverageMinimumStmtTotal := 90, // Minimum threshold to be increased
   coverageFailOnMinimum := true,
   coverageHighlighting := true,
   Test / parallelExecution := false

@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Configuration}
 
-trait IntegrationSpec extends AnyWordSpec with Matchers with GuiceOneServerPerSuite {
+trait IntegrationSpec extends AnyWordSpec with Matchers with GuiceOneServerPerSuite with BeforeAndAfterEach with ScalaFutures with OptionValues {
 
   val disableMetricsConfiguration = Configuration.from(Map("metrics.jvm" -> "false", "metrics.logback" -> "false"))
+
+  val databaseName = "test-cds-file-upload-frontend"
 
   override def fakeApplication(): Application =
     new GuiceApplicationBuilder()
       .disable[com.kenshoo.play.metrics.PlayModule]
       .configure(disableMetricsConfiguration)
+      .configure(Map("mongodb.uri" -> s"mongodb://localhost:27017/$databaseName"))
       .build()
 }
