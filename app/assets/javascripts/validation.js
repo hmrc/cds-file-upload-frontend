@@ -1,4 +1,8 @@
 (() => {
+    const messages = (key, interpolation) => {
+        const message = window.messages[key]
+        return message.replace("{0}", interpolation)
+    }
     const errorSummary = document.getElementsByClassName('govuk-error-summary')[0]
     const errorSummaryList = document.getElementsByClassName('govuk-error-summary__list')[0]
 
@@ -20,10 +24,10 @@
     file2Upload.onchange = function() {
         resetError()
         const file = this.files[0]
-        if (!regex.test(file.name)) showError("File name must start with a letter or number,<br>and only contain hyphen, underscore or dot as special characters")
-        else if (file.size == 0) showError("The selected file is empty")
-        else if (file.size > maxFileSize) showError(`File size must not be bigger than ${maxFileSize/1024/1024} Megabytes (MB)`)
-        else if (!hasExpectedExtension(file)) showError(`File must have an extension of ${fileExtensions.join(", ")}`)
+        if (!regex.test(file.name)) showError(messages("fileUploadPage.error.nameStart"))
+        else if (file.size == 0) showError(messages("fileUploadPage.error.emptyFile"))
+        else if (file.size > maxFileSize) showError(messages("fileUploadPage.error.fileSize", maxFileSize/1024/1024))
+        else if (!hasExpectedExtension(file)) showError(messages("fileUploadPage.error.extension", fileExtensions.join(", ")))
     }
 
     let allowSubmit = true
@@ -31,7 +35,7 @@
     document.querySelector('form').onsubmit = (event) => {
         if (!file2Upload.value) {
             event.preventDefault()
-            showError("Select a file!")
+            showError(messages("fileUploadPage.selectFile"))
         }
         else if (allowSubmit) {
             allowSubmit = false
