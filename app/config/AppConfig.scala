@@ -23,7 +23,6 @@ import pureconfig.{CamelCase, ConfigFieldMapping, KebabCase}
 case class AppConfig(
   appName: String,
   developerHubClientId: String,
-  assets: Assets,
   googleAnalytics: GoogleAnalytics,
   microservice: Microservice,
   fileFormats: FileFormats,

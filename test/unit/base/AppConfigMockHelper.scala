@@ -23,7 +23,6 @@ object AppConfigMockHelper {
   def generateMockConfig(
     appName: String = "",
     developerHubClientId: String = "",
-    assets: Assets = mock[Assets],
     googleAnalytics: GoogleAnalytics = mock[GoogleAnalytics],
     microservice: Microservice = mock[Microservice],
     fileFormats: FileFormats = mock[FileFormats],
@@ -38,7 +37,6 @@ object AppConfigMockHelper {
   ) = AppConfig(
     appName,
     developerHubClientId,
-    assets,
     googleAnalytics,
     microservice,
     fileFormats,
