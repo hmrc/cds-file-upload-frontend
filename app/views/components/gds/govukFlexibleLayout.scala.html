@@ -32,7 +32,8 @@
   footerItems: Seq[FooterItem] = Seq.empty,
   bodyEndBlock: Option[Html] = None,
   scriptsBlock: Option[Html] = None
-)(contentBlock: Html)(implicit messages: Messages)
+)(contentBlock: Html)(implicit messages: Messages, requestHeader: RequestHeader)
+
 
 @headerDefault = {
   @headerBlock.getOrElse {
