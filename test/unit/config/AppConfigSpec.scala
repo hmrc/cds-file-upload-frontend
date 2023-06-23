@@ -54,14 +54,6 @@ class AppConfigSpec extends PlaySpec {
       |      port = 8500
       |    }
       |
-      |    keystore {
-      |      protocol = http
-      |      host = localhost
-      |      port = 8400
-      |      default-source = appName
-      |      domain = keystore
-      |    }
-      |
       |    customs-declarations {
       |      protocol = http
       |      host = localhost

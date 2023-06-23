@@ -58,7 +58,6 @@ case class Services(
   customsDeclarations: CustomsDeclarations,
   cdsFileUploadFrontend: CDSFileUploadFrontend,
   cdsFileUpload: CDSFileUpload,
-  keystore: Keystore,
   contactFrontend: ContactFrontend,
   secureMessaging: SecureMessaging
 )
@@ -77,10 +76,6 @@ case class CDSFileUpload(protocol: Option[String], host: String, port: Option[In
 
   def fetchVerifiedEmailEndpoint(eori: String): String =
     s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$fetchVerifiedEmail/$eori"
-}
-
-case class Keystore(protocol: String = "https", host: String, port: Int, defaultSource: String, domain: String) {
-  lazy val baseUri: String = s"$protocol://$host:$port"
 }
 
 case class ContactFrontend(url: String, serviceId: String) {
