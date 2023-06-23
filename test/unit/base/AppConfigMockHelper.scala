@@ -54,8 +54,7 @@ object AppConfigMockHelper {
     customsDeclarations: CustomsDeclarations = mock[CustomsDeclarations],
     cdsFileUploadFrontend: CDSFileUploadFrontend = mock[CDSFileUploadFrontend],
     cdsFileUpload: CDSFileUpload = mock[CDSFileUpload],
-    keystore: Keystore = mock[Keystore],
     contactFrontend: ContactFrontend = mock[ContactFrontend],
     secureMessaging: SecureMessaging = mock[SecureMessaging]
-  ) = Services(customsDeclarations, cdsFileUploadFrontend, cdsFileUpload, keystore, contactFrontend, secureMessaging)
+  ) = Services(customsDeclarations, cdsFileUploadFrontend, cdsFileUpload, contactFrontend, secureMessaging)
 }
