@@ -16,18 +16,16 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Format, Json, OFormat}
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-import java.time.{ZoneOffset, ZonedDateTime}
+import java.time.Instant
 
-case class Notification(
-  fileReference: String,
-  outcome: String,
-  filename: Option[String],
-  createdAt: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC)
-)
+case class Notification(fileReference: String, outcome: String, filename: Option[String], createdAt: Option[Instant] = Some(Instant.now()))
 
 object Notification {
 
-  implicit val format = Json.format[Notification]
+  implicit val mongoDateReads: Format[Instant] = MongoJavatimeFormats.instantFormat
+  implicit val format: OFormat[Notification] = Json.format[Notification]
+
 }
