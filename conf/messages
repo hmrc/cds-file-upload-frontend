@@ -1,25 +1,22 @@
 ## common
 
 common.title.format = {0} - {1} - GOV.UK
-
 common.service.name = CDS document uploads and secure messages
 common.phase = Beta
 common.continue = Continue
-
 common.feedback = This is a new service - your {0} will help us to improve it.
 common.feedback.link = feedback
-
 common.navigation.messages = Messages
 common.navigation.uploadFiles = Upload files
-
 common.back.link = Back
 
 ## common buttons with shared labels
-common.button.startNow = Start now
 
+common.button.startNow = Start now
 common.backToGovUk = Back to GOV.UK
 
 ## errors
+
 error.browser.heading.prefix = Error:
 error.summary.title = There is a problem
 error.required = Please enter a value.
@@ -27,7 +24,6 @@ error.required = Please enter a value.
 ## Sign-out
 
 signOut.link = Sign out
-
 signed.out.heading = You have been signed out
 signed.out.information = To use the service again, you will need to {0}.
 signed.out.startPageLink = return to the start page and sign in
@@ -160,24 +156,6 @@ fileUploadPage.paragraph1 = Each file you upload must not be bigger than 10 mega
 fileUploadPage.button = Upload and continue
 fileUploadPage.insetText = If you have a Word or Excel document to upload, you need to 'save as' a PDF first. Word and Excel formats are not allowed on this service.
 fileUploadPage.cancel = Cancel upload
-
-fileUploadReceiptPage.heading = Files have been uploaded and sent to HMRC
-fileUploadReceiptPage.mrn = Movement reference number:
-fileUploadReceiptPage.tableTitle = Uploaded files
-fileUploadReceiptPage.fileName = File name
-fileUploadReceiptPage.receipt = Receipt
-fileUploadReceiptPage.printPage = Print this page for your records
-fileUploadReceiptPage.whatHappensNext = What happens next?
-fileUploadReceiptPage.paragraph1 = As long as you have provided the documents that customs needs to clear your goods, they should be cleared within these time limits from arriving goods or uploading documents (whichever is later):
-fileUploadReceiptPage.listitem1 = 2 hours for air freight imports, road freight imports, all exports
-fileUploadReceiptPage.listitem2 = 3 hours if received between 8am and 3pm - for maritime freight imports
-fileUploadReceiptPage.listitem3 = by 8am the following day if received after 3pm - for maritime freight imports
-fileUploadReceiptPage.paragraph2 = If the status of your declaration has not changed within the specified time, you should
-fileUploadReceiptPage.listitem4 = first check your email
-fileUploadReceiptPage.listitem5 = email the National Clearance Hub on {0}
-fileUploadReceiptPage.uploadAnother = Upload documents for another declaration
-fileUploadReceiptPage.paragraph3 = You only need to add documents that are required by HMRC: this will show in the status of the declaration or in a message to you from HMRC.
-fileUploadReceiptPage.finalButton.text = Upload documents for another declaration
 
 fileUploadConfirmationPage.heading = Files uploaded
 fileUploadConfirmationPage.mrn = Movement reference number:
