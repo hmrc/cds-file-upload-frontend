@@ -26,7 +26,7 @@ class ExternalServicesConfig @Inject() (val configuration: Configuration) {
     configuration.getOptional[String](s"urls.$key").getOrElse(throw new Exception(s"Missing configuration key: urls.$key"))
 
   lazy val cdsRegister = loadUrl("cdsRegister")
-  lazy val cdsCheckStatus = loadUrl("cdsCheckStatus")
+  lazy val cdsSubscribe = loadUrl("cdsSubscribe")
   lazy val emailFrontendUrl = loadUrl("emailFrontendUrl")
   lazy val eoriService = loadUrl("eoriService")
   lazy val feedbackFrontend = loadUrl("feedbackFrontend")
