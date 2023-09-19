@@ -135,7 +135,7 @@ class AppConfigSpec extends PlaySpec {
       |  loginContinue = "http://localhost:6793/cds-file-upload-service/start"
       |  eoriService = "https://www.gov.uk/eori"
       |  cdsRegister = "https://www.gov.uk/guidance/get-access-to-the-customs-declaration-service"
-      |  cdsCheckStatus = "https://www.tax.service.gov.uk/customs/register-for-cds/are-you-based-in-uk"
+      |  cdsSubscribe = "http://localhost:6750/customs-enrolment-services/cds/subscribe"
       |  feedbackFrontend = "http://locahost:9514/feedback/cds-file-upload-frontend"
       |  nationalClearingHubLink = "mailto:nch.cds@hmrc.gov.uk"
       |  emailFrontendUrl = "http://localhost:9898/manage-email-cds/service/cds-file-upload"

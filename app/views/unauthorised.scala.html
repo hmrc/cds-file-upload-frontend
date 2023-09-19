@@ -52,7 +52,7 @@
   @Html(messages("unauthorised.paragraph.2", link(
       id = Some("check_cds_application_status_link"),
       text = messages("unauthorised.paragraph.2.link"),
-      call = Call("GET", config.cdsCheckStatus)
+      call = Call("GET", config.cdsSubscribe)
     )
   ))
   </p>

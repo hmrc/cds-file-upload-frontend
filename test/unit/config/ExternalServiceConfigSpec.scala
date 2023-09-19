@@ -30,7 +30,7 @@ class ExternalServiceConfigSpec extends SpecBase {
   }
 
   "have a correct configuration for Check Status url" in {
-    config.cdsCheckStatus mustBe "https://www.tax.service.gov.uk/customs/register-for-cds/are-you-based-in-uk"
+    config.cdsSubscribe mustBe "http://localhost:6750/customs-enrolment-services/cds/subscribe"
   }
 
   "have a correct configuration for Feedback url" in {
