@@ -56,8 +56,8 @@ class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers wi
       view must containElementWithID("navigation-banner")
     }
 
-    "not display the language toggle" in {
-      view.getElementsByClass("hmrc-language-select") must be(empty)
+    "display the language toggle" in {
+      view.getElementsByClass("hmrc-language-select").text() must be("English Newid yr iaith ir Gymraeg Cymraeg")
     }
 
     "display the file receipts table" in {
@@ -111,7 +111,7 @@ class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers wi
       }
 
       "have a bullet list" in {
-        val bulletList = view.getElementsByTag("ul").get(0)
+        val bulletList = view.getElementsByTag("ul").get(1)
 
         bulletList must containMessage("fileUploadConfirmationPage.section2.listitem1")
         bulletList must containMessage("fileUploadConfirmationPage.section2.listitem2")

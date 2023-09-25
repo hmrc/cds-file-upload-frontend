@@ -67,7 +67,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
 
     "redirect to start page" when {
       "no user answers are in the cache" in {
-        when(mockFileUploadAnswersService.findOneAndRemove(anyString()))
+        when(mockFileUploadAnswersService.findOne(anyString()))
           .thenReturn(Future.successful(None))
 
         val result = controller.onPageLoad()(fakeRequest).futureValue
@@ -86,18 +86,18 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
 
         result.header.status mustBe OK
 
-        verify(mockFileUploadAnswersService).findOneAndRemove(any())
+        verify(mockFileUploadAnswersService).findOne(any())
       }
     }
 
     "user is redirect to start page" in {
-      when(mockFileUploadAnswersService.findOneAndRemove(anyString()))
+      when(mockFileUploadAnswersService.findOne(anyString()))
         .thenReturn(Future.successful(None))
 
       val result = controller.onPageLoad()(fakeRequest).futureValue
 
       result.header.status mustBe SEE_OTHER
-      verify(mockFileUploadAnswersService).findOneAndRemove(any())
+      verify(mockFileUploadAnswersService).findOne(any())
     }
   }
 
@@ -106,7 +106,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
       .thenReturn(Future.successful(Option(Notification(sampleFileUpload.reference, "SUCCESS", Some("someFile.pdf")))))
 
     val answers = FileUploadAnswers(eori, fileUploadResponse = Some(sampleFileUploadResponse))
-    when(mockFileUploadAnswersService.findOneAndRemove(anyString()))
+    when(mockFileUploadAnswersService.findOne(anyString()))
       .thenReturn(Future.successful(Some(answers)))
 
     test
