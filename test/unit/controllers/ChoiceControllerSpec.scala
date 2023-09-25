@@ -24,13 +24,17 @@ import play.api.i18n.Messages
 import play.api.mvc.Request
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
+import services.FileUploadAnswersService
+import scala.concurrent.Future
 import views.html.choice_page
 
 class ChoiceControllerSpec extends ControllerSpecBase {
 
   private val choicePage = mock[choice_page]
+  private val answersService = mock[FileUploadAnswersService]
 
-  private val controller = new ChoiceController(stubMessagesControllerComponents(), new FakeAuthAction(), new FakeVerifiedEmailAction(), choicePage)
+  private val controller =
+    new ChoiceController(stubMessagesControllerComponents(), new FakeAuthAction(), new FakeVerifiedEmailAction(), answersService, choicePage)
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -48,6 +52,7 @@ class ChoiceControllerSpec extends ControllerSpecBase {
   "ChoiceController on onPageLoad" should {
 
     "return Ok (200) response" in {
+      when(answersService.remove(any[String])).thenReturn(Future.successful(()))
       val result = controller.onPageLoad()(fakeRequest)
 
       status(result) mustBe OK

@@ -21,8 +21,10 @@ import forms.ChoiceForm
 import forms.ChoiceForm.AllowedChoiceValues._
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.FileUploadAnswersService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.choice_page
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import javax.inject.{Inject, Singleton}
 
@@ -31,13 +33,16 @@ class ChoiceController @Inject() (
   mcc: MessagesControllerComponents,
   authenticate: AuthAction,
   verifiedEmail: VerifiedEmailAction,
+  answersService: FileUploadAnswersService,
   choicePage: choice_page
 ) extends FrontendController(mcc) with I18nSupport {
 
   val actions = authenticate andThen verifiedEmail
 
-  val onPageLoad: Action[AnyContent] = actions { implicit request =>
-    Ok(choicePage(ChoiceForm.form))
+  val onPageLoad: Action[AnyContent] = actions.async { implicit request =>
+    answersService.remove(request.eori).map { _ =>
+      Ok(choicePage(ChoiceForm.form))
+    }
   }
 
   val onSubmit: Action[AnyContent] = actions { implicit request =>
