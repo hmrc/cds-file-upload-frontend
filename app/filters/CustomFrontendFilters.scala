@@ -19,5 +19,5 @@ package filters
 import javax.inject.Inject
 import play.api.http.{DefaultHttpFilters, EnabledFilters}
 
-class CustomFrontendFilters @Inject() (enabledFilters: EnabledFilters, allowListFilter: AllowListFilter, csrfFilter: CsrfFilter)
-    extends DefaultHttpFilters(enabledFilters.filters :+ allowListFilter :+ csrfFilter: _*)
+class CustomFrontendFilters @Inject() (enabledFilters: EnabledFilters, csrfFilter: CsrfFilter)
+    extends DefaultHttpFilters(enabledFilters.filters :+ csrfFilter: _*)
