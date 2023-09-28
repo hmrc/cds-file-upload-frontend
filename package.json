@@ -5,7 +5,7 @@
     "test": "mkdir -p target/test-reports/html-report/a11y/screenshots && pa11y-ci"
   },
   "dependencies": {
-    "pa11y-ci": "2.1.1",
+    "pa11y-ci": "2.4.2",
     "puppeteer": "1.13.0"
   }
 }
