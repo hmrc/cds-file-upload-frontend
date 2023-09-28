@@ -2,14 +2,13 @@ import sbt._
 
 object Dependencies {
 
-  val bootstrapPlayVersion = "7.2.0"
-  val hmrcMongoVersion = "1.3.0"
+  val bootstrapPlayVersion = "7.22.0"
 
   val compile = Seq(
     "uk.gov.hmrc"               %% "bootstrap-frontend-play-28" % bootstrapPlayVersion,
-    "uk.gov.hmrc"               %% "play-frontend-hmrc"         % "7.16.0-play-28",
+    "uk.gov.hmrc"               %% "play-frontend-hmrc"         % "7.20.0-play-28",
     "uk.gov.hmrc"               %% "play-partials"              % "8.4.0-play-28",
-    "uk.gov.hmrc.mongo"         %% "hmrc-mongo-play-28"         % hmrcMongoVersion,
+    "uk.gov.hmrc.mongo"         %% "hmrc-mongo-play-28"         % "1.3.0",
     "com.github.pureconfig"     %% "pureconfig"                 % "0.17.4"
   ).map(_.withSources)
 

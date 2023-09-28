@@ -27,14 +27,17 @@ import play.twirl.api.HtmlFormat
 import services.FileUploadAnswersService
 import scala.concurrent.Future
 import views.html.choice_page
+import play.api.test.Helpers
 
 class ChoiceControllerSpec extends ControllerSpecBase {
 
   private val choicePage = mock[choice_page]
   private val answersService = mock[FileUploadAnswersService]
 
+  val ec = Helpers.stubControllerComponents().executionContext
+
   private val controller =
-    new ChoiceController(stubMessagesControllerComponents(), new FakeAuthAction(), new FakeVerifiedEmailAction(), answersService, choicePage)
+    new ChoiceController(stubMessagesControllerComponents(), new FakeAuthAction(), new FakeVerifiedEmailAction(), answersService, choicePage, ec)
 
   override def beforeEach(): Unit = {
     super.beforeEach()

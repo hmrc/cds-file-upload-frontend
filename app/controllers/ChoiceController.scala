@@ -24,9 +24,9 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.FileUploadAnswersService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.choice_page
-import scala.concurrent.ExecutionContext.Implicits.global
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class ChoiceController @Inject() (
@@ -34,7 +34,8 @@ class ChoiceController @Inject() (
   authenticate: AuthAction,
   verifiedEmail: VerifiedEmailAction,
   answersService: FileUploadAnswersService,
-  choicePage: choice_page
+  choicePage: choice_page,
+  implicit val ec: ExecutionContext
 ) extends FrontendController(mcc) with I18nSupport {
 
   val actions = authenticate andThen verifiedEmail

@@ -18,6 +18,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components.{FileUpload => FileUploadComponent, _}
 @import views.html.components.gds.{bulletList, gdsMainTemplate, link, paragraphBody, pageTitle}
 @import views.Title
+@import views.html.helper.CSPNonce
 
 @this(
     mainTemplate: gdsMainTemplate,
@@ -107,8 +108,8 @@
     </form>
 }
 
-<script id="validation" src="@routes.Assets.versioned("javascripts/validation.min.js")"></script>
-<script id="validation-messages" type="text/javascript">
+<script @CSPNonce.attr id="validation" src="@routes.Assets.versioned("javascripts/validation.min.js")"></script>
+<script @CSPNonce.attr id="validation-messages" type="text/javascript">
 window.messages = {
         "fileUploadPage.error.nameStart": "@messages("fileUploadPage.error.nameStart")",
         "fileUploadPage.error.fileSize" : "@messages("fileUploadPage.error.fileSize")",
