@@ -18,6 +18,7 @@
 @import views.Title
 @import views.html.components.gds._
 @import config.ExternalServicesConfig
+@import views.html.helper.CSPNonce
 
 @this(
     govukPanel : GovukPanel,
@@ -68,9 +69,28 @@
         captionClasses = "govuk-heading-m"
     ))
 
+    <script @CSPNonce.attr>
+        document.addEventListener('DOMContentLoaded', function() {
+            var printButton = document.getElementById('printButton');
+            if (printButton) {
+                printButton.addEventListener('click', function(event) {
+                    window.print();
+                    event.preventDefault(); // Prevent the default behavior of the anchor element
+                });
+            }
+        });
+    </script>
+    <div class="gem-c-print-link govuk-!-display-none-print govuk-!-margin-top-20 govuk-!-margin-bottom-5">
+        <button class="govuk-link govuk-body-s gem-c-print-link__button" id="printButton">
+         @messages("fileUploadConfirmationPage.printPage")
+        </button>
+    </div>
+
+    @*
     <p class="govuk-body">
         <a class="govuk-link govuk-link--visually-hidden govuk-!-display-none-print" href="javascript:if(window.print)window.print()">@messages("fileUploadConfirmationPage.printPage")</a>
     </p>
+    *@
 
     <h2 class="govuk-heading-m">@messages("fileUploadConfirmationPage.section1.title")</h2>
 
