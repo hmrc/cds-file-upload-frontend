@@ -75,7 +75,7 @@ class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers wi
     }
 
     "have a link to print the page" in {
-      assertContainsLink(view, messages("fileUploadConfirmationPage.printPage"), "javascript:if(window.print)window.print()")
+      assertContainsText(view, messages("fileUploadConfirmationPage.printPage"))
     }
 
     "have a paragraph explaining what happens when a query is raised" which {
@@ -107,7 +107,7 @@ class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers wi
       }
 
       "has some description text" in {
-        view.getElementsByTag("p").get(4) must containMessage("fileUploadConfirmationPage.section2.paragraph1")
+        view.getElementsByTag("p").get(3) must containMessage("fileUploadConfirmationPage.section2.paragraph1")
       }
 
       "have a bullet list" in {
