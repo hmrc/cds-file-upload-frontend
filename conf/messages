@@ -57,7 +57,7 @@ conversation.heading = View conversation
 
 ## Secure Messaging Reply Result page
 
-replyResult.heading = Reply result
+replyResult.heading = Message sent
 
 ## Secure Messaging. Right grey box in "Conversation" and "Reply Result" pages
 
