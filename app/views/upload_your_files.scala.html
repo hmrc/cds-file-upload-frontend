@@ -93,7 +93,7 @@
                     "data-max-file-size" -> appConfig.fileFormats.maxFileSize.toString,
                     "file-extensions" -> appConfig.fileFormats.approvedFileExtensions
                 ),
-                errorMessage = Some(ErrorMessage(id = Some("file-upload-error")))
+                errorMessage = Some(ErrorMessage(id = Some("file-upload-error"), visuallyHiddenText = None))
             ))
         </div>
 
@@ -107,7 +107,6 @@
         )
     </form>
 }
-
 <script @CSPNonce.attr id="validation" src="@routes.Assets.versioned("javascripts/validation.min.js")"></script>
 <script @CSPNonce.attr id="validation-messages" type="text/javascript">
 window.messages = {
