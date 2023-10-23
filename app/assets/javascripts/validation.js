@@ -9,6 +9,8 @@
     const group = document.getElementsByClassName('govuk-form-group')[0]
     document.getElementsByClassName('govuk-form-group')[1].classList.remove("govuk-form-group--error")
 
+    const fileUploadComponent = document.getElementById("file-upload-component");
+    fileUploadComponent.removeAttribute("aria-describedby");
     const errorSection = document.getElementById('file-upload-component-error')
     const errorMessage = document.createElement("span")
     errorSection.appendChild(errorMessage)
@@ -63,6 +65,7 @@
     }
 
     function showError(error) {
+        fileUploadComponent.setAttribute("aria-describedby", "file-upload-component-error");
         showErrorSummary(error)
 
         group.classList.add("govuk-form-group--error")
