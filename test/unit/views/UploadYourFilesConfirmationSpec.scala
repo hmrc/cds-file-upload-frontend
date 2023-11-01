@@ -44,6 +44,9 @@ class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers wi
 
     "display page header" which {
       "contains the header text" in {
+
+        println(view)
+
         view.getElementsByTag("h1").first() must containMessage("fileUploadConfirmationPage.heading")
       }
 
@@ -80,7 +83,7 @@ class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers wi
 
     "have a paragraph explaining what happens when a query is raised" which {
       "has a heading" in {
-        view.getElementsByTag("h2").first() must containMessage("fileUploadConfirmationPage.section1.title")
+        view.getElementsByTag("h2").get(1) must containMessage("fileUploadConfirmationPage.section1.title")
       }
 
       "displays the current user's verified email address" in {
@@ -103,7 +106,7 @@ class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers wi
 
     "have a paragraph explaining next steps" which {
       "has a heading" in {
-        view.getElementsByTag("h2").get(1) must containMessage("fileUploadConfirmationPage.section2.title")
+        view.getElementsByTag("h2").get(2) must containMessage("fileUploadConfirmationPage.section2.title")
       }
 
       "has some description text" in {

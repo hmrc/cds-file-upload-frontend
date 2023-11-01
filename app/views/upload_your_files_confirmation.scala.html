@@ -46,6 +46,8 @@
         content = HtmlContent(panelContent)
     ))
 
+    <h2 class="govuk-heading-m">@messages("fileUploadConfirmationPage.tableTitle")</h2>
+
     @govukTable(Table(
         rows = files.map { f =>
             Seq(
@@ -66,7 +68,7 @@
             )
         )),
         caption = Some(messages("fileUploadConfirmationPage.tableTitle")),
-        captionClasses = "govuk-heading-m"
+        captionClasses = "govuk-visually-hidden"
     ))
 
     <script @CSPNonce.attr>
