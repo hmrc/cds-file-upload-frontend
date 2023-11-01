@@ -44,9 +44,6 @@ class UploadYourFilesConfirmationSpec extends DomAssertions with ViewMatchers wi
 
     "display page header" which {
       "contains the header text" in {
-
-        println(view)
-
         view.getElementsByTag("h1").first() must containMessage("fileUploadConfirmationPage.heading")
       }
 
