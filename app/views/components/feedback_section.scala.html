@@ -25,11 +25,13 @@
 
 @()(implicit messages: Messages)
 
-<h2 id="feedback" class="govuk-heading-m">@messages("feedback.header")</h2>
-<p id="feedback-element-1" class="govuk-body"> @messages("feedback.line.1") </p>
+<div class="govuk-!-display-none-print">
+    <h2 id="feedback" class="govuk-heading-m">@messages("feedback.header")</h2>
+    <p id="feedback-element-1" class="govuk-body"> @messages("feedback.line.1") </p>
 
- @paragraphBody(message = messages("feedback.line.2", link(
-        text = messages("feedback.link"),
-        call = Call("GET", config.feedbackFrontend),
-        id = Some("feedback-element-2")
-)))
+     @paragraphBody(message = messages("feedback.line.2", link(
+            text = messages("feedback.link"),
+            call = Call("GET", config.feedbackFrontend),
+            id = Some("feedback-element-2")
+    )))
+</div>

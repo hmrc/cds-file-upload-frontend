@@ -58,14 +58,14 @@ class InboxChoiceController @Inject() (
       .fold(formWithErrors => Future.successful(BadRequest(inboxChoice(formWithErrors))), form => checkMessageFilterTag(form.choice))
   }
 
-  private def checkMessageFilterTag(choice: String)(implicit req: VerifiedEmailRequest[AnyContent]): Future[Result] =
+  def checkMessageFilterTag(choice: String)(implicit request: VerifiedEmailRequest[_]): Future[Result] =
     MessageFilterTag.valueOf(choice) match {
       case None =>
         logger.error(s"InboxChoiceForm was sent an invalid MessageFilterTag value of '$choice'")
         Future.successful(BadRequest(inboxChoice(InboxChoiceForm.form)))
 
       case Some(tag) =>
-        answersService.findOneAndReplace(SecureMessageAnswers(req.eori, tag)).map { _ =>
+        answersService.findOneAndReplace(SecureMessageAnswers(request.eori, tag)).map { _ =>
           Redirect(routes.SecureMessagingController.displayInbox)
         }
     }
