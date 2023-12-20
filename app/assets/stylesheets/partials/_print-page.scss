@@ -44,3 +44,20 @@
   background-color: #fd0;
   border-color: transparent;
 }
+
+@media print {
+  a[href]:after {
+    content: none !important;
+  }
+  .hmrc-sign-out-nav, .hmrc-language-select, .hmrc-report-technical-issue, .govuk-footer {
+    display: none !important;
+  }
+  .receipt-content {
+    float: none;
+    padding-right: 60px;
+    width: 100%;
+  }
+  .reply-message {
+    color: #0b0c0c !important
+  }
+}

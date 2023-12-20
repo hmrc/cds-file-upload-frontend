@@ -14,10 +14,10 @@
  * limitations under the License.
  *@
 
+@import config.ExternalServicesConfig
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.Title
 @import views.html.components.gds._
-@import config.ExternalServicesConfig
 @import views.html.helper.CSPNonce
 
 @this(
@@ -38,38 +38,42 @@
 
 @mainTemplate(
     title = Title("fileUploadConfirmationPage.heading"),
-    withNavigationBanner = true,
-    showLanguageSwitch = true
+    useCustomContentWidth = true,
+    withNavigationBanner = true
 ) {
-    @govukPanel(Panel(
-        title = Text(messages("fileUploadConfirmationPage.heading")),
-        content = HtmlContent(panelContent)
-    ))
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            @govukPanel(Panel(
+                title = Text(messages("fileUploadConfirmationPage.heading")),
+                content = HtmlContent(panelContent)
+            ))
 
-    <h2 class="govuk-heading-m">@messages("fileUploadConfirmationPage.tableTitle")</h2>
+            <h2 class="govuk-heading-m">@messages("fileUploadConfirmationPage.tableTitle")</h2>
 
-    @govukTable(Table(
-        rows = files.map { f =>
-            Seq(
-                TableRow(
-                    content = HtmlContent(s"<strong>${f.filename}</strong>")
-                ),
-                TableRow(
-                    content = Text(f.reference),
-                )
-            )
-        },
-        head = Some(List(
-            HeadCell(
-                content = Text(messages("fileUploadConfirmationPage.fileName"))
-            ),
-            HeadCell(
-                content = Text(messages("fileUploadConfirmationPage.receipt"))
-            )
-        )),
-        caption = Some(messages("fileUploadConfirmationPage.tableTitle")),
-        captionClasses = "govuk-visually-hidden"
-    ))
+            @govukTable(Table(
+                rows = files.map { f =>
+                    Seq(
+                        TableRow(
+                            content = HtmlContent(s"<strong>${f.filename}</strong>")
+                        ),
+                        TableRow(
+                            content = Text(f.reference),
+                        )
+                    )
+                },
+                head = Some(List(
+                    HeadCell(
+                        content = Text(messages("fileUploadConfirmationPage.fileName"))
+                    ),
+                    HeadCell(
+                        content = Text(messages("fileUploadConfirmationPage.receipt"))
+                    )
+                )),
+                caption = Some(messages("fileUploadConfirmationPage.tableTitle")),
+                captionClasses = "govuk-visually-hidden"
+            ))
+        </div>
+    </div>
 
     <script @CSPNonce.attr>
         document.addEventListener('DOMContentLoaded', function() {
@@ -82,46 +86,54 @@
             }
         });
     </script>
-    <div class="gem-c-print-link govuk-!-display-none-print govuk-!-margin-top-20 govuk-!-margin-bottom-5">
+    <div class="gem-c-print-link govuk-!-display-none-print govuk-!-margin-top-3 govuk-!-margin-bottom-3">
         <button class="govuk-link govuk-body-s gem-c-print-link__button" id="printButton">
          @messages("fileUploadConfirmationPage.printPage")
         </button>
     </div>
 
-    <h2 class="govuk-heading-m">@messages("fileUploadConfirmationPage.section1.title")</h2>
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds receipt-content">
+            <h2 class="govuk-heading-m">@messages("fileUploadConfirmationPage.section1.title")</h2>
 
-    @paragraphBody(message = messages("fileUploadConfirmationPage.section1.paragraph1",
-        link(text = messages("fileUploadConfirmationPage.section1.paragraph1.linkText"),
-            call = Call("GET", controllers.routes.InboxChoiceController.onPageLoad.url)),
-            <strong id="verifiedEmail">{emailAddress}</strong>))
+            @paragraphBody(message = messages("fileUploadConfirmationPage.section1.paragraph1",
+                link(text = messages("fileUploadConfirmationPage.section1.paragraph1.linkText"),
+                    call = Call("GET", controllers.routes.InboxChoiceController.onPageLoad.url)),
+                    <strong id="verifiedEmail">{emailAddress}</strong>))
 
-    @paragraphBody(message = messages("fileUploadConfirmationPage.section1.paragraph2",
-        link(text = messages("fileUploadConfirmationPage.section1.paragraph2.linkText"),
-            call = Call("GET", controllers.routes.InboxChoiceController.onPageLoad.url))))
+            @paragraphBody(message = messages("fileUploadConfirmationPage.section1.paragraph2",
+                link(text = messages("fileUploadConfirmationPage.section1.paragraph2.linkText"),
+                    call = Call("GET", controllers.routes.InboxChoiceController.onPageLoad.url),
+                    classes = "reply-message govuk-link govuk-link--no-visited-state"
+                )
+            ))
 
-    <h2 class="govuk-heading-m">@messages("fileUploadConfirmationPage.section2.title")</h2>
+            <h2 class="govuk-heading-m">@messages("fileUploadConfirmationPage.section2.title")</h2>
 
-    @paragraphBody(message = messages("fileUploadConfirmationPage.section2.paragraph1"))
-    @bulletList(
-        elements = Seq(
-            Html(messages("fileUploadConfirmationPage.section2.listitem1")),
-            Html(messages("fileUploadConfirmationPage.section2.listitem2")),
-            Html(messages("fileUploadConfirmationPage.section2.listitem3"))
-        )
-    )
+            @paragraphBody(message = messages("fileUploadConfirmationPage.section2.paragraph1"))
+            @bulletList(
+                elements = Seq(
+                    Html(messages("fileUploadConfirmationPage.section2.listitem1")),
+                    Html(messages("fileUploadConfirmationPage.section2.listitem2")),
+                    Html(messages("fileUploadConfirmationPage.section2.listitem3"))
+                )
+            )
 
-    @paragraphBody(message = messages("fileUploadConfirmationPage.section2.paragraph2", link(
-        text = config.nationalClearingHubLink.replace("mailto:", ""),
-        call = Call("GET", config.nationalClearingHubLink)
-    )))
+            @paragraphBody(message = messages("fileUploadConfirmationPage.section2.paragraph2", link(
+                text = config.nationalClearingHubLink.replace("mailto:", ""),
+                call = Call("GET", config.nationalClearingHubLink)
+            )))
 
-    </br>
-    @govukButton(
-        Button(
-            href = Some(controllers.routes.ChoiceController.onPageLoad.url),
-            content = Text(messages("fileUploadConfirmationPage.finalButton.text"))
-        )
-    )
+            </br>
+            @govukButton(
+                Button(
+                    href = Some(controllers.routes.ChoiceController.onPageLoad.url),
+                    classes = "govuk-!-display-none-print",
+                    content = Text(messages("fileUploadConfirmationPage.finalButton.text"))
+                )
+            )
 
-    @feedbackSection()
+            @feedbackSection()
+        </div>
+    </div>
 }

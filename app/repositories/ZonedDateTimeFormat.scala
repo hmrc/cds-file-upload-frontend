@@ -29,8 +29,6 @@ object ZonedDateTimeFormat {
   val zonedDateTimeWrites: Writes[ZonedDateTime] =
     instantWrites.contramap(res => res.withZoneSameInstant(ZoneId.of("UTC")).toInstant)
 
-  lazy val zonedDateTimeFormat: Format[ZonedDateTime] = Format(zonedDateTimeReads, zonedDateTimeWrites)
-
   private val fromNumberLongObj: Reads[ZonedDateTime] =
     Reads.at[String](__ \ "$date" \ "$numberLong").map(s => Instant.ofEpochMilli(s.toLong).atZone(ZoneOffset.UTC))
 
@@ -43,7 +41,5 @@ object ZonedDateTimeFormat {
         JsSuccess(ZonedDateTime.parse(value.as[String]))
       }.getOrElse(JsError(s"[$value] cannot be parsed to ZonedDateTime"))
 
-  lazy val instantWrites: Writes[Instant] = Writes.at[Long](__ \ "$date").contramap(_.toEpochMilli)
+  private lazy val instantWrites: Writes[Instant] = Writes.at[Long](__ \ "$date").contramap(_.toEpochMilli)
 }
-
-case class JsZonedDateTime(value: ZonedDateTime)
