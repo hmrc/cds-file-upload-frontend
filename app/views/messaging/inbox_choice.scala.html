@@ -21,7 +21,7 @@
 @import views.components.gds.Styles._
 @import views.helpers.ErrorMapper.radioGroupErrors
 @import views.html.components.gds._
-@import views.Title
+@import views.helpers.Title
 
 @this(
   mainTemplate: gdsMainTemplate,
@@ -33,37 +33,39 @@
 
 @(form: Form[InboxChoiceForm])(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = Title("inboxChoice.heading"), backLinkUrl = Some(routes.ChoiceController.onPageLoad.url)) {
+@mainTemplate(
+  title = Title("inboxChoice.heading", hasErrors = form.hasErrors || form.hasGlobalErrors),
+  backLinkUrl = Some(routes.ChoiceController.onPageLoad.url)
+) {
+    @formHelper(action = routes.InboxChoiceController.onSubmit, args = Symbol("autoComplete") -> "off") {
+        @errorSummary(radioGroupErrors(InboxChoiceKey, ExportsMessages, form.errors))
 
-  @formHelper(action = routes.InboxChoiceController.onSubmit, args = Symbol("autoComplete") -> "off") {
-    @errorSummary(radioGroupErrors(InboxChoiceKey, ExportsMessages, form.errors))
-
-    @govukRadios(Radios(
-      name = InboxChoiceKey,
-      fieldset = Some(Fieldset(
-        legend = Some(Legend(
-          content = Text(messages("inboxChoice.heading")),
-          isPageHeading = true,
-          classes = gdsPageLegend
+        @govukRadios(Radios(
+          name = InboxChoiceKey,
+          fieldset = Some(Fieldset(
+            legend = Some(Legend(
+              content = Text(messages("inboxChoice.heading")),
+              isPageHeading = true,
+              classes = gdsPageLegend
+            ))
+          )),
+          items = Seq(
+            RadioItem(
+              id = Some(ExportsMessages),
+              value = Some(ExportsMessages),
+              content = Text(messages("inboxChoice.input.exportsMessages")),
+              checked = form(InboxChoiceKey).value.contains(ExportsMessages)
+            ),
+            RadioItem(
+              id = Some(ImportsMessages),
+              value = Some(ImportsMessages),
+              content = Text(messages("inboxChoice.input.importsMessages")),
+              checked = form(InboxChoiceKey).value.contains(ImportsMessages)
+            )
+          ),
+          errorMessage = form(InboxChoiceKey).error.map(err => ErrorMessage(content = Text(messages(err.message, err.args:_*))))
         ))
-      )),
-      items = Seq(
-        RadioItem(
-          id = Some(ExportsMessages),
-          value = Some(ExportsMessages),
-          content = Text(messages("inboxChoice.input.exportsMessages")),
-          checked = form(InboxChoiceKey).value.contains(ExportsMessages)
-        ),
-        RadioItem(
-          id = Some(ImportsMessages),
-          value = Some(ImportsMessages),
-          content = Text(messages("inboxChoice.input.importsMessages")),
-          checked = form(InboxChoiceKey).value.contains(ImportsMessages)
-        )
-      ),
-      errorMessage = form(InboxChoiceKey).error.map(err => ErrorMessage(content = Text(messages(err.message, err.args:_*))))
-    ))
 
-    @govukButton(Button(content = Text(messages("common.continue")), attributes = Map("id" -> "submit", "name" -> "continue")))
-  }
+        @govukButton(Button(content = Text(messages("common.continue")), attributes = Map("id" -> "submit", "name" -> "continue")))
+    }
 }
