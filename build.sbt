@@ -42,7 +42,7 @@ lazy val microservice = (project in file("."))
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
 
 lazy val commonSettings = Seq(
-  scalaVersion := "2.13.8",
+  scalaVersion := "2.13.12",
   scalacOptions ++= scalacFlags,
   libraryDependencies ++= Dependencies.compile ++ Dependencies.test
 )
@@ -56,7 +56,8 @@ lazy val scalacFlags = Seq(
   "-Xfatal-warnings",        // warnings are fatal!!
   "-Wconf:cat=unused-imports&src=routes/.*:s",       // silent "unused import" warnings from Play routes
   "-Wconf:cat=unused-imports&src=twirl/.*:is",       // silent "unused import" warnings from Twirl templates
-  "-Wconf:site=.*Module.*&cat=lint-byname-implicit:s"  // silent warnings from Pureconfig/Shapeless
+  "-Wconf:site=.*Module.*&cat=lint-byname-implicit:s",  // silent warnings from Pureconfig/Shapeless
+  "-Wconf:cat=unused&src=.*routes.*:s" // silence private val defaultPrefix in class Routes is never used
 )
 
 lazy val scoverageSettings: Seq[Setting[_]] = Seq(
@@ -65,6 +66,7 @@ lazy val scoverageSettings: Seq[Setting[_]] = Seq(
     "Reverse.*",
     "metrics\\..*",
     "features\\..*",
+    "filters.*;config.*",
     "views.html.components\\..*",
     "controllers.test\\..*",
     "test\\..*",

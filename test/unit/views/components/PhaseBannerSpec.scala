@@ -17,6 +17,7 @@
 package views.components
 
 import base.{Injector, UnitViewSpec}
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 import views.html.components.phase_banner
@@ -26,7 +27,7 @@ class PhaseBannerSpec extends UnitViewSpec with Injector {
   private val bannerPartial = instanceOf[phase_banner]
 
   private val requestPath = "/customs-declare-exports/any-page"
-  private implicit val fakeRequest = FakeRequest("GET", requestPath)
+  private implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", requestPath)
 
   private def createBanner(): Html = bannerPartial("")(fakeRequest, messages)
 

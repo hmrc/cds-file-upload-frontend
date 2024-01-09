@@ -40,7 +40,7 @@ class InboxChoiceController @Inject() (
   ec: ExecutionContext
 ) extends FrontendController(mcc) with I18nSupport with Logging {
 
-  implicit val eContext = ec
+  implicit val eContext: ExecutionContext = ec
 
   val actions = authenticate andThen verifiedEmail
 

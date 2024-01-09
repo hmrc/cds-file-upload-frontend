@@ -29,7 +29,7 @@ class MainTemplateSpec extends SpecBase with ViewMatchers {
   class MainTemplateSpec extends SpecBase with ViewMatchers {
 
     private val injector = new OverridableInjector(new TestModule(_.copy(play = Play(Frontend(None), I18n(List("en"))))))
-    private implicit val mainTemplate = injector.instanceOf[gdsMainTemplate]
+    private implicit val mainTemplate: gdsMainTemplate = injector.instanceOf[gdsMainTemplate]
     private val testContent = HtmlFormat.empty
 
     private def createView(withNavigationBanner: Boolean = false)(implicit template: gdsMainTemplate): Document =
