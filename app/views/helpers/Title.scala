@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package views
+package views.helpers
 
 import play.api.i18n.Messages
 
-case class Title(headingKey: String, headingArgs: String*) {
+case class Title(headingKey: String, hasErrors: Boolean = false, headingArgs: Seq[String] = List.empty) {
 
-  def toString(implicit messages: Messages): String =
-    messages(s"common.title.format", messages(headingKey, headingArgs: _*), messages("common.service.name"))
+  def toString(implicit messages: Messages): String = {
+    val withErrors = if (hasErrors) ".withErrors" else ""
+    messages(s"title${withErrors}.format", messages(headingKey, headingArgs: _*), messages("service.name"))
+  }
 }

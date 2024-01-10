@@ -35,8 +35,8 @@ trait ViewBehaviours extends DomAssertions {
       "rendered" must {
         "display the correct browser title" in {
           val message = messages(s"$messageKeyPrefix.heading")
-          val service = messages("common.service.name")
-          assertEqualsMessage(view(), "title", "common.title.format", message, service)
+          val service = messages("service.name")
+          assertEqualsMessage(view(), "title", "title.format", message, service)
         }
       }
     }
@@ -49,7 +49,7 @@ trait ViewBehaviours extends DomAssertions {
       "rendered" must {
         "have the correct banner title" in {
           val element = view().getElementsByClass("hmrc-header__service-name")
-          element.text mustBe messages("common.service.name")
+          element.text mustBe messages("service.name")
         }
 
         "display the correct guidance" in {

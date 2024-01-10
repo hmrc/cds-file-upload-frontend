@@ -16,7 +16,7 @@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.html.components.gds._
-@import views.Title
+@import views.helpers.Title
 
 @this(
         mainTemplate: gdsMainTemplate,
@@ -32,48 +32,43 @@
 
 @(form: Form[FileUploadCount], mrn: MRN)(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = Title("howManyFilesUpload.heading"), backLinkUrl = Some(routes.ContactDetailsController.onPageLoad.url)) {
+@mainTemplate(
+  title = Title("howManyFilesUpload.heading", hasErrors = form.hasErrors || form.hasGlobalErrors),
+  backLinkUrl = Some(routes.ContactDetailsController.onPageLoad.url)
+) {
+    <div class="form-group">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <div class="govuk-form-group">
+                @formHelper(action = routes.HowManyFilesUploadController.onSubmit, args = Symbol("autoComplete") -> "off") {
+                    @errorSummary(form.errors)
 
-<div class="form-group">
-    <div class="govuk-grid-row">
-        <div class="govuk-grid-column-full">
-            <div class="govuk-form-group">
+                    <span class="govuk-caption-l">@{mrn.value}</span>
+                    @pageTitle(text = messages("howManyFilesUpload.heading"))
 
-            @formHelper(action = routes.HowManyFilesUploadController.onSubmit, args = Symbol("autoComplete") -> "off") {
+                    @paragraphBody(messages("howManyFilesUpload.paragraph1"))
+                    @paragraphBody(messages("howManyFilesUpload.paragraph2"))
+                    @paragraphBody(messages("howManyFilesUpload.paragraph3"))
 
-                @errorSummary(form.errors)
-
-                <span class="govuk-caption-l">@{mrn.value}</span>
-                @pageTitle(text = messages("howManyFilesUpload.heading"))
-
-                @paragraphBody(messages("howManyFilesUpload.paragraph1"))
-
-                @paragraphBody(messages("howManyFilesUpload.paragraph2"))
-
-                @paragraphBody(messages("howManyFilesUpload.paragraph3"))
-
-                @bulletList(
-                    elements = Seq(
+                    @bulletList(elements = Seq(
                         Html(messages("howManyFilesUpload.listItem1")),
                         Html(messages("howManyFilesUpload.listItem2")),
                         Html(messages("howManyFilesUpload.listItem3")),
                         Html(messages("howManyFilesUpload.listItem4"))
+                    ))
+                    @exportsInputText(
+                        field = form("value"),
+                        labelKey = "howManyFilesUpload.heading",
+                        labelClasses = "visually-hidden",
                     )
-                )
 
-                @exportsInputText(
-                    field = form("value"),
-                    labelKey = "howManyFilesUpload.heading",
-                    labelClasses = "visually-hidden",
-                )
+                    @govukInsetText(InsetText(content = Text(messages("howManyFilesUpload.insetText"))))
 
-                @govukInsetText(InsetText(content = Text(messages("howManyFilesUpload.insetText"))))
+                    </br>
 
-                </br>
-
-                @govukButton(Button(content = Text(messages("common.continue")), attributes = Map("id" -> "submit", "name" -> "continue")))
-            }
+                    @govukButton(Button(content = Text(messages("common.continue")), attributes = Map("id" -> "submit", "name" -> "continue")))
+                }
+            </div>
         </div>
     </div>
-</div>
 }

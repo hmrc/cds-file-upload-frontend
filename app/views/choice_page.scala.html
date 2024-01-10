@@ -19,7 +19,7 @@
 @import forms.ChoiceForm.AllowedChoiceValues._
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.html.components.gds._
-@import views.Title
+@import views.helpers.Title
 @import views.helpers.ErrorMapper.radioGroupErrors
 @import views.components.gds.Styles._
 
@@ -33,7 +33,7 @@
 
 @(form: Form[ChoiceForm])(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = Title("choicePage.heading")) {
+@mainTemplate(title = Title("choicePage.heading", hasErrors = form.hasErrors || form.hasGlobalErrors)) {
 
   @formHelper(action = routes.ChoiceController.onSubmit, Symbol("autoComplete") -> "off") {
     @errorSummary(radioGroupErrors(ChoiceKey, SecureMessageInbox, form.errors))

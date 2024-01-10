@@ -18,8 +18,8 @@ package views.messaging
 
 import controllers.routes
 import forms.InboxChoiceForm
-import forms.InboxChoiceForm.{InboxChoiceKey, Values}
 import forms.InboxChoiceForm.Values.ExportsMessages
+import forms.InboxChoiceForm.{InboxChoiceKey, Values}
 import org.jsoup.nodes.Document
 import views.DomAssertions
 import views.html.messaging.inbox_choice
@@ -27,12 +27,11 @@ import views.matchers.ViewMatchers
 
 class InboxChoiceSpec extends DomAssertions with ViewMatchers {
 
-  private val inboxChoice = instanceOf[inbox_choice]
   private val form = InboxChoiceForm.form
-
-  private val view: Document = inboxChoice(form)(fakeRequest, messages)
+  private val inboxChoice = instanceOf[inbox_choice]
 
   "The Message Inbox Choice page" when {
+
     "form does not contain errors" should {
       commonAssertions()
     }
@@ -41,6 +40,10 @@ class InboxChoiceSpec extends DomAssertions with ViewMatchers {
       commonAssertions()
 
       val errorView = inboxChoice(form.withError(InboxChoiceKey, "choicePage.input.error.empty"))(fakeRequest, messages)
+
+      "have the page's title prefixed with 'Error:'" in {
+        errorView.head.getElementsByTag("title").first.text must startWith("Error: ")
+      }
 
       "display error box at top of page" in {
         errorView.getElementsByClass("govuk-error-summary__title").first() must containMessage("error.summary.title")
@@ -53,10 +56,11 @@ class InboxChoiceSpec extends DomAssertions with ViewMatchers {
         errorLink must haveHref(s"#${ExportsMessages}")
       }
     }
-
   }
 
-  private def commonAssertions() = {
+  private val view: Document = inboxChoice(form)(fakeRequest, messages)
+
+  private def commonAssertions(): Unit = {
     "display page header" in {
       view.getElementsByTag("h1").first() must containMessage("inboxChoice.heading")
     }

@@ -25,12 +25,11 @@ import views.matchers.ViewMatchers
 
 class ChoicePageSpec extends DomAssertions with ViewMatchers {
 
-  private val choicePage = instanceOf[choice_page]
   private val form = ChoiceForm.form
-
-  private val view: Document = choicePage(form)(fakeRequest, messages)
+  private val choicePage = instanceOf[choice_page]
 
   "Choice page" when {
+
     "form does not contain errors" should {
       commonAssertions()
     }
@@ -39,6 +38,10 @@ class ChoicePageSpec extends DomAssertions with ViewMatchers {
       commonAssertions()
 
       val errorView = choicePage(form.withError(ChoiceKey, "choicePage.input.error.empty"))(fakeRequest, messages)
+
+      "have the page's title prefixed with 'Error:'" in {
+        errorView.head.getElementsByTag("title").first.text must startWith("Error: ")
+      }
 
       "display error box at top of page" in {
         errorView.getElementsByClass("govuk-error-summary__title").first() must containMessage("error.summary.title")
@@ -52,6 +55,8 @@ class ChoicePageSpec extends DomAssertions with ViewMatchers {
       }
     }
   }
+
+  private val view: Document = choicePage(form)(fakeRequest, messages)
 
   private def commonAssertions() = {
     "display page header" in {
