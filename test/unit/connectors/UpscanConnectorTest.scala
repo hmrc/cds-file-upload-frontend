@@ -16,8 +16,8 @@
 
 package connectors
 
-import akka.stream.scaladsl.Source
-import akka.util.ByteString
+import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.util.ByteString
 import base.{SfusMetricsMock, SpecBase}
 import models.{ContactDetails, UploadRequest}
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}

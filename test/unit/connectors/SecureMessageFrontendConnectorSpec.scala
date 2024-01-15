@@ -36,7 +36,7 @@ class SecureMessageFrontendConnectorSpec extends UnitSpec with BeforeAndAfterEac
   val appConfig = instanceOf[AppConfig]
   val httpClient = mock[HttpClient]
   val mockAuditService = mock[AuditService]
-  implicit val hc = mock[HeaderCarrier]
+  implicit val hc: HeaderCarrier = mock[HeaderCarrier]
   implicit val ec: ExecutionContext = ExecutionContext.global
 
   override protected def beforeEach(): Unit = {

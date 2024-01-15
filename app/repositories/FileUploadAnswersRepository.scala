@@ -38,7 +38,7 @@ class FileUploadAnswersRepository @Inject() (mongoComponent: MongoComponent, app
     ) with RepositoryOps[FileUploadAnswers] {
 
   override def classTag: ClassTag[FileUploadAnswers] = implicitly[ClassTag[FileUploadAnswers]]
-  implicit val executionContext = ec
+  implicit val executionContext: ExecutionContext = ec
 
   def findOne(eori: String): Future[Option[FileUploadAnswers]] = findOne("eori", eori)
 

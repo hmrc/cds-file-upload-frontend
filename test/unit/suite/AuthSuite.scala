@@ -17,10 +17,9 @@
 package suite
 
 import scala.concurrent.{ExecutionContext, Future}
-
 import org.scalatest.concurrent.ScalaFutures
 import play.api.Application
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 import play.api.libs.ws.WSClient
 
 trait AuthSuite extends ScalaFutures {
@@ -29,7 +28,7 @@ trait AuthSuite extends ScalaFutures {
 
   object GatewayToken {
 
-    implicit val formats = Json.format[GatewayToken]
+    implicit val formats: OFormat[GatewayToken] = Json.format[GatewayToken]
   }
 
   val json = """{

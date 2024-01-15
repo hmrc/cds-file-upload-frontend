@@ -25,7 +25,7 @@ case class SecureMessageAnswers(eori: String, filter: MessageFilterTag, created:
 
 object SecureMessageAnswers {
 
-  implicit val format = {
+  implicit val format: OFormat[SecureMessageAnswers] = {
     implicit val zonedDateTimeFormat: Format[ZonedDateTime] = Format(zonedDateTimeReads, zonedDateTimeWrites)
 
     OFormat[SecureMessageAnswers](Json.reads[SecureMessageAnswers], Json.writes[SecureMessageAnswers])

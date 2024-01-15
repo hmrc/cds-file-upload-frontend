@@ -19,6 +19,7 @@ package views
 import base.SpecBase
 import controllers.routes.SignOutController
 import models.SignOutReason
+import play.api.mvc.{AnyContentAsEmpty, Request}
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 import testdata.CommonTestData
@@ -28,7 +29,7 @@ import views.matchers.ViewMatchers
 
 class MrnAccessDeniedSpec extends SpecBase with ViewMatchers {
 
-  private implicit val request = FakeRequest().withCSRFToken
+  private implicit val request: Request[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
   private val mrnAccessDeniedPage = instanceOf[mrn_access_denied]
   private def view(mrn: String): Html = mrnAccessDeniedPage(mrn)(request, messages)

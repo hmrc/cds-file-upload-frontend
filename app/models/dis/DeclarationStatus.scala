@@ -17,8 +17,7 @@
 package models.dis
 
 import java.time.ZonedDateTime
-
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class DeclarationStatus(
   mrn: String,
@@ -39,5 +38,5 @@ case class DeclarationStatus(
 )
 
 object DeclarationStatus {
-  implicit val format = Json.format[DeclarationStatus]
+  implicit val format: OFormat[DeclarationStatus] = Json.format[DeclarationStatus]
 }

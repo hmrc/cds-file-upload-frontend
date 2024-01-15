@@ -30,7 +30,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
 
 trait SpecBase
     extends PlaySpec with BeforeAndAfterEach with ScalaCheckPropertyChecks with Generators with ScalaFutures with IntegrationPatience with Injector {
@@ -49,7 +49,7 @@ trait SpecBase
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  implicit val executionContext = ExecutionContext.global
+  implicit val executionContext: ExecutionContextExecutor = ExecutionContext.global
 
   // toJson strips out Some and None and replaces them with string values
   def asFormParams(cc: Product): List[(String, String)] =
