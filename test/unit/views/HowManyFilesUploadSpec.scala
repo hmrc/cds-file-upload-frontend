@@ -18,39 +18,51 @@ package views
 
 import controllers.routes
 import forms.FileUploadCountProvider
+import models.FileUploadCount
 import models.requests.{AuthenticatedRequest, SignedInUser}
-import models.{FileUploadCount, MRN}
+import org.jsoup.nodes.Document
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.data.Form
-import play.twirl.api.HtmlFormat
+import play.twirl.api.HtmlFormat.Appendable
 import utils.FakeRequestCSRFSupport._
 import views.behaviours.IntViewBehaviours
 import views.html.how_many_files_upload
 
 class HowManyFilesUploadSpec extends DomAssertions with IntViewBehaviours[FileUploadCount] with ScalaCheckPropertyChecks {
 
+  val mrn = arbitraryMrn.arbitrary.sample.get
+
   val form = new FileUploadCountProvider()()
-  val mrn: MRN = arbitraryMrn.arbitrary.sample.get
   val page = instanceOf[how_many_files_upload]
-  val view = asDocument(page(form, mrn)(fakeRequest.withCSRFToken, messages))
+
+  def createView(form: Form[FileUploadCount] = form): Document =
+    asDocument(page(form, mrn)(fakeRequest.withCSRFToken, messages))
 
   val messagePrefix = "howManyFilesUpload"
 
-  def createViewUsingForm: Form[FileUploadCount] => HtmlFormat.Appendable =
-    form => page(form, mrn)(fakeRequest.withCSRFToken, messages)
-
   "How Many Files Upload Page" must {
-    behave like normalPage(() => view, messagePrefix)
 
-    behave like intPage(createViewUsingForm, (form, i) => form.bind(Map("value" -> i.toString)), "value", messagePrefix)
+    "have the page's title prefixed with 'Error:'" when {
+      "the page has errors" in {
+        val view = createView(form.withGlobalError("error.summary.title"))
+        view.head.getElementsByTag("title").first.text must startWith("Error: ")
+      }
+    }
+
+    behave like normalPage(() => createView(), messagePrefix)
+
+    def createAppendable(form: Form[FileUploadCount]): Appendable =
+      page(form, mrn)(fakeRequest.withCSRFToken, messages)
+
+    behave like intPage(createAppendable, (form, i) => form.bind(Map("value" -> i.toString)), "value", messagePrefix)
 
     "display the correct guidance" in {
       val expectedGuidanceKeys: List[String] = List("paragraph1", "paragraph2", "paragraph3", "listItem1", "listItem2", "listItem3", "listItem4")
-      for (key <- expectedGuidanceKeys) assertContainsText(view, messages(s"$messagePrefix.$key"))
+      for (key <- expectedGuidanceKeys) assertContainsText(createView(), messages(s"$messagePrefix.$key"))
     }
 
     "display inset text" in {
-      assertContainsMessage(view, s"$messagePrefix.insetText")
+      assertContainsMessage(createView(), s"$messagePrefix.insetText")
     }
 
     "include the 'Sign out' link if the user is authorised" in {
@@ -61,7 +73,7 @@ class HowManyFilesUploadSpec extends DomAssertions with IntViewBehaviours[FileUp
     }
 
     "display the 'Back' link" in {
-      assertBackLinkIsIncluded(view, routes.ContactDetailsController.onPageLoad.url)
+      assertBackLinkIsIncluded(createView(), routes.ContactDetailsController.onPageLoad.url)
     }
   }
 }

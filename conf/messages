@@ -1,7 +1,10 @@
 ## common
 
-common.title.format = {0} - {1} - GOV.UK
-common.service.name = CDS document uploads and secure messages
+service.name = CDS document uploads and secure messages
+
+title.format = {0} - {1} - GOV.UK
+title.withErrors.format = Error: {0} - {1} - GOV.UK
+
 common.phase = Beta
 common.continue = Continue
 common.feedback = This is a new service - your {0} will help us to improve it.
