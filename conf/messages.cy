@@ -1,5 +1,8 @@
-common.title.format = {0} - {1} - GOV.UK
-common.service.name = Dogfennau CDS wedi’u huwchlwytho a negeseuon diogel
+service.name = Dogfennau CDS wedi’u huwchlwytho a negeseuon diogel
+
+title.format = {0} - {1} - GOV.UK
+title.withErrors.format = Gwall: {0} - {1} - GOV.UK
+
 common.phase = Beta
 common.continue = Yn eich blaen
 common.feedback = Gwasanaeth newydd yn hwn – bydd eich {0} yn ein helpu i’w wella.
@@ -7,6 +10,7 @@ common.feedback.link = adborth
 common.navigation.messages = Negeseuon
 common.navigation.uploadFiles = Uwchlwytho ffeiliau
 common.back.link = Yn ôl
+
 common.button.startNow = Dechrau nawr
 common.backToGovUk = Yn ôl i GOV.UK
 
