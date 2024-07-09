@@ -25,6 +25,8 @@ import models.{FileUploadAnswers, MRN}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import services.FileUploadAnswersService
+import uk.gov.hmrc.play.bootstrap.binders.{OnlyRelative, RedirectUrl}
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.RefererUrlValidator
 import views.html.{mrn_access_denied, mrn_entry}
@@ -43,26 +45,27 @@ class MrnEntryController @Inject() (
   mcc: MessagesControllerComponents,
   mrnEntry: mrn_entry,
   mrnAccessDenied: mrn_access_denied
-)(implicit ec: ExecutionContext, appConf: AppConfig)
+)(implicit ec: ExecutionContext, appConfig: AppConfig)
     extends FrontendController(mcc) with I18nSupport {
 
   private val form = formProvider()
 
   private def getBackLink(refererUrl: Option[String]): String = refererUrl.getOrElse(routes.ChoiceController.onPageLoad.url)
 
-  def onPageLoad(refererUrl: Option[String] = None): Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData).async { implicit req =>
-    val populatedForm = req.userAnswers.mrn.fold(form)(form.fill)
+  def onPageLoad(maybeRefererUrl: Option[RedirectUrl] = None): Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData).async {
+    implicit req =>
+      val populatedForm = req.userAnswers.mrn.fold(form)(form.fill)
 
-    val sanitisedRefererUrl = for {
-      decodedUrl <- decodeRefererUrl(refererUrl)
-      filteredUrl <- filterBadRefererUrl(decodedUrl)
-    } yield filteredUrl
+      val sanitisedRefererUrl = for {
+        decodedUrl <- decodeRefererUrl(maybeRefererUrl)
+        filteredUrl <- filterBadRefererUrl(decodedUrl)
+      } yield filteredUrl
 
-    sanitisedRefererUrl.map { backLink =>
-      answersService
-        .findOneAndReplace(req.userAnswers.copy(mrnPageRefererUrl = Some(backLink)))
-        .map(_ => Ok(mrnEntry(populatedForm, getBackLink(Some(backLink)))))
-    }.getOrElse(Future.successful(Ok(mrnEntry(populatedForm, getBackLink(req.userAnswers.mrnPageRefererUrl)))))
+      sanitisedRefererUrl.map { backLink =>
+        answersService
+          .findOneAndReplace(req.userAnswers.copy(mrnPageRefererUrl = Some(backLink)))
+          .map(_ => Ok(mrnEntry(populatedForm, getBackLink(Some(backLink)))))
+      }.getOrElse(Future.successful(Ok(mrnEntry(populatedForm, getBackLink(req.userAnswers.mrnPageRefererUrl)))))
   }
 
   def onSubmit: Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData).async { implicit req =>
@@ -74,16 +77,16 @@ class MrnEntryController @Inject() (
       )
   }
 
-  def autoFill(mrn: String, refererUrl: Option[String] = None): Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData).async {
-    implicit req =>
-      val updatedAnswers = decodeRefererUrl(refererUrl)
+  def autoFill(mrn: String, maybeRefererUrl: Option[RedirectUrl] = None): Action[AnyContent] =
+    (authenticate andThen verifiedEmail andThen getData).async { implicit req =>
+      val updatedAnswers = decodeRefererUrl(maybeRefererUrl)
         .map(decodedBackLink => req.userAnswers.copy(mrnPageRefererUrl = Some(decodedBackLink)))
         .getOrElse(req.userAnswers)
 
       MRN(mrn)
         .map(updateUserAnswersAndRedirect(_, updatedAnswers))
         .getOrElse(invalidMrnResponse(mrn))
-  }
+    }
 
   private def updateUserAnswersAndRedirect(mrn: MRN, userAnswers: FileUploadAnswers): Future[Result] =
     answersService.findOneAndReplace(userAnswers.copy(mrn = Some(mrn))).map { _ =>
@@ -93,7 +96,15 @@ class MrnEntryController @Inject() (
   private def invalidMrnResponse(mrn: String)(implicit req: DataRequest[AnyContent]): Future[Result] =
     Future.successful(BadRequest(mrnAccessDenied(mrn)))
 
-  private val decodeRefererUrl = (refererUrl: Option[String]) => refererUrl.map(url => decode(url, "UTF-8"))
+  private val decodeRefererUrl = (refererUrl: Option[RedirectUrl]) =>
+    refererUrl.flatMap { url =>
+      val maybeUrl = url.getEither(OnlyRelative) match {
+        case Left(_)                => None
+        case Right(safeRedirectUrl) => Some(safeRedirectUrl.url)
+      }
+
+      maybeUrl.map(decode(_, "UTF-8"))
+    }
 
   private val filterBadRefererUrl = (refererUrl: String) => Some(refererUrl).filter(RefererUrlValidator.isValid)
 }

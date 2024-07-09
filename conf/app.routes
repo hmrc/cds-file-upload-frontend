@@ -26,9 +26,9 @@ GET         /conversation/:client/:conversationId           controllers.SecureMe
 POST        /conversation/:client/:conversationId           controllers.SecureMessagingController.submitReply(client, conversationId)
 GET         /conversation/:client/:conversationId/result    controllers.SecureMessagingController.displayReplyResult(client, conversationId)
 
-GET         /mrn-entry                                      controllers.MrnEntryController.onPageLoad(refererUrl: Option[String] ?= None)
+GET         /mrn-entry                                      controllers.MrnEntryController.onPageLoad(refererUrl: Option[RedirectUrl] ?= None)
 POST        /mrn-entry                                      controllers.MrnEntryController.onSubmit
-GET         /mrn-entry/:mrn                                 controllers.MrnEntryController.autoFill(mrn, refererUrl: Option[String] ?= None)
+GET         /mrn-entry/:mrn                                 controllers.MrnEntryController.autoFill(mrn, refererUrl: Option[RedirectUrl] ?= None)
 
 GET         /contact-details                                controllers.ContactDetailsController.onPageLoad
 POST        /contact-details                                controllers.ContactDetailsController.onSubmit
