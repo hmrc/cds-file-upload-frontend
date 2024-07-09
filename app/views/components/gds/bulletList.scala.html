@@ -20,12 +20,10 @@
 
 @(elements: Seq[Html])
 
-<nav>
-    <ul class="govuk-list govuk-list--bullet">
-        @elements.map { element =>
-            <li class="dashed-list-item">
-                @element
-            </li>
-        }
-    </ul>
-</nav>
+<ul class="govuk-list govuk-list--bullet">
+    @elements.map { element =>
+        <li class="dashed-list-item">
+            @element
+        </li>
+    }
+</ul>
