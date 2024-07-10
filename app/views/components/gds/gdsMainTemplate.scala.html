@@ -23,7 +23,7 @@
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.reporttechnicalissue.ReportTechnicalIssue
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.language.{En, Cy}
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcStandardFooter
-@import views.Title
+@import views.helpers.Title
 @import views.html.helper.CSPNonce
 
 @this(
@@ -53,7 +53,7 @@
   showLanguageSwitch: Boolean = true
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages)
 
-@userIsSignedIn = @{ request.isInstanceOf[Authenticated]}
+@userIsSignedIn = @{ request.isInstanceOf[Authenticated] }
 
 @head = {
     @if(userIsSignedIn) {

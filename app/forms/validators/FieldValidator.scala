@@ -18,18 +18,6 @@ package forms.validators
 
 object FieldValidator {
 
-  implicit class PredicateOpsForFunctions[A](first: A => Boolean) {
-    def and(second: A => Boolean): A => Boolean =
-      (arg: A) => first(arg) && second(arg)
-
-    def and(second: Boolean): A => Boolean = (arg: A) => first(arg) && second
-
-    def or(second: A => Boolean): A => Boolean =
-      (arg: A) => first(arg) || second(arg)
-
-    def or(second: Boolean): A => Boolean = (arg: A) => first(arg) || second
-  }
-
   implicit class PredicateOpsForBooleans[A](first: Boolean) {
     def and(second: A => Boolean): A => Boolean =
       (arg: A) => first && second(arg)

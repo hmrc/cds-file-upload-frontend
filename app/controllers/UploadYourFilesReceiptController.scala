@@ -59,13 +59,11 @@ class UploadYourFilesReceiptController @Inject() (
     }
   }
 
-  private def composeSuccessResult(
-    uploads: List[FileUpload],
-    maybeMrn: Option[MRN]
-  )(implicit hc: HeaderCarrier, req: VerifiedEmailRequest[AnyContent]): Future[Html] =
-    addFilenames(uploads).map { uploads =>
-      uploadYourFilesConfirmation(uploads, maybeMrn, req.email)
-    }
+  private def composeSuccessResult(uploads: List[FileUpload], maybeMrn: Option[MRN])(
+    implicit hc: HeaderCarrier,
+    req: VerifiedEmailRequest[AnyContent]
+  ): Future[Html] =
+    addFilenames(uploads).map(uploadYourFilesConfirmation(_, maybeMrn, req.email))
 
   private def getOrRedirect[A](option: Option[A], errorAction: Call): Either[Future[Result], A] =
     option.fold[Either[Future[Result], A]](Left(Future.successful(Redirect(errorAction))))(Right(_))

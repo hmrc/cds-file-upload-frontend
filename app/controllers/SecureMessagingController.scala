@@ -21,11 +21,11 @@ import controllers.actions.{AuthAction, MessageFilterAction, VerifiedEmailAction
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import play.twirl.api.HtmlFormat
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.partials.HeaderCarrierForPartialsConverter
 import views.html.messaging.{inbox_wrapper, partial_wrapper}
 
-import java.net.URLEncoder.encode
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
@@ -104,8 +104,6 @@ class SecureMessagingController @Inject() (
       }
   }
 
-  private def defineUploadLink(refererUrl: String) = {
-    val encodedRefererUrl = encode(refererUrl, "UTF-8")
-    routes.MrnEntryController.onPageLoad(Some(encodedRefererUrl)).url
-  }
+  private def defineUploadLink(refererUrl: String) =
+    routes.MrnEntryController.onPageLoad(Some(RedirectUrl(refererUrl))).url
 }

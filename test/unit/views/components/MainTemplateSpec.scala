@@ -20,7 +20,7 @@ import base.{OverridableInjector, SpecBase, TestModule}
 import config.{Frontend, I18n, Play}
 import org.jsoup.nodes.Document
 import play.twirl.api.HtmlFormat
-import views.Title
+import views.helpers.Title
 import views.html.components.gds.gdsMainTemplate
 import views.matchers.ViewMatchers
 
@@ -29,18 +29,18 @@ class MainTemplateSpec extends SpecBase with ViewMatchers {
   class MainTemplateSpec extends SpecBase with ViewMatchers {
 
     private val injector = new OverridableInjector(new TestModule(_.copy(play = Play(Frontend(None), I18n(List("en"))))))
-    private implicit val mainTemplate = injector.instanceOf[gdsMainTemplate]
+    private implicit val mainTemplate: gdsMainTemplate = injector.instanceOf[gdsMainTemplate]
     private val testContent = HtmlFormat.empty
 
     private def createView(withNavigationBanner: Boolean = false)(implicit template: gdsMainTemplate): Document =
-      template(title = Title("common.service.name"), withNavigationBanner = withNavigationBanner)(testContent)(fakeRequest, messages)
+      template(title = Title("service.name"), withNavigationBanner = withNavigationBanner)(testContent)(fakeRequest, messages)
 
     "Main Template" should {
 
       "display the expected title as part of the <head> tag" in {
         val view: Document = createView()
-        val serviceName = messages("common.service.name")
-        view.getElementsByTag("title").first.text mustBe messages("common.title.format", serviceName, serviceName)
+        val serviceName = messages("service.name")
+        view.getElementsByTag("title").first.text mustBe messages("title.format", serviceName, serviceName)
       }
 
       "display NavigationBanner" when {

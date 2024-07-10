@@ -18,7 +18,7 @@ package utils
 
 import base.AppConfigMockHelper.generateMockConfig
 import base.Injector
-import config.AllowList
+import config.{AllowList, AppConfig}
 import org.scalatestplus.play.PlaySpec
 
 class RefererUrlValidatorSpec extends PlaySpec with Injector {
@@ -28,7 +28,7 @@ class RefererUrlValidatorSpec extends PlaySpec with Injector {
   private val disallowedService3 = "service3"
   private val validRefererUrl = s"/$allowedService1/"
 
-  lazy implicit val appConfig = generateMockConfig(allowList = AllowList(List.empty, List(allowedService1, allowedService2)))
+  lazy implicit val appConfig: AppConfig = generateMockConfig(allowList = AllowList(List.empty, List(allowedService1, allowedService2)))
 
   val validator = RefererUrlValidator
 

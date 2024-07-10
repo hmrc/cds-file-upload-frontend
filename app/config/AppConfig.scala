@@ -96,7 +96,7 @@ case class SecureMessageAnswersRepository(ttlSeconds: Int)
 
 case class Gtm(container: String)
 
-case class TrackingConsentFrontend(gtm: Gtm, host: String)
+case class TrackingConsentFrontend(gtm: Gtm)
 
 case class Play(frontend: Frontend, i18n: I18n)
 

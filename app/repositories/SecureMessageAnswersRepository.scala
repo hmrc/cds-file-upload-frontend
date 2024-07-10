@@ -38,7 +38,7 @@ class SecureMessageAnswersRepository @Inject() (mongoComponent: MongoComponent, 
     ) with RepositoryOps[SecureMessageAnswers] {
 
   override def classTag: ClassTag[SecureMessageAnswers] = implicitly[ClassTag[SecureMessageAnswers]]
-  implicit val executionContext = ec
+  implicit val executionContext: ExecutionContext = ec
 
   def findOne(eori: String): Future[Option[SecureMessageAnswers]] = findOne("eori", eori)
 

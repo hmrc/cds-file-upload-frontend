@@ -18,13 +18,13 @@ package controllers.actions
 
 import com.google.inject.ProvidedBy
 import config.AppConfig
-import controllers.routes
+import controllers.routes.UnauthorisedController
 import models.AuthKey
 import models.UnauthorisedReason.UserIsAgent
 import models.requests.{AuthenticatedRequest, SignedInUser}
 import play.api.mvc.Results.Redirect
 import play.api.mvc._
-import play.api.{Configuration, Environment}
+import play.api.{Configuration, Environment, Logging}
 import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{affinityGroup, allEnrolments}
@@ -42,7 +42,7 @@ class AuthActionImpl @Inject() (
   val env: Environment,
   eoriAllowList: EoriAllowList,
   mcc: MessagesControllerComponents
-) extends AuthAction with AuthorisedFunctions with AuthRedirects {
+) extends AuthAction with AuthorisedFunctions with AuthRedirects with Logging {
 
   implicit override val executionContext: ExecutionContext = mcc.executionContext
   override val parser: BodyParser[AnyContent] = mcc.parsers.defaultBodyParser
@@ -57,21 +57,24 @@ class AuthActionImpl @Inject() (
     authorised((Individual or Organisation) and Enrolment(AuthKey.enrolment))
       .retrieve(allEnrolments and affinityGroup) { case allEnrolments ~ _ =>
         allEnrolments.getEnrolment(AuthKey.enrolment).flatMap(_.getIdentifier(AuthKey.identifierKey)) match {
-
           case Some(eori) if eoriAllowList.allows(eori.value) =>
             val signedInUser = SignedInUser(eori.value, allEnrolments)
             Future.successful(Right(AuthenticatedRequest(request, signedInUser)))
 
           case Some(_) => throw new UnauthorizedException("User is not authorized to use this service")
-          case None    => throw InsufficientEnrolments()
+          case None    => throw InsufficientEnrolments("User has insufficient enrolments")
         }
       }
       .recover {
-        case _: UnsupportedAffinityGroup => Left(Results.Redirect(routes.UnauthorisedController.onAgentKickOut(UserIsAgent)))
-        case _: NoActiveSession          => Left(Redirect(loginUrl, Map("continue" -> Seq(continueLoginUrl))))
-        case _                           => Left(Redirect(routes.UnauthorisedController.onPageLoad))
+        case exc: UnsupportedAffinityGroup => unauthorized(exc, Redirect(UnauthorisedController.onAgentKickOut(UserIsAgent)))
+        case exc: NoActiveSession          => unauthorized(exc, Redirect(loginUrl, Map("continue" -> Seq(continueLoginUrl))))
+        case exc                           => unauthorized(exc, Redirect(UnauthorisedController.onPageLoad))
       }
+  }
 
+  private def unauthorized[A](throwable: Throwable, result: Result): Either[Result, AuthenticatedRequest[A]] = {
+    logger.warn(s"User rejected with ${throwable.getMessage}")
+    Left(result)
   }
 }
 

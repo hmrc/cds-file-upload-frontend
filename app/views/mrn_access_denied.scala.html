@@ -15,7 +15,7 @@
  *@
 
 @import models.MRN
-@import views.Title
+@import views.helpers.Title
 @import views.html.components.gds._
 @import views.html.components._
 
@@ -30,7 +30,7 @@
 
 @(mrn: String)(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = Title("mrnAccessDenied.heading", mrn)) {
+@mainTemplate(title = Title("mrnAccessDenied.heading", false, List(mrn))) {
 
   @pageTitle(messages("mrnAccessDenied.heading", mrn))
 

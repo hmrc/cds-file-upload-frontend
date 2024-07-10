@@ -19,38 +19,46 @@ package views
 import forms.MRNFormProvider
 import models.MRN
 import models.requests.{AuthenticatedRequest, SignedInUser}
+import org.jsoup.nodes.Document
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.data.Form
-import play.twirl.api.HtmlFormat
+import play.twirl.api.HtmlFormat.Appendable
 import utils.FakeRequestCSRFSupport._
 import views.behaviours.StringViewBehaviours
 import views.html.mrn_entry
 
 class MrnEntrySpec extends DomAssertions with StringViewBehaviours[MRN] with ScalaCheckPropertyChecks {
 
-  val form = new MRNFormProvider()()
   val testBackLink = "testBackLink"
   val messagePrefix = "mrnEntryPage"
 
+  val form = new MRNFormProvider()()
   val page = instanceOf[mrn_entry]
-  val view = asDocument(createViewUsingForm(form))
 
-  def createViewUsingForm: Form[MRN] => HtmlFormat.Appendable =
-    form => page(form, testBackLink)(fakeRequest.withCSRFToken, messages)
+  def createAppendable(form: Form[MRN]): Appendable =
+    page(form, testBackLink)(fakeRequest.withCSRFToken, messages)
+
+  def createView(form: Form[MRN] = form): Document = asDocument(createAppendable(form))
 
   "MRN Entry Page" must {
-    behave like normalPage(() => view, messagePrefix)
 
-    behave like stringPage(createViewUsingForm, "value", messagePrefix)
+    "have the page's title prefixed with 'Error:'" when {
+      "the page has errors" in {
+        val view = createView(form.withGlobalError("error.summary.title"))
+        view.head.getElementsByTag("title").first.text must startWith("Error: ")
+      }
+    }
 
-    val doc = asDocument(createViewUsingForm(form))
+    behave like normalPage(() => createView(), messagePrefix)
+
+    behave like stringPage(createAppendable, "value", messagePrefix)
 
     "include a paragraph" in {
-      doc.getElementsByClass("govuk-body").first.text.contains(messages("mrnEntryPage.paragraph"))
+      createView().getElementsByClass("govuk-body").first.text.contains(messages("mrnEntryPage.paragraph"))
     }
 
     "include a hidden label" in {
-      doc.getElementsByTag("label").first.text.contains(messages("mrnEntryPage.label"))
+      createView().getElementsByTag("label").first.text.contains(messages("mrnEntryPage.label"))
     }
 
     "include the 'Sign out' link if the user is authorised" in {

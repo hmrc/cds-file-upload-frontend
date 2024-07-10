@@ -16,10 +16,10 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class BatchFileUpload(mrn: MRN, files: List[FileUpload])
 
 object BatchFileUpload {
-  implicit val formats = Json.format[BatchFileUpload]
+  implicit val formats: OFormat[BatchFileUpload] = Json.format[BatchFileUpload]
 }

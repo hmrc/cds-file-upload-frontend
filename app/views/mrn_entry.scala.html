@@ -16,7 +16,7 @@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.html.components.gds._
-@import views.Title
+@import views.helpers.Title
 
 @this(
     mainTemplate: gdsMainTemplate,
@@ -30,34 +30,35 @@
 
 @(form: Form[MRN], backLink: String)(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = Title("mrnEntryPage.heading"), backLinkUrl = Some(backLink)) {
+@mainTemplate(
+  title = Title("mrnEntryPage.heading", hasErrors = form.hasErrors || form.hasGlobalErrors),
+  backLinkUrl = Some(backLink)
+) {
+    <div class="form-group">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+              <div class="govuk-form-group">
+                @formHelper(action = routes.MrnEntryController.onSubmit, args = Symbol("autoComplete") -> "off") {
+                    @helper.CSRF.formField
 
-<div class="form-group">
-    <div class="govuk-grid-row">
-        <div class="govuk-grid-column-full">
-            <div class="govuk-form-group">
+                    @errorSummary(form.errors)
 
-            @formHelper(action = routes.MrnEntryController.onSubmit, args = Symbol("autoComplete") -> "off") {
-                @helper.CSRF.formField
+                    @pageTitle(text = messages("mrnEntryPage.heading"))
 
-                @errorSummary(form.errors)
+                    @paragraphBody(messages("mrnEntryPage.paragraph"))
 
-                @pageTitle(text = messages("mrnEntryPage.heading"))
+                    @exportsInputText(
+                        field = form("value"),
+                        labelKey = "mrnEntryPage.label",
+                        labelClasses = "visually-hidden"
+                    )
 
-                @paragraphBody(messages("mrnEntryPage.paragraph"))
+                    </br>
 
-                @exportsInputText(
-                    field = form("value"),
-                    labelKey = "mrnEntryPage.label",
-                    labelClasses = "visually-hidden"
-                )
-
-                </br>
-
-                @govukButton(Button(content = Text(messages("common.continue")), attributes = Map("id" -> "submit", "name" -> "continue")))
-             }
-             </div>
+                    @govukButton(Button(content = Text(messages("common.continue")), attributes = Map("id" -> "submit", "name" -> "continue")))
+                 }
+               </div>
+            </div>
         </div>
     </div>
-</div>
 }

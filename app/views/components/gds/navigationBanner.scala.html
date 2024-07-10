@@ -21,7 +21,15 @@
 @()(implicit messages: Messages)
 
 <div id="navigation-banner" class="govuk-!-padding-bottom-3 govuk-!-padding-top-3">
-  @link(text = messages("common.navigation.messages"), call = routes.InboxChoiceController.onPageLoad, classes="govuk-link govuk-link--no-visited-state right-margin--30")
-  @link(text = messages("common.navigation.uploadFiles"), call = routes.MrnEntryController.onPageLoad())
+  @link(
+     text = messages("common.navigation.messages"),
+     call = routes.InboxChoiceController.onPageLoad,
+     classes="govuk-link govuk-link--no-visited-state right-margin--30 govuk-!-display-none-print"
+  )
+  @link(
+     text = messages("common.navigation.uploadFiles"),
+     call = routes.MrnEntryController.onPageLoad(),
+     classes="govuk-link govuk-link--no-visited-state govuk-!-display-none-print"
+  )
 </div>
 <hr class="govuk-section-break govuk-section-break--visible">

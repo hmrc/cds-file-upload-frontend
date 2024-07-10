@@ -19,8 +19,8 @@ package views
 import controllers.routes
 import forms.mappings.ContactDetailsMapping._
 import generators.Generators
+import models.ContactDetails
 import models.requests.{AuthenticatedRequest, SignedInUser}
-import models.{ContactDetails, MRN}
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.data.Form
 import utils.FakeRequestCSRFSupport._
@@ -30,22 +30,25 @@ import views.html.contact_details
 
 class ContactDetailsSpec extends DomAssertions with ViewBehaviours with ScalaCheckPropertyChecks with Generators {
 
-  val form: Form[ContactDetails] = Form(contactDetailsMapping)
-  val mrn: MRN = arbitraryMrn.arbitrary.sample.get
-  val contactDetails: contact_details = instanceOf[contact_details]
+  val mrn = arbitraryMrn.arbitrary.sample.get
+
+  val form = Form(contactDetailsMapping)
+  val contactDetails = instanceOf[contact_details]
+
   val exportsInputText = instanceOf[exportsInputText]
 
-  val view = asDocument(contactDetails(form, mrn)(fakeRequest.withCSRFToken, messages))
-
-  def viewAsString(form: Form[ContactDetails] = form): String = contactDetails(form, mrn)(fakeRequest.withCSRFToken, messages).toString
-
-  val messagePrefix = "contactDetails"
-
-  def getMessage(key: String): String = messages(s"$messagePrefix.$key")
+  def createView(form: Form[ContactDetails]) = asDocument(contactDetails(form, mrn)(fakeRequest.withCSRFToken, messages))
 
   "Contact details page" must {
 
-    behave like normalPage(() => view, messagePrefix)
+    "have the page's title prefixed with 'Error:'" when {
+      "the page has errors" in {
+        val view = createView(form.withGlobalError("error.summary.title"))
+        view.head.getElementsByTag("title").first.text must startWith("Error: ")
+      }
+    }
+
+    behave like normalPage(() => createView(form), "contactDetails")
 
     "include the 'Sign out' link if the user is authorised" in {
       forAll { user: SignedInUser =>
@@ -55,31 +58,31 @@ class ContactDetailsSpec extends DomAssertions with ViewBehaviours with ScalaChe
     }
 
     "display the 'Back' link" in {
-      assertBackLinkIsIncluded(view, routes.MrnEntryController.onPageLoad().url)
+      assertBackLinkIsIncluded(createView(form), routes.MrnEntryController.onPageLoad().url)
     }
 
-    "display name input" in {
+    def createViewAsString(form: Form[ContactDetails]): String =
+      contactDetails(form, mrn)(fakeRequest.withCSRFToken, messages).toString
 
+    "display name input" in {
       forAll { contactDetails: ContactDetails =>
         val popForm = form.fillAndValidate(contactDetails)
         val input = exportsInputText(field = popForm("name"), labelKey = "contactDetails.name", labelClasses = "govuk-label")
 
-        viewAsString(popForm) must include(input.toString())
+        createViewAsString(popForm) must include(input.toString())
       }
     }
 
     "display company name input" in {
-
       forAll { contactDetails: ContactDetails =>
         val popForm = form.fillAndValidate(contactDetails)
         val input = exportsInputText(field = popForm("companyName"), labelKey = "contactDetails.companyName", labelClasses = "govuk-label")
 
-        viewAsString(popForm) must include(input.toString())
+        createViewAsString(popForm) must include(input.toString())
       }
     }
 
     "display phone number input" in {
-
       forAll { contactDetails: ContactDetails =>
         val popForm = form.fillAndValidate(contactDetails)
         val input = exportsInputText(
@@ -90,7 +93,7 @@ class ContactDetailsSpec extends DomAssertions with ViewBehaviours with ScalaChe
           pattern = "[0-9]*"
         )
 
-        viewAsString(popForm) must include(input.toString())
+        createViewAsString(popForm) must include(input.toString())
       }
     }
   }

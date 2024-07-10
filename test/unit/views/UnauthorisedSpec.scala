@@ -17,6 +17,7 @@
 package views
 
 import base.SpecBase
+import play.api.mvc.{AnyContentAsEmpty, Request}
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 import views.html.unauthorised
@@ -25,7 +26,7 @@ import views.matchers.ViewMatchers
 
 class UnauthorisedSpec extends SpecBase with ViewMatchers {
 
-  private implicit val request = FakeRequest().withCSRFToken
+  private implicit val request: Request[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
   private val unauthorisedPage = instanceOf[unauthorised]
   private def view: Html = unauthorisedPage()(request, messages)

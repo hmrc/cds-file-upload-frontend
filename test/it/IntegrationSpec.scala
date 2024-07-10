@@ -30,7 +30,7 @@ trait IntegrationSpec extends AnyWordSpec with Matchers with GuiceOneServerPerSu
 
   override def fakeApplication(): Application =
     new GuiceApplicationBuilder()
-      .disable[com.kenshoo.play.metrics.PlayModule]
+      .disable[com.codahale.metrics.MetricRegistry]
       .configure(disableMetricsConfiguration)
       .configure(Map("mongodb.uri" -> s"mongodb://localhost:27017/$databaseName"))
       .build()

@@ -1,5 +1,8 @@
-common.title.format = {0} - {1} - GOV.UK
-common.service.name = Dogfennau CDS wedi’u huwchlwytho a negeseuon diogel
+service.name = Dogfennau CDS wedi’u huwchlwytho a negeseuon diogel
+
+title.format = {0} - {1} - GOV.UK
+title.withErrors.format = Gwall: {0} - {1} - GOV.UK
+
 common.phase = Beta
 common.continue = Yn eich blaen
 common.feedback = Gwasanaeth newydd yn hwn – bydd eich {0} yn ein helpu i’w wella.
@@ -7,6 +10,7 @@ common.feedback.link = adborth
 common.navigation.messages = Negeseuon
 common.navigation.uploadFiles = Uwchlwytho ffeiliau
 common.back.link = Yn ôl
+
 common.button.startNow = Dechrau nawr
 common.backToGovUk = Yn ôl i GOV.UK
 
@@ -117,7 +121,7 @@ fileUploadConfirmationPage.mrn = Cyfeirnod Symud Nwyddau:
 fileUploadConfirmationPage.tableTitle = Ffeiliau wedi’u huwchlwytho
 fileUploadConfirmationPage.fileName = Enw’r ffeil
 fileUploadConfirmationPage.receipt = Derbynneb
-fileUploadConfirmationPage.printPage = Cadwch neu argraffwch y dudalen hon ar gyfer eich cofnodion (yn agor tab newydd).
+fileUploadConfirmationPage.printPage = Argraffu’r dudalen hon
 fileUploadConfirmationPage.section1.title = Beth i’w wneud gydag ymholiadau
 fileUploadConfirmationPage.section1.paragraph1 = Os bydd awdurdod tollau’n codi ymholiad am eich nwyddau neu’ch dogfennau, bydd yr ymholiad yn cael ei anfon i’ch {0}. Byddwch yn cael gwybod am yr ymholiad ar {1}, sef eich cyfeiriad e-bost CDS cofrestredig. Dylech hefyd gael gwybod drwy’ch meddalwedd ar gyfer y tollau.
 fileUploadConfirmationPage.section1.paragraph1.linkText = mewnflwch diogel y Gwasanaeth Datganiadau Tollau

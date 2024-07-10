@@ -31,17 +31,18 @@ import scala.concurrent.Future
 
 class AuthActionSpec extends ControllerSpecBase {
 
-  lazy val conf = instanceOf[Configuration]
-  lazy val env = instanceOf[Environment]
+  private lazy val conf = instanceOf[Configuration]
+  private lazy val env = instanceOf[Environment]
 
-  def authAction(allowedEoris: Seq[String]) = new AuthActionImpl(mockAuthConnector, conf, env, new EoriAllowList(allowedEoris), mcc)
+  def authAction(allowedEoris: Seq[String]) =
+    new AuthActionImpl(mockAuthConnector, conf, env, new EoriAllowList(allowedEoris), mcc)
 
-  def authController(allowedEoris: Seq[String] = Seq.empty) = new TestController(authAction(allowedEoris))
+  def authController(allowedEoris: Seq[String] = Seq.empty) =
+    new TestController(authAction(allowedEoris))
 
   "AuthAction" should {
 
     "return authenticated user" in {
-
       val user = CommonTestData.signedInUser
 
       withSignedInUser(user) {
@@ -54,7 +55,6 @@ class AuthActionSpec extends ControllerSpecBase {
     }
 
     "redirect to gg sign in when NoActiveSession is returned" in {
-
       withAuthError(new NoActiveSession("") {}) {
 
         val request = FakeRequest("GET", "")
@@ -68,7 +68,6 @@ class AuthActionSpec extends ControllerSpecBase {
     "redirect to Unauthorised" when {
 
       "authorisation fails" in {
-
         withAuthError(InsufficientEnrolments("")) {
 
           val response = authController().action(FakeRequest())
@@ -90,7 +89,6 @@ class AuthActionSpec extends ControllerSpecBase {
     }
 
     "allow access" when {
-
       "allowListing doesn't have any eori and user has eori" in {
 
         val user = CommonTestData.signedInUser
@@ -103,7 +101,6 @@ class AuthActionSpec extends ControllerSpecBase {
       }
 
       "allowListing contains eori and user has allowed eori" in {
-
         val user = CommonTestData.signedInUser
 
         withSignedInUser(user) {
@@ -115,9 +112,7 @@ class AuthActionSpec extends ControllerSpecBase {
     }
 
     "doesn't allow access" when {
-
       "user has not allowListed eori" in {
-
         val user = CommonTestData.signedInUser
 
         withSignedInUser(user) {
@@ -131,14 +126,12 @@ class AuthActionSpec extends ControllerSpecBase {
 
     "redirect to /you-cannot-use-this-service when user is an Agent" in {
       withSignedInAgent() {
-
         val result = authController(Seq("GB1111231")).action(FakeRequest())
 
         status(result) mustBe SEE_OTHER
         redirectLocation(result) mustBe Some(routes.UnauthorisedController.onAgentKickOut(UserIsAgent).url)
       }
     }
-
   }
 
   class TestController(actions: AuthAction) extends FrontendController(mcc) {
@@ -147,5 +140,4 @@ class AuthActionSpec extends ControllerSpecBase {
       Future.successful(Ok(request.user.toString))
     }
   }
-
 }

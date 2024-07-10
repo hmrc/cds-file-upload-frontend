@@ -33,7 +33,7 @@ case class FileUploadAnswers(
 
 object FileUploadAnswers {
 
-  implicit val format = {
+  implicit val format: OFormat[FileUploadAnswers] = {
     implicit val zonedDateTimeFormat: Format[ZonedDateTime] = Format(zonedDateTimeReads, zonedDateTimeWrites)
 
     OFormat[FileUploadAnswers](Json.reads[FileUploadAnswers], Json.writes[FileUploadAnswers])
