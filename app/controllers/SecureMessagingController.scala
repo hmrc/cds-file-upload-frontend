@@ -26,7 +26,6 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.partials.HeaderCarrierForPartialsConverter
 import views.html.messaging.{inbox_wrapper, partial_wrapper}
 
-import java.net.URLEncoder.encode
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
@@ -106,5 +105,5 @@ class SecureMessagingController @Inject() (
   }
 
   private def defineUploadLink(refererUrl: String) =
-    encode(routes.MrnEntryController.onPageLoad(Some(RedirectUrl(refererUrl))).url, "UTF-8")
+    routes.MrnEntryController.onPageLoad(Some(RedirectUrl(refererUrl))).url
 }
