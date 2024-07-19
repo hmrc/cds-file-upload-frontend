@@ -10,6 +10,7 @@ common.feedback.link = adborth
 common.navigation.messages = Negeseuon
 common.navigation.uploadFiles = Uwchlwytho ffeiliau
 common.back.link = Yn ôl
+common.warning = Rhybudd
 
 common.button.startNow = Dechrau nawr
 common.backToGovUk = Yn ôl i GOV.UK
@@ -88,17 +89,21 @@ fileWarning.paragraph1 = Mae angen i CThEF gael gwybod faint o ffeiliau yr ydych
 fileWarning.paragraph2 = Nid yw hyn yr un peth â nifer y dogfennau.
 fileWarning.panel = Mae angen i chi nodi’r nifer cywir o ffeiliau – ni allwch ddiwygio’ch ateb felly, os byddwch yn gwneud camgymeriad, bydd yn rhaid i chi ddechrau eto.
 fileWarning.button = Rwy’n deall
-howManyFilesUpload.heading = Sawl ffeil y mae angen i chi ei huwchlwytho?
+
+howManyFilesUpload.heading = Sawl ffeil ydych chi am ei huwchlwytho?
 howManyFilesUpload.missing = Nodwch nifer y ffeiliau i’w huwchlwytho
 howManyFilesUpload.invalid = Nodwch rif rhwng 1 a 10
-howManyFilesUpload.paragraph1 = Nodwch union nifer y ffeiliau rydych yn bwriadu eu huwchlwytho. Cyfrifwch y ffeiliau, nid y dogfennau eu hunain. Er enghraifft, os ydych wedi cadw un rhestr bacio fel 2 JPEG, mae hyn yn cyfrif fel 2 ffeil.
-howManyFilesUpload.paragraph2 = Gwnewch yn siŵr bod enwau’r ffeiliau’n dechrau gyda llythyren neu rif, nid bwlch, ac nad ydynt yn cynnwys unrhyw gymeriadau arbennig. Mae cysylltnodau a thanlinellau’n dderbyniol.
-howManyFilesUpload.paragraph3 = Mae’n rhaid i bob ffeil a uwchlwythwch fod yn llai na 10 megabeit (MB), a rhaid iddynt fod yn un o’r fformatau canlynol:
+howManyFilesUpload.paragraph1 = Nodwch nifer y ffeiliau yr ydych chi am eu huwchlwytho.
+howManyFilesUpload.insetText = Er enghraifft, os ydych wedi cadw un rhestr bacio fel 2 JPEG, mae hyn yn cyfrif fel 2 ffeil.
+howManyFilesUpload.paragraph2.heading = Ynglŷn ag enwi ffeiliau
+howManyFilesUpload.paragraph2 = Gwenwch yn siŵr eich bod yn defnyddio llythrennau a rhifau i enwi’r ffeiliau. Peidiwch â chynnwys bylchau na chymeriadau arbennig. Gallwch ddefnyddio cysylltnodau a thanlinellau.
+howManyFilesUpload.paragraph3.heading = Ynglŷn â maint y ffeiliau a’u fformatau
+howManyFilesUpload.paragraph3 = Ni all unrhyw un ffeil fod yn fwy na 10 megabeit (MB). Mae’n rhaid i’r ffeiliau gael eu cadw ar un o’r fformatau canlynol:
 howManyFilesUpload.listItem1 = JPEG (delwedd)
 howManyFilesUpload.listItem2 = PNG (delwedd)
-howManyFilesUpload.listItem3 = PDF (heb ei amgryptio)
-howManyFilesUpload.listItem4 = txt (testun plaen)
-howManyFilesUpload.insetText = Ni allwch newid y rhif hwn ar ôl i chi ddewis mynd yn eich blaen. Os nodwch y rhif anghywir, bydd yn rhaid i chi ddechrau eto.
+howManyFilesUpload.listItem3 = PDF (dogfen heb ei amgryptio)
+howManyFilesUpload.listItem4 = txt (dogfen testun plaen)
+howManyFilesUpload.warning = Sylwer: ni allwch ddiwygio’r rhif hwn ar ôl i chi ddewis mynd yn eich blaen. I ddiwygio’r rhif, bydd yn rhaid i chi ddechrau eto.
 
 fileUploadPage.heading.first = Uwchlwythwch eich ffeil gyntaf
 fileUploadPage.heading.middle = Uwchlwythwch eich ffeil nesaf

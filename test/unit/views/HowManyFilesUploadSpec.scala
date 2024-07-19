@@ -57,8 +57,20 @@ class HowManyFilesUploadSpec extends DomAssertions with IntViewBehaviours[FileUp
     behave like intPage(createAppendable, (form, i) => form.bind(Map("value" -> i.toString)), "value", messagePrefix)
 
     "display the correct guidance" in {
-      val expectedGuidanceKeys: List[String] = List("paragraph1", "paragraph2", "paragraph3", "listItem1", "listItem2", "listItem3", "listItem4")
-      for (key <- expectedGuidanceKeys) assertContainsText(createView(), messages(s"$messagePrefix.$key"))
+      val page = createView()
+      val expectedGuidanceKeys: List[String] = List(
+        "paragraph1",
+        "paragraph2.heading",
+        "paragraph2",
+        "paragraph3.heading",
+        "paragraph3",
+        "listItem1",
+        "listItem2",
+        "listItem3",
+        "listItem4",
+        "warning"
+      )
+      for (key <- expectedGuidanceKeys) assertContainsText(page, messages(s"$messagePrefix.$key"))
     }
 
     "display inset text" in {

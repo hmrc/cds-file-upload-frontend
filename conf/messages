@@ -12,6 +12,7 @@ common.feedback.link = feedback
 common.navigation.messages = Messages
 common.navigation.uploadFiles = Upload files
 common.back.link = Back
+common.warning = Warning
 
 ## common buttons with shared labels
 
@@ -131,17 +132,20 @@ fileWarning.button = I understand
 
 ## How many files do you need to upload page
 
-howManyFilesUpload.heading = How many files do you need to upload?
+howManyFilesUpload.heading = How many files do you want to upload?
 howManyFilesUpload.missing = Enter a number of files to upload
 howManyFilesUpload.invalid = Enter a number between 1 and 10
-howManyFilesUpload.paragraph1 = Tell us the exact number of files you intend to upload. Count the files, not the actual documents. For example, if you have saved one packing list as 2 jpegs, this is 2 files.
-howManyFilesUpload.paragraph2 = Make sure that file names start with a letter or number, not a space, and do not contain any special characters. Hyphens and underscores are acceptable.
-howManyFilesUpload.paragraph3 = Each file you upload must not be bigger than 10 megabytes (MB), and must be in one of the following formats:
+howManyFilesUpload.paragraph1 = Tell us the number of files you want to upload.
+howManyFilesUpload.insetText = For example, if you have a single packing list document saved as 2 jpegs, this would be 2 files.
+howManyFilesUpload.paragraph2.heading = About file naming
+howManyFilesUpload.paragraph2 = Make sure that files names are made up of letters and numbers. Do not include spaces or special characters. Hyphens and underscores can be used.
+howManyFilesUpload.paragraph3.heading = About file size and formats
+howManyFilesUpload.paragraph3 = Each file must not exceed 10 megabytes (MB). They must be saved in one of the following formats:
 howManyFilesUpload.listItem1 = jpeg (image)
 howManyFilesUpload.listItem2 = png (image)
-howManyFilesUpload.listItem3 = PDF (unencrypted)
-howManyFilesUpload.listItem4 = txt (plain text)
-howManyFilesUpload.insetText = You cannot change this number once you select continue. If you input the wrong number, you will have to start again.
+howManyFilesUpload.listItem3 = PDF (unencrypted document)
+howManyFilesUpload.listItem4 = txt (plain text document)
+howManyFilesUpload.warning = Be aware: you cannot revise this number once you select continue. To revise the number, you will have to start again.
 
 fileUploadPage.heading.first = Upload your first file
 fileUploadPage.heading.middle = Upload your next file
