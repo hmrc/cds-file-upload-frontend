@@ -1,4 +1,4 @@
-service.name = Dogfennau CDS wedi’u huwchlwytho a negeseuon diogel
+service.name = Gwasanaeth Datganiadau Tollau: dogfennau wedi’u huwchlwytho a negeseuon diogel
 
 title.format = {0} - {1} - GOV.UK
 title.withErrors.format = Gwall: {0} - {1} - GOV.UK
@@ -45,8 +45,8 @@ greyBox.paragraph.1 = Bydd angen i chi ailnodi’r cyfeirnod symud (MRN) cywir i
 greyBox.paragraph.2 = Uwchlwythwch y dogfennau ac yna atebwch y neges i roi gwybod i ni eu bod yn barod i gael eu gwirio.
 greyBox.uploadFiles = Uwchlwytho ac atodi dogfennau i ddatganiad
 
-mrnEntryPage.heading = Beth yw MRN y datganiad yr hoffech atodi ffeiliau iddo?
-mrnEntryPage.paragraph = Mae cyfeirnod symud (MRN) yn cynnwys 18 o gymeriadau, yn dechrau â 2 rhif ar gyfer y flwyddyn y cafodd y datganiad ei greu, y llythrennau ‘GB’ ac yna 14 o lythrennau a rhifau. Er enghraifft, 22GB123456789AB012.
+mrnEntryPage.heading = Beth yw Cyfeirnod Symud (MRN) y datganiad yr hoffech atodi ffeiliau iddo?
+mrnEntryPage.paragraph = Mae MRN yn cynnwys 18 o gymeriadau, yn dechrau â 2 rhif sy’n dynodi’r flwyddyn y cafodd y datganiad ei greu, y llythrennau ‘GB’ ac yna 14 o lythrennau a rhifau. Er enghraifft, 22GB123456789AB012.
 mrnEntryPage.label = Beth yw MRN y datganiad yr hoffech atodi ffeiliau iddo?
 mrn.missing = Nodwch gyfeirnod symud (MRN)
 mrn.invalid = Mae’n rhaid i’r cyfeirnod symud (MRN) fod yn fformat cywir
