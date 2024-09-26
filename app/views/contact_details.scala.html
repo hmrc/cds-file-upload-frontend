@@ -14,8 +14,8 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.govukfrontend.views.html.components._
-@import views.html.components.gds._
+@import uk.gov.hmrc.govukfrontend.views.html.components.{Button, FormWithCSRF, GovukButton, Text}
+@import views.html.components.gds.{errorSummary, exportsInputText, gdsMainTemplate, pageTitle, paragraphBody}
 @import views.helpers.Title
 
 @this(
@@ -28,7 +28,7 @@
     paragraphBody: paragraphBody
 )
 
-@(form: Form[ContactDetails], mrn: MRN)(implicit request: Request[_], messages: Messages)
+@(form: Form[ContactDetails], mrn: MRN)(implicit messages: Messages, request: Request[_])
 
 @mainTemplate(
   title = Title("contactDetails.heading", hasErrors = form.hasErrors || form.hasGlobalErrors),

@@ -14,21 +14,22 @@
  * limitations under the License.
  *@
 
-@import views.html.components.gds._
+@import controllers.routes.RootController
+@import views.html.components.gds.gdsMainTemplate
 @import views.helpers.Title
 
-@this(
-  govukLayout: gdsMainTemplate,
-  pageTitle: pageTitle,
-  paragraphBody: paragraphBody
-)
+@this(govukLayout: gdsMainTemplate)
 
-@(title: String, heading: String, messageKeys: String*)(implicit request: Request[_], messages: Messages)
+@(pageTitle: String, heading: String, message: String)(implicit request: Request[_], messages: Messages)
 
-@govukLayout(title = Title(title)) {
-
-  @pageTitle(text = messages(heading))
-  @messageKeys.map { key =>
-    <p class="govuk-body-m">@messages(key)</p>
-  }
+@govukLayout(
+  title = Title(pageTitle),
+  backLinkUrl = Some(RootController.displayPage.url)
+) {
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+            <h1 class="govuk-heading-xl">@heading</h1>
+            <p class="govuk-body-m">@message</p>
+        </div>
+    </div>
 }

@@ -16,21 +16,34 @@
 
 package utils
 
-import base.AppConfigMockHelper.generateMockConfig
-import base.Injector
-import config.{AllowList, AppConfig}
-import org.scalatestplus.play.PlaySpec
+import base.UnitSpec
+import config._
+import org.mockito.MockitoSugar.mock
 
-class RefererUrlValidatorSpec extends PlaySpec with Injector {
+class RefererUrlValidatorSpec extends UnitSpec {
 
   private val allowedService1 = "service1"
   private val allowedService2 = "service2"
   private val disallowedService3 = "service3"
   private val validRefererUrl = s"/$allowedService1/"
 
-  lazy implicit val appConfig: AppConfig = generateMockConfig(allowList = AllowList(List.empty, List(allowedService1, allowedService2)))
+  override implicit lazy val appConfig: AppConfig = AppConfig(
+    appName = "",
+    developerHubClientId = "",
+    googleAnalytics = mock[GoogleAnalytics],
+    microservice = mock[Microservice],
+    fileFormats = mock[FileFormats],
+    notifications = mock[Notifications],
+    feedback = mock[Feedback],
+    proxy = mock[Proxy],
+    fileUploadAnswersRepository = mock[FileUploadAnswersRepository],
+    secureMessageAnswersRepository = mock[SecureMessageAnswersRepository],
+    trackingConsentFrontend = mock[TrackingConsentFrontend],
+    play = mock[Play],
+    allowList = AllowList(List.empty, List(allowedService1, allowedService2))
+  )
 
-  val validator = RefererUrlValidator
+  private val validator = RefererUrlValidator
 
   "RefererUrlValidator" should {
     "allow referer urls that reference the services on the allow list" in {

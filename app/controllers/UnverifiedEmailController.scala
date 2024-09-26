@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.ExternalServicesConfig
+import config.ServiceUrls
 import controllers.actions.AuthAction
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
@@ -29,14 +29,14 @@ class UnverifiedEmailController @Inject() (
   mcc: MessagesControllerComponents,
   unverified_email: unverified_email,
   undeliverable_email: undeliverable_email,
-  config: ExternalServicesConfig
+  serviceUrls: ServiceUrls
 ) extends FrontendController(mcc) with I18nSupport {
 
   val informUserUnverified: Action[AnyContent] = authenticate { implicit req =>
-    Ok(unverified_email(config.emailFrontendUrl))
+    Ok(unverified_email(serviceUrls.emailFrontend))
   }
 
   val informUserUndeliverable: Action[AnyContent] = authenticate { implicit req =>
-    Ok(undeliverable_email(config.emailFrontendUrl))
+    Ok(undeliverable_email(serviceUrls.emailFrontend))
   }
 }

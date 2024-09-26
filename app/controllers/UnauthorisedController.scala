@@ -39,5 +39,4 @@ class UnauthorisedController @Inject() (mcc: MessagesControllerComponents, unaut
       case _           => Ok(unauthorisedAgent(displaySignOut = false))
     }
   }
-
 }

@@ -19,20 +19,22 @@ package controllers.test
 import config.AppConfig
 import play.api.Logging
 import play.api.http.{ContentTypes, HeaderNames}
-import play.api.mvc.{Codec, MessagesControllerComponents, MessagesRequest, MultipartFormData}
+import play.api.libs.Files
+import play.api.mvc._
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class CustomsDeclarationsStubController @Inject() (appConfig: AppConfig, httpClient: HttpClient, mcc: MessagesControllerComponents)(
+class CustomsDeclarationsStubController @Inject() (appConfig: AppConfig, httpClientV2: HttpClientV2, mcc: MessagesControllerComponents)(
   implicit ec: ExecutionContext
 ) extends FrontendController(mcc) with Logging {
 
-  val handleS3FileUploadRequest = Action(parse.multipartFormData) { implicit request =>
+  val handleS3FileUploadRequest: Action[MultipartFormData[Files.TemporaryFile]] = Action(parse.multipartFormData) { implicit request =>
     val filename = request.body.files.head.filename
     val redirectLocation = redirectionAccordingTo(filename)
     val reference = redirectLocation.split("/").last
@@ -62,7 +64,7 @@ class CustomsDeclarationsStubController @Inject() (appConfig: AppConfig, httpCli
     val url = cdsFileUploadBaseUrl + "/internal/notification"
     val header: (String, String) = HeaderNames.CONTENT_TYPE -> ContentTypes.XML(Codec.utf_8)
 
-    httpClient.POSTString[HttpResponse](url, notification.toString(), Seq(header))
+    httpClientV2.post(url"$url").transform(_.addHttpHeaders(Seq(header): _*)).withBody[String](notification.toString).execute[HttpResponse]
     logger.debug(s"Sent notification for file ${reference} to ${url}")
   }
 }

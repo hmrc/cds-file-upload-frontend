@@ -14,14 +14,14 @@
  * limitations under the License.
  *@
 
-@import config.ExternalServicesConfig
+@import config.ServiceUrls
 @import views.helpers.Title
 @import views.html.components.feedback_section
 @import views.html.components.gds._
 
 
 @this(
-    externalServicesConfig: ExternalServicesConfig,
+    serviceUrls: ServiceUrls,
     gdsMainTemplate: gdsMainTemplate,
     pageTitle: pageTitle,
     paragraphBody: paragraphBody,
@@ -42,6 +42,6 @@
     @feedbackSection()
 
     <p class="govuk-body govuk-!-margin-top-9">
-        @link(id = Some("govuk-link"), text = messages("signed.out.backToGovUk"), call = Call("GET", externalServicesConfig.govUk))
+        @link(id = Some("govuk-link"), text = messages("signed.out.backToGovUk"), call = Call("GET", serviceUrls.govUk))
     </p>
 }

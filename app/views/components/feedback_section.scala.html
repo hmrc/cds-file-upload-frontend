@@ -14,11 +14,11 @@
  * limitations under the License.
  *@
 
-@import config.ExternalServicesConfig
+@import config.ServiceUrls
 @import views.html.components.gds._
 
 @this(
-    config: ExternalServicesConfig,
+    serviceUrls: ServiceUrls,
     paragraphBody: paragraphBody,
     link: link
 )
@@ -31,7 +31,7 @@
 
      @paragraphBody(message = messages("feedback.line.2", link(
             text = messages("feedback.link"),
-            call = Call("GET", config.feedbackFrontend),
+            call = Call("GET", serviceUrls.feedbackFrontend),
             id = Some("feedback-element-2")
     )))
 </div>

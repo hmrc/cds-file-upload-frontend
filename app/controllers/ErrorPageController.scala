@@ -16,20 +16,23 @@
 
 package controllers
 
-import config.ErrorHandler
-import javax.inject.Inject
+import handlers.ErrorHandler
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.upload_error
 
-class ErrorPageController @Inject() (mcc: MessagesControllerComponents, uploadErrorPage: upload_error, errorHandler: ErrorHandler)
-    extends FrontendController(mcc) {
+import javax.inject.Inject
+import scala.concurrent.ExecutionContext
+
+class ErrorPageController @Inject() (mcc: MessagesControllerComponents, uploadErrorPage: upload_error, errorHandler: ErrorHandler)(
+  implicit ec: ExecutionContext
+) extends FrontendController(mcc) {
 
   def uploadError: Action[AnyContent] = Action { implicit request =>
     Ok(uploadErrorPage())
   }
 
-  def error: Action[AnyContent] = Action { implicit request =>
-    Ok(errorHandler.internalServerErrorTemplate)
+  def error: Action[AnyContent] = Action.async { implicit request =>
+    errorHandler.internalServerErrorTemplate.map(Ok(_))
   }
 }

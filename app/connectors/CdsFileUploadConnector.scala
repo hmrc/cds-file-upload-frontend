@@ -19,36 +19,36 @@ package connectors
 import config.{AppConfig, CDSFileUpload}
 import models.{EORI, Email, Notification}
 import play.api.Logging
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.client.HttpClientV2
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class CdsFileUploadConnector @Inject() (appConfig: AppConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) extends Logging {
+class CdsFileUploadConnector @Inject() (appConfig: AppConfig, httpClientV2: HttpClientV2)(implicit ec: ExecutionContext)
+    extends Connector with Logging {
+
+  protected val httpClient: HttpClientV2 = httpClientV2
 
   private val cdsFileUploadConfig: CDSFileUpload = appConfig.microservice.services.cdsFileUpload
 
   def getNotification(reference: String)(implicit hc: HeaderCarrier): Future[Option[Notification]] =
-    httpClient
-      .GET[Option[Notification]](cdsFileUploadConfig.fetchNotificationEndpoint(reference))
-      .map { maybeNotification =>
-        maybeNotification match {
-          case Some(notification) => logger.info(s"Fetched notification: $notification")
-          case None               => logger.info(s"There is no notification with reference: $reference")
-        }
-        maybeNotification
+    get[Option[Notification]](cdsFileUploadConfig.fetchNotificationEndpoint(reference)).map { maybeNotification =>
+      maybeNotification match {
+        case Some(notification) => logger.info(s"Fetched notification: $notification")
+        case None               => logger.info(s"There is no notification with reference: $reference")
       }
+      maybeNotification
+    }
 
   def getVerifiedEmailAddress(eori: EORI)(implicit hc: HeaderCarrier): Future[Option[Email]] =
-    httpClient
-      .GET[Option[Email]](cdsFileUploadConfig.fetchVerifiedEmailEndpoint(eori.value))
-      .map { maybeVerifiedEmail =>
-        maybeVerifiedEmail match {
-          case Some(Email(_, true))  => logger.debug(s"Found verified email for eori: $eori")
-          case Some(Email(_, false)) => logger.debug(s"Undeliverable email for eori: $eori")
-          case None                  => logger.info(s"No verified email for eori: $eori")
-        }
-        maybeVerifiedEmail
+    get[Option[Email]](cdsFileUploadConfig.fetchVerifiedEmailEndpoint(eori.value)).map { maybeVerifiedEmail =>
+      maybeVerifiedEmail match {
+        case Some(Email(_, true))  => logger.debug(s"Found verified email for eori: $eori")
+        case Some(Email(_, false)) => logger.debug(s"Undeliverable email for eori: $eori")
+        case None                  => logger.info(s"No verified email for eori: $eori")
       }
+      maybeVerifiedEmail
+    }
 }

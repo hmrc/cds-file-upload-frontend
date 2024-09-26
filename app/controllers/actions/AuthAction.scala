@@ -17,20 +17,19 @@
 package controllers.actions
 
 import com.google.inject.ProvidedBy
-import config.AppConfig
+import config.{AppConfig, ServiceUrls}
 import controllers.routes.UnauthorisedController
 import models.AuthKey
 import models.UnauthorisedReason.UserIsAgent
 import models.requests.{AuthenticatedRequest, SignedInUser}
+import play.api.Logging
 import play.api.mvc.Results.Redirect
 import play.api.mvc._
-import play.api.{Configuration, Environment, Logging}
 import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{affinityGroup, allEnrolments}
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
-import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import javax.inject.{Inject, Provider}
@@ -38,18 +37,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class AuthActionImpl @Inject() (
   val authConnector: AuthConnector,
-  val config: Configuration,
-  val env: Environment,
   eoriAllowList: EoriAllowList,
-  mcc: MessagesControllerComponents
-) extends AuthAction with AuthorisedFunctions with AuthRedirects with Logging {
+  mcc: MessagesControllerComponents,
+  serviceUrls: ServiceUrls
+) extends AuthAction with AuthorisedFunctions with Logging {
 
   implicit override val executionContext: ExecutionContext = mcc.executionContext
   override val parser: BodyParser[AnyContent] = mcc.parsers.defaultBodyParser
-
-  private lazy val loginUrl = config.getOptional[String]("urls.login").getOrElse(throw new Exception("Missing login url configuration"))
-  private lazy val continueLoginUrl =
-    config.getOptional[String]("urls.loginContinue").getOrElse(throw new Exception("Missing continue login url configuration"))
 
   override protected def refine[A](request: Request[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
@@ -66,9 +60,13 @@ class AuthActionImpl @Inject() (
         }
       }
       .recover {
-        case exc: UnsupportedAffinityGroup => unauthorized(exc, Redirect(UnauthorisedController.onAgentKickOut(UserIsAgent)))
-        case exc: NoActiveSession          => unauthorized(exc, Redirect(loginUrl, Map("continue" -> Seq(continueLoginUrl))))
-        case exc                           => unauthorized(exc, Redirect(UnauthorisedController.onPageLoad))
+        case exc: NoActiveSession =>
+          unauthorized(exc, Redirect(serviceUrls.login, Map("continue" -> Seq(serviceUrls.loginContinue))))
+
+        case exc: UnsupportedAffinityGroup =>
+          unauthorized(exc, Redirect(UnauthorisedController.onAgentKickOut(UserIsAgent)))
+
+        case exc => unauthorized(exc, Redirect(UnauthorisedController.onPageLoad))
       }
   }
 
@@ -85,7 +83,7 @@ class EoriAllowList(val values: Seq[String]) {
   def allows(eori: String): Boolean = values.isEmpty || values.contains(eori)
 }
 
-class EoriAllowListProvider @Inject() (config: AppConfig) extends Provider[EoriAllowList] {
+class EoriAllowListProvider @Inject() (appConfig: AppConfig) extends Provider[EoriAllowList] {
   override def get(): EoriAllowList =
-    new EoriAllowList(config.allowList.eori)
+    new EoriAllowList(appConfig.allowList.eori)
 }

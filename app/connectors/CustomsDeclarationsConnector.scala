@@ -17,33 +17,34 @@
 package connectors
 
 import config.AppConfig
-import javax.inject.Inject
 import models.{FileUploadRequest, FileUploadResponse}
-import play.api.Logger
+import play.api.Logging
 import play.api.http.{ContentTypes, HeaderNames}
 import play.api.mvc.Codec
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 import scala.xml.XML
 
-class CustomsDeclarationsConnector @Inject() (config: AppConfig, httpClient: HttpClient)(implicit ec: ExecutionContext) {
+class CustomsDeclarationsConnector @Inject() (appConfig: AppConfig, httpClientV2: HttpClientV2)(implicit ec: ExecutionContext)
+    extends Connector with Logging {
 
-  private val logger = Logger(this.getClass)
+  protected val httpClient: HttpClientV2 = httpClientV2
 
-  private val fileUploadUrl = config.microservice.services.customsDeclarations.batchUploadEndpoint
-  private val apiVersion = config.microservice.services.customsDeclarations.apiVersion
-  private val clientId = config.developerHubClientId
+  private val fileUploadUrl = appConfig.microservice.services.customsDeclarations.batchUploadEndpoint
+  private val apiVersion = appConfig.microservice.services.customsDeclarations.apiVersion
+  private val clientId = appConfig.developerHubClientId
 
   def requestFileUpload(eori: String, request: FileUploadRequest)(implicit hc: HeaderCarrier): Future[FileUploadResponse] = {
     logger.info(s"Request to initiate ${request.toXml}")
     logger.info(s"fileUploadUrl: $fileUploadUrl")
-    httpClient
-      .POSTString[HttpResponse](fileUploadUrl, request.toXml.mkString, headers(eori))
-      .map(r =>
-        Try(XML.loadString(r.body)) match {
+    post[String, HttpResponse](fileUploadUrl, request.toXml.mkString, headers(eori))
+      .map(response =>
+        Try(XML.loadString(response.body)) match {
           case Success(value) =>
             logger.info(s"Got initiate response: $FileUploadResponse")
             FileUploadResponse.fromXml(value)
