@@ -1,23 +1,27 @@
-import sbt._
+import sbt.*
 
 object Dependencies {
 
-  val bootstrapPlayVersion = "8.3.0"
-  val frontendPlayVersion = "8.5.0"
+  val bootstrapPlayVersion = "9.5.0"
 
-  val compile = Seq(
+  val compile: Seq[ModuleID] = List(
     "uk.gov.hmrc"               %% "bootstrap-frontend-play-30"     % bootstrapPlayVersion,
-    "uk.gov.hmrc"               %% "play-frontend-hmrc-play-30"     % frontendPlayVersion,
-    "uk.gov.hmrc"               %% "play-partials-play-30"          % "9.1.0",
-    "uk.gov.hmrc.mongo"         %% "hmrc-mongo-play-30"             % "1.7.0",
-    "com.github.pureconfig"     %% "pureconfig"                     % "0.17.4"
+    "uk.gov.hmrc"               %% "play-frontend-hmrc-play-30"     % "10.12.0",
+    "uk.gov.hmrc"               %% "play-partials-play-30"          % "10.0.0",
+    "uk.gov.hmrc.mongo"         %% "hmrc-mongo-play-30"             % "2.2.0",
+    "com.github.pureconfig"     %% "pureconfig"                     % "0.17.7"
   ).map(_.withSources)
 
-  val test = Seq(
-    "uk.gov.hmrc"            %% "bootstrap-test-play-30"  % bootstrapPlayVersion % "test, it",
-    "org.mockito"            %% "mockito-scala"           % "1.17.29"            % "test",
-    "org.scalatestplus"      %% "scalacheck-1-15"         % "3.2.11.0"           % "test",
-    "com.vladsch.flexmark"   %  "flexmark-all"            % "0.64.6"             % "test",
-    "org.jsoup"              %  "jsoup"                   % "1.15.4"             % "test"
-  ).map(moduleID => if (moduleID.name.contains("flexmark")) moduleID else moduleID.withSources)
+  val test: Seq[ModuleID] = List(
+    "uk.gov.hmrc"            %% "bootstrap-test-play-30"  % bootstrapPlayVersion % "test",
+    "org.mockito"            %% "mockito-scala"           % "1.17.37"            % "test",
+    "org.scalatestplus"      %% "scalacheck-1-18"         % "3.2.19.0"           % "test",
+    "com.vladsch.flexmark"   %  "flexmark-all"            % "0.64.8"             % "test",
+    "org.jsoup"              %  "jsoup"                   % "1.18.1"             % "test"
+  )
+
+  private val missingSources = List("accessible-autocomplete", "flexmark-all")
+
+  def apply(): Seq[ModuleID] =
+    (compile ++ test).map(moduleId => if (missingSources.contains(moduleId.name)) moduleId else moduleId.withSources)
 }

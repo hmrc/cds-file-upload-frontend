@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,78 +16,79 @@
 
 package connectors
 
-import scala.concurrent.{ExecutionContext, Future}
 import com.google.inject.Inject
 import config.AppConfig
 import models._
 import play.api.Logging
 import play.api.http.Status
 import services.AuditService
-import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
 
-class SecureMessageFrontendConnector @Inject() (httpClient: HttpClient, config: AppConfig, auditService: AuditService)(implicit ec: ExecutionContext)
-    extends Logging with Status {
+import scala.concurrent.{ExecutionContext, Future}
+
+class SecureMessageFrontendConnector @Inject() (appConfig: AppConfig, httpClientV2: HttpClientV2, auditService: AuditService)(
+  implicit ec: ExecutionContext
+) extends Connector with Logging with Status {
+
+  protected val httpClient: HttpClientV2 = httpClientV2
 
   def retrieveInboxPartial(eori: String, filter: MessageFilterTag)(implicit hc: HeaderCarrier): Future[InboxPartial] =
     fetchPartial(
-      config.microservice.services.secureMessaging.fetchInboxEndpoint,
+      appConfig.microservice.services.secureMessaging.fetchInboxEndpoint,
       "the user's inbox",
       constructInboxEndpointQueryParams(AuthKey.enrolment, eori, filter)
     ).map { response =>
-      auditService.auditSecureMessageInbox(AuthKey.enrolment, eori, filter, config.microservice.services.secureMessaging.fetchInbox)
+      auditService.auditSecureMessageInbox(AuthKey.enrolment, eori, filter, appConfig.microservice.services.secureMessaging.fetchInbox)
       InboxPartial(response.body)
     }
 
   def retrieveConversationPartial(client: String, conversationId: String)(implicit hc: HeaderCarrier): Future[ConversationPartial] =
     fetchPartial(
-      config.microservice.services.secureMessaging.fetchMessageEndpoint(client, conversationId),
+      appConfig.microservice.services.secureMessaging.fetchMessageEndpoint(client, conversationId),
       s"the '$client/$conversationId' conversation",
       conversationEndpointQueryParams
     ).map(response => ConversationPartial(response.body))
 
   def submitReply(client: String, conversationId: String, reply: Map[String, Seq[String]])(
     implicit hc: HeaderCarrier
-  ): Future[Option[ConversationPartial]] =
-    httpClient
-      .POSTForm(config.microservice.services.secureMessaging.submitReplyEndpoint(client, conversationId), reply)
-      .flatMap { response =>
-        response.status match {
-          case OK          => Future.successful(None)
-          case BAD_REQUEST => Future.successful(Some(ConversationPartial(response.body)))
-          case statusCode =>
-            Future.failed(UpstreamErrorResponse(s"Unhappy response($statusCode) posting reply form to secure-messaging-frontend", statusCode))
-        }
+  ): Future[Option[ConversationPartial]] = {
+    val submitEndpoint = appConfig.microservice.services.secureMessaging.submitReplyEndpoint(client, conversationId)
+    post[Map[String, Seq[String]], HttpResponse](submitEndpoint, reply).flatMap { response =>
+      response.status match {
+        case OK          => Future.successful(None)
+        case BAD_REQUEST => Future.successful(Some(ConversationPartial(response.body)))
+        case statusCode =>
+          Future.failed(UpstreamErrorResponse(s"Unhappy response($statusCode) posting reply form to secure-messaging-frontend", statusCode))
       }
-      .recoverWith { case exc: UpstreamErrorResponse =>
-        logger.warn(
-          s"Received a ${exc.statusCode} response from secure-messaging-frontend while submitting a reply for '$client/$conversationId'. ${exc.message}"
-        )
-        Future.failed(exc)
-      }
+    }.recoverWith { case exc: UpstreamErrorResponse =>
+      logger.warn(
+        s"Received a ${exc.statusCode} response from secure-messaging-frontend while submitting a reply for '$client/$conversationId'. ${exc.message}"
+      )
+      Future.failed(exc)
+    }
+  }
 
   def retrieveReplyResult(client: String, conversationId: String)(implicit hc: HeaderCarrier): Future[ReplyResultPartial] =
     fetchPartial(
-      config.microservice.services.secureMessaging.replyResultEndpoint(client, conversationId),
+      appConfig.microservice.services.secureMessaging.replyResultEndpoint(client, conversationId),
       s"the success result of replying to '$client/$conversationId' conversation"
     ).map(response => ReplyResultPartial(response.body))
 
   private def fetchPartial(url: String, errorInfo: String, queryParams: Seq[(String, String)] = Seq.empty)(
     implicit hc: HeaderCarrier
   ): Future[HttpResponse] =
-    httpClient
-      .GET[HttpResponse](url, queryParams)
-      .flatMap { response =>
-        response.status match {
-          case OK => Future.successful(response)
-          case statusCode =>
-            Future.failed(UpstreamErrorResponse(s"Unhappy response($statusCode) fetching $errorInfo", statusCode))
-        }
+    get[HttpResponse](url, queryParams).flatMap { response =>
+      response.status match {
+        case OK => Future.successful(response)
+        case statusCode =>
+          Future.failed(UpstreamErrorResponse(s"Unhappy response($statusCode) fetching $errorInfo", statusCode))
       }
-      .recoverWith { case exc: UpstreamErrorResponse =>
-        logger.warn(s"Received a ${exc.statusCode} response from secure-messaging-frontend while retrieving $errorInfo. ${exc.message}")
-        Future.failed(exc)
-      }
+    }.recoverWith { case exc: UpstreamErrorResponse =>
+      logger.warn(s"Received a ${exc.statusCode} response from secure-messaging-frontend while retrieving $errorInfo. ${exc.message}")
+      Future.failed(exc)
+    }
 
   private def constructInboxEndpointQueryParams(enrolment: String, eori: String, filter: MessageFilterTag): Seq[(String, String)] = {
     val enrolmentParameter = ("enrolment", s"$enrolment~EoriNumber~$eori")

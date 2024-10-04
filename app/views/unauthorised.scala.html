@@ -1,5 +1,5 @@
 @*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import config.ExternalServicesConfig
+@import config.ServiceUrls
 @import views.helpers.Title
 @import views.html.components.gds._
 
@@ -24,7 +24,7 @@
   paragraphBody: paragraphBody,
   link: link,
   bulletList: bulletList,
-  config: ExternalServicesConfig
+  serviceUrls: ServiceUrls
 )
 
 @()(implicit request: Request[_], messages: Messages)
@@ -36,12 +36,12 @@
       Html(messages("unauthorised.paragraph.1.bullet.1", link(
         id = Some("get_eori_link"),
         text = messages("unauthorised.paragraph.1.bullet.1.link"),
-        call = Call("GET", config.eoriService)
+        call = Call("GET", serviceUrls.eoriService)
       ))),
       link(
         id = Some("access_cds_link"),
         text = messages("unauthorised.paragraph.1.bullet.2.link"),
-        call = Call("GET", config.cdsRegister)
+        call = Call("GET", serviceUrls.cdsRegister)
       )
     )
   )
@@ -52,7 +52,7 @@
   @Html(messages("unauthorised.paragraph.2", link(
       id = Some("check_cds_application_status_link"),
       text = messages("unauthorised.paragraph.2.link"),
-      call = Call("GET", config.cdsSubscribe)
+      call = Call("GET", serviceUrls.cdsSubscribe)
     )
   ))
   </p>

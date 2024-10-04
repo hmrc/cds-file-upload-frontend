@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,14 @@
 import com.google.inject.{AbstractModule, Provides}
 import config.AppConfig
 import controllers.actions._
-import javax.inject.Singleton
+import pureconfig.ConfigSource
 import pureconfig.generic.auto._
-import play.filters.csrf.CSRFConfig
+
+import javax.inject.Singleton
 
 class Module extends AbstractModule {
 
-  import pureconfig.ConfigSource
-
   val cfg: AppConfig = ConfigSource.default.loadOrThrow[AppConfig]
-
-  val csrfConfig: CSRFConfig = CSRFConfig(shouldProtect = !_.uri.matches("*test-only*"))
 
   override def configure(): Unit = {
     // Bind the actions for DI

@@ -161,9 +161,15 @@ uploadError.bullet.3 = yn llygredig neu’n cynnwys feirws
 uploadError.bullet.4 = ffeil PDF wedi’i hamgryptio
 uploadError.button = Dechreuwch y broses uwchlwytho eto
 uploadError.guidance = Efallai y gofynnir i chi i wirio neu ailnodi’r manylion cyswllt.
-notFoundError.heading = Heb ddod o hyd i’r dudalen
-notFoundError.paragraph.1 = Os gwnaethoch deipio’r cyfeiriad gwe, gwiriwch ei fod yn gywir.
-notFoundError.paragraph.2 = Os gwnaethoch gyrraedd y dudalen hon drwy bwyso ar gysylltiad neu fotwm, gallwch roi gwybod am broblem dechnegol drwy’r cysylltiad ar waelod y dudalen hon. Cofiwch gynnwys manylion yr hyn a wnaethoch.
+
+global.error.title = Mae problem wedi codi
+global.error.heading = Mae problem wedi codi gyda gwasanaeth
+global.error.message = Rhowch gynnig arall arni yn nes ymlaen
+
+global.error.pageNotFound.title = Heb ddod o hyd i’r dudalen
+global.error.pageNotFound.heading = Ni ellir dod o hyd i’r dudalen hon
+global.error.pageNotFound.message = Gwiriwch eich bod wedi nodi’r cyfeiriad gwe cywir.
+
 feedback.header = Rhowch eich barn
 feedback.line.1 = Mae hwn yn wasanaeth newydd ac rydym eisiau gwybod beth yw’ch barn amdano.
 feedback.line.2 = {0}. Bydd eich meddyliau a’ch syniadau’n ein helpu i wneud gwelliannau.

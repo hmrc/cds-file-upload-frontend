@@ -1,5 +1,5 @@
 @*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,29 +19,25 @@
 @import models.requests.Authenticated
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
-@import uk.gov.hmrc.hmrcfrontend.views.html.components.HmrcReportTechnicalIssue
-@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.reporttechnicalissue.ReportTechnicalIssue
-@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.language.{En, Cy}
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcStandardFooter
 @import views.helpers.Title
 @import views.html.helper.CSPNonce
 
 @this(
-  govukHeader: GovukHeader,
-  govukLayout: GovukLayout,
-  govukFlexibleLayout: govukFlexibleLayout,
-  govukBackLink: GovukBackLink,
-  siteHeader: components.gds.siteHeader,
-  phaseBanner: components.gds.phaseBanner,
-  navigationBanner: components.gds.navigationBanner,
-  timeoutDialogConfig: TimeoutDialogConfig,
-  hmrcHead: HmrcHead,
-  hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
-  hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet,
-  hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
-  hmrcReportTechnicalIssue: HmrcReportTechnicalIssue,
-  hmrcFooter: HmrcStandardFooter,
-  appConfig: AppConfig
+    govukHeader: GovukHeader,
+    govukLayout: GovukLayout,
+    govukFlexibleLayout: govukFlexibleLayout,
+    govukBackLink: GovukBackLink,
+    hmrcHead: HmrcHead,
+    hmrcScripts: HmrcScripts,
+    hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
+    hmrcReportTechnicalIssue: HmrcReportTechnicalIssueHelper,
+    hmrcFooter: HmrcStandardFooter,
+    hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
+    timeoutDialogConfig: TimeoutDialogConfig,
+    siteHeader: siteHeader,
+    phaseBanner: phaseBanner,
+    navigationBanner: navigationBanner,
+    appConfig: AppConfig
 )
 
 @(
@@ -66,39 +62,27 @@
             ))
         )
     } else {
-        @hmrcTrackingConsentSnippet()
+        @hmrcHead()
     }
 
-    <link rel="shortcut icon" href='@Assets.versioned("/lib/govuk-frontend/govuk/assets/images/favicon.ico")' type="image/x-icon" />
     <meta name="format-detection" content="telephone=no" />
-    <!--[if lte IE 8]><link href='@Assets.versioned("stylesheets/application-ie-8.css")' rel="stylesheet" type="text/css" /><![endif]-->
-    <!--[if gt IE 8]><!--><link href='@Assets.versioned("stylesheets/customsdecexfrontend-app.css")' media="all" rel="stylesheet" type="text/css" /><!--<![endif]-->
-
-    <noscript>
-      <style>
-        .govuk-form-group--error {
-          padding-left: 0;
-          border-left: none;
-        }
-      </style>
-    </noscript>
+    <link rel="shortcut icon" href='@Assets.versioned("/lib/govuk-frontend/govuk/assets/images/favicon.ico")' type="image/x-icon" />
+    <link href='@Assets.versioned("stylesheets/sfus-app.css")' media="all" rel="stylesheet" type="text/css" />
 }
 
 @scripts = {
-    <script @CSPNonce.attr src="@Assets.versioned("javascripts/show-hide-content.js")"></script>
-    <script @CSPNonce.attr src='@Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
-    <script @CSPNonce.attr src='@Assets.versioned("lib/hmrc-frontend/hmrc/all.js")'></script>
-    <script @CSPNonce.attr>window.HMRCFrontend.initAll();</script>
-    <script @CSPNonce.attr>window.GOVUKFrontend.initAll();</script>
+    @hmrcScripts()
+
+    <script @CSPNonce.attr src='@Assets.versioned("javascripts/show-hide-content.js")'></script>
 }
 
 @beforeContentBlock = {
-    @phaseBanner("beta")
+    @phaseBanner("BETA")
 
     @if(withNavigationBanner) {
       @navigationBanner()
     }
-    @if(appConfig.play.i18n.langs.contains("cy") && showLanguageSwitch){
+    @if(showLanguageSwitch && appConfig.play.i18n.langs.contains("cy")){
         @hmrcLanguageSelectHelper()
     }
 
@@ -106,13 +90,9 @@
 }
 
 @content = {
-  @contentBlock
+    @contentBlock
     </br>
-  @hmrcReportTechnicalIssue(
-    ReportTechnicalIssue(
-        serviceCode = appConfig.appName,
-        language = if(messages.lang.code == "en") En else Cy)
-  )
+    @hmrcReportTechnicalIssue()
 }
 
 @if(useCustomContentWidth) {

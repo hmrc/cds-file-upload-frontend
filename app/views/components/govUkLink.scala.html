@@ -1,5 +1,5 @@
 @*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
  * limitations under the License.
  *@
 
-@import config.ExternalServicesConfig
+@import config.ServiceUrls
 @import views.html.components.gds.link
 
-@this(externalServicesConfig: ExternalServicesConfig, link: link)
+@this(serviceUrls: ServiceUrls, link: link)
 
 @(id: String = "govuk-link", textKey: String = "common.backToGovUk")(implicit messages: Messages)
 
 <p class="govuk-body">
-  @link(id = Some(id), text = messages(textKey), call = Call("GET", externalServicesConfig.govUk))
+  @link(id = Some(id), text = messages(textKey), call = Call("GET", serviceUrls.govUk))
 </p>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.ExternalServicesConfig
+import config.ServiceUrls
 import controllers.actions.AuthAction
 import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
@@ -29,14 +29,14 @@ class UnverifiedEmailController @Inject() (
   mcc: MessagesControllerComponents,
   unverified_email: unverified_email,
   undeliverable_email: undeliverable_email,
-  config: ExternalServicesConfig
+  serviceUrls: ServiceUrls
 ) extends FrontendController(mcc) with I18nSupport {
 
   val informUserUnverified: Action[AnyContent] = authenticate { implicit req =>
-    Ok(unverified_email(config.emailFrontendUrl))
+    Ok(unverified_email(serviceUrls.emailFrontend))
   }
 
   val informUserUndeliverable: Action[AnyContent] = authenticate { implicit req =>
-    Ok(undeliverable_email(config.emailFrontendUrl))
+    Ok(undeliverable_email(serviceUrls.emailFrontend))
   }
 }

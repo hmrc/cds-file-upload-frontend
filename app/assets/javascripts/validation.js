@@ -4,7 +4,10 @@
         return message.replace("{0}", interpolation)
     }
     const errorSummary = document.getElementsByClassName('govuk-error-summary')[0]
-    const errorSummaryList = document.getElementsByClassName('govuk-error-summary__list')[0]
+    const errorSummaryBody = document.getElementsByClassName('govuk-error-summary__body')[0]
+    const errorSummaryList = document.createElement('ul')
+    errorSummaryList.classList.add("govuk-list", "govuk-error-summary__list")
+    errorSummaryBody.appendChild(errorSummaryList)
 
     const group = document.getElementsByClassName('govuk-form-group')[0]
     document.getElementsByClassName('govuk-form-group')[1].classList.remove("govuk-form-group--error")

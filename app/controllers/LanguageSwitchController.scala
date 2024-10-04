@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package controllers
 
-import config.AppConfig
-import play.api.Configuration
+import config.{AppConfig, ServiceUrls}
 import play.api.i18n.{Lang, MessagesApi}
 import play.api.mvc.MessagesControllerComponents
 import uk.gov.hmrc.play.language.{LanguageController, LanguageUtils}
@@ -25,14 +24,13 @@ import uk.gov.hmrc.play.language.{LanguageController, LanguageUtils}
 import javax.inject.Inject
 
 class LanguageSwitchController @Inject() (
-  config: Configuration,
   override implicit val messagesApi: MessagesApi,
   languageUtils: LanguageUtils,
-  cc: MessagesControllerComponents
+  cc: MessagesControllerComponents,
+  serviceUrls: ServiceUrls
 ) extends LanguageController(languageUtils, cc) {
 
-  override def fallbackURL: String =
-    config.getOptional[String]("urls.loginContinue").getOrElse(throw new Exception("Missing continue login url configuration"))
+  override def fallbackURL: String = serviceUrls.loginContinue
 
   override def languageMap: Map[String, Lang] = AppConfig.languageMap
 }

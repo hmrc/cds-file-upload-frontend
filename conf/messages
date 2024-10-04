@@ -199,7 +199,6 @@ unauthorisedAgent.paragraph.2 = You will be able to declare your representation 
 notImplemented.heading = This page has not been implemented yet
 notImplemented.message = We are working hard to make it available to you. Please come back later.
 
-
 ## Errors
 uploadError.heading = One of your files has been rejected
 uploadError.paragraph = At least one of your files may be:
@@ -210,9 +209,13 @@ uploadError.bullet.4 = an encrypted PDF file
 uploadError.button = Start your upload again
 uploadError.guidance = You may be asked to check or re-enter the contact details.
 
-notFoundError.heading = Page not found
-notFoundError.paragraph.1 = If you typed the web address, check it is correct.
-notFoundError.paragraph.2 = If you selected a link or button and arrived at this page, you can report a technical problem on the link at the base of this page. Include details about what you did.
+global.error.title = There is a problem
+global.error.heading = There is a problem with a service
+global.error.message = Try again later
+
+global.error.pageNotFound.title = Page not found
+global.error.pageNotFound.heading = This page can’t be found
+global.error.pageNotFound.message = Please check that you have entered the correct web address.
 
 feedback.header = Tell us what you think
 feedback.line.1 = This is a new service and we want to know what you think of it.
