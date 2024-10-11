@@ -74,8 +74,8 @@ case class CDSFileUpload(protocol: Option[String], host: String, port: Option[In
   def fetchNotificationEndpoint(reference: String): String =
     s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$fetchNotificationUri/$reference"
 
-  def fetchVerifiedEmailEndpoint(eori: String): String =
-    s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$fetchVerifiedEmail/$eori"
+  def fetchVerifiedEmailEndpoint: String =
+    s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$fetchVerifiedEmail"
 }
 
 case class ContactFrontend(url: String, serviceId: String) {
