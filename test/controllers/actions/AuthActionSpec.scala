@@ -23,7 +23,6 @@ import play.api.mvc.{Action, AnyContent}
 import play.api.test.Helpers._
 import play.api.test._
 import testdata.CommonTestData
-import testdata.CommonTestData.eori
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -33,11 +32,10 @@ class AuthActionSpec extends ControllerSpecBase {
 
   private lazy val serviceUrls = instanceOf[ServiceUrls]
 
-  def authAction(allowedEoris: Seq[String]) =
-    new AuthActionImpl(mockAuthConnector, new EoriAllowList(allowedEoris), mcc, serviceUrls)
-
-  def authController(allowedEoris: Seq[String] = Seq.empty) =
-    new TestController(authAction(allowedEoris))
+  val authController: TestController = {
+    val authAction = new AuthActionImpl(mockAuthConnector, mcc, serviceUrls)
+    new TestController(authAction)
+  }
 
   "AuthAction" should {
 
@@ -46,7 +44,7 @@ class AuthActionSpec extends ControllerSpecBase {
 
       withSignedInUser(user) {
 
-        val response = authController().action(FakeRequest())
+        val response = authController.action(FakeRequest())
 
         status(response) mustBe OK
         contentAsString(response) mustBe user.toString
@@ -57,7 +55,7 @@ class AuthActionSpec extends ControllerSpecBase {
       withAuthError(new NoActiveSession("") {}) {
 
         val request = FakeRequest("GET", "")
-        val response = authController().action(request)
+        val response = authController.action(request)
 
         status(response) mustBe SEE_OTHER
         redirectLocation(response).get must include("cds-file-upload-service")
@@ -69,7 +67,7 @@ class AuthActionSpec extends ControllerSpecBase {
       "authorisation fails" in {
         withAuthError(InsufficientEnrolments("")) {
 
-          val response = authController().action(FakeRequest())
+          val response = authController.action(FakeRequest())
 
           status(response) mustBe SEE_OTHER
           redirectLocation(response) mustBe Some(controllers.routes.UnauthorisedController.onPageLoad.url)
@@ -79,7 +77,7 @@ class AuthActionSpec extends ControllerSpecBase {
       "user does not have an eori number" in {
         withUserWithoutEori {
 
-          val response = authController().action(FakeRequest())
+          val response = authController.action(FakeRequest())
 
           status(response) mustBe SEE_OTHER
           redirectLocation(response) mustBe Some(controllers.routes.UnauthorisedController.onPageLoad.url)
@@ -88,44 +86,21 @@ class AuthActionSpec extends ControllerSpecBase {
     }
 
     "allow access" when {
-      "allowListing doesn't have any eori and user has eori" in {
+      "the user has eori" in {
 
         val user = CommonTestData.signedInUser
 
         withSignedInUser(user) {
-          val response = authController().action(FakeRequest())
+          val response = authController.action(FakeRequest())
 
           status(response) mustBe OK
-        }
-      }
-
-      "allowListing contains eori and user has allowed eori" in {
-        val user = CommonTestData.signedInUser
-
-        withSignedInUser(user) {
-          val response = authController(Seq(eori)).action(FakeRequest())
-
-          status(response) mustBe OK
-        }
-      }
-    }
-
-    "doesn't allow access" when {
-      "user has not allowListed eori" in {
-        val user = CommonTestData.signedInUser
-
-        withSignedInUser(user) {
-          val response = authController(Seq("GB1111231")).action(FakeRequest())
-
-          status(response) mustBe SEE_OTHER
-          redirectLocation(response) mustBe Some(controllers.routes.UnauthorisedController.onPageLoad.url)
         }
       }
     }
 
     "redirect to /you-cannot-use-this-service when user is an Agent" in {
       withSignedInAgent() {
-        val result = authController(Seq("GB1111231")).action(FakeRequest())
+        val result = authController.action(FakeRequest())
 
         status(result) mustBe SEE_OTHER
         redirectLocation(result) mustBe Some(routes.UnauthorisedController.onAgentKickOut(UserIsAgent).url)

@@ -40,7 +40,7 @@ class RefererUrlValidatorSpec extends UnitSpec {
     secureMessageAnswersRepository = mock[SecureMessageAnswersRepository],
     trackingConsentFrontend = mock[TrackingConsentFrontend],
     play = mock[Play],
-    allowList = AllowList(List.empty, List(allowedService1, allowedService2))
+    refererServices = List(allowedService1, allowedService2)
   )
 
   private val validator = RefererUrlValidator

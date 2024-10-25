@@ -147,10 +147,7 @@ class AppConfigSpec extends PlaySpec {
       |  ttl-seconds = 3600
       |}
       |
-      |allow-list {
-      |  eori = [123456,345678]
-      |  referer-services = ["cds-file-upload-service", "customs-declare-exports"]
-      |}
+      |referer-services = ["cds-file-upload-service", "customs-declare-exports"]
       |
       |tracking-consent-frontend {
       |  gtm.container = "a"
@@ -207,12 +204,8 @@ class AppConfigSpec extends PlaySpec {
       config.secureMessageAnswersRepository.ttlSeconds mustBe 3600
     }
 
-    "have an allow list eori value defined" in {
-      config.allowList.eori.size mustBe 2
-    }
-
     "have an allow list refererServices value defined" in {
-      config.allowList.refererServices.size mustBe 2
+      config.refererServices.size mustBe 2
     }
   }
 }
