@@ -16,8 +16,7 @@
 
 package controllers.actions
 
-import com.google.inject.ProvidedBy
-import config.{AppConfig, ServiceUrls}
+import config.ServiceUrls
 import controllers.routes.UnauthorisedController
 import models.AuthKey
 import models.UnauthorisedReason.UserIsAgent
@@ -29,18 +28,14 @@ import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{affinityGroup, allEnrolments}
 import uk.gov.hmrc.auth.core.retrieve.~
-import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
-import javax.inject.{Inject, Provider}
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuthActionImpl @Inject() (
-  val authConnector: AuthConnector,
-  eoriAllowList: EoriAllowList,
-  mcc: MessagesControllerComponents,
-  serviceUrls: ServiceUrls
-) extends AuthAction with AuthorisedFunctions with Logging {
+class AuthActionImpl @Inject() (val authConnector: AuthConnector, mcc: MessagesControllerComponents, serviceUrls: ServiceUrls)
+    extends AuthAction with AuthorisedFunctions with Logging {
 
   implicit override val executionContext: ExecutionContext = mcc.executionContext
   override val parser: BodyParser[AnyContent] = mcc.parsers.defaultBodyParser
@@ -51,12 +46,11 @@ class AuthActionImpl @Inject() (
     authorised((Individual or Organisation) and Enrolment(AuthKey.enrolment))
       .retrieve(allEnrolments and affinityGroup) { case allEnrolments ~ _ =>
         allEnrolments.getEnrolment(AuthKey.enrolment).flatMap(_.getIdentifier(AuthKey.identifierKey)) match {
-          case Some(eori) if eoriAllowList.allows(eori.value) =>
+          case Some(eori) =>
             val signedInUser = SignedInUser(eori.value, allEnrolments)
             Future.successful(Right(AuthenticatedRequest(request, signedInUser)))
 
-          case Some(_) => throw new UnauthorizedException("User is not authorized to use this service")
-          case None    => throw InsufficientEnrolments("User has insufficient enrolments")
+          case _ => throw InsufficientEnrolments("User has insufficient enrolments")
         }
       }
       .recover {
@@ -77,13 +71,3 @@ class AuthActionImpl @Inject() (
 }
 
 trait AuthAction extends ActionBuilder[AuthenticatedRequest, AnyContent] with ActionRefiner[Request, AuthenticatedRequest]
-
-@ProvidedBy(classOf[EoriAllowListProvider])
-class EoriAllowList(val values: Seq[String]) {
-  def allows(eori: String): Boolean = values.isEmpty || values.contains(eori)
-}
-
-class EoriAllowListProvider @Inject() (appConfig: AppConfig) extends Provider[EoriAllowList] {
-  override def get(): EoriAllowList =
-    new EoriAllowList(appConfig.allowList.eori)
-}

@@ -33,7 +33,7 @@ case class AppConfig(
   secureMessageAnswersRepository: SecureMessageAnswersRepository,
   trackingConsentFrontend: TrackingConsentFrontend,
   play: Play,
-  allowList: AllowList
+  refererServices: List[String]
 )
 
 object AppConfig {
@@ -130,5 +130,3 @@ case class SecureMessaging(
   def submitReplyEndpoint(client: String, conversationId: String): String =
     s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$submitReply/$client/$conversationId"
 }
-
-case class AllowList(eori: List[String], refererServices: List[String])
