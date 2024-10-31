@@ -19,7 +19,7 @@ package controllers.actions
 import connectors.CdsFileUploadConnector
 import controllers.routes
 import javax.inject.{Inject, Singleton}
-import models.{EORI, Email}
+import models.Email
 import models.requests.{AuthenticatedRequest, VerifiedEmailRequest}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Result}
@@ -41,7 +41,7 @@ class VerifiedEmailActionImpl @Inject() (backendConnector: CdsFileUploadConnecto
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    backendConnector.getVerifiedEmailAddress(EORI(request.eori)).map {
+    backendConnector.getVerifiedEmailAddress.map {
       case Some(Email(address, true)) => Right(VerifiedEmailRequest(request, address))
       case Some(Email(_, false))      => Left(onUndeliverable)
       case _                          => Left(onUnverified)

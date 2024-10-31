@@ -16,7 +16,7 @@
 
 package connectors
 
-import models.{EORI, Email, Notification}
+import models.{Email, Notification}
 import org.mockito.MockitoSugar.when
 import uk.gov.hmrc.http.UpstreamErrorResponse
 
@@ -50,34 +50,33 @@ class CdsFileUploadConnectorSpec extends ConnectorSpec {
   }
 
   "CdsFileUploadConnector on getVerifiedEmail" should {
-    lazy val sampleEori = EORI("12345")
 
     "handle a 200 response by returning a Email" in {
       val expectedEmail = Email("some@email.com", true)
       when(execute[Option[Email]]).thenReturn(Future.successful(Some(expectedEmail)))
 
-      val result = connector.getVerifiedEmailAddress(sampleEori).futureValue
+      val result = connector.getVerifiedEmailAddress.futureValue
       result mustBe Some(expectedEmail)
     }
 
     "handle a 404 response by returning None" in {
       when(execute[Option[Email]]).thenReturn(Future.successful(None))
 
-      val result = connector.getVerifiedEmailAddress(sampleEori).futureValue
+      val result = connector.getVerifiedEmailAddress.futureValue
       result mustBe None
     }
 
     "handle a 'non 404' 4XX response by throwing an exception" in {
       when(execute[Option[Email]]).thenReturn(Future.failed(UpstreamErrorResponse("", 410)))
 
-      val result = connector.getVerifiedEmailAddress(sampleEori)
+      val result = connector.getVerifiedEmailAddress
       assert(result.failed.futureValue.isInstanceOf[UpstreamErrorResponse])
     }
 
     "handle a 5XX response by throwing an exception" ignore {
       when(execute[Option[Email]]).thenReturn(Future.failed(UpstreamErrorResponse("", 500)))
 
-      val result = connector.getVerifiedEmailAddress(sampleEori)
+      val result = connector.getVerifiedEmailAddress
       assert(result.failed.futureValue.isInstanceOf[UpstreamErrorResponse])
     }
   }

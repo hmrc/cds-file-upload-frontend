@@ -170,7 +170,7 @@ class AppConfigSpec extends PlaySpec {
     "have a correct configuration for CDS File Upload" in {
       val cdsFileUpload = config.microservice.services.cdsFileUpload
       cdsFileUpload.fetchNotificationEndpoint("reference") mustBe "http://localhost:6795/cds-file-upload/notification/reference"
-      cdsFileUpload.fetchVerifiedEmailEndpoint("sampleEori") mustBe "http://localhost:6795/cds-file-upload/eori-email/sampleEori"
+      cdsFileUpload.fetchVerifiedEmailEndpoint mustBe "http://localhost:6795/cds-file-upload/eori-email"
     }
 
     "have gtm container" in {

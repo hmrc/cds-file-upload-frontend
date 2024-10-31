@@ -19,8 +19,8 @@ package controllers.actions
 import connectors.CdsFileUploadConnector
 import controllers.{routes, ControllerSpecBase}
 import models.requests.{AuthenticatedRequest, VerifiedEmailRequest}
-import models.{EORI, Email}
-import org.mockito.ArgumentMatchers.{eq => meq, _}
+import models.Email
+import org.mockito.ArgumentMatchers._
 import org.mockito.MockitoSugar.{mock, reset, when}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{MessagesControllerComponents, Result}
@@ -39,7 +39,6 @@ class VerifiedEmailActionSpec extends ControllerSpecBase {
   lazy val action = new ActionTestWrapper(backendConnector, mcc)
 
   lazy val sampleEmailAddress = "example@example.com"
-  lazy val sampleEori = EORI(eori)
   lazy val verifiedEmail = Email(sampleEmailAddress, deliverable = true)
   lazy val undeliverableEmail = Email(sampleEmailAddress, deliverable = false)
   lazy val authenticatedRequest = AuthenticatedRequest[Any](FakeRequest("GET", "requestPath"), signedInUser)
@@ -52,7 +51,7 @@ class VerifiedEmailActionSpec extends ControllerSpecBase {
   "VerifiedEmailAction" should {
     "return a VerifiedEmailRequest" when {
       "user has a verified email address" in {
-        when(backendConnector.getVerifiedEmailAddress(meq(sampleEori))(any())).thenReturn(Future.successful(Some(verifiedEmail)))
+        when(backendConnector.getVerifiedEmailAddress(any())).thenReturn(Future.successful(Some(verifiedEmail)))
 
         val request = AuthenticatedRequest(authenticatedRequest, signedInUser)
 
@@ -64,7 +63,7 @@ class VerifiedEmailActionSpec extends ControllerSpecBase {
 
     "return a redirection Result" when {
       "user has no verified email address" in {
-        when(backendConnector.getVerifiedEmailAddress(meq(sampleEori))(any())).thenReturn(Future.successful(None))
+        when(backendConnector.getVerifiedEmailAddress(any())).thenReturn(Future.successful(None))
 
         val request = AuthenticatedRequest(authenticatedRequest, signedInUser)
 
@@ -75,7 +74,7 @@ class VerifiedEmailActionSpec extends ControllerSpecBase {
     }
 
     "user has no deliverable email address" in {
-      when(backendConnector.getVerifiedEmailAddress(meq(sampleEori))(any())).thenReturn(Future.successful(Some(undeliverableEmail)))
+      when(backendConnector.getVerifiedEmailAddress(any())).thenReturn(Future.successful(Some(undeliverableEmail)))
 
       val request = new AuthenticatedRequest(authenticatedRequest, signedInUser)
 
@@ -86,7 +85,7 @@ class VerifiedEmailActionSpec extends ControllerSpecBase {
 
     "propagate exception" when {
       "connector fails" in {
-        when(backendConnector.getVerifiedEmailAddress(meq(sampleEori))(any())).thenReturn(Future.failed(new Exception("Some unhappy response")))
+        when(backendConnector.getVerifiedEmailAddress(any())).thenReturn(Future.failed(new Exception("Some unhappy response")))
 
         val request = AuthenticatedRequest(authenticatedRequest, signedInUser)
         val result = action.testRefine(request)
