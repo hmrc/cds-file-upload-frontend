@@ -57,7 +57,7 @@ class AuditServiceSpec extends UnitSpec {
     }
 
     "audit a 'UploadSuccess' event" in {
-      auditService.auditUploadSuccess(eori, Some(contactDetails), None, fileUploadCount, List(fileUpload))(hc)
+      auditService.auditUploadSuccess(eori, Some(contactDetails), None, fileUploadCount, List(fileUpload), AuditTypes.UploadSuccess)(hc)
       verify(mockAuditConnector).sendEvent(ArgumentMatchers.refEq(uploadSuccessEvent, "eventId", "generatedAt"))(any(), any())
     }
 

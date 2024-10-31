@@ -26,7 +26,7 @@ import models.requests.FileUploadResponseRequest
 import play.api.Logging
 import play.api.i18n.I18nSupport
 import play.api.mvc._
-import services.{AuditService, FileUploadAnswersService}
+import services.{AuditService, AuditTypes, FileUploadAnswersService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.{upload_error, upload_your_files}
 
@@ -126,6 +126,7 @@ class UpscanStatusController @Inject() (
           case ns if ns.exists(failedUpload) =>
             logger.warn("Failed notification received for an upload.")
             logger.warn(s"Notifications: ${prettyPrint(ns)}")
+
             clearUserCache(request.eori)
             Future.successful(Redirect(routes.ErrorPageController.uploadError))
 
@@ -136,7 +137,8 @@ class UpscanStatusController @Inject() (
               request.userAnswers.contactDetails,
               request.userAnswers.mrn,
               request.userAnswers.fileUploadCount,
-              request.fileUploadResponse.uploads
+              request.fileUploadResponse.uploads,
+              AuditTypes.UploadSuccess
             )
             Future.successful(Redirect(routes.UploadYourFilesReceiptController.onPageLoad))
 
