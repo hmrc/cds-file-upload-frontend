@@ -20,7 +20,7 @@
 
 @()(implicit messages: Messages)
 
-<div id="navigation-banner" class="govuk-!-padding-bottom-3 govuk-!-padding-top-3">
+<nav id="navigation-banner" class="govuk-!-padding-bottom-3 govuk-!-padding-top-3">
   @link(
      text = messages("common.navigation.messages"),
      call = routes.InboxChoiceController.onPageLoad,
@@ -31,5 +31,5 @@
      call = routes.MrnEntryController.onPageLoad(),
      classes="govuk-link govuk-link--no-visited-state govuk-!-display-none-print"
   )
-</div>
+</nav>
 <hr class="govuk-section-break govuk-section-break--visible">
