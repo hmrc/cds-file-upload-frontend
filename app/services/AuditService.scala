@@ -21,7 +21,7 @@ import config.AppConfig
 import models._
 import play.api.Logging
 import play.api.libs.json.Json
-import services.AuditTypes.{NavigateToMessages, UploadSuccess}
+import services.AuditTypes.{Audit, NavigateToMessages}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions
 import uk.gov.hmrc.play.audit.AuditExtensions._
@@ -48,14 +48,14 @@ class AuditService @Inject() (connector: AuditConnector, appConfig: AppConfig)(i
     connector.sendExtendedEvent(extendedEvent).map(handleResponse(_, auditType.toString))
   }
 
-  def auditUploadSuccess(
+  def auditUploadResult(
     eori: String,
     maybeContactDetails: Option[ContactDetails],
     maybeMrn: Option[MRN],
     maybeFileUploadCount: Option[FileUploadCount],
-    uploads: List[FileUpload]
+    uploads: List[FileUpload],
+    auditType: Audit
   )(implicit hc: HeaderCarrier): Future[AuditResult] = {
-    val auditType = UploadSuccess
 
     def auditDetails: Map[String, String] = {
       val contactDetails = maybeContactDetails
@@ -101,5 +101,5 @@ class AuditService @Inject() (connector: AuditConnector, appConfig: AppConfig)(i
 
 object AuditTypes extends Enumeration {
   type Audit = Value
-  val NavigateToMessages, UploadSuccess = Value
+  val NavigateToMessages, UploadSuccess, UploadFailure = Value
 }

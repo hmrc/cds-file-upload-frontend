@@ -22,7 +22,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.MockitoSugar.{mock, verify, when}
 import play.api.libs.json.Json
-import services.AuditTypes.{NavigateToMessages, UploadSuccess}
+import services.AuditTypes.{NavigateToMessages, UploadFailure, UploadSuccess}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Disabled, Failure, Success}
@@ -57,8 +57,13 @@ class AuditServiceSpec extends UnitSpec {
     }
 
     "audit a 'UploadSuccess' event" in {
-      auditService.auditUploadSuccess(eori, Some(contactDetails), None, fileUploadCount, List(fileUpload))(hc)
+      auditService.auditUploadResult(eori, Some(contactDetails), None, fileUploadCount, List(fileUpload), AuditTypes.UploadSuccess)(hc)
       verify(mockAuditConnector).sendEvent(ArgumentMatchers.refEq(uploadSuccessEvent, "eventId", "generatedAt"))(any(), any())
+    }
+
+    "audit a 'UploadFailure' event" in {
+      auditService.auditUploadResult(eori, Some(contactDetails), None, fileUploadCount, List(fileUpload), AuditTypes.UploadFailure)(hc)
+      verify(mockAuditConnector).sendEvent(ArgumentMatchers.refEq(uploadFailedEvent, "eventId", "generatedAt"))(any(), any())
     }
 
     "audit with a success" in {
@@ -102,6 +107,22 @@ class AuditServiceSpec extends UnitSpec {
   private val uploadSuccessEvent = DataEvent(
     auditSource = appConfig.appName,
     auditType = UploadSuccess.toString,
+    detail = Map(
+      "eori" -> eori,
+      "telephoneNumber" -> contactDetails.phoneNumber,
+      "fullName" -> contactDetails.name,
+      "companyName" -> contactDetails.companyName,
+      "numberOfFiles" -> fileUploadCount.get.value.toString,
+      "fileReference1" -> fileUpload.reference
+    ),
+    tags = AuditExtensions
+      .auditHeaderCarrier(hc)
+      .toAuditTags("trader-submission", "N/A")
+  )
+
+  private val uploadFailedEvent = DataEvent(
+    auditSource = appConfig.appName,
+    auditType = UploadFailure.toString,
     detail = Map(
       "eori" -> eori,
       "telephoneNumber" -> contactDetails.phoneNumber,
