@@ -28,6 +28,12 @@ class NavigationBannerSpec extends UnitSpec with ViewMatchers {
 
   "Navigation Banner component" should {
 
+    "wrap all links by a <nav> tag" in {
+      val navigationBanner = component.getElementById("navigation-banner")
+      navigationBanner.tagName mustBe "nav"
+      navigationBanner.childrenSize mustBe 2
+    }
+
     "contain link to /message-choice page" in {
       val messagesLink = component.getElementsByClass("govuk-link").get(0)
 
