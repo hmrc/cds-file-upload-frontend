@@ -18,9 +18,10 @@ package controllers
 
 import controllers.routes.SecureMessagingController
 import forms.InboxChoiceForm
+import forms.InboxChoiceForm.Values.ExportsMessages
 import forms.InboxChoiceForm.{InboxChoiceKey, Values}
-import models.requests.{AuthenticatedRequest, VerifiedEmailRequest}
-import models.{ExportMessages, SecureMessageAnswers}
+import models.requests.{AuthenticatedRequest, MessageFilterRequest, VerifiedEmailRequest}
+import models.{AllMessages, ExportMessages, MessageFilterTag, SecureMessageAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.MockitoSugar.{mock, reset, verify, when}
 import play.api.data.Form
@@ -39,9 +40,10 @@ class InboxChoiceControllerSpec extends ControllerSpecBase {
   private val inboxChoice = mock[inbox_choice]
   private val secureMessageAnswersService = mock[SecureMessageAnswersService]
 
-  private val controller =
+  private def controller(tag: MessageFilterTag = ExportMessages) =
     new InboxChoiceController(
       stubMessagesControllerComponents(),
+      new FakeMessageFilterAction(eoriString.sample.get, tag),
       new FakeAuthAction(),
       new FakeVerifiedEmailAction(),
       secureMessageAnswersService,
@@ -59,13 +61,28 @@ class InboxChoiceControllerSpec extends ControllerSpecBase {
 
   "InboxChoiceController.onPageLoad" should {
 
-    "return a 200(OK) status code" in {
-      val result = controller.onPageLoad()(fakeRequest)
-      status(result) mustBe OK
+    "return a 200(OK) status code" when {
+      "cache is empty" in {
+        val result = controller(AllMessages).onPageLoad()(fakeRequest)
+
+        status(result) mustBe OK
+
+        val expectedFormWithErrors = InboxChoiceForm.form
+        verify(inboxChoice).apply(eqTo(expectedFormWithErrors))(any[Request[_]], any[Messages])
+      }
+
+      "cache contains filter choice" in {
+        val result = controller().onPageLoad()(fakeRequest)
+
+        status(result) mustBe OK
+
+        val expectedFormWithErrors = InboxChoiceForm.form.bind(Map(InboxChoiceKey -> ExportsMessages))
+        verify(inboxChoice).apply(eqTo(expectedFormWithErrors))(any[Request[_]], any[Messages])
+      }
     }
 
     "call inbox_choice_page template" in {
-      controller.onPageLoad()(fakeRequest).futureValue
+      controller().onPageLoad()(fakeRequest).futureValue
       verify(inboxChoice).apply(any[Form[InboxChoiceForm]])(any[Request[_]], any[Messages])
     }
   }
@@ -76,12 +93,12 @@ class InboxChoiceControllerSpec extends ControllerSpecBase {
       val request = fakePostRequest.withFormUrlEncodedBody(InboxChoiceKey -> "Incorrect Choice")
 
       "return a 400(BAD_REQUEST) status code" in {
-        val result = controller.onSubmit()(request)
+        val result = controller().onSubmit()(request)
         status(result) mustBe BAD_REQUEST
       }
 
       "call the inbox_choice page passing a form with errors" in {
-        controller.onSubmit()(request).futureValue
+        controller().onSubmit()(request).futureValue
 
         val expectedFormWithErrors = InboxChoiceForm.form.bind(Map(InboxChoiceKey -> "Incorrect Choice"))
         verify(inboxChoice).apply(eqTo(expectedFormWithErrors))(any[Request[_]], any[Messages])
@@ -92,12 +109,12 @@ class InboxChoiceControllerSpec extends ControllerSpecBase {
       val request = fakePostRequest.withFormUrlEncodedBody(InboxChoiceKey -> "")
 
       "return a 400(BAD_REQUEST) status code" in {
-        val result = controller.onSubmit()(request)
+        val result = controller().onSubmit()(request)
         status(result) mustBe BAD_REQUEST
       }
 
       "call the inbox_choice page passing a form with errors" in {
-        controller.onSubmit()(request).futureValue
+        controller().onSubmit()(request).futureValue
 
         val expectedFormWithErrors = InboxChoiceForm.form.bind(Map(InboxChoiceKey -> ""))
         verify(inboxChoice).apply(eqTo(expectedFormWithErrors))(any[Request[_]], any[Messages])
@@ -110,12 +127,12 @@ class InboxChoiceControllerSpec extends ControllerSpecBase {
         val request = fakePostRequest.withFormUrlEncodedBody(InboxChoiceKey -> Values.ExportsMessages)
 
         "call SecureMessageAnswerService" in {
-          controller.onSubmit()(request).futureValue
+          controller().onSubmit()(request).futureValue
           verify(secureMessageAnswersService).findOneAndReplace(SecureMessageAnswers(any(), ExportMessages))
         }
 
         "return SEE_OTHER (303) and redirect to /messages" in {
-          val result = controller.onSubmit()(request)
+          val result = controller().onSubmit()(request)
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some(SecureMessagingController.displayInbox.url)
         }
@@ -125,7 +142,7 @@ class InboxChoiceControllerSpec extends ControllerSpecBase {
         val request = fakePostRequest.withFormUrlEncodedBody(InboxChoiceKey -> Values.ImportsMessages)
 
         "return SEE_OTHER (303) and redirect to /messages" in {
-          val result = controller.onSubmit()(request)
+          val result = controller().onSubmit()(request)
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some(SecureMessagingController.displayInbox.url)
         }
@@ -136,12 +153,12 @@ class InboxChoiceControllerSpec extends ControllerSpecBase {
   "InboxChoiceController.onExportsMessageChoice" should {
 
     "call SecureMessageAnswerService" in {
-      controller.onExportsMessageChoice()(fakeGetRequest).futureValue
+      controller().onExportsMessageChoice()(fakeGetRequest).futureValue
       verify(secureMessageAnswersService).findOneAndReplace(SecureMessageAnswers(any(), ExportMessages))
     }
 
     "return SEE_OTHER (303) and redirect to /messages" in {
-      val result = controller.onExportsMessageChoice()(fakeGetRequest)
+      val result = controller().onExportsMessageChoice()(fakeGetRequest)
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(SecureMessagingController.displayInbox.url)
     }
@@ -150,8 +167,11 @@ class InboxChoiceControllerSpec extends ControllerSpecBase {
   "InboxChoiceController.checkMessageFilterTag" should {
     "return a 400(BAD_REQUEST) status code" when {
       "the given parameter is not a 'MessageFilterTag' value" in {
-        val request = VerifiedEmailRequest(AuthenticatedRequest(fakeRequest, signedInUser), verifiedEmail)
-        val result = controller.checkMessageFilterTag("some choice")(request)
+        val request = MessageFilterRequest(
+          VerifiedEmailRequest(AuthenticatedRequest(fakeRequest, signedInUser), verifiedEmail),
+          SecureMessageAnswers(signedInUser.eori, ExportMessages)
+        )
+        val result = controller().checkMessageFilterTag("some choice")(request)
         status(result) mustBe BAD_REQUEST
       }
     }
