@@ -24,10 +24,11 @@ sealed trait MessageFilterTag {
 
 case object ExportMessages extends MessageFilterTag { val filterValue = "CDS-EXPORTS" }
 case object ImportMessages extends MessageFilterTag { val filterValue = "CDS-IMPORTS" }
+case object AllMessages extends MessageFilterTag { val filterValue = "" }
 
 object MessageFilterTag {
 
-  val values = Seq(ExportMessages, ImportMessages)
+  val values = Seq(ExportMessages, ImportMessages, AllMessages)
 
   def valueOf(name: String): Option[MessageFilterTag] =
     values.foldLeft(Option.empty[MessageFilterTag]) { (acc, tag) =>

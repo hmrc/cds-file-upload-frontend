@@ -16,14 +16,13 @@
 
 package controllers.actions
 
-import controllers.routes
+import models.{AllMessages, SecureMessageAnswers}
 import models.requests.{MessageFilterRequest, VerifiedEmailRequest}
 import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Result}
 import services.SecureMessageAnswersService
+
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-
-import play.api.mvc.Results.Redirect
 
 @Singleton
 class MessageFilterActionImpl @Inject() (val answersService: SecureMessageAnswersService, mcc: MessagesControllerComponents)
@@ -31,14 +30,12 @@ class MessageFilterActionImpl @Inject() (val answersService: SecureMessageAnswer
 
   implicit val executionContext: ExecutionContext = mcc.executionContext
 
-  private lazy val onError = Redirect(routes.InboxChoiceController.onPageLoad)
-
   override protected def refine[A](request: VerifiedEmailRequest[A]): Future[Either[Result, MessageFilterRequest[A]]] =
     answersService.findOne(request.eori).map { maybeFilter =>
       maybeFilter match {
         case Some(filter) =>
           Right(MessageFilterRequest(request, filter))
-        case None => Left(onError)
+        case None => Right(MessageFilterRequest(request, SecureMessageAnswers(request.eori, AllMessages)))
       }
     }
 }

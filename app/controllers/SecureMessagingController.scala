@@ -46,7 +46,7 @@ class SecureMessagingController @Inject() (
   val displayInbox: Action[AnyContent] = actions.async { implicit request =>
     implicit val hc = headerCarrierForPartialsConverter.fromRequestWithEncryptedCookie(request)
     messageConnector
-      .retrieveInboxPartial(request.secureMessageAnswers.eori, request.secureMessageAnswers.filter)
+      .retrieveInboxPartial(request.request.eori, request.secureMessageAnswers.filter)
       .map { partial =>
         Ok(inbox_wrapper(HtmlFormat.raw(partial.body)))
       }
