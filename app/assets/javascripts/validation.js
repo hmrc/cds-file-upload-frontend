@@ -8,7 +8,7 @@
 
     const errorH2Element = document.createElement('h2')
     errorH2Element.classList.add("govuk-error-summary__title")
-    errorH2Element.innerHTML = messages("fileUploadPage.selectFile")
+    errorH2Element.innerHTML = messages("global.error.title")
 
     const errorElement = document.createElement('div')
     errorElement.setAttribute("role", "alert")
