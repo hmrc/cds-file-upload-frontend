@@ -49,18 +49,21 @@
 
                 @exportsInputText(
                     field = form("name"),
+                    autocomplete = Some("name"),
                     labelKey = "contactDetails.name",
                     labelClasses = "govuk-label",
                 )
 
                 @exportsInputText(
                     field = form("companyName"),
+                    autocomplete = Some("organization"),
                     labelKey = "contactDetails.companyName",
                     labelClasses = "govuk-label",
                 )
 
                 @exportsInputText(
                     field = form("phoneNumber"),
+                    autocomplete = Some("tel"),
                     labelKey = "contactDetails.phoneNumber",
                     labelClasses = "govuk-label",
                     inputmode = "numeric",
