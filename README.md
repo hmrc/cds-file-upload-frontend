@@ -52,6 +52,14 @@ To set a feature flag via system properties
 
 `sbt "run -Dmicroservice.services.features.secureMessaging=enabled"`
 
+## Before pushing changes
+
+Run the following command to ensure all tests pass:
+
+```
+./precheck.sh
+```
+
 ## Accessibility Statement
 
 As a developer we rarely have the need to test it locally, therefore we should not add the 

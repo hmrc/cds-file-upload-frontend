@@ -66,7 +66,8 @@ class ContactDetailsSpec extends UnitViewSpec with ScalaCheckPropertyChecks with
     "display name input" in {
       forAll { contactDetails: ContactDetails =>
         val popForm = form.fillAndValidate(contactDetails)
-        val input = exportsInputText(field = popForm("name"), labelKey = "contactDetails.name", labelClasses = "govuk-label")
+        val input =
+          exportsInputText(field = popForm("name"), autocomplete = Some("name"), labelKey = "contactDetails.name", labelClasses = "govuk-label")
 
         createViewAsString(popForm) must include(input.toString())
       }
@@ -75,7 +76,12 @@ class ContactDetailsSpec extends UnitViewSpec with ScalaCheckPropertyChecks with
     "display company name input" in {
       forAll { contactDetails: ContactDetails =>
         val popForm = form.fillAndValidate(contactDetails)
-        val input = exportsInputText(field = popForm("companyName"), labelKey = "contactDetails.companyName", labelClasses = "govuk-label")
+        val input = exportsInputText(
+          field = popForm("companyName"),
+          autocomplete = Some("organization"),
+          labelKey = "contactDetails.companyName",
+          labelClasses = "govuk-label"
+        )
 
         createViewAsString(popForm) must include(input.toString())
       }
@@ -86,6 +92,7 @@ class ContactDetailsSpec extends UnitViewSpec with ScalaCheckPropertyChecks with
         val popForm = form.fillAndValidate(contactDetails)
         val input = exportsInputText(
           field = popForm("phoneNumber"),
+          autocomplete = Some("tel"),
           labelKey = "contactDetails.phoneNumber",
           labelClasses = "govuk-label",
           inputmode = "numeric",
