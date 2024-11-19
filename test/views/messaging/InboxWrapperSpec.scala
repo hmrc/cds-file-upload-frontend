@@ -32,7 +32,7 @@ class InboxWrapperSpec extends UnitViewSpec {
   "Inbox Wrapper page" should {
 
     "display page header" in {
-      view.getElementsByTag("title").first() must containMessage("Messages between you and HMRC")
+      view.getElementsByTag("title").first() must containText("Messages between you and HMRC")
     }
 
     "display navigation banner" in {

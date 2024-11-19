@@ -29,6 +29,7 @@ import views.html.messaging.{inbox_wrapper, partial_wrapper}
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
+import scala.util.matching.Regex
 
 class SecureMessagingController @Inject() (
   authenticate: AuthAction,
@@ -109,8 +110,8 @@ class SecureMessagingController @Inject() (
     routes.MrnEntryController.onPageLoad(Some(RedirectUrl(refererUrl))).url
 
   private def defineH1Text(partialBody: String) = {
-    val trimAfterH1 = StringUtils.substringBefore(partialBody, "</h1>")
-    val trimBeforeH1 = StringUtils.substringAfter(trimAfterH1, "<h1")
-    StringUtils.substringBefore(StringUtils.substringAfter(trimBeforeH1, ">"), "</h1>")
+    val h1textPattern: Regex = "(?i)>(.*?)<\\/h1>".r
+    val matcher = h1textPattern.findFirstIn(partialBody).getOrElse("");
+    StringUtils.substringBetween(matcher, ">", "</h1>")
   }
 }
