@@ -21,10 +21,10 @@
 
 @this(mainTemplate: gdsMainTemplate, govukAccordion : GovukAccordion, govukBackLink : GovukBackLink)
 
-@(partial: HtmlFormat.Appendable)(implicit request: Request[_], messages: Messages)
+@(partial: HtmlFormat.Appendable, h1Text: String)(implicit request: Request[_], messages: Messages)
 
 @mainTemplate(
-  title = Title("inbox.heading"),
+  title = Title(h1Text),
   useCustomContentWidth = true,
   withNavigationBanner = true,
   backLinkUrl = Some(routes.InboxChoiceController.onPageLoad.url)

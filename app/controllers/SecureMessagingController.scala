@@ -18,6 +18,7 @@ package controllers
 
 import connectors.SecureMessageFrontendConnector
 import controllers.actions.{AuthAction, MessageFilterAction, VerifiedEmailAction}
+import org.apache.commons.lang3.StringUtils
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import play.twirl.api.HtmlFormat
@@ -48,7 +49,7 @@ class SecureMessagingController @Inject() (
     messageConnector
       .retrieveInboxPartial(request.secureMessageAnswers.eori, request.secureMessageAnswers.filter)
       .map { partial =>
-        Ok(inbox_wrapper(HtmlFormat.raw(partial.body)))
+        Ok(inbox_wrapper(HtmlFormat.raw(partial.body), defineH1Text(partial.toString)))
       }
   }
 
@@ -60,7 +61,7 @@ class SecureMessagingController @Inject() (
         Ok(
           partial_wrapper(
             HtmlFormat.raw(partial.body),
-            "conversation.heading",
+            defineH1Text(partial.toString),
             defineUploadLink(routes.SecureMessagingController.displayConversation(client, conversationId).url),
             Some(routes.SecureMessagingController.displayInbox.url)
           )
@@ -106,4 +107,10 @@ class SecureMessagingController @Inject() (
 
   private def defineUploadLink(refererUrl: String) =
     routes.MrnEntryController.onPageLoad(Some(RedirectUrl(refererUrl))).url
+
+  private def defineH1Text(partialBody: String) = {
+    val trimAfterH1 = StringUtils.substringBefore(partialBody, "</h1>")
+    val trimBeforeH1 = StringUtils.substringAfter(trimAfterH1, "<h1")
+    StringUtils.substringBefore(StringUtils.substringAfter(trimBeforeH1, ">"), "</h1>")
+  }
 }

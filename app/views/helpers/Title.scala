@@ -22,6 +22,7 @@ case class Title(headingKey: String, hasErrors: Boolean = false, headingArgs: Se
 
   def toString(implicit messages: Messages): String = {
     val withErrors = if (hasErrors) ".withErrors" else ""
-    messages(s"title${withErrors}.format", messages(headingKey, headingArgs: _*), messages("service.name"))
+    val messageOrH1Text = if (messages.isDefinedAt(headingKey)) messages(headingKey, headingArgs: _*) else headingKey
+    messages(s"title${withErrors}.format", messageOrH1Text, messages("service.name"))
   }
 }
