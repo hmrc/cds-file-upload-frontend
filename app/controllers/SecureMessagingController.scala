@@ -18,7 +18,6 @@ package controllers
 
 import connectors.SecureMessageFrontendConnector
 import controllers.actions.{AuthAction, MessageFilterAction, VerifiedEmailAction}
-import org.apache.commons.lang3.StringUtils
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import play.twirl.api.HtmlFormat
@@ -111,7 +110,7 @@ class SecureMessagingController @Inject() (
 
   private def defineH1Text(partialBody: String) = {
     val h1textPattern: Regex = "(?i)>(.*?)<\\/h1>".r
-    val matcher = h1textPattern.findFirstIn(partialBody).getOrElse("");
-    StringUtils.substringBetween(matcher, ">", "</h1>")
+    val maybeMatcher = h1textPattern.findFirstMatchIn(partialBody)
+    maybeMatcher.map{ _.group(1)}.getOrElse("")
   }
 }
