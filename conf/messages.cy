@@ -26,7 +26,8 @@ signed.out.information = I ddefnyddio’r gwasanaeth eto bydd yn rhaid i chi {0}
 signed.out.startPageLink = ddychwelyd i’r dudalen cychwyn a mewngofnodi
 signed.out.backToGovUk = Yn ôl i GOV.UK
 
-choicePage.heading = Beth hoffech ei wneud?
+choicePage.heading = Rheoli dogfennau i ategu’ch datganiadau
+choicePage.text = Dewiswch un o’r opsiynau canlynol:
 choicePage.input.messageInbox = Bwrw golwg dros negeseuon ynghylch eich datganiadau
 choicePage.input.documentUpload = Atodi dogfennau i ddatganiad
 choicePage.input.error.empty = Dewiswch yr hyn yr hoffech ei wneud

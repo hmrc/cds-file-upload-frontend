@@ -26,13 +26,10 @@
 
 @this(
   mainTemplate: gdsMainTemplate,
-  govukRadios: GovukRadios,
-  govukButton: GovukButton,
-  errorSummary: errorSummary,
   paragraph: paragraph,
+  paragraphBody: paragraphBody,
   pageTitle: pageTitle,
-  link: link,
-  formHelper: FormWithCSRF
+  link: link
 )
 
 @(form: Form[ChoiceForm])(implicit request: Request[_], messages: Messages)
@@ -41,17 +38,19 @@
 
     @pageTitle(text = messages("choicePage.heading"))
 
-    @paragraph( link(
-        id = Some("view-messages"),
-        text = messages("choicePage.input.messageInbox"),
-        call = InboxChoiceController.onPageLoad,
-        classes = "govuk-link govuk-link--no-visited-state focus"
-    ))
+    @paragraphBody(messages("choicePage.text"))
 
     @paragraph( link(
         id = Some("upload-files"),
         text = messages("choicePage.input.documentUpload"),
         call = MrnEntryController.onPageLoad(),
         classes = "govuk-link govuk-link--no-visited-state"
+    ))
+
+    @paragraph( link(
+        id = Some("view-messages"),
+        text = messages("choicePage.input.messageInbox"),
+        call = InboxChoiceController.onPageLoad,
+        classes = "govuk-link govuk-link--no-visited-state focus"
     ))
 }
