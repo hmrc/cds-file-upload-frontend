@@ -111,6 +111,6 @@ class SecureMessagingController @Inject() (
   private def defineH1Text(partialBody: String) = {
     val h1textPattern: Regex = "(?i)>(.*?)<\\/h1>".r
     val maybeMatcher = h1textPattern.findFirstMatchIn(partialBody)
-    maybeMatcher.map{ _.group(1)}.getOrElse("")
+    maybeMatcher.map(_.group(1)).getOrElse("")
   }
 }
