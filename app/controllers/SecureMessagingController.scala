@@ -28,6 +28,7 @@ import views.html.messaging.{inbox_wrapper, partial_wrapper}
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
+import scala.util.matching.Regex
 
 class SecureMessagingController @Inject() (
   authenticate: AuthAction,
@@ -48,7 +49,7 @@ class SecureMessagingController @Inject() (
     messageConnector
       .retrieveInboxPartial(request.secureMessageAnswers.eori, request.secureMessageAnswers.filter)
       .map { partial =>
-        Ok(inbox_wrapper(HtmlFormat.raw(partial.body)))
+        Ok(inbox_wrapper(HtmlFormat.raw(partial.body), defineH1Text(partial.toString)))
       }
   }
 
@@ -60,7 +61,7 @@ class SecureMessagingController @Inject() (
         Ok(
           partial_wrapper(
             HtmlFormat.raw(partial.body),
-            "conversation.heading",
+            defineH1Text(partial.toString),
             defineUploadLink(routes.SecureMessagingController.displayConversation(client, conversationId).url),
             Some(routes.SecureMessagingController.displayInbox.url)
           )
@@ -106,4 +107,10 @@ class SecureMessagingController @Inject() (
 
   private def defineUploadLink(refererUrl: String) =
     routes.MrnEntryController.onPageLoad(Some(RedirectUrl(refererUrl))).url
+
+  private def defineH1Text(partialBody: String) = {
+    val h1textPattern: Regex = "(?i)>(.*?)<\\/h1>".r
+    val maybeMatcher = h1textPattern.findFirstMatchIn(partialBody)
+    maybeMatcher.map(_.group(1)).getOrElse("")
+  }
 }

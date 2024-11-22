@@ -53,7 +53,7 @@ class SecureMessagingControllerSpec extends ControllerSpecBase {
 
     reset(partial_wrapper, partialWrapperPage, connector)
 
-    when(partialWrapperPage.apply(any[HtmlFormat.Appendable])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
+    when(partialWrapperPage.apply(any[HtmlFormat.Appendable], any[String])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
     when(partial_wrapper.apply(any[HtmlFormat.Appendable], any[String], any[String], any[Option[String]])(any[Request[_]], any[Messages]))
       .thenReturn(HtmlFormat.empty)
   }

@@ -27,12 +27,12 @@ class InboxWrapperSpec extends UnitViewSpec {
   private val partialWrapperPage = instanceOf[inbox_wrapper]
   private val partialContent = "Partial Content"
 
-  private def view: Document = partialWrapperPage(HtmlFormat.raw(partialContent))(request, messages)
+  private def view: Document = partialWrapperPage(HtmlFormat.raw(partialContent), "Messages between you and HMRC")(request, messages)
 
   "Inbox Wrapper page" should {
 
     "display page header" in {
-      view.getElementsByTag("title").first() must containMessage("inbox.heading")
+      view.getElementsByTag("title").first() must containText("Messages between you and HMRC")
     }
 
     "display navigation banner" in {
