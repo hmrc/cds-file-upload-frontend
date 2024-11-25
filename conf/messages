@@ -37,7 +37,8 @@ session.timeout.heading = For your security we have signed you out
 
 ## Choice Page
 
-choicePage.heading = What do you want to do?
+choicePage.heading = Manage documents to support your declarations
+choicePage.text = Choose one of the following options:
 choicePage.input.messageInbox = View messages about your declarations
 choicePage.input.documentUpload = Attach documents to a declaration
 choicePage.input.error.empty = Select what you would like to do

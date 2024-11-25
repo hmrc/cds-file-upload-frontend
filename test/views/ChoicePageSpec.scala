@@ -18,8 +18,6 @@ package views
 
 import base.UnitViewSpec
 import forms.ChoiceForm
-import forms.ChoiceForm.AllowedChoiceValues._
-import forms.ChoiceForm.ChoiceKey
 import org.jsoup.nodes.Document
 import views.html.choice_page
 
@@ -29,36 +27,6 @@ class ChoicePageSpec extends UnitViewSpec {
   private val choicePage = instanceOf[choice_page]
 
   "Choice page" when {
-
-    "form does not contain errors" should {
-      commonAssertions()
-    }
-
-    "form contains errors" should {
-      commonAssertions()
-
-      val errorView = choicePage(form.withError(ChoiceKey, "choicePage.input.error.empty"))(request, messages)
-
-      "have the page's title prefixed with 'Error:'" in {
-        errorView.head.getElementsByTag("title").first.text must startWith("Error: ")
-      }
-
-      "display error box at top of page" in {
-        errorView.getElementsByClass("govuk-error-summary__title").first() must containMessage("error.summary.title")
-      }
-
-      "display error box with a link to first radio option" in {
-        val errorLink = errorView.getElementsByClass("govuk-list govuk-error-summary__list").first().getElementsByTag("a").first()
-
-        errorLink must containMessage("choicePage.input.error.empty")
-        errorLink must haveHref(s"#${SecureMessageInbox}")
-      }
-    }
-  }
-
-  private val view: Document = choicePage(form)(request, messages)
-
-  private def commonAssertions(): Unit = {
     "display page header" in {
       view.getElementsByTag("h1").first() must containMessage("choicePage.heading")
     }
@@ -67,13 +35,16 @@ class ChoicePageSpec extends UnitViewSpec {
       assertBackLinkIsNotIncluded(view)
     }
 
-    "display radio buttons" in {
-      view must containElementWithID(SecureMessageInbox)
-      view must containElementWithID(DocumentUpload)
+    "display link to upload documents" in {
+      val link = view.getElementsByAttributeValue("id", "upload-files").get(0)
+      link must haveHref(controllers.routes.MrnEntryController.onPageLoad())
     }
 
-    "display 'Continue' button" in {
-      view.getElementsByClass("govuk-button").first() must containMessage("common.continue")
+    "display link to view messages" in {
+      val link = view.getElementsByAttributeValue("id", "view-messages").get(0)
+      link must haveHref(controllers.routes.InboxChoiceController.onPageLoad)
     }
   }
+
+  private val view: Document = choicePage(form)(request, messages)
 }

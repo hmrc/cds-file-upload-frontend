@@ -16,13 +16,12 @@
 
 package controllers.actions
 
-import controllers.{routes, ControllerSpecBase}
+import controllers.ControllerSpecBase
 import models.requests.{AuthenticatedRequest, MessageFilterRequest, VerifiedEmailRequest}
-import models.{ExportMessages, SecureMessageAnswers}
+import models.{AllMessages, ExportMessages, SecureMessageAnswers}
 import org.mockito.ArgumentMatchers.{eq => eqTo}
 import org.mockito.MockitoSugar.{mock, reset, when}
 import play.api.mvc.Result
-import play.api.mvc.Results.Redirect
 import services.SecureMessageAnswersService
 import testdata.CommonTestData._
 
@@ -54,14 +53,16 @@ class MessageFilterActionSpec extends ControllerSpecBase {
     }
 
     "the repository does not find the user's filter selection" must {
-      "redirect the user to the message filter choice page" in {
+      "return a default answer cache with no filter applied" in {
         when(answersService.findOne(eqTo(eori_2))) thenReturn Future.successful(None)
         val request = VerifiedEmailRequest(AuthenticatedRequest(fakeRequest, signedInUser.copy(eori = eori_2)), verifiedEmail)
 
         val result = action.callRefine(request).futureValue
 
-        result.isLeft mustBe true
-        result.swap.getOrElse("") mustBe Redirect(routes.InboxChoiceController.onPageLoad)
+        result.isRight mustBe true
+        val secureMessageAnswer = result.toOption.get.secureMessageAnswers
+        secureMessageAnswer.eori mustBe eori_2
+        secureMessageAnswer.filter mustBe AllMessages
       }
     }
   }

@@ -16,9 +16,10 @@
 
 package forms
 
+import forms.InboxChoiceForm.Values.{ExportsMessages, ImportsMessages}
 import forms.mappings.EnhancedMapping.requiredRadio
 import forms.validators.FieldValidator
-import models.{ExportMessages, ImportMessages}
+import models.{ExportMessages, ImportMessages, MessageFilterTag}
 import play.api.data.{Form, Forms}
 
 case class InboxChoiceForm(choice: String)
@@ -43,4 +44,11 @@ object InboxChoiceForm {
 
     Form(inboxChoiceMapping)
   }
+
+  def messageFilterTagToChoice(filter: MessageFilterTag): Option[InboxChoiceForm] =
+    filter match {
+      case ExportMessages => Some(InboxChoiceForm(ExportsMessages))
+      case ImportMessages => Some(InboxChoiceForm(ImportsMessages))
+      case _              => None
+    }
 }

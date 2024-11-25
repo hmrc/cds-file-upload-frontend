@@ -22,48 +22,35 @@
 @import views.helpers.Title
 @import views.helpers.ErrorMapper.radioGroupErrors
 @import views.html.components.gds._
+@import controllers.routes.{InboxChoiceController, MrnEntryController}
 
 @this(
   mainTemplate: gdsMainTemplate,
-  govukRadios: GovukRadios,
-  govukButton: GovukButton,
-  errorSummary: errorSummary,
-  formHelper: FormWithCSRF
+  paragraph: paragraph,
+  paragraphBody: paragraphBody,
+  pageTitle: pageTitle,
+  link: link
 )
 
 @(form: Form[ChoiceForm])(implicit request: Request[_], messages: Messages)
 
 @mainTemplate(title = Title("choicePage.heading", hasErrors = form.hasErrors || form.hasGlobalErrors)) {
 
-  @formHelper(action = routes.ChoiceController.onSubmit, Symbol("autoComplete") -> "off") {
-    @errorSummary(radioGroupErrors(ChoiceKey, SecureMessageInbox, form.errors))
+    @pageTitle(text = messages("choicePage.heading"))
 
-    @govukRadios(Radios(
-      name = ChoiceKey,
-      fieldset = Some(Fieldset(
-        legend = Some(Legend(
-          content = Text(messages("choicePage.heading")),
-          isPageHeading = true,
-          classes = gdsPageLegend
-        ))
-      )),
-      items = Seq(
-        RadioItem(
-          id = Some(SecureMessageInbox),
-          value = Some(SecureMessageInbox),
-          content = Text(messages("choicePage.input.messageInbox")),
-          checked = form(ChoiceKey).value.contains(SecureMessageInbox)
-        ),
-        RadioItem(
-          id = Some(DocumentUpload),
-          value = Some(DocumentUpload),
-          content = Text(messages("choicePage.input.documentUpload")),
-          checked = form(ChoiceKey).value.contains(DocumentUpload)
-        )
-      ),
-      errorMessage = form(ChoiceKey).error.map(err => ErrorMessage(content = Text(messages(err.message, err.args:_*))))
+    @paragraphBody(messages("choicePage.text"))
+
+    @paragraph( link(
+        id = Some("upload-files"),
+        text = messages("choicePage.input.documentUpload"),
+        call = MrnEntryController.onPageLoad(),
+        classes = "govuk-link govuk-link--no-visited-state"
     ))
 
-    @govukButton(Button(content = Text(messages("common.continue")), attributes = Map("id" -> "submit", "name" -> "continue")))
-  }
+    @paragraph( link(
+        id = Some("view-messages"),
+        text = messages("choicePage.input.messageInbox"),
+        call = InboxChoiceController.onPageLoad,
+        classes = "govuk-link govuk-link--no-visited-state focus"
+    ))
 }
