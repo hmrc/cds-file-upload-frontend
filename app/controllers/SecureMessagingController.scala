@@ -85,6 +85,7 @@ class SecureMessagingController @Inject() (
   }
 
   def submitReply(client: String, conversationId: String): Action[AnyContent] = actions.async { implicit request =>
+    implicit val hc = headerCarrierForPartialsConverter.fromRequestWithEncryptedCookie(request)
     val formData = request.body.asFormUrlEncoded.getOrElse(Map.empty)
 
     messageConnector
