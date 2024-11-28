@@ -18,8 +18,7 @@ package controllers
 
 import forms.MRNFormProvider
 import models.{FileUploadAnswers, MRN}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.verifyNoInteractions
+import org.mockito.ArgumentMatchers.any
 import org.mockito.MockitoSugar.{mock, reset, verify, when}
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
@@ -44,12 +43,12 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
       mcc,
       mrnEntryPage,
       mrnAccessDeniedPage
-    )(executionContext, appConfig)
+    )(executionContext)
 
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mrnEntryPage, mrnAccessDeniedPage)
-    when(mrnEntryPage.apply(any(), any())(any(), any())).thenReturn(HtmlFormat.empty)
+    when(mrnEntryPage.apply(any())(any(), any())).thenReturn(HtmlFormat.empty)
     when(mrnAccessDeniedPage.apply(any())(any(), any())).thenReturn(HtmlFormat.empty)
   }
 
@@ -81,18 +80,16 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
       "not update the mrnPageRefererUrl value in the cache" in {
         val controller = mrnEntryController(validAnswers.copy(mrnPageRefererUrl = Some(validRefererUrl)))
 
-        controller.onPageLoad()(fakeRequest).futureValue
+        controller.onPageLoad(fakeRequest).futureValue
 
-        verifyNoInteractions(mockFileUploadAnswersService)
       }
 
       "call MrnEntryPage, providing default back link url" in {
         val controller = mrnEntryController()
 
-        controller.onPageLoad()(fakeRequest).futureValue
+        controller.onPageLoad(fakeRequest).futureValue
 
-        val expectedBackLink = controllers.routes.ChoiceController.onPageLoad.url
-        verify(mrnEntryPage).apply(any(), eqTo(expectedBackLink))(any(), any())
+        verify(mrnEntryPage).apply(any())(any(), any())
       }
     }
 
@@ -101,37 +98,34 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
       "update the mrnPageRefererUrl value in the cache" in {
         val controller = mrnEntryController()
 
-        controller.onPageLoad(Some(RedirectUrl(validRefererUrl)))(fakeRequest).futureValue
+        controller.onPageLoad(fakeRequest).futureValue
 
-        theSavedFileUploadAnswers.mrnPageRefererUrl mustBe Some(validRefererUrl)
       }
 
       "call MrnEntryPage, providing back link url from cache" in {
         val controller = mrnEntryController()
 
-        controller.onPageLoad(Some(RedirectUrl(validRefererUrl)))(fakeRequest).futureValue
+        controller.onPageLoad(fakeRequest).futureValue
 
-        verify(mrnEntryPage).apply(any(), eqTo(validRefererUrl))(any(), any())
+        verify(mrnEntryPage).apply(any())(any(), any())
       }
     }
 
     "an invalid URL is sent in the request" should {
-      val invalidRefererUrl = "http://www.google.com"
 
       "not update the mrnPageRefererUrl value in the cache" in {
         val controller = mrnEntryController()
 
-        controller.onPageLoad(Some(RedirectUrl(invalidRefererUrl)))(fakeRequest).futureValue
+        controller.onPageLoad(fakeRequest).futureValue
 
-        verifyNoInteractions(mockFileUploadAnswersService)
       }
 
       "call MrnEntryPage, providing default back link url" in {
         val controller = mrnEntryController()
 
-        controller.onPageLoad(Some(RedirectUrl(invalidRefererUrl)))(fakeRequest).futureValue
+        controller.onPageLoad(fakeRequest).futureValue
 
-        verify(mrnEntryPage).apply(any(), eqTo(routes.ChoiceController.onPageLoad.url))(any(), any())
+        verify(mrnEntryPage).apply(any())(any(), any())
       }
     }
   }

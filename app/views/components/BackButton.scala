@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,25 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import controllers.routes.RootController
-@import views.html.components.gds.gdsMainTemplate
-@import views.helpers.Title
-@import views.components.BackButton
+package views.components
 
-@this(govukLayout: gdsMainTemplate)
+import play.api.mvc.Call
 
-@(pageTitle: String, heading: String, message: String)(implicit request: Request[_], messages: Messages)
-
-@govukLayout(
-  title = Title(pageTitle),
-  backButton = Some(BackButton())
-) {
-    <div class="govuk-grid-row">
-        <div class="govuk-grid-column-full">
-            <h1 class="govuk-heading-xl">@heading</h1>
-            <p class="govuk-body-m">@message</p>
-        </div>
-    </div>
-}
+case class BackButton(title: String = "common.back.link", call: Call = Call("GET", "#"))

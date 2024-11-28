@@ -17,7 +17,6 @@
 package views
 
 import base.UnitViewSpec
-import controllers.routes
 import forms.mappings.ContactDetailsMapping._
 import generators.Generators
 import models.ContactDetails
@@ -57,7 +56,7 @@ class ContactDetailsSpec extends UnitViewSpec with ScalaCheckPropertyChecks with
     }
 
     "display the 'Back' link" in {
-      assertBackLinkIsIncluded(createView(form), routes.MrnEntryController.onPageLoad().url)
+      assertBackLinkIsIncluded(createView(form))
     }
 
     def createViewAsString(form: Form[ContactDetails]): String =

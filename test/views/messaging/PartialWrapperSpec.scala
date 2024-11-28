@@ -33,7 +33,7 @@ class PartialWrapperSpec extends UnitViewSpec {
   "partial_wrapper in case of Conversation page" should {
 
     val titleKeyForConversation = "conversation.heading"
-    val view = genView(titleKeyForConversation, Some(routes.SecureMessagingController.displayInbox.url))
+    val view = genView(titleKeyForConversation, true)
 
     "display page header" in {
       view.getElementsByTag("title").first() must containMessage(titleKeyForConversation)
@@ -44,7 +44,7 @@ class PartialWrapperSpec extends UnitViewSpec {
     }
 
     "display the 'Back' link" in {
-      assertBackLinkIsIncluded(view, routes.SecureMessagingController.displayInbox.url)
+      assertBackLinkIsIncluded(view)
     }
 
     "display partial contents" in {
@@ -59,7 +59,7 @@ class PartialWrapperSpec extends UnitViewSpec {
   "partial_wrapper in case of Reply Result page" should {
 
     val titleKeyForReplyResult = "replyResult.heading"
-    val view = genView(titleKeyForReplyResult, None)
+    val view = genView(titleKeyForReplyResult, false)
 
     "display page header" in {
       view.getElementsByTag("title").first() must containMessage(titleKeyForReplyResult)
@@ -85,10 +85,10 @@ class PartialWrapperSpec extends UnitViewSpec {
   private def assertUploadFilesLink(view: Document): Assertion = {
     val elements: List[Element] = view.getElementsByClass("govuk-link").iterator.asScala.toList
     assert(elements.exists { element =>
-      element.text == messages("greyBox.uploadFiles") && element.attr("href") == routes.MrnEntryController.onPageLoad().url
+      element.text == messages("greyBox.uploadFiles") && element.attr("href") == routes.MrnEntryController.onPageLoad.url
     })
   }
 
-  private def genView(titleKey: String, backLinkUrl: Option[String]): Document =
-    partialWrapperPage(HtmlFormat.raw(partialContent), titleKey, routes.MrnEntryController.onPageLoad().url, backLinkUrl)(request, messages)
+  private def genView(titleKey: String, hasBoolean: Boolean): Document =
+    partialWrapperPage(HtmlFormat.raw(partialContent), titleKey, routes.MrnEntryController.onPageLoad.url, hasBoolean)(request, messages)
 }

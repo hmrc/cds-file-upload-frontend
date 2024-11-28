@@ -45,7 +45,7 @@ class NavigationBannerSpec extends UnitSpec with ViewMatchers {
       val messagesLink = component.getElementsByClass("govuk-link").get(1)
 
       messagesLink must containMessage("common.navigation.uploadFiles")
-      messagesLink must haveHref(controllers.routes.MrnEntryController.onPageLoad())
+      messagesLink must haveHref(controllers.routes.MrnEntryController.onPageLoad)
     }
   }
 }

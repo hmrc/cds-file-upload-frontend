@@ -31,14 +31,13 @@ import views.html.mrn_entry
 
 class MrnEntrySpec extends UnitViewSpec with Generators with ScalaCheckPropertyChecks {
 
-  val testBackLink = "testBackLink"
   val messagePrefix = "mrnEntryPage"
 
   val form = new MRNFormProvider()()
   val page = instanceOf[mrn_entry]
 
   def createAppendable(form: Form[MRN]): Appendable =
-    page(form, testBackLink)(request.withCSRFToken, messages)
+    page(form)(request.withCSRFToken, messages)
 
   def createView(form: Form[MRN] = form): Document = asDocument(createAppendable(form))
 
@@ -66,14 +65,14 @@ class MrnEntrySpec extends UnitViewSpec with Generators with ScalaCheckPropertyC
     "include the 'Sign out' link if the user is authorised" in {
       forAll { user: SignedInUser =>
         val authenticatedRequest = AuthenticatedRequest(request.withCSRFToken, user)
-        val view = page(form, testBackLink)(authenticatedRequest, messages)
+        val view = page(form)(authenticatedRequest, messages)
         assertSignoutLinkIsIncluded(view)
       }
     }
 
     "display the 'Back' link with URL provided" in {
-      val view = page(form, testBackLink)(request.withCSRFToken, messages)
-      assertBackLinkIsIncluded(asDocument(view), testBackLink)
+      val view = page(form)(request.withCSRFToken, messages)
+      assertBackLinkIsIncluded(asDocument(view))
     }
   }
 

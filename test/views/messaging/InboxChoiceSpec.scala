@@ -16,7 +16,6 @@
 
 package views.messaging
 
-import controllers.routes
 import forms.InboxChoiceForm
 import forms.InboxChoiceForm.Values.ExportsMessages
 import forms.InboxChoiceForm.{InboxChoiceKey, Values}
@@ -65,7 +64,7 @@ class InboxChoiceSpec extends UnitViewSpec {
     }
 
     "display the 'Back' link" in {
-      assertBackLinkIsIncluded(view, routes.ChoiceController.onPageLoad.url)
+      assertBackLinkIsIncluded(view)
     }
 
     "display radio buttons" in {

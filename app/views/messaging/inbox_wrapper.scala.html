@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.html.components.gds.gdsMainTemplate
 @import views.helpers.Title
+@import views.components.BackButton
 @import play.twirl.api.HtmlFormat
 
 @this(mainTemplate: gdsMainTemplate, govukAccordion : GovukAccordion, govukBackLink : GovukBackLink)
@@ -27,7 +28,7 @@
   title = Title(h1Text),
   useCustomContentWidth = true,
   withNavigationBanner = true,
-  backLinkUrl = Some(routes.InboxChoiceController.onPageLoad.url)
+  backButton = Some(BackButton())
 ) {
 
   <div class="govuk-grid-row">

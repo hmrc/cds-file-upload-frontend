@@ -22,6 +22,7 @@
 @import views.helpers.ErrorMapper.radioGroupErrors
 @import views.html.components.gds._
 @import views.helpers.Title
+@import views.components.BackButton
 
 @this(
   mainTemplate: gdsMainTemplate,
@@ -35,7 +36,7 @@
 
 @mainTemplate(
   title = Title("inboxChoice.heading", hasErrors = form.hasErrors || form.hasGlobalErrors),
-  backLinkUrl = Some(routes.ChoiceController.onPageLoad.url)
+  backButton = Some(BackButton())
 ) {
     @formHelper(action = routes.InboxChoiceController.onSubmit, args = Symbol("autoComplete") -> "off") {
         @errorSummary(radioGroupErrors(InboxChoiceKey, ExportsMessages, form.errors))

@@ -19,7 +19,7 @@ package controllers
 import scala.concurrent.Future
 import connectors.SecureMessageFrontendConnector
 import models.{ConversationPartial, InboxPartial, ReplyResultPartial}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, anyBoolean}
 import org.mockito.MockitoSugar.{mock, reset, verify, when}
 import play.api.i18n.Messages
 import play.api.mvc.Request
@@ -54,7 +54,7 @@ class SecureMessagingControllerSpec extends ControllerSpecBase {
     reset(partial_wrapper, partialWrapperPage, connector)
 
     when(partialWrapperPage.apply(any[HtmlFormat.Appendable], any[String])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
-    when(partial_wrapper.apply(any[HtmlFormat.Appendable], any[String], any[String], any[Option[String]])(any[Request[_]], any[Messages]))
+    when(partial_wrapper.apply(any[HtmlFormat.Appendable], any[String], any[String], anyBoolean())(any[Request[_]], any[Messages]))
       .thenReturn(HtmlFormat.empty)
   }
 
@@ -102,8 +102,7 @@ class SecureMessagingControllerSpec extends ControllerSpecBase {
 
           status(result) mustBe OK
 
-          val expectedUrl = Some(routes.SecureMessagingController.displayInbox.url)
-          verify(partial_wrapper).apply(any(), any(), any(), eqTo(expectedUrl))(any(), any())
+          verify(partial_wrapper).apply(any(), any(), any(), any())(any(), any())
         }
       }
 
@@ -177,8 +176,7 @@ class SecureMessagingControllerSpec extends ControllerSpecBase {
 
         status(result) mustBe OK
 
-        val expectedUrl = Some(routes.SecureMessagingController.displayInbox.url)
-        verify(partial_wrapper).apply(any(), any(), any(), eqTo(expectedUrl))(any(), any())
+        verify(partial_wrapper).apply(any(), any(), any(), any())(any(), any())
       }
     }
 
@@ -192,8 +190,7 @@ class SecureMessagingControllerSpec extends ControllerSpecBase {
 
         status(result) mustBe OK
 
-        val expectedUrl = Some(routes.SecureMessagingController.displayInbox.url)
-        verify(partial_wrapper).apply(any(), any(), any(), eqTo(expectedUrl))(any(), any())
+        verify(partial_wrapper).apply(any(), any(), any(), any())(any(), any())
       }
     }
 
