@@ -56,8 +56,14 @@
   @scriptsBlock
 }
 
+@lang = @{
+    requestHeader.headers.get("Cookie").map{ cookie =>
+        cookie.substring(cookie.indexOf("PLAY_LANG=") + 10, cookie.indexOf("PLAY_LANG=") + 12)
+    }
+}
+
 @govukTemplate(
-  htmlLang = Some("en"),
+  htmlLang = lang,
   pageTitle = pageTitle,
   headBlock = headBlock,
   headerBlock = headerDefault,
