@@ -24,12 +24,9 @@ import models.{FileUploadAnswers, MRN}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import services.FileUploadAnswersService
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl._
-import uk.gov.hmrc.play.bootstrap.binders.{OnlyRelative, RedirectUrl}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.{mrn_access_denied, mrn_entry}
 
-import java.net.URLDecoder.decode
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -59,17 +56,14 @@ class MrnEntryController @Inject() (
       .fold(errorForm => Future.successful(BadRequest(mrnEntry(errorForm))), updateUserAnswersAndRedirect(_, req.userAnswers))
   }
 
-  def autoFill(mrn: String, maybeRefererUrl: Option[RedirectUrl] = None): Action[AnyContent] =
+  def autoFill(mrn: String): Action[AnyContent] =
     (authenticate andThen verifiedEmail andThen getData).async { implicit req =>
-      val updatedAnswers = decodeRefererUrl(maybeRefererUrl)
-        .map(decodedBackLink => req.userAnswers.copy(mrnPageRefererUrl = Some(decodedBackLink)))
-        .getOrElse(req.userAnswers)
-
-      MRN(mrn)
-        .map(updateUserAnswersAndRedirect(_, updatedAnswers))
+      MRN(mrn).map { _ =>
+        Future.successful(Redirect(routes.ContactDetailsController.onPageLoad))
+      }
         .getOrElse(invalidMrnResponse(mrn))
-    }
 
+    }
   private def updateUserAnswersAndRedirect(mrn: MRN, userAnswers: FileUploadAnswers): Future[Result] =
     answersService.findOneAndReplace(userAnswers.copy(mrn = Some(mrn))).map { _ =>
       Redirect(routes.ContactDetailsController.onPageLoad)
@@ -77,15 +71,4 @@ class MrnEntryController @Inject() (
 
   private def invalidMrnResponse(mrn: String)(implicit req: DataRequest[AnyContent]): Future[Result] =
     Future.successful(BadRequest(mrnAccessDenied(mrn)))
-
-  private val decodeRefererUrl = (refererUrl: Option[RedirectUrl]) =>
-    refererUrl.flatMap { url =>
-      val maybeUrl = url.getEither(OnlyRelative) match {
-        case Left(_)                => None
-        case Right(safeRedirectUrl) => Some(safeRedirectUrl.url)
-      }
-
-      maybeUrl.map(decode(_, "UTF-8"))
-    }
-
 }

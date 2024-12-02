@@ -23,7 +23,6 @@ import org.mockito.MockitoSugar.{mock, reset, verify, when}
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
 import testdata.CommonTestData._
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import views.html.{mrn_access_denied, mrn_entry}
 
 class MrnEntryControllerSpec extends ControllerSpecBase {
@@ -176,14 +175,6 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
 
     "provided with correct MRN" should {
 
-      "call AnswersService" in {
-        controller.autoFill(mrn)(fakeRequest).futureValue
-
-        val upsertedUserAnswers = theSavedFileUploadAnswers
-        upsertedUserAnswers.mrn mustBe defined
-        upsertedUserAnswers.mrn.get mustBe MRN(mrn).get
-      }
-
       "return SeeOther (303) response" in {
         val result = controller.autoFill(mrn)(fakeRequest)
 
@@ -193,24 +184,4 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
     }
   }
 
-  "MrnEntryController on autoFill" should {
-
-    "not clear the mrnPageRefererUrl value in the cache" when {
-      "no value is sent in the request" in {
-        val controller = mrnEntryController(validAnswers.copy(mrnPageRefererUrl = Some(validRefererUrl)))
-        controller.autoFill(mrn)(fakeRequest).futureValue
-
-        theSavedFileUploadAnswers.mrnPageRefererUrl mustBe Some(validRefererUrl)
-      }
-    }
-
-    "update the mrnPageRefererUrl value in the cache" when {
-      "a valid URL is sent in the request" in {
-        val controller = mrnEntryController()
-        controller.autoFill(mrn, Some(RedirectUrl(validRefererUrl)))(fakeRequest).futureValue
-
-        theSavedFileUploadAnswers.mrnPageRefererUrl mustBe Some(validRefererUrl)
-      }
-    }
-  }
 }

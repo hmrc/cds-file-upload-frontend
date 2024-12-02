@@ -28,7 +28,7 @@ GET         /conversation/:client/:conversationId/result    controllers.SecureMe
 
 GET         /mrn-entry                                      controllers.MrnEntryController.onPageLoad
 POST        /mrn-entry                                      controllers.MrnEntryController.onSubmit
-GET         /mrn-entry/:mrn                                 controllers.MrnEntryController.autoFill(mrn, refererUrl: Option[RedirectUrl] ?= None)
+GET         /mrn-entry/:mrn                                 controllers.MrnEntryController.autoFill(mrn)
 
 GET         /contact-details                                controllers.ContactDetailsController.onPageLoad
 POST        /contact-details                                controllers.ContactDetailsController.onSubmit
