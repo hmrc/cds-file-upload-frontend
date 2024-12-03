@@ -97,7 +97,7 @@ class SecureMessagingController @Inject() (
             Ok(
               partial_wrapper(
                 HtmlFormat.raw(partial.body),
-                "replyResult.heading",
+                defineH1Text(partial.toString),
                 defineUploadLink(routes.SecureMessagingController.displayConversation(client, conversationId).url),
                 Some(routes.SecureMessagingController.displayInbox.url),
                 true
