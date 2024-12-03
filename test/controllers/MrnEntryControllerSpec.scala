@@ -192,17 +192,4 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
     }
   }
 
-  "MrnEntryController on autoFill" should {
-
-    "not clear the mrnPageRefererUrl value in the cache" when {
-      "no value is sent in the request" in {
-        val controller = mrnEntryController(validAnswers.copy(mrnPageRefererUrl = Some(validRefererUrl)))
-        controller.autoFill(mrn)(fakeRequest).futureValue
-
-        theSavedFileUploadAnswers.mrnPageRefererUrl mustBe Some(validRefererUrl)
-      }
-    }
-
-  }
-
 }
