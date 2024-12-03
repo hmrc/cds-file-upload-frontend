@@ -58,11 +58,9 @@ class MrnEntryController @Inject() (
 
   def autoFill(mrn: String): Action[AnyContent] =
     (authenticate andThen verifiedEmail andThen getData).async { implicit req =>
-      MRN(mrn).map { _ =>
-        Future.successful(Redirect(routes.ContactDetailsController.onPageLoad))
-      }
+      MRN(mrn)
+        .map(updateUserAnswersAndRedirect(_, req.userAnswers))
         .getOrElse(invalidMrnResponse(mrn))
-
     }
   private def updateUserAnswersAndRedirect(mrn: MRN, userAnswers: FileUploadAnswers): Future[Result] =
     answersService.findOneAndReplace(userAnswers.copy(mrn = Some(mrn))).map { _ =>

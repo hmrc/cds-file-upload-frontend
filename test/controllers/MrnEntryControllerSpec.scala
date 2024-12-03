@@ -175,6 +175,14 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
 
     "provided with correct MRN" should {
 
+      "call AnswersService" in {
+        controller.autoFill(mrn)(fakeRequest).futureValue
+
+        val upsertedUserAnswers = theSavedFileUploadAnswers
+        upsertedUserAnswers.mrn mustBe defined
+        upsertedUserAnswers.mrn.get mustBe MRN(mrn).get
+      }
+
       "return SeeOther (303) response" in {
         val result = controller.autoFill(mrn)(fakeRequest)
 
@@ -182,6 +190,19 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
         redirectLocation(result).get mustBe routes.ContactDetailsController.onPageLoad.url
       }
     }
+  }
+
+  "MrnEntryController on autoFill" should {
+
+    "not clear the mrnPageRefererUrl value in the cache" when {
+      "no value is sent in the request" in {
+        val controller = mrnEntryController(validAnswers.copy(mrnPageRefererUrl = Some(validRefererUrl)))
+        controller.autoFill(mrn)(fakeRequest).futureValue
+
+        theSavedFileUploadAnswers.mrnPageRefererUrl mustBe Some(validRefererUrl)
+      }
+    }
+
   }
 
 }
