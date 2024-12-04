@@ -57,7 +57,7 @@
 }
 
 @lang = @{
-    requestHeader.headers.get("Cookie").map{ cookie =>
+    requestHeader.headers.get("Cookie").filter(_.contains("PLAY_LANG=")).map{ cookie =>
         cookie.substring(cookie.indexOf("PLAY_LANG=") + 10, cookie.indexOf("PLAY_LANG=") + 12)
     }
 }
