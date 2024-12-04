@@ -85,6 +85,7 @@ class SecureMessagingController @Inject() (
   }
 
   def submitReply(client: String, conversationId: String): Action[AnyContent] = actions.async { implicit request =>
+    implicit val hc = headerCarrierForPartialsConverter.fromRequestWithEncryptedCookie(request)
     val formData = request.body.asFormUrlEncoded.getOrElse(Map.empty)
 
     messageConnector
@@ -96,9 +97,10 @@ class SecureMessagingController @Inject() (
             Ok(
               partial_wrapper(
                 HtmlFormat.raw(partial.body),
-                "replyResult.heading",
+                defineH1Text(partial.toString),
                 defineUploadLink(routes.SecureMessagingController.displayConversation(client, conversationId).url),
-                Some(routes.SecureMessagingController.displayInbox.url)
+                Some(routes.SecureMessagingController.displayInbox.url),
+                true
               )
             )
         }

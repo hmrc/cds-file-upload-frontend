@@ -30,7 +30,7 @@ class PartialWrapperSpec extends UnitViewSpec {
   private val partialWrapperPage = instanceOf[partial_wrapper]
   private val partialContent = "Partial Content"
 
-  "partial_wrapper in case of Conversation page" should {
+  "partial_wrapper when passed a backlink url" should {
 
     val titleKeyForConversation = "conversation.heading"
     val view = genView(titleKeyForConversation, Some(routes.SecureMessagingController.displayInbox.url))
@@ -56,7 +56,7 @@ class PartialWrapperSpec extends UnitViewSpec {
     }
   }
 
-  "partial_wrapper in case of Reply Result page" should {
+  "partial_wrapper when not passed a backlink url" should {
 
     val titleKeyForReplyResult = "replyResult.heading"
     val view = genView(titleKeyForReplyResult, None)
@@ -82,6 +82,15 @@ class PartialWrapperSpec extends UnitViewSpec {
     }
   }
 
+  "partial_wrapper when passed a positive error flag" should {
+    val titleKeyForReplyResult = "replyResult.heading"
+    val view = genView(titleKeyForReplyResult, None, true)
+
+    "display 'Error' prefix in the title'" in {
+      view.getElementsByTag("title").first().text() must startWith("Error:")
+    }
+  }
+
   private def assertUploadFilesLink(view: Document): Assertion = {
     val elements: List[Element] = view.getElementsByClass("govuk-link").iterator.asScala.toList
     assert(elements.exists { element =>
@@ -89,6 +98,6 @@ class PartialWrapperSpec extends UnitViewSpec {
     })
   }
 
-  private def genView(titleKey: String, backLinkUrl: Option[String]): Document =
-    partialWrapperPage(HtmlFormat.raw(partialContent), titleKey, routes.MrnEntryController.onPageLoad().url, backLinkUrl)(request, messages)
+  private def genView(titleKey: String, backLinkUrl: Option[String], hasError: Boolean = false): Document =
+    partialWrapperPage(HtmlFormat.raw(partialContent), titleKey, routes.MrnEntryController.onPageLoad().url, backLinkUrl, hasError)(request, messages)
 }
