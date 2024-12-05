@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.html.components.gds._
 @import views.helpers.Title
+@import views.components.BackButton
 
 @this(
         mainTemplate: gdsMainTemplate,
@@ -36,7 +37,7 @@
 
 @mainTemplate(
   title = Title("howManyFilesUpload.heading", hasErrors = form.hasErrors || form.hasGlobalErrors),
-  backLinkUrl = Some(routes.ContactDetailsController.onPageLoad.url)
+  backButton = Some(BackButton())
 ) {
     <div class="form-group">
         <div class="govuk-grid-row">

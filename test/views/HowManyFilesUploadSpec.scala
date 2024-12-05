@@ -17,7 +17,6 @@
 package views
 
 import base.UnitViewSpec
-import controllers.routes
 import forms.FileUploadCountProvider
 import generators.Generators
 import models.FileUploadCount
@@ -86,7 +85,7 @@ class HowManyFilesUploadSpec extends UnitViewSpec with Generators with ScalaChec
     }
 
     "display the 'Back' link" in {
-      assertBackLinkIsIncluded(createView(), routes.ContactDetailsController.onPageLoad.url)
+      assertBackLinkIsIncluded(createView())
     }
   }
 

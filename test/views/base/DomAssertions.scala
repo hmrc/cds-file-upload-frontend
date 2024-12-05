@@ -116,10 +116,10 @@ trait DomAssertions { self: UnitViewSpec =>
     }
   }
 
-  def assertBackLinkIsIncluded(view: Document, url: String): Assertion = {
+  def assertBackLinkIsIncluded(view: Document): Assertion = {
     val elements: List[Element] = view.getElementsByClass("govuk-back-link").iterator.asScala.toList
     assert(elements.exists { element =>
-      element.text == messages("common.back.link") && element.attr("href") == url
+      element.text == messages("common.back.link")
     })
   }
 

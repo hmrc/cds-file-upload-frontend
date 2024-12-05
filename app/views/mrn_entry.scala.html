@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.html.components.gds._
 @import views.helpers.Title
+@import views.components.BackButton
 
 @this(
     mainTemplate: gdsMainTemplate,
@@ -28,11 +29,11 @@
     paragraphBody: paragraphBody
 )
 
-@(form: Form[MRN], backLink: String)(implicit request: Request[_], messages: Messages)
+@(form: Form[MRN])(implicit request: Request[_], messages: Messages)
 
 @mainTemplate(
   title = Title("mrnEntryPage.heading", hasErrors = form.hasErrors || form.hasGlobalErrors),
-  backLinkUrl = Some(backLink)
+  backButton = Some(BackButton())
 ) {
     <div class="form-group">
         <div class="govuk-grid-row">

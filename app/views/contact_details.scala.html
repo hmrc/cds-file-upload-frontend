@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components.{Button, FormWithCSRF, GovukButton, Text}
 @import views.html.components.gds.{errorSummary, exportsInputText, gdsMainTemplate, pageTitle, paragraphBody}
 @import views.helpers.Title
+@import views.components.BackButton
 
 @this(
     mainTemplate: gdsMainTemplate,
@@ -32,7 +33,7 @@
 
 @mainTemplate(
   title = Title("contactDetails.heading", hasErrors = form.hasErrors || form.hasGlobalErrors),
-  backLinkUrl = Some(routes.MrnEntryController.onPageLoad().url)
+  backButton = Some(BackButton())
 ) {
     <div class="govuk-grid-row">
         <div class="govuk-grid-column-full">

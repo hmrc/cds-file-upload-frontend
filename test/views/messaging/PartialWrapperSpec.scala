@@ -33,7 +33,7 @@ class PartialWrapperSpec extends UnitViewSpec {
   "partial_wrapper when passed a backlink url" should {
 
     val titleKeyForConversation = "conversation.heading"
-    val view = genView(titleKeyForConversation, Some(routes.SecureMessagingController.displayInbox.url))
+    val view = genView(titleKeyForConversation, true, false)
 
     "display page header" in {
       view.getElementsByTag("title").first() must containMessage(titleKeyForConversation)
@@ -44,7 +44,7 @@ class PartialWrapperSpec extends UnitViewSpec {
     }
 
     "display the 'Back' link" in {
-      assertBackLinkIsIncluded(view, routes.SecureMessagingController.displayInbox.url)
+      assertBackLinkIsIncluded(view)
     }
 
     "display partial contents" in {
@@ -59,7 +59,7 @@ class PartialWrapperSpec extends UnitViewSpec {
   "partial_wrapper when not passed a backlink url" should {
 
     val titleKeyForReplyResult = "replyResult.heading"
-    val view = genView(titleKeyForReplyResult, None)
+    val view = genView(titleKeyForReplyResult, false, false)
 
     "display page header" in {
       view.getElementsByTag("title").first() must containMessage(titleKeyForReplyResult)
@@ -84,7 +84,7 @@ class PartialWrapperSpec extends UnitViewSpec {
 
   "partial_wrapper when passed a positive error flag" should {
     val titleKeyForReplyResult = "replyResult.heading"
-    val view = genView(titleKeyForReplyResult, None, true)
+    val view = genView(titleKeyForReplyResult, true, true)
 
     "display 'Error' prefix in the title'" in {
       view.getElementsByTag("title").first().text() must startWith("Error:")
@@ -94,10 +94,10 @@ class PartialWrapperSpec extends UnitViewSpec {
   private def assertUploadFilesLink(view: Document): Assertion = {
     val elements: List[Element] = view.getElementsByClass("govuk-link").iterator.asScala.toList
     assert(elements.exists { element =>
-      element.text == messages("greyBox.uploadFiles") && element.attr("href") == routes.MrnEntryController.onPageLoad().url
+      element.text == messages("greyBox.uploadFiles") && element.attr("href") == routes.MrnEntryController.onPageLoad.url
     })
   }
 
-  private def genView(titleKey: String, backLinkUrl: Option[String], hasError: Boolean = false): Document =
-    partialWrapperPage(HtmlFormat.raw(partialContent), titleKey, routes.MrnEntryController.onPageLoad().url, backLinkUrl, hasError)(request, messages)
+  private def genView(titleKey: String, hasBackLink: Boolean, hasError: Boolean): Document =
+    partialWrapperPage(HtmlFormat.raw(partialContent), titleKey, routes.MrnEntryController.onPageLoad.url, hasBackLink, hasError)(request, messages)
 }

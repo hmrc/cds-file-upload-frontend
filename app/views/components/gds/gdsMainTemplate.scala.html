@@ -20,6 +20,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
 @import views.helpers.Title
+@import views.components.BackButton
 @import views.html.helper.CSPNonce
 
 @this(
@@ -42,14 +43,21 @@
 
 @(
   title: Title,
+  backButton: Option[BackButton] = None,
   useCustomContentWidth: Boolean = false,
   withNavigationBanner: Boolean = false,
-  backLinkUrl: Option[String] = None,
   displaySignOut: Boolean = false,
   showLanguageSwitch: Boolean = true
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages)
 
 @userIsSignedIn = @{ request.isInstanceOf[Authenticated] }
+
+@backLink = @{
+    backButton.map { back =>
+        val attributes = Map("id" -> "back-link", "data-module" -> "hmrc-back-link")
+        govukBackLink(BackLink(href = back.call.url, attributes = attributes, content = Text(messages(back.title))))
+    }
+}
 
 @head = {
     @if(userIsSignedIn) {
@@ -86,7 +94,7 @@
         @hmrcLanguageSelectHelper()
     }
 
-    @backLinkUrl.map(href => govukBackLink(BackLink(href = href, content = Text(messages("common.back.link")))))
+    @backLink
 }
 
 @content = {

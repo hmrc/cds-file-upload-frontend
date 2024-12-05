@@ -16,7 +16,6 @@
 
 package views.messaging
 
-import controllers.routes
 import org.jsoup.nodes.Document
 import play.twirl.api.HtmlFormat
 import views.base.UnitViewSpec
@@ -40,7 +39,7 @@ class InboxWrapperSpec extends UnitViewSpec {
     }
 
     "display the 'Back' link" in {
-      assertBackLinkIsIncluded(view, routes.InboxChoiceController.onPageLoad.url)
+      assertBackLinkIsIncluded(view)
     }
 
     "display partial contents" in {

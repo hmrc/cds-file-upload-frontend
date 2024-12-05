@@ -138,7 +138,7 @@ class ChoiceControllerSpec extends ControllerSpecBase {
         "redirect to /mrn-entry" in {
           val result = controller.onSubmit()(request)
 
-          redirectLocation(result) mustBe Some(controllers.routes.MrnEntryController.onPageLoad().url)
+          redirectLocation(result) mustBe Some(controllers.routes.MrnEntryController.onPageLoad.url)
         }
       }
     }

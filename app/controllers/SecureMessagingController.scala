@@ -21,7 +21,6 @@ import controllers.actions.{AuthAction, MessageFilterAction, VerifiedEmailAction
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import play.twirl.api.HtmlFormat
-import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.partials.HeaderCarrierForPartialsConverter
 import views.html.messaging.{inbox_wrapper, partial_wrapper}
@@ -62,8 +61,7 @@ class SecureMessagingController @Inject() (
           partial_wrapper(
             HtmlFormat.raw(partial.body),
             defineH1Text(partial.toString),
-            defineUploadLink(routes.SecureMessagingController.displayConversation(client, conversationId).url),
-            Some(routes.SecureMessagingController.displayInbox.url)
+            defineUploadLink(routes.SecureMessagingController.displayConversation(client, conversationId).url)
           )
         )
       )
@@ -78,7 +76,9 @@ class SecureMessagingController @Inject() (
           partial_wrapper(
             HtmlFormat.raw(partial.body),
             "replyResult.heading",
-            defineUploadLink(routes.SecureMessagingController.displayReplyResult(client, conversationId).url)
+            defineUploadLink(routes.SecureMessagingController.displayReplyResult(client, conversationId).url),
+            false,
+            false
           )
         )
       )
@@ -99,7 +99,7 @@ class SecureMessagingController @Inject() (
                 HtmlFormat.raw(partial.body),
                 defineH1Text(partial.toString),
                 defineUploadLink(routes.SecureMessagingController.displayConversation(client, conversationId).url),
-                Some(routes.SecureMessagingController.displayInbox.url),
+                true,
                 true
               )
             )
@@ -108,7 +108,7 @@ class SecureMessagingController @Inject() (
   }
 
   private def defineUploadLink(refererUrl: String) =
-    routes.MrnEntryController.onPageLoad(Some(RedirectUrl(refererUrl))).url
+    routes.MrnEntryController.onPageLoad.url
 
   private def defineH1Text(partialBody: String) = {
     val h1textPattern: Regex = "(?i)>(.*?)<\\/h1>".r

@@ -37,7 +37,7 @@ class ChoicePageSpec extends UnitViewSpec {
 
     "display link to upload documents" in {
       val link = view.getElementsByAttributeValue("id", "upload-files").get(0)
-      link must haveHref(controllers.routes.MrnEntryController.onPageLoad())
+      link must haveHref(controllers.routes.MrnEntryController.onPageLoad)
     }
 
     "display link to view messages" in {
