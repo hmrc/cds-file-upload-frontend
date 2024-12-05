@@ -77,7 +77,7 @@ class SecureMessagingController @Inject() (
             HtmlFormat.raw(partial.body),
             "replyResult.heading",
             defineUploadLink(routes.SecureMessagingController.displayReplyResult(client, conversationId).url),
-            true,
+            false,
             false
           )
         )
