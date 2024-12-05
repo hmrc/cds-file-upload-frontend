@@ -54,7 +54,9 @@ class SecureMessagingControllerSpec extends ControllerSpecBase {
     reset(partial_wrapper, partialWrapperPage, connector)
 
     when(partialWrapperPage.apply(any[HtmlFormat.Appendable], any[String])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
-    when(partial_wrapper.apply(any[HtmlFormat.Appendable], any[String], any[String], anyBoolean())(any[Request[_]], any[Messages]))
+    when(
+      partial_wrapper.apply(any[HtmlFormat.Appendable], any[String], any[String], any[Option[String]], any[Boolean])(any[Request[_]], any[Messages])
+    )
       .thenReturn(HtmlFormat.empty)
   }
 
@@ -102,7 +104,9 @@ class SecureMessagingControllerSpec extends ControllerSpecBase {
 
           status(result) mustBe OK
 
-          verify(partial_wrapper).apply(any(), any(), any(), any())(any(), any())
+          val expectedUrl = Some(routes.SecureMessagingController.displayInbox.url)
+          verify(partial_wrapper).apply(any(), any(), any(), eqTo(expectedUrl), any())(any(), any())
+
         }
       }
 
@@ -176,7 +180,8 @@ class SecureMessagingControllerSpec extends ControllerSpecBase {
 
         status(result) mustBe OK
 
-        verify(partial_wrapper).apply(any(), any(), any(), any())(any(), any())
+        val expectedUrl = Some(routes.SecureMessagingController.displayInbox.url)
+        verify(partial_wrapper).apply(any(), any(), any(), eqTo(expectedUrl), any())(any(), any())
       }
     }
 
@@ -190,7 +195,8 @@ class SecureMessagingControllerSpec extends ControllerSpecBase {
 
         status(result) mustBe OK
 
-        verify(partial_wrapper).apply(any(), any(), any(), any())(any(), any())
+        val expectedUrl = Some(routes.SecureMessagingController.displayInbox.url)
+        verify(partial_wrapper).apply(any(), any(), any(), eqTo(expectedUrl), any())(any(), any())
       }
     }
 

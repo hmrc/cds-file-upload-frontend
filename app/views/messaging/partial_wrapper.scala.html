@@ -22,10 +22,10 @@
 
 @this(mainTemplate: gdsMainTemplate, govukAccordion : GovukAccordion, govukBackLink : GovukBackLink)
 
-@(partial: HtmlFormat.Appendable, titleKey: String, uploadLink: String, hasBackButton: Boolean = true)(implicit request: Request[_], messages: Messages)
+@(partial: HtmlFormat.Appendable, titleKey: String, uploadLink: String, hasBackButton: Boolean = true, hasErrors: Boolean = false)(implicit request: Request[_], messages: Messages)
 
 @mainTemplate(
-  title = Title(titleKey),
+  title = Title(titleKey, hasErrors),
   useCustomContentWidth = true,
   withNavigationBanner = true,
   backButton = if (hasBackButton) Some(BackButton()) else None

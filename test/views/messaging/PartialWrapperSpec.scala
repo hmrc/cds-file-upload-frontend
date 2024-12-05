@@ -30,8 +30,8 @@ class PartialWrapperSpec extends UnitViewSpec {
   private val partialWrapperPage = instanceOf[partial_wrapper]
   private val partialContent = "Partial Content"
 
-  "partial_wrapper in case of Conversation page" should {
-
+  "partial_wrapper when passed a backlink url" should {
+ 
     val titleKeyForConversation = "conversation.heading"
     val view = genView(titleKeyForConversation, true)
 
@@ -56,7 +56,7 @@ class PartialWrapperSpec extends UnitViewSpec {
     }
   }
 
-  "partial_wrapper in case of Reply Result page" should {
+  "partial_wrapper when not passed a backlink url" should {
 
     val titleKeyForReplyResult = "replyResult.heading"
     val view = genView(titleKeyForReplyResult, false)
@@ -79,6 +79,15 @@ class PartialWrapperSpec extends UnitViewSpec {
 
     "display link for uploading files after having entered the MRN" in {
       assertUploadFilesLink(view)
+    }
+  }
+
+  "partial_wrapper when passed a positive error flag" should {
+    val titleKeyForReplyResult = "replyResult.heading"
+    val view = genView(titleKeyForReplyResult, None, true)
+
+    "display 'Error' prefix in the title'" in {
+      view.getElementsByTag("title").first().text() must startWith("Error:")
     }
   }
 
