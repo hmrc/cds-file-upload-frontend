@@ -99,8 +99,8 @@ class SecureMessageFrontendConnectorSpec extends ConnectorSpec {
         }
       }
 
-      "is passed the user's eori number" should {
-        "include the Enrolment tag as a query string parameter with the correct eori value" in {
+      "is passed the message filter tag of ExportMessages" should {
+        "have the correct size of queryParamValue array" in {
           val httpResponse = HttpResponse(status = OK, body = "")
           when(execute[HttpResponse]).thenReturn(Future.successful(httpResponse))
 
@@ -112,21 +112,6 @@ class SecureMessageFrontendConnectorSpec extends ConnectorSpec {
 
           queryParamValue.length mustBe 2
           queryParamValue(0) mustBe s"enrolment=${AuthKey.enrolment}~EoriNumber~${CommonTestData.eori}"
-        }
-      }
-
-      "is passed the message filter tag of ExportMessages" should {
-        "include the ExportMessages tag as a query string parameter" in {
-          val httpResponse = HttpResponse(status = OK, body = "")
-          when(execute[HttpResponse]).thenReturn(Future.successful(httpResponse))
-
-          connector.retrieveInboxPartial(CommonTestData.eori, ExportMessages).futureValue
-
-          val queryParamCaptor = ArgumentCaptor.forClass(classOf[URL])
-          verify(httpClient).get(queryParamCaptor.capture())(any())
-          val queryParamValue = queryParamCaptor.getValue.asInstanceOf[URL].getQuery.split('&')
-
-          queryParamValue.length mustBe 2
           queryParamValue(1) mustBe "tag=notificationType~CDS-EXPORTS"
         }
       }
@@ -143,7 +128,24 @@ class SecureMessageFrontendConnectorSpec extends ConnectorSpec {
           val queryParamValue = queryParamCaptor.getValue.asInstanceOf[URL].getQuery.split('&')
 
           queryParamValue.length mustBe 2
+          queryParamValue(0) mustBe s"enrolment=${AuthKey.enrolment}~EoriNumber~${CommonTestData.eori}"
           queryParamValue(1) mustBe "tag=notificationType~CDS-IMPORTS"
+        }
+      }
+
+      "is passed the message filter tag of AllMessages" should {
+        "not include the notificationType tag as a query string parameter" in {
+          val httpResponse = HttpResponse(status = OK, body = "")
+          when(execute[HttpResponse]).thenReturn(Future.successful(httpResponse))
+
+          connector.retrieveInboxPartial(CommonTestData.eori, AllMessages).futureValue
+
+          val queryParamCaptor = ArgumentCaptor.forClass(classOf[URL])
+          verify(httpClient).get(queryParamCaptor.capture())(any())
+          val queryParamValue = queryParamCaptor.getValue.asInstanceOf[URL].getQuery.split('&')
+
+          queryParamValue.length mustBe 1
+          queryParamValue(0) mustBe s"enrolment=${AuthKey.enrolment}~EoriNumber~${CommonTestData.eori}"
         }
       }
     }

@@ -91,10 +91,10 @@ class SecureMessageFrontendConnector @Inject() (appConfig: AppConfig, httpClient
     }
 
   private def constructInboxEndpointQueryParams(enrolment: String, eori: String, filter: MessageFilterTag): Seq[(String, String)] = {
-    val enrolmentParameter = ("enrolment", s"$enrolment~EoriNumber~$eori")
-    val filterParameter = ("tag", s"notificationType~${filter.filterValue}")
+    val enrolmentParameter = Seq(("enrolment", s"$enrolment~EoriNumber~$eori"))
+    val filterParameter = if (filter.filterValue.isEmpty) Seq.empty else Seq(("tag", s"notificationType~${filter.filterValue}"))
 
-    Seq(enrolmentParameter, filterParameter)
+    enrolmentParameter ++ filterParameter
   }
 
   private val conversationEndpointQueryParams: Seq[(String, String)] = Seq(("showReplyForm", "true"))
