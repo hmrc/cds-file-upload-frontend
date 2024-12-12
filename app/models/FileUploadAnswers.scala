@@ -20,6 +20,7 @@ import play.api.libs.json.{Format, Json, OFormat}
 import repositories.ZonedDateTimeFormat.{zonedDateTimeReads, zonedDateTimeWrites}
 
 import java.time.{ZoneOffset, ZonedDateTime}
+import java.util.UUID
 
 case class FileUploadAnswers(
   eori: String,
@@ -28,7 +29,8 @@ case class FileUploadAnswers(
   fileUploadCount: Option[FileUploadCount] = None,
   fileUploadResponse: Option[FileUploadResponse] = None,
   updated: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC),
-  mrnPageRefererUrl: Option[String] = None
+  mrnPageRefererUrl: Option[String] = None,
+  uuid:String = UUID.randomUUID().toString
 )
 
 object FileUploadAnswers {

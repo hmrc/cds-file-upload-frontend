@@ -20,7 +20,7 @@ import com.google.inject.Singleton
 import controllers.actions._
 import forms.MRNFormProvider
 import models.requests.DataRequest
-import models.{FileUploadAnswers, MRN}
+import models.{FileUploadAnswers, MRN, SessionHelper}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import services.FileUploadAnswersService
@@ -62,9 +62,9 @@ class MrnEntryController @Inject() (
         .map(updateUserAnswersAndRedirect(_, req.userAnswers))
         .getOrElse(invalidMrnResponse(mrn))
     }
-  private def updateUserAnswersAndRedirect(mrn: MRN, userAnswers: FileUploadAnswers): Future[Result] =
+  private def updateUserAnswersAndRedirect(mrn: MRN, userAnswers: FileUploadAnswers)(implicit  request:DataRequest[AnyContent]): Future[Result] =
     answersService.findOneAndReplace(userAnswers.copy(mrn = Some(mrn))).map { _ =>
-      Redirect(routes.ContactDetailsController.onPageLoad)
+      Redirect(routes.ContactDetailsController.onPageLoad).addingToSession(SessionHelper.ANSWER_CACHE_ID -> userAnswers.uuid)
     }
 
   private def invalidMrnResponse(mrn: String)(implicit req: DataRequest[AnyContent]): Future[Result] =

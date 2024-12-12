@@ -44,11 +44,11 @@ class FileUploadAnswersRepository @Inject() (mongoComponent: MongoComponent, app
 
   def findOneAndRemove(eori: String): Future[Option[FileUploadAnswers]] = findOneAndRemove("eori", eori)
 
-  def findOneOrCreate(eori: String): Future[FileUploadAnswers] =
-    findOneOrCreate("eori", eori, FileUploadAnswers(eori))
+  def findOneOrCreate(eori: String, uuid: String): Future[FileUploadAnswers] =
+    findOneOrCreate("eori", eori, "uuid", uuid,FileUploadAnswers(eori))
 
   def findOneAndReplace(answers: FileUploadAnswers): Future[FileUploadAnswers] =
-    findOneAndReplace("eori", answers.eori, answers)
+    findOneAndReplace("eori",answers.eori, "uuid",answers.uuid , answers)
 
   def remove(eori: String): Future[Unit] = removeEvery("eori", eori)
 }

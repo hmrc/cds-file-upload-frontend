@@ -43,7 +43,7 @@ class SecureMessageAnswersRepository @Inject() (mongoComponent: MongoComponent, 
   def findOne(eori: String): Future[Option[SecureMessageAnswers]] = findOne("eori", eori)
 
   def findOneAndReplace(answers: SecureMessageAnswers): Future[SecureMessageAnswers] =
-    findOneAndReplace("eori", answers.eori, answers)
+    findOneAndReplace("eori", answers.eori, "uuid",answers.uuid, answers)
 }
 
 object SecureMessageAnswersRepository {

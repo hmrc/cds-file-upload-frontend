@@ -20,8 +20,9 @@ import play.api.libs.json.{Format, Json, OFormat}
 import repositories.ZonedDateTimeFormat.{zonedDateTimeReads, zonedDateTimeWrites}
 
 import java.time.{ZoneOffset, ZonedDateTime}
+import java.util.UUID
 
-case class SecureMessageAnswers(eori: String, filter: MessageFilterTag, created: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC))
+case class SecureMessageAnswers(eori: String,  filter: MessageFilterTag, created: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC), uuid:String =UUID.randomUUID().toString)
 
 object SecureMessageAnswers {
 

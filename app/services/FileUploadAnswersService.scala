@@ -25,12 +25,12 @@ import javax.inject.Inject
 import scala.concurrent.Future
 
 class FileUploadAnswersService @Inject() (val repository: FileUploadAnswersRepository) extends Logging {
-
+//todo
   def findOne(eori: String): Future[Option[FileUploadAnswers]] = repository.findOne(eori)
-
+//can be removed
   def findOneAndRemove(eori: String): Future[Option[FileUploadAnswers]] = repository.findOneAndRemove(eori)
 
-  def findOneOrCreate(eori: String): Future[FileUploadAnswers] = repository.findOneOrCreate(eori)
+  def findOneOrCreate(eori: String, uuid: String): Future[FileUploadAnswers] = repository.findOneOrCreate(eori,uuid)
 
   def findOneAndReplace(answers: FileUploadAnswers): Future[FileUploadAnswers] =
     repository.findOneAndReplace(answers.copy(updated = ZonedDateTime.now(ZoneOffset.UTC)))
