@@ -127,14 +127,7 @@ class UpscanStatusController @Inject() (
             logger.warn("Failed notification received for an upload.")
             logger.warn(s"Notifications: ${prettyPrint(ns)}")
 
-            auditservice.auditUploadResult(
-              request.eori,
-              request.userAnswers.contactDetails,
-              request.userAnswers.mrn,
-              request.userAnswers.fileUploadCount,
-              request.fileUploadResponse.uploads,
-              AuditTypes.UploadFailure
-            )
+            auditservice.auditUploadResult(request, AuditTypes.UploadFailure)
 
             clearUserCache(request.eori)
             Future.successful(Redirect(routes.ErrorPageController.uploadError))
@@ -142,14 +135,7 @@ class UpscanStatusController @Inject() (
           case ns if ns.length == uploads.length =>
             logger.info("All notifications successful.")
 
-            auditservice.auditUploadResult(
-              request.eori,
-              request.userAnswers.contactDetails,
-              request.userAnswers.mrn,
-              request.userAnswers.fileUploadCount,
-              request.fileUploadResponse.uploads,
-              AuditTypes.UploadSuccess
-            )
+            auditservice.auditUploadResult(request, AuditTypes.UploadSuccess)
 
             Future.successful(Redirect(routes.UploadYourFilesReceiptController.onPageLoad))
 
@@ -164,14 +150,7 @@ class UpscanStatusController @Inject() (
             logger.warn(s"Maximum number of retries exceeded. Retrieved ${ns.length} of ${uploads.length} notifications.")
             logger.warn(s"Notifications: ${prettyPrint(ns)}")
 
-            auditservice.auditUploadResult(
-              request.eori,
-              request.userAnswers.contactDetails,
-              request.userAnswers.mrn,
-              request.userAnswers.fileUploadCount,
-              request.fileUploadResponse.uploads,
-              AuditTypes.UploadFailure
-            )
+            auditservice.auditUploadResult(request, AuditTypes.UploadFailure)
 
             clearUserCache(request.eori)
             Future.successful(Redirect(routes.ErrorPageController.uploadError))
