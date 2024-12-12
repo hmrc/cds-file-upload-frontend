@@ -27,7 +27,7 @@ import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
-import services.AuditService
+import services.{AuditService, AuditTypes}
 import testdata.CommonTestData.{eori, signedInUser}
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.{upload_error, upload_your_files}
@@ -235,9 +235,14 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val result = controller(fakeDataRetrievalAction(answers)).success(lastFile.reference)(fakeRequest)
       status(result) mustBe SEE_OTHER
 
-      verify(auditService).auditUploadSuccess(meq(eori), meq(Some(cd)), meq(Some(mrn)), meq(FileUploadCount(3)), meq(response.uploads))(
-        any[HeaderCarrier]
-      )
+      verify(auditService).auditUploadResult(
+        meq(eori),
+        meq(Some(cd)),
+        meq(Some(mrn)),
+        meq(FileUploadCount(3)),
+        meq(response.uploads),
+        meq(AuditTypes.UploadSuccess)
+      )(any[HeaderCarrier])
     }
 
     "load receipt page when all notifications are successful" in {
@@ -289,6 +294,15 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       result.map(_ => verify(mockFileUploadAnswersService).remove(any()))
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(routes.ErrorPageController.uploadError.url)
+
+      verify(auditService).auditUploadResult(
+        meq(eori),
+        meq(Some(cd)),
+        meq(Some(mrn)),
+        meq(FileUploadCount(3)),
+        meq(response.uploads),
+        meq(AuditTypes.UploadFailure)
+      )(any[HeaderCarrier])
     }
 
     "load upload error page when notification retries are exceeded" in {
