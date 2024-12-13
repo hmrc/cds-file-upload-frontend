@@ -19,7 +19,7 @@ package controllers.actions
 import controllers.ControllerSpecBase
 import models.FileUploadAnswers
 import models.requests.{AuthenticatedRequest, DataRequest, VerifiedEmailRequest}
-import org.mockito.ArgumentMatchers.{eq => eqTo}
+import org.mockito.ArgumentMatchers.{anyString, eq => eqTo}
 import org.mockito.MockitoSugar.{mock, reset, when}
 import services.FileUploadAnswersService
 import testdata.CommonTestData._
@@ -37,7 +37,7 @@ class DataRetrievalActionSpec extends ControllerSpecBase {
     super.beforeEach()
 
     reset(answersService)
-    when(answersService.findOneOrCreate(eqTo(eori))) thenReturn Future.successful(answers)
+    when(answersService.findOneOrCreate(eqTo(eori), anyString())) thenReturn Future.successful(answers)
   }
 
   override def afterEach(): Unit = {

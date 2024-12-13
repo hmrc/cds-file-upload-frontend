@@ -55,7 +55,7 @@ class ChoiceControllerSpec extends ControllerSpecBase {
   "ChoiceController on onPageLoad" should {
 
     "return Ok (200) response" in {
-      when(answersService.remove(any[String])).thenReturn(Future.successful(()))
+      when(answersService.remove(any[String], any[String])).thenReturn(Future.successful(()))
       val result = controller.onPageLoad()(fakeRequest)
 
       status(result) mustBe OK

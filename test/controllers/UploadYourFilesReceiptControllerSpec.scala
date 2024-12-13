@@ -38,6 +38,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
   private val controller = new UploadYourFilesReceiptController(
     new FakeAuthAction(),
     new FakeVerifiedEmailAction(),
+    new FakeDataRetrievalAction(),
     cdsFileUploadConnector,
     sfusMetrics,
     confirmationPage,
@@ -67,7 +68,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
 
     "redirect to start page" when {
       "no user answers are in the cache" in {
-        when(mockFileUploadAnswersService.findOne(anyString()))
+        when(mockFileUploadAnswersService.findOne(anyString(), any()))
           .thenReturn(Future.successful(None))
 
         val result = controller.onPageLoad()(fakeRequest).futureValue
@@ -86,18 +87,18 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
 
         result.header.status mustBe OK
 
-        verify(mockFileUploadAnswersService).findOne(any())
+        verify(mockFileUploadAnswersService).findOne(any(), any())
       }
     }
 
     "user is redirect to start page" in {
-      when(mockFileUploadAnswersService.findOne(anyString()))
+      when(mockFileUploadAnswersService.findOne(anyString(), any()))
         .thenReturn(Future.successful(None))
 
       val result = controller.onPageLoad()(fakeRequest).futureValue
 
       result.header.status mustBe SEE_OTHER
-      verify(mockFileUploadAnswersService).findOne(any())
+      verify(mockFileUploadAnswersService).findOne(any(), any())
     }
   }
 
@@ -109,7 +110,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
       .thenReturn(Future.successful(Option(Notification(sampleFileUpload.reference, "SUCCESS", Some("someFile.pdf")))))
 
     val answers = FileUploadAnswers(eori, fileUploadResponse = Some(sampleFileUploadResponse))
-    when(mockFileUploadAnswersService.findOne(anyString())).thenReturn(Future.successful(Some(answers)))
+    when(mockFileUploadAnswersService.findOne(anyString(), any())).thenReturn(Future.successful(Some(answers)))
 
     test
   }

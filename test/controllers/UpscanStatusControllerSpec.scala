@@ -163,7 +163,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
     "no responses are in the cache" in {
       val result = controller(new FakeDataRetrievalAction(None)).success("someRef")(fakeRequest)
 
-      result.map(_ => verify(mockFileUploadAnswersService).remove(any()))
+      result.map(_ => verify(mockFileUploadAnswersService).remove(any(), any()))
 
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(routes.ErrorPageController.error.url)
@@ -176,7 +176,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
           val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response))
           val result = controller(fakeDataRetrievalAction(answers)).success(ref)(fakeRequest)
 
-          result.map(_ => verify(mockFileUploadAnswersService).remove(any()))
+          result.map(_ => verify(mockFileUploadAnswersService).remove(any(), any()))
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some(routes.ErrorPageController.error.url)
@@ -286,7 +286,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
         .thenReturn(Future.successful(Some(Notification("fileRef3", "SUCCESS", Some("file3.gif")))))
 
       val result = controller(fakeDataRetrievalAction(answers)).success(lastFile.reference)(fakeRequest)
-      result.map(_ => verify(mockFileUploadAnswersService).remove(any()))
+      result.map(_ => verify(mockFileUploadAnswersService).remove(any(), any()))
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(routes.ErrorPageController.uploadError.url)
     }
@@ -311,7 +311,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       when(cdsFileUploadConnector.getNotification(meq("fileRef3"))(any())).thenReturn(Future.successful(None))
 
       val result = controller(fakeDataRetrievalAction(answers)).success(lastFile.reference)(fakeRequest)
-      result.map(_ => verify(mockFileUploadAnswersService).remove(any()))
+      result.map(_ => verify(mockFileUploadAnswersService).remove(any(), any()))
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(routes.ErrorPageController.uploadError.url)
     }

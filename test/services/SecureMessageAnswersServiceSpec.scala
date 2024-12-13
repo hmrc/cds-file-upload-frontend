@@ -43,8 +43,8 @@ class SecureMessageAnswersServiceSpec extends UnitSpec {
     "return the expected 'SecureMessageAnswers' instance" when {
 
       "the 'findOne' method is called" in {
-        when(mockRepository.findOne(any[String])).thenReturn(Future.successful(Some(secureMessageAnswers)))
-        service.findOne(eori).futureValue.value mustBe secureMessageAnswers
+        when(mockRepository.findOne(any[String], any[String])).thenReturn(Future.successful(Some(secureMessageAnswers)))
+        service.findOne(eori, any[String]).futureValue.value mustBe secureMessageAnswers
       }
 
       "the 'findOneAndReplace' method is called" in {
