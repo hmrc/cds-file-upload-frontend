@@ -16,7 +16,7 @@
 
 package controllers.actions
 
-import models.{SessionHelper,FileUploadAnswers}
+import models.{FileUploadAnswers, SessionHelper}
 import models.requests.{DataRequest, VerifiedEmailRequest}
 import play.api.mvc.{ActionTransformer, MessagesControllerComponents}
 import services.FileUploadAnswersService
@@ -31,9 +31,10 @@ class DataRetrievalActionImpl @Inject() (val answersService: FileUploadAnswersSe
   override protected def transform[A](request: VerifiedEmailRequest[A]): Future[DataRequest[A]] = {
     val mayBeCacheId = SessionHelper.getValue(SessionHelper.ANSWER_CACHE_ID)(request)
     println(s"mayBeCacheId ** s[$mayBeCacheId]")
-    mayBeCacheId.map{cacheId =>
-      answersService.findOneOrCreate(request.eori,cacheId).map(DataRequest(request, _))
-    }.getOrElse(Future.successful(DataRequest(request,new FileUploadAnswers(request.eori)))) // ToDo
+    mayBeCacheId.map { cacheId =>
+      println(s"cacheId ${cacheId}")
+      answersService.findOneOrCreate(request.eori, cacheId).map(DataRequest(request, _))
+    }.getOrElse(Future.successful(DataRequest(request, new FileUploadAnswers(request.eori)))) // ToDo
   }
 }
 

@@ -31,7 +31,7 @@ class MessageFilterActionImpl @Inject() (val answersService: SecureMessageAnswer
   implicit val executionContext: ExecutionContext = mcc.executionContext
 
   override protected def refine[A](request: VerifiedEmailRequest[A]): Future[Either[Result, MessageFilterRequest[A]]] =
-    answersService.findOne(request.eori).map { maybeFilter =>
+    answersService.findOne(request.eori, "TESTING").map { maybeFilter =>
       maybeFilter match {
         case Some(filter) =>
           Right(MessageFilterRequest(request, filter))

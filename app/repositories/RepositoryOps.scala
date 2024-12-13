@@ -41,8 +41,11 @@ trait RepositoryOps[T] extends Logging {
   def findAll[V](keyId: String, keyValue: V): Future[Seq[T]] =
     collection.find(equal(keyId, keyValue)).toFuture()
 
-  def findOne[V](keyId: String, keyValue: V): Future[Option[T]] =
-    collection.find(equal(keyId, keyValue)).toFuture().map(_.headOption)
+  def findOne[V](keyId: String, keyValue: V, keyId2: String, keyValue2: V): Future[Option[T]] =
+    collection
+      .find(and(equal(keyId, keyValue), equal(keyId2, keyValue2)))
+      .toFuture()
+      .map(_.headOption)
 
   /*
    Find one and return if a document with keyId=keyValue exists,
@@ -88,8 +91,8 @@ trait RepositoryOps[T] extends Logging {
   def removeAll: Future[Unit] =
     collection.deleteMany(BsonDocument()).toFuture().map(_ => ())
 
-  def removeEvery[V](keyId: String, keyValue: V): Future[Unit] =
-    collection.deleteMany(equal(keyId, keyValue)).toFuture().map(_ => ())
+  def removeEvery[V](keyId: String, keyValue: V, keyId2: String, keyValue2: V): Future[Unit] =
+    collection.deleteMany(and(equal(keyId, keyValue), equal(keyId2, keyValue2))).toFuture().map(_ => ())
 
   def removeOne[V](keyId: String, keyValue: V): Future[Unit] =
     collection.deleteOne(equal(keyId, keyValue)).toFuture().map(_ => ())

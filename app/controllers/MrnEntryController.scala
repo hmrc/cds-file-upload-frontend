@@ -62,7 +62,7 @@ class MrnEntryController @Inject() (
         .map(updateUserAnswersAndRedirect(_, req.userAnswers))
         .getOrElse(invalidMrnResponse(mrn))
     }
-  private def updateUserAnswersAndRedirect(mrn: MRN, userAnswers: FileUploadAnswers)(implicit  request:DataRequest[AnyContent]): Future[Result] =
+  private def updateUserAnswersAndRedirect(mrn: MRN, userAnswers: FileUploadAnswers)(implicit request: DataRequest[AnyContent]): Future[Result] =
     answersService.findOneAndReplace(userAnswers.copy(mrn = Some(mrn))).map { _ =>
       Redirect(routes.ContactDetailsController.onPageLoad).addingToSession(SessionHelper.ANSWER_CACHE_ID -> userAnswers.uuid)
     }

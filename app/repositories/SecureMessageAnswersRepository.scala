@@ -40,10 +40,10 @@ class SecureMessageAnswersRepository @Inject() (mongoComponent: MongoComponent, 
   override def classTag: ClassTag[SecureMessageAnswers] = implicitly[ClassTag[SecureMessageAnswers]]
   implicit val executionContext: ExecutionContext = ec
 
-  def findOne(eori: String): Future[Option[SecureMessageAnswers]] = findOne("eori", eori)
+  def findOne(eori: String, uuid: String): Future[Option[SecureMessageAnswers]] = findOne("eori", eori, "uuid", uuid)
 
   def findOneAndReplace(answers: SecureMessageAnswers): Future[SecureMessageAnswers] =
-    findOneAndReplace("eori", answers.eori, "uuid",answers.uuid, answers)
+    findOneAndReplace("eori", answers.eori, "uuid", answers.uuid, answers)
 }
 
 object SecureMessageAnswersRepository {

@@ -30,7 +30,7 @@ case class FileUploadAnswers(
   fileUploadResponse: Option[FileUploadResponse] = None,
   updated: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC),
   mrnPageRefererUrl: Option[String] = None,
-  uuid:String = UUID.randomUUID().toString
+  uuid: String = UUID.randomUUID().toString
 )
 
 object FileUploadAnswers {

@@ -19,6 +19,7 @@ package controllers
 import controllers.actions.{AuthAction, VerifiedEmailAction}
 import forms.ChoiceForm
 import forms.ChoiceForm.AllowedChoiceValues._
+import models.SessionHelper
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.FileUploadAnswersService
@@ -26,7 +27,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.choice_page
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ChoiceController @Inject() (
@@ -41,9 +42,12 @@ class ChoiceController @Inject() (
   val actions = authenticate andThen verifiedEmail
 
   val onPageLoad: Action[AnyContent] = actions.async { implicit request =>
-    answersService.remove(request.eori).map { _ =>
-      Ok(choicePage(ChoiceForm.form))
+    val mayBeCacheId = SessionHelper.getValue(SessionHelper.ANSWER_CACHE_ID)(request)
+    mayBeCacheId.map { cacheId =>
+      answersService.remove(request.eori, cacheId)
     }
+
+    Future.successful(Ok(choicePage(ChoiceForm.form)))
   }
 
   val onSubmit: Action[AnyContent] = actions { implicit request =>

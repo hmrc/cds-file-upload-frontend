@@ -40,17 +40,16 @@ class FileUploadAnswersRepository @Inject() (mongoComponent: MongoComponent, app
   override def classTag: ClassTag[FileUploadAnswers] = implicitly[ClassTag[FileUploadAnswers]]
   implicit val executionContext: ExecutionContext = ec
 
-  def findOne(eori: String): Future[Option[FileUploadAnswers]] = findOne("eori", eori)
-
-  def findOneAndRemove(eori: String): Future[Option[FileUploadAnswers]] = findOneAndRemove("eori", eori)
+  def findOne(eori: String, uuid: String): Future[Option[FileUploadAnswers]] =
+    findOne("eori", eori, "uuid", uuid)
 
   def findOneOrCreate(eori: String, uuid: String): Future[FileUploadAnswers] =
-    findOneOrCreate("eori", eori, "uuid", uuid,FileUploadAnswers(eori))
+    findOneOrCreate("eori", eori, "uuid", uuid, FileUploadAnswers(eori, uuid = uuid))
 
   def findOneAndReplace(answers: FileUploadAnswers): Future[FileUploadAnswers] =
-    findOneAndReplace("eori",answers.eori, "uuid",answers.uuid , answers)
+    findOneAndReplace("eori", answers.eori, "uuid", answers.uuid, answers)
 
-  def remove(eori: String): Future[Unit] = removeEvery("eori", eori)
+  def remove(eori: String, uuid: String): Future[Unit] = removeEvery("eori", eori, "uuid", uuid)
 }
 
 object FileUploadAnswersRepository {

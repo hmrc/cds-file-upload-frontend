@@ -59,17 +59,6 @@ class FileUploadAnswersServiceISpec extends IntegrationSpec {
       }
     }
 
-    "remove an existing record" when {
-      "one exists with the given eori" in {
-
-        repository.insertOne(answers).futureValue.isRight mustBe true
-
-        service.findOneAndRemove(eori).futureValue
-
-        collectionSize mustBe 0
-      }
-    }
-
     "replace an existing record" when {
       "one exists with the given eori" in {
 
