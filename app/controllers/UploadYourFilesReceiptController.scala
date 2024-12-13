@@ -21,7 +21,7 @@ import connectors.CdsFileUploadConnector
 import controllers.actions._
 import metrics.MetricIdentifiers._
 import metrics.SfusMetrics
-import models.requests.VerifiedEmailRequest
+import models.requests.DataRequest
 import models.{FileUpload, MRN}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
@@ -38,6 +38,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class UploadYourFilesReceiptController @Inject() (
   authenticate: AuthAction,
   verifiedEmail: VerifiedEmailAction,
+  getData: DataRetrievalAction,
   cdsFileUploadConnector: CdsFileUploadConnector,
   metrics: SfusMetrics,
   uploadYourFilesConfirmation: upload_your_files_confirmation,
@@ -45,8 +46,8 @@ class UploadYourFilesReceiptController @Inject() (
 )(implicit mcc: MessagesControllerComponents, ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
-  val onPageLoad: Action[AnyContent] = (authenticate andThen verifiedEmail).async { implicit req =>
-    answersService.findOne(req.eori, "TESTTEST").flatMap { maybeUserAnswers =>
+  val onPageLoad: Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData).async { implicit request =>
+    answersService.findOne(request.userAnswers.eori, request.userAnswers.uuid).flatMap { maybeUserAnswers =>
       val result = for {
         userAnswers <- getOrRedirect(maybeUserAnswers, routes.RootController.displayPage)
         fileUploads <- getOrRedirect(userAnswers.fileUploadResponse, routes.ErrorPageController.error)
@@ -61,9 +62,9 @@ class UploadYourFilesReceiptController @Inject() (
 
   private def composeSuccessResult(uploads: List[FileUpload], maybeMrn: Option[MRN])(
     implicit hc: HeaderCarrier,
-    req: VerifiedEmailRequest[AnyContent]
+    request: DataRequest[AnyContent]
   ): Future[Html] =
-    addFilenames(uploads).map(uploadYourFilesConfirmation(_, maybeMrn, req.email))
+    addFilenames(uploads).map(uploadYourFilesConfirmation(_, maybeMrn, request.request.email))
 
   private def getOrRedirect[A](option: Option[A], errorAction: Call): Either[Future[Result], A] =
     option.fold[Either[Future[Result], A]](Left(Future.successful(Redirect(errorAction))))(Right(_))
