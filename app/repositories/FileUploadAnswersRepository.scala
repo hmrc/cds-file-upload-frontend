@@ -34,7 +34,8 @@ class FileUploadAnswersRepository @Inject() (mongoComponent: MongoComponent, app
       mongoComponent = mongoComponent,
       collectionName = "answers",
       domainFormat = FileUploadAnswers.format,
-      indexes = FileUploadAnswersRepository.indexes(appConfig)
+      indexes = FileUploadAnswersRepository.indexes(appConfig),
+      replaceIndexes = true
     ) with RepositoryOps[FileUploadAnswers] {
 
   override def classTag: ClassTag[FileUploadAnswers] = implicitly[ClassTag[FileUploadAnswers]]
@@ -56,7 +57,7 @@ object FileUploadAnswersRepository {
 
   def indexes(appConfig: AppConfig): Seq[IndexModel] =
     List(
-      IndexModel(ascending("eori"), IndexOptions().name("eoriIdx")),
+      IndexModel(ascending("eori", "uuid"), IndexOptions().name("eoriUuidIdx")),
       IndexModel(
         ascending("updated"),
         IndexOptions()
