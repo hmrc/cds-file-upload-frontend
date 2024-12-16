@@ -65,10 +65,9 @@ class AuthActionImpl @Inject() (val authConnector: AuthConnector, mcc: MessagesC
   }
 
   private def unauthorized[A](throwable: Throwable, result: Result, request: Request[A]): Either[Result, AuthenticatedRequest[A]] = {
-    val ipAddress = s"Remote-Address='${request.headers.get("Remote-Address").getOrElse("unknown")}'"
     val referer = s"Raw-Request-URI='${request.headers.get("Raw-Request-URI").getOrElse("unknown")}'"
 
-    logger.warn(s"User rejected with ${throwable.getMessage}. $ipAddress $referer")
+    logger.info(s"User rejected with ${throwable.getMessage}. $referer")
     Left(result)
   }
 }
