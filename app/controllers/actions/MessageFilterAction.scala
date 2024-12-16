@@ -37,10 +37,10 @@ class MessageFilterActionImpl @Inject() (val answersService: SecureMessageAnswer
       answersService.findOne(request.eori, cacheId).map {
         case Some(filter) =>
           Right(MessageFilterRequest(request, filter))
-        case None => Right(MessageFilterRequest(request, SecureMessageAnswers(request.eori, AllMessages, uuid = cacheId)))
+        case None => Right(MessageFilterRequest(request, SecureMessageAnswers(request.eori, AllMessages, cacheId)))
       }
     }.getOrElse(
-      Future.successful(Right(MessageFilterRequest(request, new SecureMessageAnswers(request.eori, AllMessages, uuid = UUID.randomUUID().toString))))
+      Future.successful(Right(MessageFilterRequest(request, new SecureMessageAnswers(request.eori, AllMessages, UUID.randomUUID().toString))))
     )
   }
 }

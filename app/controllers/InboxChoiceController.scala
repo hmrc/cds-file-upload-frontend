@@ -70,7 +70,7 @@ class InboxChoiceController @Inject() (
         Future.successful(BadRequest(inboxChoice(InboxChoiceForm.form)))
 
       case Some(tag) =>
-        val answers = SecureMessageAnswers(request.request.eori, tag, uuid = request.secureMessageAnswers.uuid)
+        val answers = SecureMessageAnswers(request.request.eori, tag, request.secureMessageAnswers.uuid)
         answersService.findOneAndReplace(answers).map { _ =>
           Redirect(routes.SecureMessagingController.displayInbox).addingToSession(SessionHelper.ANSWER_CACHE_ID -> answers.uuid)
         }

@@ -45,7 +45,7 @@ class FileUploadAnswersRepository @Inject() (mongoComponent: MongoComponent, app
     findOne("eori", eori, "uuid", uuid)
 
   def findOneOrCreate(eori: String, uuid: String): Future[FileUploadAnswers] =
-    findOneOrCreate("eori", eori, "uuid", uuid, FileUploadAnswers(eori, uuid = uuid))
+    findOneOrCreate("eori", eori, "uuid", uuid, FileUploadAnswers(eori, uuid))
 
   def findOneAndReplace(answers: FileUploadAnswers): Future[FileUploadAnswers] =
     findOneAndReplace("eori", answers.eori, "uuid", answers.uuid, answers)

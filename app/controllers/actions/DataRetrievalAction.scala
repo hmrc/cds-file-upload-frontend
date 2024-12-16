@@ -34,7 +34,7 @@ class DataRetrievalActionImpl @Inject() (val answersService: FileUploadAnswersSe
     val mayBeCacheId = SessionHelper.getValue(SessionHelper.ANSWER_CACHE_ID)(request)
     mayBeCacheId.map { cacheId =>
       answersService.findOneOrCreate(request.eori, cacheId).map(DataRequest(request, _))
-    }.getOrElse(Future.successful(DataRequest(request, new FileUploadAnswers(request.eori, uuid = UUID.randomUUID().toString))))
+    }.getOrElse(Future.successful(DataRequest(request, new FileUploadAnswers(request.eori, UUID.randomUUID().toString))))
   }
 }
 

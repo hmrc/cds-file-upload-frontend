@@ -31,7 +31,7 @@ class DataRetrievalActionSpec extends ControllerSpecBase {
   private val answersService: FileUploadAnswersService = mock[FileUploadAnswersService]
   private val action: ActionTestWrapper = new ActionTestWrapper(answersService)
 
-  private val answers = FileUploadAnswers(eori, uuid = cacheId)
+  private val answers = FileUploadAnswers(eori, cacheId)
 
   override def beforeEach(): Unit = {
     super.beforeEach()

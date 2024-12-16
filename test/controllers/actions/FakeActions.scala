@@ -40,7 +40,7 @@ trait FakeActions extends Generators {
     protected def executionContext = global
     def parser = stubBodyParser()
     override protected def transform[A](request: VerifiedEmailRequest[A]): Future[DataRequest[A]] =
-      Future.successful(DataRequest(request, answers.getOrElse(FileUploadAnswers(request.eori, uuid = cacheId))))
+      Future.successful(DataRequest(request, answers.getOrElse(FileUploadAnswers(request.eori, cacheId))))
   }
 
   class FakeContactDetailsRequiredAction(val contactDetails: ContactDetails = arbitraryContactDetails.arbitrary.sample.get)
