@@ -29,7 +29,7 @@ import scala.concurrent.Future
 class SecureMessageAnswersServiceSpec extends UnitSpec {
 
   private val eori = "eori"
-  private val secureMessageAnswers = SecureMessageAnswers(eori, ExportMessages)
+  private val secureMessageAnswers = SecureMessageAnswers(eori, ExportMessages, cacheId)
 
   private val mockRepository = mock[SecureMessageAnswersRepository]
 

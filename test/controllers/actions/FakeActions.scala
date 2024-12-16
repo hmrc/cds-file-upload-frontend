@@ -68,7 +68,7 @@ trait FakeActions extends Generators {
     protected def executionContext = global
     def parser = stubBodyParser()
     override protected def refine[A](request: VerifiedEmailRequest[A]): Future[Either[Result, MessageFilterRequest[A]]] =
-      Future.successful(Right(MessageFilterRequest[A](request, SecureMessageAnswers(eori, tag))))
+      Future.successful(Right(MessageFilterRequest[A](request, SecureMessageAnswers(eori, tag, cacheId))))
   }
 }
 

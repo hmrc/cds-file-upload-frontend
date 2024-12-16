@@ -21,7 +21,7 @@ import repositories.ZonedDateTimeFormat.{zonedDateTimeReads, zonedDateTimeWrites
 
 import java.time.{ZoneOffset, ZonedDateTime}
 
-case class SecureMessageAnswers(eori: String, filter: MessageFilterTag, created: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC), uuid: String)
+case class SecureMessageAnswers(eori: String, filter: MessageFilterTag, uuid: String, created: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC))
 
 object SecureMessageAnswers {
 

@@ -37,6 +37,8 @@ trait UnitSpec extends BaseSpec with Generators with IntegrationPatience with In
   lazy val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
   lazy val fakeSessionDataRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "").withSession(SessionHelper.ANSWER_CACHE_ID -> cacheId)
   lazy val fakePostRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "").withMethod("POST")
+  lazy val fakeSessionPostRequest: FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest("", "").withMethod("POST").withSession(SessionHelper.ANSWER_CACHE_ID -> cacheId)
   lazy val fakeGetRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "").withMethod("GET")
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
