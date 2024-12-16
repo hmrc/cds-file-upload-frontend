@@ -109,7 +109,7 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
     when(cdsFileUploadConnector.getNotification(any())(any()))
       .thenReturn(Future.successful(Option(Notification(sampleFileUpload.reference, "SUCCESS", Some("someFile.pdf")))))
 
-    val answers = FileUploadAnswers(eori, fileUploadResponse = Some(sampleFileUploadResponse), uuid = cacheId)
+    val answers = FileUploadAnswers(eori, cacheId, fileUploadResponse = Some(sampleFileUploadResponse))
     when(mockFileUploadAnswersService.findOne(anyString(), anyString())).thenReturn(Future.successful(Some(answers)))
 
     test

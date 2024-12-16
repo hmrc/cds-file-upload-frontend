@@ -48,7 +48,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase {
   val eori: String = eoriString.sample.get
   val mrn: MRN = arbitraryMrn.arbitrary.sample.get
   private val fileUploadCount = FileUploadCount(7)
-  val validAnswers = FileUploadAnswers(eori, mrn = Some(mrn), fileUploadCount = fileUploadCount, uuid = cacheId)
+  val validAnswers = FileUploadAnswers(eori, cacheId, mrn = Some(mrn), fileUploadCount = fileUploadCount)
 
   implicit val arbitraryContactDetailsActions: Arbitrary[ContactDetailsRequiredAction] =
     Arbitrary(arbitrary[FakeContactDetailsRequiredAction].map(_.asInstanceOf[ContactDetailsRequiredAction]))

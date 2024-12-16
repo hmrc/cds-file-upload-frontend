@@ -31,7 +31,7 @@ class FileUploadAnswersServiceISpec extends IntegrationSpec {
   private val mrn = MRN("18GB9JLC3CU1LFGVR1")
   private val mrn_2 = MRN("18GB9JLC3CU1LFGVR2")
 
-  private val answers = FileUploadAnswers(eori, mrn, uuid = cacheId)
+  private val answers = FileUploadAnswers(eori, cacheId, mrn)
   private val service = injector.instanceOf[FileUploadAnswersService]
   private val repository = injector.instanceOf[FileUploadAnswersRepository]
 

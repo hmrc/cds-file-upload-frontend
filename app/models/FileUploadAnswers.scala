@@ -23,13 +23,13 @@ import java.time.{ZoneOffset, ZonedDateTime}
 
 case class FileUploadAnswers(
   eori: String,
+  uuid: String,
   mrn: Option[MRN] = None,
   contactDetails: Option[ContactDetails] = None,
   fileUploadCount: Option[FileUploadCount] = None,
   fileUploadResponse: Option[FileUploadResponse] = None,
   updated: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC),
-  mrnPageRefererUrl: Option[String] = None,
-  uuid: String
+  mrnPageRefererUrl: Option[String] = None
 )
 
 object FileUploadAnswers {
