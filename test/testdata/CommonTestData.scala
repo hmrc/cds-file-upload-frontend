@@ -27,6 +27,7 @@ object CommonTestData {
   val mrn_3 = "18gb9jlc3cu1lfgvr2"
   val eori = "GB123456789012000"
   val eori_2 = "GB123456789012001"
+  val cacheId = "1233456"
   val ucr = "20GBAKZ81EQJ2WXYZ"
 
   val verifiedEmail = "email@mail.org"

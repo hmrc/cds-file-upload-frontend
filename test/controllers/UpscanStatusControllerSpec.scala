@@ -28,7 +28,7 @@ import org.scalacheck.Gen
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
 import services.AuditService
-import testdata.CommonTestData.{eori, signedInUser}
+import testdata.CommonTestData.{cacheId, eori, signedInUser}
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.{upload_error, upload_your_files}
 
@@ -102,7 +102,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
     "load the view" when {
       "request file exists in response" in {
         forAll(waitingGen) { case (file, _, response) =>
-          val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response))
+          val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response), uuid = cacheId)
           val result = controller(fakeDataRetrievalAction(answers)).onPageLoad(file.reference)(fakeRequest)
 
           status(result) mustBe OK
@@ -116,7 +116,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
         val fileUpload = FileUpload("ref1", Uploaded, id = "ref1")
         val response = FileUploadResponse(List(fileUpload))
 
-        val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response))
+        val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response), uuid = cacheId)
 
         when(cdsFileUploadConnector.getNotification(any())(any()))
           .thenReturn(Future.successful(Some(Notification("ref1", "SUCCESS", Some("file1.pdf")))))
@@ -134,7 +134,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
     val response = FileUploadResponse(List(fileUpload1, fileUpload2))
 
     "redirect to next page when file is valid" in {
-      val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response))
+      val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response), uuid = cacheId)
 
       val result = controller(fakeDataRetrievalAction(answers)).success(fileUpload1.id)(fakeRequest)
 
@@ -149,7 +149,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
 
       when(cdsFileUploadConnector.getNotification(any())(any()))
         .thenReturn(Future.successful(Some(Notification("ref1", "SUCCESS", Some("myfile.doc")))))
-      val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response))
+      val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response), uuid = cacheId)
 
       val result = controller(fakeDataRetrievalAction(answers)).success("ref1")(fakeRequest)
 
@@ -173,7 +173,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       forAll { (ref: String, response: FileUploadResponse) =>
         whenever(!response.uploads.exists(_.reference == ref)) {
 
-          val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response))
+          val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response), uuid = cacheId)
           val result = controller(fakeDataRetrievalAction(answers)).success(ref)(fakeRequest)
 
           result.map(_ => verify(mockFileUploadAnswersService).remove(any(), any()))
@@ -194,7 +194,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       when(cdsFileUploadConnector.getNotification(any())(any()))
         .thenReturn(Future.successful(Some(Notification("ref", "SUCCESS", Some("myfile.pdf")))))
 
-      val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response))
+      val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response), uuid = cacheId)
       await(controller(fakeDataRetrievalAction(answers)).success("ref")(fakeRequest))
 
       val updateResponse = theSavedFileUploadAnswers.fileUploadResponse.get
@@ -207,7 +207,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val fileUploadWaiting = FileUpload("ref2", Waiting(UploadRequest("href", Map.empty)), id = "ref2")
       val response = FileUploadResponse(List(fileUploaded, fileUploadWaiting))
 
-      val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response))
+      val answers = FileUploadAnswers(eori, fileUploadResponse = Some(response), uuid = cacheId)
       val result = controller(fakeDataRetrievalAction(answers)).success(fileUploaded.reference)(fakeRequest)
 
       status(result) mustBe SEE_OTHER
@@ -223,7 +223,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val mrn = MRN("34GB1234567ABCDEFG").get
       val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456")
       val answers =
-        FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
+        FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response), uuid = cacheId)
 
       when(cdsFileUploadConnector.getNotification(meq("fileRef1"))(any()))
         .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", Some("file1.pdf")))))
@@ -249,7 +249,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val mrn = MRN("34GB1234567ABCDEFG").get
       val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456")
       val answers =
-        FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response))
+        FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response), uuid = cacheId)
 
       when(cdsFileUploadConnector.getNotification(meq("fileRef1"))(any()))
         .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", Some("file1.pdf")))))
@@ -274,7 +274,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val mrn = MRN("34GB1234567ABCDEFG").get
       val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456")
       val answers =
-        FileUploadAnswers(eori, mrn = Some(mrn), contactDetails = Some(cd), FileUploadCount(3), fileUploadResponse = Some(response))
+        FileUploadAnswers(eori, mrn = Some(mrn), contactDetails = Some(cd), FileUploadCount(3), fileUploadResponse = Some(response), uuid = cacheId)
 
       when(cdsFileUploadConnector.getNotification(meq("fileRef1"))(any()))
         .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", Some("file1.pdf")))))
@@ -300,7 +300,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val mrn = MRN("34GB1234567ABCDEFG").get
       val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456")
       val answers =
-        FileUploadAnswers(eori, mrn = Some(mrn), contactDetails = Some(cd), FileUploadCount(3), fileUploadResponse = Some(response))
+        FileUploadAnswers(eori, mrn = Some(mrn), contactDetails = Some(cd), FileUploadCount(3), fileUploadResponse = Some(response), uuid = cacheId)
 
       when(cdsFileUploadConnector.getNotification(meq("fileRef1"))(any()))
         .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", Some("file1.pdf")))))

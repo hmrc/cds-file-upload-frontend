@@ -18,11 +18,13 @@ package base
 
 import config.AppConfig
 import generators.Generators
+import models.SessionHelper
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.mvc.{AnyContentAsEmpty, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import testdata.CommonTestData.cacheId
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
@@ -33,6 +35,7 @@ trait UnitSpec extends BaseSpec with Generators with IntegrationPatience with In
   implicit val mcc: MessagesControllerComponents = stubMessagesControllerComponents()
 
   lazy val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
+  lazy val fakeSessionDataRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "").withSession(SessionHelper.ANSWER_CACHE_ID -> cacheId)
   lazy val fakePostRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "").withMethod("POST")
   lazy val fakeGetRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "").withMethod("GET")
 

@@ -22,6 +22,7 @@ import org.mockito.ArgumentMatchersSugar.any
 import org.mockito.MockitoSugar.{mock, reset, when}
 import repositories.SecureMessageAnswersRepository
 import services.SecureMessageAnswersService
+import testdata.CommonTestData.cacheId
 
 import scala.concurrent.Future
 
@@ -44,7 +45,7 @@ class SecureMessageAnswersServiceSpec extends UnitSpec {
 
       "the 'findOne' method is called" in {
         when(mockRepository.findOne(any[String], any[String])).thenReturn(Future.successful(Some(secureMessageAnswers)))
-        service.findOne(eori, any[String]).futureValue.value mustBe secureMessageAnswers
+        service.findOne(eori, cacheId).futureValue.value mustBe secureMessageAnswers
       }
 
       "the 'findOneAndReplace' method is called" in {

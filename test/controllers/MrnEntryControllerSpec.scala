@@ -30,7 +30,7 @@ class MrnEntryControllerSpec extends ControllerSpecBase {
   private val mrnEntryPage = mock[mrn_entry]
   private val mrnAccessDeniedPage = mock[mrn_access_denied]
 
-  private val validAnswers = FileUploadAnswers(eori, contactDetails = Some(contactDetails))
+  private val validAnswers = FileUploadAnswers(eori, contactDetails = Some(contactDetails), uuid = cacheId)
 
   private def mrnEntryController(answers: FileUploadAnswers = validAnswers) =
     new MrnEntryController(

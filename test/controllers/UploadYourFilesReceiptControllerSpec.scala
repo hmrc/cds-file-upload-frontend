@@ -25,7 +25,7 @@ import play.api.i18n.Messages
 import play.api.mvc.Request
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
-import testdata.CommonTestData.eori
+import testdata.CommonTestData.{cacheId, eori}
 import views.html.upload_your_files_confirmation
 
 import scala.concurrent.Future
@@ -109,8 +109,8 @@ class UploadYourFilesReceiptControllerSpec extends ControllerSpecBase with SfusM
     when(cdsFileUploadConnector.getNotification(any())(any()))
       .thenReturn(Future.successful(Option(Notification(sampleFileUpload.reference, "SUCCESS", Some("someFile.pdf")))))
 
-    val answers = FileUploadAnswers(eori, fileUploadResponse = Some(sampleFileUploadResponse))
-    when(mockFileUploadAnswersService.findOne(anyString(), any())).thenReturn(Future.successful(Some(answers)))
+    val answers = FileUploadAnswers(eori, fileUploadResponse = Some(sampleFileUploadResponse), uuid = cacheId)
+    when(mockFileUploadAnswersService.findOne(anyString(), anyString())).thenReturn(Future.successful(Some(answers)))
 
     test
   }

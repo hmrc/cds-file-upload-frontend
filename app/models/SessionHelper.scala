@@ -19,6 +19,7 @@ package models
 import play.api.mvc.{Request, Session}
 
 object SessionHelper {
+  /** Unique value o differentiate two logged-in users who are using the same EORI */
   val ANSWER_CACHE_ID = "ANSWER_CACHE_ID"
 
   def getValue(key: String)(implicit request: Request[_]): Option[String] =

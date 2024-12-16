@@ -21,6 +21,7 @@ import models.{FileUploadAnswers, MRN}
 import play.api.inject.guice.GuiceApplicationBuilder
 import repositories.FileUploadAnswersRepository
 import services.FileUploadAnswersService
+import testdata.CommonTestData.cacheId
 
 class FileUploadAnswersServiceISpec extends IntegrationSpec {
 
@@ -30,7 +31,7 @@ class FileUploadAnswersServiceISpec extends IntegrationSpec {
   private val mrn = MRN("18GB9JLC3CU1LFGVR1")
   private val mrn_2 = MRN("18GB9JLC3CU1LFGVR2")
 
-  private val answers = FileUploadAnswers(eori, mrn)
+  private val answers = FileUploadAnswers(eori, mrn, uuid = cacheId)
   private val service = injector.instanceOf[FileUploadAnswersService]
   private val repository = injector.instanceOf[FileUploadAnswersRepository]
 
@@ -45,7 +46,7 @@ class FileUploadAnswersServiceISpec extends IntegrationSpec {
 
     "persist a record successfully" when {
       "no record matching eori exists" in {
-        service.findOneOrCreate(eori).futureValue.eori mustBe answers.eori
+        service.findOneOrCreate(eori, cacheId).futureValue.eori mustBe answers.eori
 
         collectionSize mustBe 1
       }
@@ -55,7 +56,7 @@ class FileUploadAnswersServiceISpec extends IntegrationSpec {
       "one exists with the given eori" in {
 
         repository.insertOne(answers).futureValue.isRight mustBe true
-        service.findOne(eori).futureValue.value.mrn mustBe mrn
+        service.findOne(eori, cacheId).futureValue.value.mrn mustBe mrn
       }
     }
 
@@ -72,7 +73,7 @@ class FileUploadAnswersServiceISpec extends IntegrationSpec {
     "remove each record with matching eori" in {
       repository.insertOne(answers).futureValue.isRight mustBe true
 
-      service.remove(eori).futureValue
+      service.remove(eori, cacheId).futureValue
 
       collectionSize mustBe 0
     }

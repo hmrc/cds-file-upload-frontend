@@ -68,7 +68,7 @@ abstract class ControllerSpecBase extends UnitSpec with FakeActions {
 
   override protected def beforeEach(): Unit =
     when(mockFileUploadAnswersService.findOneAndReplace(any[FileUploadAnswers]))
-      .thenReturn(Future.successful(FileUploadAnswers("")))
+      .thenReturn(Future.successful(FileUploadAnswers("", uuid = "")))
 
   override protected def afterEach(): Unit =
     reset(mockAuthConnector, mockFileUploadAnswersService, mockSecureMessageAnswersService)
@@ -76,7 +76,7 @@ abstract class ControllerSpecBase extends UnitSpec with FakeActions {
   protected def resetFileUploadAnswersService(): Unit = {
     reset(mockFileUploadAnswersService)
     when(mockFileUploadAnswersService.findOneAndReplace(any[FileUploadAnswers]))
-      .thenReturn(Future.successful(FileUploadAnswers("")))
+      .thenReturn(Future.successful(FileUploadAnswers("", uuid = "")))
   }
 
   def theSavedFileUploadAnswers: FileUploadAnswers = {
