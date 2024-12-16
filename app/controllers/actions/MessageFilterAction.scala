@@ -16,11 +16,12 @@
 
 package controllers.actions
 
-import models.{AllMessages, SecureMessageAnswers}
 import models.requests.{MessageFilterRequest, VerifiedEmailRequest}
+import models.{AllMessages, SecureMessageAnswers, SessionHelper}
 import play.api.mvc.{ActionRefiner, MessagesControllerComponents, Result}
 import services.SecureMessageAnswersService
 
+import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -30,14 +31,18 @@ class MessageFilterActionImpl @Inject() (val answersService: SecureMessageAnswer
 
   implicit val executionContext: ExecutionContext = mcc.executionContext
 
-  override protected def refine[A](request: VerifiedEmailRequest[A]): Future[Either[Result, MessageFilterRequest[A]]] =
-    answersService.findOne(request.eori, "TESTING").map { maybeFilter =>
-      maybeFilter match {
+  override protected def refine[A](request: VerifiedEmailRequest[A]): Future[Either[Result, MessageFilterRequest[A]]] = {
+    val mayBeCacheId = SessionHelper.getValue(SessionHelper.ANSWER_CACHE_ID)(request)
+    mayBeCacheId.map { cacheId =>
+      answersService.findOne(request.eori, cacheId).map {
         case Some(filter) =>
           Right(MessageFilterRequest(request, filter))
-        case None => Right(MessageFilterRequest(request, SecureMessageAnswers(request.eori, AllMessages)))
+        case None => Right(MessageFilterRequest(request, SecureMessageAnswers(request.eori, AllMessages, uuid = cacheId)))
       }
-    }
+    }.getOrElse(
+      Future.successful(Right(MessageFilterRequest(request, new SecureMessageAnswers(request.eori, AllMessages, uuid = UUID.randomUUID().toString))))
+    )
+  }
 }
 
 trait MessageFilterAction extends ActionRefiner[VerifiedEmailRequest, MessageFilterRequest]

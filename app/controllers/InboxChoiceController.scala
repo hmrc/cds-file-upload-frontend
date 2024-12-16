@@ -19,7 +19,7 @@ package controllers
 import controllers.actions.{AuthAction, MessageFilterAction, VerifiedEmailAction}
 import forms.InboxChoiceForm
 import models.requests.MessageFilterRequest
-import models.{ExportMessages, MessageFilterTag, SecureMessageAnswers}
+import models.{ExportMessages, MessageFilterTag, SecureMessageAnswers, SessionHelper}
 import play.api.Logging
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -70,8 +70,9 @@ class InboxChoiceController @Inject() (
         Future.successful(BadRequest(inboxChoice(InboxChoiceForm.form)))
 
       case Some(tag) =>
-        answersService.findOneAndReplace(SecureMessageAnswers(request.request.eori, tag)).map { _ =>
-          Redirect(routes.SecureMessagingController.displayInbox)
+        val answers = SecureMessageAnswers(request.request.eori, tag, uuid = request.secureMessageAnswers.uuid)
+        answersService.findOneAndReplace(answers).map { _ =>
+          Redirect(routes.SecureMessagingController.displayInbox).addingToSession(SessionHelper.ANSWER_CACHE_ID -> answers.uuid)
         }
     }
 }
