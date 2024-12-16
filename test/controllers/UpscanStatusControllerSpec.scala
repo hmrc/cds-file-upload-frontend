@@ -223,7 +223,14 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val mrn = MRN("34GB1234567ABCDEFG").get
       val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456")
       val answers =
-        FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response), uuid = cacheId)
+        FileUploadAnswers(
+          eori,
+          contactDetails = Some(cd),
+          mrn = Some(mrn),
+          fileUploadCount = FileUploadCount(3),
+          fileUploadResponse = Some(response),
+          uuid = cacheId
+        )
 
       when(cdsFileUploadConnector.getNotification(meq("fileRef1"))(any()))
         .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", Some("file1.pdf")))))
@@ -249,7 +256,14 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val mrn = MRN("34GB1234567ABCDEFG").get
       val cd = ContactDetails("Joe Bloggs", "Bloggs Inc", "07998123456")
       val answers =
-        FileUploadAnswers(eori, contactDetails = Some(cd), mrn = Some(mrn), fileUploadCount = FileUploadCount(3), fileUploadResponse = Some(response), uuid = cacheId)
+        FileUploadAnswers(
+          eori,
+          contactDetails = Some(cd),
+          mrn = Some(mrn),
+          fileUploadCount = FileUploadCount(3),
+          fileUploadResponse = Some(response),
+          uuid = cacheId
+        )
 
       when(cdsFileUploadConnector.getNotification(meq("fileRef1"))(any()))
         .thenReturn(Future.successful(Some(Notification("fileRef1", "SUCCESS", Some("file1.pdf")))))

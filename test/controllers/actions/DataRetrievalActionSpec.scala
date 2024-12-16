@@ -19,7 +19,7 @@ package controllers.actions
 import controllers.ControllerSpecBase
 import models.FileUploadAnswers
 import models.requests.{AuthenticatedRequest, DataRequest, VerifiedEmailRequest}
-import org.mockito.ArgumentMatchers.{anyString}
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.MockitoSugar.{mock, reset, when}
 import services.FileUploadAnswersService
 import testdata.CommonTestData._
