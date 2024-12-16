@@ -55,17 +55,19 @@ class AuthActionImpl @Inject() (val authConnector: AuthConnector, mcc: MessagesC
       }
       .recover {
         case exc: NoActiveSession =>
-          unauthorized(exc, Redirect(serviceUrls.login, Map("continue" -> Seq(serviceUrls.loginContinue))))
+          unauthorized(exc, Redirect(serviceUrls.login, Map("continue" -> Seq(serviceUrls.loginContinue))), request)
 
         case exc: UnsupportedAffinityGroup =>
-          unauthorized(exc, Redirect(UnauthorisedController.onAgentKickOut(UserIsAgent)))
+          unauthorized(exc, Redirect(UnauthorisedController.onAgentKickOut(UserIsAgent)), request)
 
-        case exc => unauthorized(exc, Redirect(UnauthorisedController.onPageLoad))
+        case exc => unauthorized(exc, Redirect(UnauthorisedController.onPageLoad), request)
       }
   }
 
-  private def unauthorized[A](throwable: Throwable, result: Result): Either[Result, AuthenticatedRequest[A]] = {
-    logger.warn(s"User rejected with ${throwable.getMessage}")
+  private def unauthorized[A](throwable: Throwable, result: Result, request: Request[A]): Either[Result, AuthenticatedRequest[A]] = {
+    val referer = s"Raw-Request-URI='${request.headers.get("Raw-Request-URI").getOrElse("unknown")}'"
+
+    logger.info(s"User rejected with ${throwable.getMessage}. $referer")
     Left(result)
   }
 }
