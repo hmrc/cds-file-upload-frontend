@@ -49,10 +49,7 @@ class AuditService @Inject() (connector: AuditConnector, appConfig: AppConfig)(i
     connector.sendExtendedEvent(extendedEvent).map(handleResponse(_, auditType.toString))
   }
 
-  def auditUploadResult(
-    request: FileUploadResponseRequest[_],
-    auditType: Audit
-  )(implicit hc: HeaderCarrier): Future[AuditResult] = {
+  def auditUploadResult(request: FileUploadResponseRequest[_], auditType: Audit)(implicit hc: HeaderCarrier): Future[AuditResult] = {
 
     def auditDetails(isOldStyle: Boolean): Map[String, String] = {
       val phoneFieldKeyName = if (isOldStyle) "telephoneNumber" else "phoneNumber"

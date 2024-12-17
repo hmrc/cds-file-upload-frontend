@@ -16,8 +16,8 @@
 
 package testdata
 
-import models.{AuthKey, ContactDetails}
 import models.requests.SignedInUser
+import models._
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 
 object CommonTestData {

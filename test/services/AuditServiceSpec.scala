@@ -23,11 +23,14 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.MockitoSugar.{mock, verify, when}
 import play.api.libs.json.Json
 import services.AuditTypes.{NavigateToMessages, UploadFailure, UploadSuccess}
+import models.requests.{AuthenticatedRequest, FileUploadResponseRequest, MrnRequest}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Disabled, Failure, Success}
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.{DataEvent, ExtendedDataEvent}
+import testdata.CommonTestData
+import testdata.CommonTestData._
 
 import scala.concurrent.ExecutionContext.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,11 +41,22 @@ class AuditServiceSpec extends UnitSpec {
   private val auditFailure = Failure("Event sending failed")
 
   private val enrolment = AuthKey.enrolment
-  private val eori = "GB150454489082"
   private val dcPath = "/secure-message-frontend/cds-file-upload-service/messages"
   private val contactDetails = ContactDetails("Joe Bloggs", "Bloggs Inc", "0123456")
   private val fileUploadCount = FileUploadCount(1)
   private val fileUpload = FileUpload("fileRef1", Successful, "", "id")
+  private val sampleFileUpload: FileUpload = FileUpload("fileRef1", Successful, "filename", "id")
+  private val sampleFileUploadResponse: FileUploadResponse = new FileUploadResponse(List(sampleFileUpload)) {}
+
+  val answers = FileUploadAnswers(
+    eori,
+    None, //    MRN(CommonTestData.mrn),
+    Some(contactDetails),
+    fileUploadCount,
+    Some(sampleFileUploadResponse)
+  )
+  val mrnRequest = MrnRequest(AuthenticatedRequest(fakeRequest, signedInUser), answers, MRN(CommonTestData.mrn).get)
+  val fileUploadResponseRequest = FileUploadResponseRequest(mrnRequest, answers, sampleFileUploadResponse)
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -57,12 +71,12 @@ class AuditServiceSpec extends UnitSpec {
     }
 
     "audit a 'UploadSuccess' event" in {
-      auditService.auditUploadResult(eori, Some(contactDetails), None, fileUploadCount, List(fileUpload), AuditTypes.UploadSuccess)(hc)
+      auditService.auditUploadResult(fileUploadResponseRequest, AuditTypes.UploadSuccess)(hc)
       verify(mockAuditConnector).sendEvent(ArgumentMatchers.refEq(uploadSuccessEvent, "eventId", "generatedAt"))(any(), any())
     }
 
     "audit a 'UploadFailure' event" in {
-      auditService.auditUploadResult(eori, Some(contactDetails), None, fileUploadCount, List(fileUpload), AuditTypes.UploadFailure)(hc)
+      auditService.auditUploadResult(fileUploadResponseRequest, AuditTypes.UploadFailure)(hc)
       verify(mockAuditConnector).sendEvent(ArgumentMatchers.refEq(uploadFailedEvent, "eventId", "generatedAt"))(any(), any())
     }
 
@@ -92,13 +106,13 @@ class AuditServiceSpec extends UnitSpec {
   private val navigateToMessageEvent = ExtendedDataEvent(
     auditSource = appConfig.appName,
     auditType = NavigateToMessages.toString,
-    detail = Json.parse("""{
-                          |   "enrolment": "HMRC-CUS-ORG",
-                          |   "eoriNumber": "GB150454489082",
-                          |   "tags": {
-                          |      "notificationType": "CDS-EXPORTS"
-                          |   }
-                          | }""".stripMargin),
+    detail = Json.parse(s"""{
+        |   "enrolment": "HMRC-CUS-ORG",
+        |   "eoriNumber": "${eori}",
+        |   "tags": {
+        |      "notificationType": "CDS-EXPORTS"
+        |   }
+        | }""".stripMargin),
     tags = AuditExtensions
       .auditHeaderCarrier(hc)
       .toAuditTags("callSFUSPartial", dcPath)
