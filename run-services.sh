@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-sm --start CDS_FUF_DEPS -f
+sm2 --start CDS_FUF_ALL

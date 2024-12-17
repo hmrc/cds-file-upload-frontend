@@ -126,7 +126,7 @@ class UpscanStatusController @Inject() (
           case ns if ns.exists(failedUpload) =>
             logger.warn("Failed notification received for an upload.")
             logger.warn(s"Notifications: ${prettyPrint(ns)}")
-            clearUserCache(request.eori)
+            clearUserCache(request.eori, request.userAnswers.uuid)
             Future.successful(Redirect(routes.ErrorPageController.uploadError))
 
           case ns if ns.length == uploads.length =>
@@ -150,7 +150,7 @@ class UpscanStatusController @Inject() (
           case ns =>
             logger.warn(s"Maximum number of retries exceeded. Retrieved ${ns.length} of ${uploads.length} notifications.")
             logger.warn(s"Notifications: ${prettyPrint(ns)}")
-            clearUserCache(request.eori)
+            clearUserCache(request.eori, request.userAnswers.uuid)
             Future.successful(Redirect(routes.ErrorPageController.uploadError))
         }
       }
@@ -159,7 +159,7 @@ class UpscanStatusController @Inject() (
     retrieveNotifications()
   }
 
-  private def clearUserCache(eori: String): Future[Unit] = answersService.remove(eori)
+  private def clearUserCache(eori: String, uuid: String): Future[Unit] = answersService.remove(eori, uuid)
 
   private def getPosition(ref: String, refs: List[String]): Position = refs match {
     case head :: _ if head == ref => First(refs.size)

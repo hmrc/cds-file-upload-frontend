@@ -34,30 +34,30 @@ class FileUploadAnswersRepository @Inject() (mongoComponent: MongoComponent, app
       mongoComponent = mongoComponent,
       collectionName = "answers",
       domainFormat = FileUploadAnswers.format,
-      indexes = FileUploadAnswersRepository.indexes(appConfig)
+      indexes = FileUploadAnswersRepository.indexes(appConfig),
+      replaceIndexes = true
     ) with RepositoryOps[FileUploadAnswers] {
 
   override def classTag: ClassTag[FileUploadAnswers] = implicitly[ClassTag[FileUploadAnswers]]
   implicit val executionContext: ExecutionContext = ec
 
-  def findOne(eori: String): Future[Option[FileUploadAnswers]] = findOne("eori", eori)
+  def findOne(eori: String, uuid: String): Future[Option[FileUploadAnswers]] =
+    findOne("eori", eori, "uuid", uuid)
 
-  def findOneAndRemove(eori: String): Future[Option[FileUploadAnswers]] = findOneAndRemove("eori", eori)
-
-  def findOneOrCreate(eori: String): Future[FileUploadAnswers] =
-    findOneOrCreate("eori", eori, FileUploadAnswers(eori))
+  def findOneOrCreate(eori: String, uuid: String): Future[FileUploadAnswers] =
+    findOneOrCreate("eori", eori, "uuid", uuid, FileUploadAnswers(eori, uuid))
 
   def findOneAndReplace(answers: FileUploadAnswers): Future[FileUploadAnswers] =
-    findOneAndReplace("eori", answers.eori, answers)
+    findOneAndReplace("eori", answers.eori, "uuid", answers.uuid, answers)
 
-  def remove(eori: String): Future[Unit] = removeEvery("eori", eori)
+  def remove(eori: String, uuid: String): Future[Unit] = removeEvery("eori", eori, "uuid", uuid)
 }
 
 object FileUploadAnswersRepository {
 
   def indexes(appConfig: AppConfig): Seq[IndexModel] =
     List(
-      IndexModel(ascending("eori"), IndexOptions().name("eoriIdx")),
+      IndexModel(ascending("eori", "uuid"), IndexOptions().name("eoriUuidIdx")),
       IndexModel(
         ascending("updated"),
         IndexOptions()

@@ -31,6 +31,7 @@ import play.api.libs.ws.WSResponse
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
 import services.CustomsDeclarationsService
+import testdata.CommonTestData.cacheId
 import utils.FakeRequestCSRFSupport._
 import views.html.how_many_files_upload
 
@@ -47,7 +48,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase {
   val eori: String = eoriString.sample.get
   val mrn: MRN = arbitraryMrn.arbitrary.sample.get
   private val fileUploadCount = FileUploadCount(7)
-  val validAnswers = FileUploadAnswers(eori, mrn = Some(mrn), fileUploadCount = fileUploadCount)
+  val validAnswers = FileUploadAnswers(eori, cacheId, mrn = Some(mrn), fileUploadCount = fileUploadCount)
 
   implicit val arbitraryContactDetailsActions: Arbitrary[ContactDetailsRequiredAction] =
     Arbitrary(arbitrary[FakeContactDetailsRequiredAction].map(_.asInstanceOf[ContactDetailsRequiredAction]))

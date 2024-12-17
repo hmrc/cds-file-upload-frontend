@@ -26,14 +26,12 @@ import scala.concurrent.Future
 
 class FileUploadAnswersService @Inject() (val repository: FileUploadAnswersRepository) extends Logging {
 
-  def findOne(eori: String): Future[Option[FileUploadAnswers]] = repository.findOne(eori)
+  def findOne(eori: String, uuid: String): Future[Option[FileUploadAnswers]] = repository.findOne(eori, uuid)
 
-  def findOneAndRemove(eori: String): Future[Option[FileUploadAnswers]] = repository.findOneAndRemove(eori)
-
-  def findOneOrCreate(eori: String): Future[FileUploadAnswers] = repository.findOneOrCreate(eori)
+  def findOneOrCreate(eori: String, uuid: String): Future[FileUploadAnswers] = repository.findOneOrCreate(eori, uuid)
 
   def findOneAndReplace(answers: FileUploadAnswers): Future[FileUploadAnswers] =
     repository.findOneAndReplace(answers.copy(updated = ZonedDateTime.now(ZoneOffset.UTC)))
 
-  def remove(eori: String): Future[Unit] = repository.remove(eori)
+  def remove(eori: String, uuid: String): Future[Unit] = repository.remove(eori, uuid)
 }

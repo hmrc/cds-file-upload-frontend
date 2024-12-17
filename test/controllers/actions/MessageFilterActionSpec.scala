@@ -19,7 +19,7 @@ package controllers.actions
 import controllers.ControllerSpecBase
 import models.requests.{AuthenticatedRequest, MessageFilterRequest, VerifiedEmailRequest}
 import models.{AllMessages, ExportMessages, SecureMessageAnswers}
-import org.mockito.ArgumentMatchers.{eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.MockitoSugar.{mock, reset, when}
 import play.api.mvc.Result
 import services.SecureMessageAnswersService
@@ -32,7 +32,7 @@ class MessageFilterActionSpec extends ControllerSpecBase {
   private val answersService: SecureMessageAnswersService = mock[SecureMessageAnswersService]
   private val action: ActionTestWrapper = new ActionTestWrapper(answersService)
 
-  private val answers = SecureMessageAnswers(eori, ExportMessages)
+  private val answers = SecureMessageAnswers(eori, ExportMessages, cacheId)
 
   override def afterEach(): Unit = {
     reset(answersService)
@@ -42,8 +42,8 @@ class MessageFilterActionSpec extends ControllerSpecBase {
   "MessageFilterAction" when {
     "the repository finds the user's filter selection" must {
       "build a SecureMessageAnswers object and add it to the MessageFilterRequest" in {
-        when(answersService.findOne(eqTo(eori))) thenReturn Future.successful(Some(answers))
-        val request = VerifiedEmailRequest(AuthenticatedRequest(fakeRequest, signedInUser), verifiedEmail)
+        when(answersService.findOne(any(), any())) thenReturn Future.successful(Some(answers))
+        val request = VerifiedEmailRequest(AuthenticatedRequest(fakeSessionDataRequest, signedInUser), verifiedEmail)
 
         val result = action.callRefine(request).futureValue
 
@@ -54,8 +54,8 @@ class MessageFilterActionSpec extends ControllerSpecBase {
 
     "the repository does not find the user's filter selection" must {
       "return a default answer cache with no filter applied" in {
-        when(answersService.findOne(eqTo(eori_2))) thenReturn Future.successful(None)
-        val request = VerifiedEmailRequest(AuthenticatedRequest(fakeRequest, signedInUser.copy(eori = eori_2)), verifiedEmail)
+        when(answersService.findOne(eqTo(eori_2), any())) thenReturn Future.successful(None)
+        val request = VerifiedEmailRequest(AuthenticatedRequest(fakeSessionDataRequest, signedInUser.copy(eori = eori_2)), verifiedEmail)
 
         val result = action.callRefine(request).futureValue
 

@@ -26,7 +26,7 @@ import scala.concurrent.Future
 
 class SecureMessageAnswersService @Inject() (val repository: SecureMessageAnswersRepository) extends Logging {
 
-  def findOne(eori: String): Future[Option[SecureMessageAnswers]] = repository.findOne(eori)
+  def findOne(eori: String, uuid: String): Future[Option[SecureMessageAnswers]] = repository.findOne(eori, uuid)
 
   def findOneAndReplace(answers: SecureMessageAnswers): Future[SecureMessageAnswers] =
     repository.findOneAndReplace(answers.copy(created = ZonedDateTime.now(ZoneOffset.UTC)))

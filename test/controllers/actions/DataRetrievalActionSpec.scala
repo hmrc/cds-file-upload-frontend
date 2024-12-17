@@ -19,7 +19,7 @@ package controllers.actions
 import controllers.ControllerSpecBase
 import models.FileUploadAnswers
 import models.requests.{AuthenticatedRequest, DataRequest, VerifiedEmailRequest}
-import org.mockito.ArgumentMatchers.{eq => eqTo}
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.MockitoSugar.{mock, reset, when}
 import services.FileUploadAnswersService
 import testdata.CommonTestData._
@@ -31,13 +31,13 @@ class DataRetrievalActionSpec extends ControllerSpecBase {
   private val answersService: FileUploadAnswersService = mock[FileUploadAnswersService]
   private val action: ActionTestWrapper = new ActionTestWrapper(answersService)
 
-  private val answers = FileUploadAnswers(eori)
+  private val answers = FileUploadAnswers(eori, cacheId)
 
   override def beforeEach(): Unit = {
     super.beforeEach()
 
     reset(answersService)
-    when(answersService.findOneOrCreate(eqTo(eori))) thenReturn Future.successful(answers)
+    when(answersService.findOneOrCreate(anyString(), anyString())) thenReturn Future.successful(answers)
   }
 
   override def afterEach(): Unit = {
@@ -49,7 +49,7 @@ class DataRetrievalActionSpec extends ControllerSpecBase {
     "the connector finds data" must {
       "build a userAnswers object and add it to the request" in {
 
-        val request = VerifiedEmailRequest(AuthenticatedRequest(fakeRequest, signedInUser), verifiedEmail)
+        val request = VerifiedEmailRequest(AuthenticatedRequest(fakeSessionDataRequest, signedInUser), verifiedEmail)
 
         val result = action.callTransform(request).futureValue
 

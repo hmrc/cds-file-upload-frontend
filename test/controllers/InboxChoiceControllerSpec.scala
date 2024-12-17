@@ -20,7 +20,7 @@ import controllers.routes.SecureMessagingController
 import forms.InboxChoiceForm
 import forms.InboxChoiceForm.Values.ExportsMessages
 import forms.InboxChoiceForm.{InboxChoiceKey, Values}
-import models.requests.{AuthenticatedRequest, MessageFilterRequest, VerifiedEmailRequest}
+import models.requests.{AuthenticatedRequest, MessageFilterRequest, SignedInUser, VerifiedEmailRequest}
 import models.{AllMessages, ExportMessages, MessageFilterTag, SecureMessageAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.MockitoSugar.{mock, reset, verify, when}
@@ -30,8 +30,9 @@ import play.api.mvc.Request
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
 import services.SecureMessageAnswersService
-import testdata.CommonTestData.{signedInUser, verifiedEmail}
+import testdata.CommonTestData.{cacheId, eori, signedInUser, verifiedEmail}
 import views.html.messaging.inbox_choice
+import org.scalacheck.Arbitrary._
 
 import scala.concurrent.Future
 
@@ -43,8 +44,8 @@ class InboxChoiceControllerSpec extends ControllerSpecBase {
   private def controller(tag: MessageFilterTag = ExportMessages) =
     new InboxChoiceController(
       stubMessagesControllerComponents(),
-      new FakeMessageFilterAction(eoriString.sample.get, tag),
-      new FakeAuthAction(),
+      new FakeMessageFilterAction(eori, tag),
+      new FakeAuthAction(arbitrary[SignedInUser].sample.get.copy(eori = eori)),
       new FakeVerifiedEmailAction(),
       secureMessageAnswersService,
       inboxChoice,
@@ -56,7 +57,7 @@ class InboxChoiceControllerSpec extends ControllerSpecBase {
 
     reset(inboxChoice, secureMessageAnswersService)
     when(inboxChoice.apply(any[Form[InboxChoiceForm]])(any[Request[_]], any[Messages])).thenReturn(HtmlFormat.empty)
-    when(secureMessageAnswersService.findOneAndReplace(any())).thenReturn(Future.successful(SecureMessageAnswers("", ExportMessages)))
+    when(secureMessageAnswersService.findOneAndReplace(any())).thenReturn(Future.successful(SecureMessageAnswers(eori, ExportMessages, cacheId)))
   }
 
   "InboxChoiceController.onPageLoad" should {
@@ -124,11 +125,11 @@ class InboxChoiceControllerSpec extends ControllerSpecBase {
     "provided with a correct form" which {
 
       "specifies the choice to show the Exports Messages" should {
-        val request = fakePostRequest.withFormUrlEncodedBody(InboxChoiceKey -> Values.ExportsMessages)
+        val request = fakeSessionPostRequest.withFormUrlEncodedBody(InboxChoiceKey -> Values.ExportsMessages)
 
         "call SecureMessageAnswerService" in {
           controller().onSubmit()(request).futureValue
-          verify(secureMessageAnswersService).findOneAndReplace(SecureMessageAnswers(any(), ExportMessages))
+          verify(secureMessageAnswersService).findOneAndReplace(SecureMessageAnswers(eori, ExportMessages, cacheId, any()))
         }
 
         "return SEE_OTHER (303) and redirect to /messages" in {
@@ -154,7 +155,7 @@ class InboxChoiceControllerSpec extends ControllerSpecBase {
 
     "call SecureMessageAnswerService" in {
       controller().onExportsMessageChoice()(fakeGetRequest).futureValue
-      verify(secureMessageAnswersService).findOneAndReplace(SecureMessageAnswers(any(), ExportMessages))
+      verify(secureMessageAnswersService).findOneAndReplace(SecureMessageAnswers(any(), ExportMessages, cacheId))
     }
 
     "return SEE_OTHER (303) and redirect to /messages" in {
@@ -169,7 +170,7 @@ class InboxChoiceControllerSpec extends ControllerSpecBase {
       "the given parameter is not a 'MessageFilterTag' value" in {
         val request = MessageFilterRequest(
           VerifiedEmailRequest(AuthenticatedRequest(fakeRequest, signedInUser), verifiedEmail),
-          SecureMessageAnswers(signedInUser.eori, ExportMessages)
+          SecureMessageAnswers(signedInUser.eori, ExportMessages, cacheId)
         )
         val result = controller().checkMessageFilterTag("some choice")(request)
         status(result) mustBe BAD_REQUEST
