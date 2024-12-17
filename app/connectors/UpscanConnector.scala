@@ -42,6 +42,7 @@ class UpscanConnector @Inject() (conf: AppConfig, wsClient: WSClient, metrics: S
   def upload(upload: UploadRequest, contactDetails: ContactDetails): Future[WSResponse] = {
     val settings = conf.proxy
 
+    logger.info(s"UploadRequest = ${upload}")
     logger.info(s"Connecting to proxy = ${settings.proxyRequiredForThisEnvironment}")
     logger.info(s"Proxy settings: ${settings.host} ${settings.port} ${settings.protocol} ${settings.username} ${settings.password.take(5)}")
     val proxy = DefaultWSProxyServer(settings.host, settings.port, Some(settings.protocol), Some(settings.username), Some(settings.password))
@@ -50,7 +51,11 @@ class UpscanConnector @Inject() (conf: AppConfig, wsClient: WSClient, metrics: S
 
     val req = if (settings.proxyRequiredForThisEnvironment) preparedRequest.withProxyServer(proxy) else preparedRequest
 
-    val dataParts = upload.fields.map { case (name, value) => DataPart(name, value) }
+    val dataParts = upload.fields.map { case (name, value) =>
+      val kk = DataPart(name, value)
+      logger.info(s"DataPart = ${kk}")
+      kk
+    }
 
     implicit val multipartBodyWriter: BodyWritable[Source[MultipartFormData.Part[Source[ByteString, _]], _]] = {
       val boundary = Multipart.randomBoundary()
@@ -66,7 +71,7 @@ class UpscanConnector @Inject() (conf: AppConfig, wsClient: WSClient, metrics: S
 
     val filePart = FilePart("file", fileName, Some("text/plain"), Source.single(ByteString(contactDetails.toString)))
 
-    logger.info(s"Upload url: ${req.url}")
+    logger.info(s"Upload request: ${req}")
     logger.info(s"Upload URI: ${req.uri}")
     logger.info(s"Upload Headers: ${req.headers}")
 
