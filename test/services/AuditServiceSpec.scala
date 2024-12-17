@@ -81,25 +81,25 @@ class AuditServiceSpec extends UnitSpec {
     }
 
     "audit with a success" in {
-      val res = auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages, dcPath)(hc).futureValue
+      val result = auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages, dcPath)(hc).futureValue
 
-      res mustBe Success
+      result mustBe Success
     }
 
     "handle audit failure" in {
       mockSendEvent(result = auditFailure)
 
-      val res = auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages, dcPath)(hc).futureValue
+      val result = auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages, dcPath)(hc).futureValue
 
-      res mustBe auditFailure
+      result mustBe auditFailure
     }
 
     "handled audit disabled" in {
       mockSendEvent(result = Disabled)
 
-      val res = auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages, dcPath)(hc).futureValue
+      val result = auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages, dcPath)(hc).futureValue
 
-      res mustBe AuditResult.Disabled
+      result mustBe AuditResult.Disabled
     }
   }
 
