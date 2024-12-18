@@ -22,15 +22,12 @@ import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.MockitoSugar.{mock, verify, when}
 import play.api.libs.json.Json
-import services.AuditTypes.{NavigateToMessages, UploadFailure, UploadSuccess}
-import models.requests.{AuthenticatedRequest, FileUploadResponseRequest, MrnRequest}
+import services.AuditTypes.{FileUploaded, NavigateToMessages, UploadFailure, UploadSuccess}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Disabled, Failure, Success}
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.{DataEvent, ExtendedDataEvent}
-import testdata.CommonTestData
-import testdata.CommonTestData._
 
 import scala.concurrent.ExecutionContext.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -41,22 +38,11 @@ class AuditServiceSpec extends UnitSpec {
   private val auditFailure = Failure("Event sending failed")
 
   private val enrolment = AuthKey.enrolment
+  private val eori = "GB150454489082"
   private val dcPath = "/secure-message-frontend/cds-file-upload-service/messages"
   private val contactDetails = ContactDetails("Joe Bloggs", "Bloggs Inc", "0123456")
   private val fileUploadCount = FileUploadCount(1)
   private val fileUpload = FileUpload("fileRef1", Successful, "", "id")
-  private val sampleFileUpload: FileUpload = FileUpload("fileRef1", Successful, "filename", "id")
-  private val sampleFileUploadResponse: FileUploadResponse = new FileUploadResponse(List(sampleFileUpload)) {}
-
-  val answers = FileUploadAnswers(
-    eori,
-    None, //    MRN(CommonTestData.mrn),
-    Some(contactDetails),
-    fileUploadCount,
-    Some(sampleFileUploadResponse)
-  )
-  val mrnRequest = MrnRequest(AuthenticatedRequest(fakeRequest, signedInUser), answers, MRN(CommonTestData.mrn).get)
-  val fileUploadResponseRequest = FileUploadResponseRequest(mrnRequest, answers, sampleFileUploadResponse)
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -70,55 +56,56 @@ class AuditServiceSpec extends UnitSpec {
       verify(mockAuditConnector).sendExtendedEvent(ArgumentMatchers.refEq(navigateToMessageEvent, "eventId", "generatedAt"))(any(), any())
     }
 
-    "audit a 'UploadSuccess' event" in {
-      auditService.auditUploadResult(fileUploadResponseRequest, AuditTypes.UploadSuccess)(hc)
-      verify(mockAuditConnector).sendEvent(ArgumentMatchers.refEq(uploadSuccessEvent, "eventId", "generatedAt"))(any(), any())
+    "audit a 'UploadSuccess' event with two explicit events (one legacy event and one in the new event style)" in {
+      auditService.auditUploadResult(eori, Some(contactDetails), None, fileUploadCount, List(fileUpload), AuditTypes.UploadSuccess)(hc)
+      verify(mockAuditConnector).sendEvent(ArgumentMatchers.refEq(uploadSuccessEventOldStyle, "eventId", "generatedAt"))(any(), any())
+      verify(mockAuditConnector).sendEvent(ArgumentMatchers.refEq(uploadSuccessEventNewStyle, "eventId", "generatedAt"))(any(), any())
     }
 
     "audit a 'UploadFailure' event" in {
-      auditService.auditUploadResult(fileUploadResponseRequest, AuditTypes.UploadFailure)(hc)
+      auditService.auditUploadResult(eori, Some(contactDetails), None, fileUploadCount, List(fileUpload), AuditTypes.UploadFailure)(hc)
       verify(mockAuditConnector).sendEvent(ArgumentMatchers.refEq(uploadFailedEvent, "eventId", "generatedAt"))(any(), any())
     }
 
     "audit with a success" in {
-      val result = auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages, dcPath)(hc).futureValue
+      val res = auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages, dcPath)(hc).futureValue
 
-      result mustBe Success
+      res mustBe Success
     }
 
     "handle audit failure" in {
       mockSendEvent(result = auditFailure)
 
-      val result = auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages, dcPath)(hc).futureValue
+      val res = auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages, dcPath)(hc).futureValue
 
-      result mustBe auditFailure
+      res mustBe auditFailure
     }
 
     "handled audit disabled" in {
       mockSendEvent(result = Disabled)
 
-      val result = auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages, dcPath)(hc).futureValue
+      val res = auditService.auditSecureMessageInbox(enrolment, eori, ExportMessages, dcPath)(hc).futureValue
 
-      result mustBe AuditResult.Disabled
+      res mustBe AuditResult.Disabled
     }
   }
 
   private val navigateToMessageEvent = ExtendedDataEvent(
     auditSource = appConfig.appName,
     auditType = NavigateToMessages.toString,
-    detail = Json.parse(s"""{
-        |   "enrolment": "HMRC-CUS-ORG",
-        |   "eoriNumber": "${eori}",
-        |   "tags": {
-        |      "notificationType": "CDS-EXPORTS"
-        |   }
-        | }""".stripMargin),
+    detail = Json.parse("""{
+                          |   "enrolment": "HMRC-CUS-ORG",
+                          |   "eoriNumber": "GB150454489082",
+                          |   "tags": {
+                          |      "notificationType": "CDS-EXPORTS"
+                          |   }
+                          | }""".stripMargin),
     tags = AuditExtensions
       .auditHeaderCarrier(hc)
       .toAuditTags("callSFUSPartial", dcPath)
   )
 
-  private val uploadSuccessEvent = DataEvent(
+  private val uploadSuccessEventOldStyle = DataEvent(
     auditSource = appConfig.appName,
     auditType = UploadSuccess.toString,
     detail = Map(
@@ -134,16 +121,34 @@ class AuditServiceSpec extends UnitSpec {
       .toAuditTags("trader-submission", "N/A")
   )
 
-  private val uploadFailedEvent = DataEvent(
+  private val uploadSuccessEventNewStyle = DataEvent(
     auditSource = appConfig.appName,
-    auditType = UploadFailure.toString,
+    auditType = FileUploaded.toString,
     detail = Map(
       "eori" -> eori,
-      "telephoneNumber" -> contactDetails.phoneNumber,
+      "phoneNumber" -> contactDetails.phoneNumber,
       "fullName" -> contactDetails.name,
       "companyName" -> contactDetails.companyName,
       "numberOfFiles" -> fileUploadCount.get.value.toString,
-      "fileReference1" -> fileUpload.reference
+      "fileReference1" -> fileUpload.reference,
+      "uploadResult" -> UploadSuccess.toString
+    ),
+    tags = AuditExtensions
+      .auditHeaderCarrier(hc)
+      .toAuditTags("trader-submission", "N/A")
+  )
+
+  private val uploadFailedEvent = DataEvent(
+    auditSource = appConfig.appName,
+    auditType = FileUploaded.toString,
+    detail = Map(
+      "eori" -> eori,
+      "phoneNumber" -> contactDetails.phoneNumber,
+      "fullName" -> contactDetails.name,
+      "companyName" -> contactDetails.companyName,
+      "numberOfFiles" -> fileUploadCount.get.value.toString,
+      "fileReference1" -> fileUpload.reference,
+      "uploadResult" -> UploadFailure.toString
     ),
     tags = AuditExtensions
       .auditHeaderCarrier(hc)

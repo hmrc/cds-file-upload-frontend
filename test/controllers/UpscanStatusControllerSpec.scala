@@ -21,7 +21,6 @@ import config.Notifications
 import connectors.CdsFileUploadConnector
 import controllers.actions.{DataRetrievalAction, FileUploadResponseRequiredAction}
 import models._
-import models.requests.FileUploadResponseRequest
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.MockitoSugar.{mock, reset, verify, when}
 import org.scalacheck.Arbitrary._
@@ -236,7 +235,14 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       val result = controller(fakeDataRetrievalAction(answers)).success(lastFile.reference)(fakeRequest)
       status(result) mustBe SEE_OTHER
 
-      verify(auditService).auditUploadResult(meq(FileUploadResponseRequest(any(), any(), any())), meq(AuditTypes.UploadSuccess))(any[HeaderCarrier])
+      verify(auditService).auditUploadResult(
+        meq(eori),
+        meq(Some(cd)),
+        meq(Some(mrn)),
+        meq(FileUploadCount(3)),
+        meq(response.uploads),
+        meq(AuditTypes.UploadSuccess)
+      )(any[HeaderCarrier])
     }
 
     "load receipt page when all notifications are successful" in {
@@ -289,7 +295,14 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(routes.ErrorPageController.uploadError.url)
 
-      verify(auditService).auditUploadResult(meq(FileUploadResponseRequest(any(), any(), any())), meq(AuditTypes.UploadFailure))(any[HeaderCarrier])
+      verify(auditService).auditUploadResult(
+        meq(eori),
+        meq(Some(cd)),
+        meq(Some(mrn)),
+        meq(FileUploadCount(3)),
+        meq(response.uploads),
+        meq(AuditTypes.UploadFailure)
+      )(any[HeaderCarrier])
     }
 
     "load upload error page when notification retries are exceeded" in {
