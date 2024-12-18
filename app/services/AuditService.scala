@@ -21,7 +21,7 @@ import config.AppConfig
 import models._
 import play.api.Logging
 import play.api.libs.json.Json
-import services.AuditTypes.{NavigateToMessages, UploadSuccess}
+import services.AuditTypes.{Audit, FileUploaded, NavigateToMessages, UploadSuccess}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions
 import uk.gov.hmrc.play.audit.AuditExtensions._
@@ -48,18 +48,20 @@ class AuditService @Inject() (connector: AuditConnector, appConfig: AppConfig)(i
     connector.sendExtendedEvent(extendedEvent).map(handleResponse(_, auditType.toString))
   }
 
-  def auditUploadSuccess(
+  def auditUploadResult(
     eori: String,
     maybeContactDetails: Option[ContactDetails],
     maybeMrn: Option[MRN],
     maybeFileUploadCount: Option[FileUploadCount],
-    uploads: List[FileUpload]
+    uploads: List[FileUpload],
+    auditType: Audit
   )(implicit hc: HeaderCarrier): Future[AuditResult] = {
-    val auditType = UploadSuccess
 
-    def auditDetails: Map[String, String] = {
+    def auditDetails(isOldStyle: Boolean): Map[String, String] = {
+      val phoneFieldKeyName = if (isOldStyle) "telephoneNumber" else "phoneNumber"
+
       val contactDetails = maybeContactDetails
-        .fold(Map.empty[String, String])(cd => Map("fullName" -> cd.name, "companyName" -> cd.companyName, "telephoneNumber" -> cd.phoneNumber))
+        .fold(Map.empty[String, String])(cd => Map("fullName" -> cd.name, "companyName" -> cd.companyName, phoneFieldKeyName -> cd.phoneNumber))
       val eoriMap = Map("eori" -> eori)
       val mrn = maybeMrn.fold(Map.empty[String, String])(m => Map("mrn" -> m.value))
       val numberOfFiles = maybeFileUploadCount.fold(Map.empty[String, String])(n => Map("numberOfFiles" -> s"${n.value}"))
@@ -67,18 +69,24 @@ class AuditService @Inject() (connector: AuditConnector, appConfig: AppConfig)(i
         .map(i => s"fileReference$i")
         .zip(uploads.map(_.reference))
         .toMap
+      val uploadResult = if (!isOldStyle) Map("uploadResult" -> auditType.toString) else Map.empty
 
-      contactDetails ++ eoriMap ++ mrn ++ numberOfFiles ++ fileReferences
+      contactDetails ++ eoriMap ++ mrn ++ numberOfFiles ++ fileReferences ++ uploadResult
     }
 
-    val dataEvent = DataEvent(
+    def createDataEvent(isOldStyle: Boolean, auditType: Audit) = DataEvent(
       auditSource = appConfig.appName,
       auditType = auditType.toString,
       tags = getAuditTags("trader-submission", "N/A"),
-      detail = hc.toAuditDetails(auditDetails.toSeq: _*)
+      detail = hc.toAuditDetails(auditDetails(isOldStyle).toSeq: _*)
     )
 
-    connector.sendEvent(dataEvent).map(handleResponse(_, auditType.toString))
+    if (auditType == UploadSuccess) {
+      connector.sendEvent(createDataEvent(true, UploadSuccess)).map(handleResponse(_, UploadSuccess.toString))
+      connector.sendEvent(createDataEvent(false, FileUploaded)).map(handleResponse(_, FileUploaded.toString))
+    } else {
+      connector.sendEvent(createDataEvent(false, FileUploaded)).map(handleResponse(_, FileUploaded.toString))
+    }
   }
 
   private def getAuditTags(transactionName: String, path: String)(implicit hc: HeaderCarrier) =
@@ -101,5 +109,5 @@ class AuditService @Inject() (connector: AuditConnector, appConfig: AppConfig)(i
 
 object AuditTypes extends Enumeration {
   type Audit = Value
-  val NavigateToMessages, UploadSuccess = Value
+  val NavigateToMessages, UploadSuccess, UploadFailure, FileUploaded = Value
 }

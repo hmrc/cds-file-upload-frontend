@@ -26,7 +26,10 @@ import models.requests.FileUploadResponseRequest
 import play.api.Logging
 import play.api.i18n.I18nSupport
 import play.api.mvc._
-import services.{AuditService, FileUploadAnswersService}
+import services.AuditTypes.Audit
+import services.{AuditService, AuditTypes, FileUploadAnswersService}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.{upload_error, upload_your_files}
 
@@ -126,18 +129,17 @@ class UpscanStatusController @Inject() (
           case ns if ns.exists(failedUpload) =>
             logger.warn("Failed notification received for an upload.")
             logger.warn(s"Notifications: ${prettyPrint(ns)}")
+
+            auditUploadResult(request, AuditTypes.UploadFailure)
+
             clearUserCache(request.eori, request.userAnswers.uuid)
             Future.successful(Redirect(routes.ErrorPageController.uploadError))
 
           case ns if ns.length == uploads.length =>
             logger.info("All notifications successful.")
-            auditservice.auditUploadSuccess(
-              request.eori,
-              request.userAnswers.contactDetails,
-              request.userAnswers.mrn,
-              request.userAnswers.fileUploadCount,
-              request.fileUploadResponse.uploads
-            )
+
+            auditUploadResult(request, AuditTypes.UploadSuccess)
+
             Future.successful(Redirect(routes.UploadYourFilesReceiptController.onPageLoad))
 
           case ns if retries < notificationsMaxRetries =>
@@ -150,6 +152,9 @@ class UpscanStatusController @Inject() (
           case ns =>
             logger.warn(s"Maximum number of retries exceeded. Retrieved ${ns.length} of ${uploads.length} notifications.")
             logger.warn(s"Notifications: ${prettyPrint(ns)}")
+
+            auditUploadResult(request, AuditTypes.UploadFailure)
+
             clearUserCache(request.eori, request.userAnswers.uuid)
             Future.successful(Redirect(routes.ErrorPageController.uploadError))
         }
@@ -166,4 +171,14 @@ class UpscanStatusController @Inject() (
     case _ :+ last if last == ref => Last(refs.size)
     case _                        => Middle(refs.indexOf(ref) + 1, refs.size)
   }
+
+  private def auditUploadResult(request: FileUploadResponseRequest[_], auditType: Audit)(implicit hc: HeaderCarrier): Future[AuditResult] =
+    auditservice.auditUploadResult(
+      request.eori,
+      request.userAnswers.contactDetails,
+      request.userAnswers.mrn,
+      request.userAnswers.fileUploadCount,
+      request.fileUploadResponse.uploads,
+      auditType
+    )
 }

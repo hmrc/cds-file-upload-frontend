@@ -27,6 +27,13 @@ In order to run CDS File Upload Frontend with the stubbed endpoints you will nee
 If you're running service manually without using the bash scripts on localhost you must use `sbt -Dapplication.router=testOnlyDoNotUseInAppConf.Routes` to
 enable the test-only S3 upload endpoint.
 
+### Testing the file upload feature
+In the QA and Production environments when a user submits a file to upload from their browser, they are actually submitting to an AWS S3 bucket. In the
+other 'stubbed' environments there is no S3 bucket to upload to so we have a 'testOnly' endpoint on this frontend service that substitutes for the missing S3 URL.
+
+When the 'testOnly' endpoint is called it will send a success notification to our back-end service (imitating what Upscan would normally send) for any file chosen
+by the user. You can however also mimic a Upscan rejection notifications by uploading a file who's filename begins with an 'x'.
+
 ## Config settings
 
 The following settings are used to configure the notifications persistance and retrieval.

@@ -50,12 +50,14 @@ class CustomsDeclarationsStubController @Inject() (appConfig: AppConfig, httpCli
   private def callBack(filename: String, reference: String)(implicit hc: HeaderCarrier): Unit = {
     // Thread.sleep(1000)
 
+    val outcome = if (filename.toLowerCase.startsWith("x")) "FAILURE" else "SUCCESS"
+
     val notification =
       <Root>
         <FileReference>{reference}</FileReference>
         <BatchId>5e634e09-77f6-4ff1-b92a-8a9676c715c4</BatchId>
         <FileName>{filename}</FileName>
-        <Outcome>SUCCESS</Outcome>
+        <Outcome>{outcome}</Outcome>
         <Details>[detail block]</Details>
       </Root>
 
@@ -65,6 +67,6 @@ class CustomsDeclarationsStubController @Inject() (appConfig: AppConfig, httpCli
     val header: (String, String) = HeaderNames.CONTENT_TYPE -> ContentTypes.XML(Codec.utf_8)
 
     httpClientV2.post(url"$url").transform(_.addHttpHeaders(Seq(header): _*)).withBody[String](notification.toString).execute[HttpResponse]
-    logger.debug(s"Sent notification for file ${reference} to ${url}")
+    logger.warn(s"Sent notification for file ${reference} to ${url}")
   }
 }

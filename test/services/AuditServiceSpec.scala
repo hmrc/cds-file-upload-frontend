@@ -22,7 +22,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.MockitoSugar.{mock, verify, when}
 import play.api.libs.json.Json
-import services.AuditTypes.{NavigateToMessages, UploadSuccess}
+import services.AuditTypes.{FileUploaded, NavigateToMessages, UploadFailure, UploadSuccess}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Disabled, Failure, Success}
@@ -56,9 +56,15 @@ class AuditServiceSpec extends UnitSpec {
       verify(mockAuditConnector).sendExtendedEvent(ArgumentMatchers.refEq(navigateToMessageEvent, "eventId", "generatedAt"))(any(), any())
     }
 
-    "audit a 'UploadSuccess' event" in {
-      auditService.auditUploadSuccess(eori, Some(contactDetails), None, fileUploadCount, List(fileUpload))(hc)
-      verify(mockAuditConnector).sendEvent(ArgumentMatchers.refEq(uploadSuccessEvent, "eventId", "generatedAt"))(any(), any())
+    "audit a 'UploadSuccess' event with two explicit events (one legacy event and one in the new event style)" in {
+      auditService.auditUploadResult(eori, Some(contactDetails), None, fileUploadCount, List(fileUpload), AuditTypes.UploadSuccess)(hc)
+      verify(mockAuditConnector).sendEvent(ArgumentMatchers.refEq(uploadSuccessEventOldStyle, "eventId", "generatedAt"))(any(), any())
+      verify(mockAuditConnector).sendEvent(ArgumentMatchers.refEq(uploadSuccessEventNewStyle, "eventId", "generatedAt"))(any(), any())
+    }
+
+    "audit a 'UploadFailure' event" in {
+      auditService.auditUploadResult(eori, Some(contactDetails), None, fileUploadCount, List(fileUpload), AuditTypes.UploadFailure)(hc)
+      verify(mockAuditConnector).sendEvent(ArgumentMatchers.refEq(uploadFailedEvent, "eventId", "generatedAt"))(any(), any())
     }
 
     "audit with a success" in {
@@ -99,7 +105,7 @@ class AuditServiceSpec extends UnitSpec {
       .toAuditTags("callSFUSPartial", dcPath)
   )
 
-  private val uploadSuccessEvent = DataEvent(
+  private val uploadSuccessEventOldStyle = DataEvent(
     auditSource = appConfig.appName,
     auditType = UploadSuccess.toString,
     detail = Map(
@@ -109,6 +115,40 @@ class AuditServiceSpec extends UnitSpec {
       "companyName" -> contactDetails.companyName,
       "numberOfFiles" -> fileUploadCount.get.value.toString,
       "fileReference1" -> fileUpload.reference
+    ),
+    tags = AuditExtensions
+      .auditHeaderCarrier(hc)
+      .toAuditTags("trader-submission", "N/A")
+  )
+
+  private val uploadSuccessEventNewStyle = DataEvent(
+    auditSource = appConfig.appName,
+    auditType = FileUploaded.toString,
+    detail = Map(
+      "eori" -> eori,
+      "phoneNumber" -> contactDetails.phoneNumber,
+      "fullName" -> contactDetails.name,
+      "companyName" -> contactDetails.companyName,
+      "numberOfFiles" -> fileUploadCount.get.value.toString,
+      "fileReference1" -> fileUpload.reference,
+      "uploadResult" -> UploadSuccess.toString
+    ),
+    tags = AuditExtensions
+      .auditHeaderCarrier(hc)
+      .toAuditTags("trader-submission", "N/A")
+  )
+
+  private val uploadFailedEvent = DataEvent(
+    auditSource = appConfig.appName,
+    auditType = FileUploaded.toString,
+    detail = Map(
+      "eori" -> eori,
+      "phoneNumber" -> contactDetails.phoneNumber,
+      "fullName" -> contactDetails.name,
+      "companyName" -> contactDetails.companyName,
+      "numberOfFiles" -> fileUploadCount.get.value.toString,
+      "fileReference1" -> fileUpload.reference,
+      "uploadResult" -> UploadFailure.toString
     ),
     tags = AuditExtensions
       .auditHeaderCarrier(hc)
