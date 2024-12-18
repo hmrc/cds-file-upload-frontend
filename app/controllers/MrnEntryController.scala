@@ -20,7 +20,7 @@ import com.google.inject.Singleton
 import controllers.actions._
 import forms.MRNFormProvider
 import models.requests.DataRequest
-import models.{FileUploadAnswers, MRN}
+import models.{FileUploadAnswers, MRN, SessionHelper}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import services.FileUploadAnswersService
@@ -45,28 +45,28 @@ class MrnEntryController @Inject() (
 
   private val form = formProvider()
 
-  val onPageLoad: Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData).async { implicit req =>
-    val populatedForm = req.userAnswers.mrn.fold(form)(form.fill)
+  val onPageLoad: Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData).async { implicit request =>
+    val populatedForm = request.userAnswers.mrn.fold(form)(form.fill)
     Future.successful(Ok(mrnEntry(populatedForm)))
   }
 
-  val onSubmit: Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData).async { implicit req =>
+  val onSubmit: Action[AnyContent] = (authenticate andThen verifiedEmail andThen getData).async { implicit request =>
     form
       .bindFromRequest()
-      .fold(errorForm => Future.successful(BadRequest(mrnEntry(errorForm))), updateUserAnswersAndRedirect(_, req.userAnswers))
+      .fold(errorForm => Future.successful(BadRequest(mrnEntry(errorForm))), updateUserAnswersAndRedirect(_, request.userAnswers))
   }
 
   def autoFill(mrn: String): Action[AnyContent] =
-    (authenticate andThen verifiedEmail andThen getData).async { implicit req =>
+    (authenticate andThen verifiedEmail andThen getData).async { implicit request =>
       MRN(mrn)
-        .map(updateUserAnswersAndRedirect(_, req.userAnswers))
+        .map(updateUserAnswersAndRedirect(_, request.userAnswers))
         .getOrElse(invalidMrnResponse(mrn))
     }
-  private def updateUserAnswersAndRedirect(mrn: MRN, userAnswers: FileUploadAnswers): Future[Result] =
+  private def updateUserAnswersAndRedirect(mrn: MRN, userAnswers: FileUploadAnswers)(implicit request: DataRequest[AnyContent]): Future[Result] =
     answersService.findOneAndReplace(userAnswers.copy(mrn = Some(mrn))).map { _ =>
-      Redirect(routes.ContactDetailsController.onPageLoad)
+      Redirect(routes.ContactDetailsController.onPageLoad).addingToSession(SessionHelper.ANSWER_CACHE_ID -> userAnswers.uuid)
     }
 
-  private def invalidMrnResponse(mrn: String)(implicit req: DataRequest[AnyContent]): Future[Result] =
+  private def invalidMrnResponse(mrn: String)(implicit request: DataRequest[AnyContent]): Future[Result] =
     Future.successful(BadRequest(mrnAccessDenied(mrn)))
 }

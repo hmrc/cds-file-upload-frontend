@@ -19,7 +19,7 @@ package repositories
 import com.mongodb.ErrorCategory.DUPLICATE_KEY
 import com.mongodb.client.model.{ReturnDocument, Updates}
 import org.mongodb.scala.bson.BsonDocument
-import org.mongodb.scala.model.Filters.equal
+import org.mongodb.scala.model.Filters.{and, equal}
 import org.mongodb.scala.model.{FindOneAndReplaceOptions, FindOneAndUpdateOptions}
 import org.mongodb.scala.{Document, MongoCollection, MongoWriteException}
 import play.api.Logging
@@ -41,17 +41,20 @@ trait RepositoryOps[T] extends Logging {
   def findAll[V](keyId: String, keyValue: V): Future[Seq[T]] =
     collection.find(equal(keyId, keyValue)).toFuture()
 
-  def findOne[V](keyId: String, keyValue: V): Future[Option[T]] =
-    collection.find(equal(keyId, keyValue)).toFuture().map(_.headOption)
+  def findOne[V](keyId: String, keyValue: V, keyId2: String, keyValue2: V): Future[Option[T]] =
+    collection
+      .find(and(equal(keyId, keyValue), equal(keyId2, keyValue2)))
+      .toFuture()
+      .map(_.headOption)
 
   /*
    Find one and return if a document with keyId=keyValue exists,
    or create "document: T" if a document with keyId=keyValue does NOT exists.
    */
-  def findOneOrCreate[V](keyId: String, keyValue: V, document: => T)(implicit writes: Writes[T]): Future[T] =
+  def findOneOrCreate[V](keyId1: String, keyValue1: V, keyId2: String, keyValue2: V, document: => T)(implicit writes: Writes[T]): Future[T] =
     collection
       .findOneAndUpdate(
-        filter = equal(keyId, keyValue),
+        filter = and(equal(keyId1, keyValue1), equal(keyId2, keyValue2)),
         update = Updates.setOnInsert(BsonDocument(Json.toJson(document).toString)),
         options = FindOneAndUpdateOptions().upsert(true).returnDocument(ReturnDocument.AFTER)
       )
@@ -61,10 +64,10 @@ trait RepositoryOps[T] extends Logging {
    Find one and replace with "document: T" if a document with keyId=keyValue exists,
    or create "document: T" if a document with keyId=keyValue does NOT exists.
    */
-  def findOneAndReplace[V](keyId: String, keyValue: V, document: T): Future[T] =
+  def findOneAndReplace[V](keyId1: String, keyValue1: V, keyId2: String, keyValue2: V, document: T): Future[T] =
     collection
       .findOneAndReplace(
-        filter = equal(keyId, keyValue),
+        filter = and(equal(keyId1, keyValue1), equal(keyId2, keyValue2)),
         replacement = document,
         options = FindOneAndReplaceOptions().upsert(true).returnDocument(ReturnDocument.AFTER)
       )
@@ -88,8 +91,8 @@ trait RepositoryOps[T] extends Logging {
   def removeAll: Future[Unit] =
     collection.deleteMany(BsonDocument()).toFuture().map(_ => ())
 
-  def removeEvery[V](keyId: String, keyValue: V): Future[Unit] =
-    collection.deleteMany(equal(keyId, keyValue)).toFuture().map(_ => ())
+  def removeEvery[V](keyId: String, keyValue: V, keyId2: String, keyValue2: V): Future[Unit] =
+    collection.deleteMany(and(equal(keyId, keyValue), equal(keyId2, keyValue2))).toFuture().map(_ => ())
 
   def removeOne[V](keyId: String, keyValue: V): Future[Unit] =
     collection.deleteOne(equal(keyId, keyValue)).toFuture().map(_ => ())

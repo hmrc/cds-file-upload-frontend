@@ -26,6 +26,7 @@ import org.scalacheck.Arbitrary._
 import play.api.data.Form
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
+import testdata.CommonTestData.cacheId
 import views.html.contact_details
 
 class ContactDetailsControllerSpec extends ControllerSpecBase {
@@ -62,7 +63,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
 
     "load the correct page when user is logged in" in {
       forAll { (user: SignedInUser, eori: String) =>
-        val answers = FileUploadAnswers(eori, mrn = Some(mrn))
+        val answers = FileUploadAnswers(eori, cacheId, mrn = Some(mrn))
         val result = controller(user, fakeDataRetrievalAction(answers)).onPageLoad(fakeRequest)
 
         status(result) mustBe OK
@@ -71,7 +72,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
 
     "contact details should be displayed if they exist in the cache" in {
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
-        val answers = FileUploadAnswers(eori, mrn = Some(mrn), contactDetails = Some(contactDetails))
+        val answers = FileUploadAnswers(eori, cacheId, mrn = Some(mrn), contactDetails = Some(contactDetails))
         val result = controller(user, fakeDataRetrievalAction(answers)).onPageLoad(fakeRequest)
 
         contentAsString(result) mustBe view(form.fill(contactDetails))
@@ -81,7 +82,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
     "return an see other when valid data is submitted" in {
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
         val postRequest = fakePostRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
-        val answers = FileUploadAnswers(eori, mrn = Some(mrn))
+        val answers = FileUploadAnswers(eori, cacheId, mrn = Some(mrn))
         val result = controller(user, fakeDataRetrievalAction(answers)).onSubmit(postRequest)
 
         status(result) mustBe SEE_OTHER
@@ -92,7 +93,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
     "return a bad request when invalid data is submitted" in {
       forAll(arbitrary[SignedInUser], eoriString, arbitrary[ContactDetails], minStringLength(36)) { (user, eori, contactDetails, invalidName) =>
         val badData = contactDetails.copy(name = invalidName)
-        val answers = FileUploadAnswers(eori, mrn = Some(mrn))
+        val answers = FileUploadAnswers(eori, cacheId, mrn = Some(mrn))
 
         val postRequest = fakePostRequest.withFormUrlEncodedBody(asFormParams(badData): _*)
         val badForm = form.fillAndValidate(badData)
@@ -108,7 +109,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
       forAll { (user: SignedInUser, eori: String, contactDetails: ContactDetails) =>
         resetFileUploadAnswersService()
         val postRequest = fakePostRequest.withFormUrlEncodedBody(asFormParams(contactDetails): _*)
-        val answers = FileUploadAnswers(eori, mrn = Some(mrn))
+        val answers = FileUploadAnswers(eori, cacheId, mrn = Some(mrn))
 
         await(controller(user, fakeDataRetrievalAction(answers)).onSubmit(postRequest))
 

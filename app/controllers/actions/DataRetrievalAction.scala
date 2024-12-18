@@ -16,10 +16,12 @@
 
 package controllers.actions
 
+import models.{FileUploadAnswers, SessionHelper}
 import models.requests.{DataRequest, VerifiedEmailRequest}
 import play.api.mvc.{ActionTransformer, MessagesControllerComponents}
 import services.FileUploadAnswersService
 
+import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -28,8 +30,12 @@ class DataRetrievalActionImpl @Inject() (val answersService: FileUploadAnswersSe
 
   implicit val executionContext: ExecutionContext = mcc.executionContext
 
-  override protected def transform[A](request: VerifiedEmailRequest[A]): Future[DataRequest[A]] =
-    answersService.findOneOrCreate(request.eori).map(DataRequest(request, _))
+  override protected def transform[A](request: VerifiedEmailRequest[A]): Future[DataRequest[A]] = {
+    val mayBeCacheId = SessionHelper.getValue(SessionHelper.ANSWER_CACHE_ID)(request)
+    mayBeCacheId.map { cacheId =>
+      answersService.findOneOrCreate(request.eori, cacheId).map(DataRequest(request, _))
+    }.getOrElse(Future.successful(DataRequest(request, new FileUploadAnswers(request.eori, UUID.randomUUID().toString))))
+  }
 }
 
 trait DataRetrievalAction extends ActionTransformer[VerifiedEmailRequest, DataRequest]

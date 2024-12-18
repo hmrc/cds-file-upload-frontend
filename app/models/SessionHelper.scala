@@ -16,18 +16,17 @@
 
 package models
 
-import play.api.libs.json.{Format, Json, OFormat}
-import repositories.ZonedDateTimeFormat.{zonedDateTimeReads, zonedDateTimeWrites}
+import play.api.mvc.{Request, Session}
 
-import java.time.{ZoneOffset, ZonedDateTime}
+object SessionHelper {
 
-case class SecureMessageAnswers(eori: String, filter: MessageFilterTag, uuid: String, created: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC))
+  /** Unique value o differentiate two or more logged-in users who are using the same EORI */
+  val ANSWER_CACHE_ID = "ANSWER_CACHE_ID"
 
-object SecureMessageAnswers {
+  def getValue(key: String)(implicit request: Request[_]): Option[String] =
+    request.session.data.get(key)
 
-  implicit val format: OFormat[SecureMessageAnswers] = {
-    implicit val zonedDateTimeFormat: Format[ZonedDateTime] = Format(zonedDateTimeReads, zonedDateTimeWrites)
+  def removeValue(key: String)(implicit request: Request[_]): Session =
+    request.session - key
 
-    OFormat[SecureMessageAnswers](Json.reads[SecureMessageAnswers], Json.writes[SecureMessageAnswers])
-  }
 }

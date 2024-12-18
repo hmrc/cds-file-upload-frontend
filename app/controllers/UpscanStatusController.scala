@@ -132,7 +132,7 @@ class UpscanStatusController @Inject() (
 
             auditUploadResult(request, AuditTypes.UploadFailure)
 
-            clearUserCache(request.eori)
+            clearUserCache(request.eori, request.userAnswers.uuid)
             Future.successful(Redirect(routes.ErrorPageController.uploadError))
 
           case ns if ns.length == uploads.length =>
@@ -155,7 +155,7 @@ class UpscanStatusController @Inject() (
 
             auditUploadResult(request, AuditTypes.UploadFailure)
 
-            clearUserCache(request.eori)
+            clearUserCache(request.eori, request.userAnswers.uuid)
             Future.successful(Redirect(routes.ErrorPageController.uploadError))
         }
       }
@@ -164,7 +164,7 @@ class UpscanStatusController @Inject() (
     retrieveNotifications()
   }
 
-  private def clearUserCache(eori: String): Future[Unit] = answersService.remove(eori)
+  private def clearUserCache(eori: String, uuid: String): Future[Unit] = answersService.remove(eori, uuid)
 
   private def getPosition(ref: String, refs: List[String]): Position = refs match {
     case head :: _ if head == ref => First(refs.size)
