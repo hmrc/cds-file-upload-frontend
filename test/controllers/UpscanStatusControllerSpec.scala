@@ -248,7 +248,8 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
         meq(Some(mrn)),
         meq(FileUploadCount(3)),
         meq(response.uploads),
-        meq(AuditTypes.UploadSuccess)
+        meq(AuditTypes.UploadSuccess),
+        any
       )(any[HeaderCarrier])
     }
 
@@ -315,7 +316,8 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
         meq(Some(mrn)),
         meq(FileUploadCount(3)),
         meq(response.uploads),
-        meq(AuditTypes.UploadFailure)
+        meq(AuditTypes.UploadFailure),
+        any
       )(any[HeaderCarrier])
     }
 

@@ -57,13 +57,29 @@ class AuditServiceSpec extends UnitSpec {
     }
 
     "audit a 'UploadSuccess' event with two explicit events (one legacy event and one in the new event style)" in {
-      auditService.auditUploadResult(eori, Some(contactDetails), None, fileUploadCount, List(fileUpload), AuditTypes.UploadSuccess)(hc)
+      auditService.auditUploadResult(
+        eori,
+        Some(contactDetails),
+        None,
+        fileUploadCount,
+        List(fileUpload),
+        AuditTypes.UploadSuccess,
+        appConfig.microservice.services.cdsFileUpload.fetchNotificationUri
+      )(hc)
       verify(mockAuditConnector).sendEvent(ArgumentMatchers.refEq(uploadSuccessEventOldStyle, "eventId", "generatedAt"))(any(), any())
       verify(mockAuditConnector).sendEvent(ArgumentMatchers.refEq(uploadSuccessEventNewStyle, "eventId", "generatedAt"))(any(), any())
     }
 
     "audit a 'UploadFailure' event" in {
-      auditService.auditUploadResult(eori, Some(contactDetails), None, fileUploadCount, List(fileUpload), AuditTypes.UploadFailure)(hc)
+      auditService.auditUploadResult(
+        eori,
+        Some(contactDetails),
+        None,
+        fileUploadCount,
+        List(fileUpload),
+        AuditTypes.UploadFailure,
+        appConfig.microservice.services.cdsFileUpload.fetchNotificationUri
+      )(hc)
       verify(mockAuditConnector).sendEvent(ArgumentMatchers.refEq(uploadFailedEvent, "eventId", "generatedAt"))(any(), any())
     }
 
@@ -118,7 +134,7 @@ class AuditServiceSpec extends UnitSpec {
     ),
     tags = AuditExtensions
       .auditHeaderCarrier(hc)
-      .toAuditTags("trader-submission", "N/A")
+      .toAuditTags("trader-submission", appConfig.microservice.services.cdsFileUpload.fetchNotificationUri)
   )
 
   private val uploadSuccessEventNewStyle = DataEvent(
@@ -135,7 +151,7 @@ class AuditServiceSpec extends UnitSpec {
     ),
     tags = AuditExtensions
       .auditHeaderCarrier(hc)
-      .toAuditTags("trader-submission", "N/A")
+      .toAuditTags("trader-submission", appConfig.microservice.services.cdsFileUpload.fetchNotificationUri)
   )
 
   private val uploadFailedEvent = DataEvent(
@@ -152,7 +168,7 @@ class AuditServiceSpec extends UnitSpec {
     ),
     tags = AuditExtensions
       .auditHeaderCarrier(hc)
-      .toAuditTags("trader-submission", "N/A")
+      .toAuditTags("trader-submission", appConfig.microservice.services.cdsFileUpload.fetchNotificationUri)
   )
 
   private def mockSendEvent(result: AuditResult = Success) = {
