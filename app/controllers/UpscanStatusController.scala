@@ -123,6 +123,8 @@ class UpscanStatusController @Inject() (
         cdsFileUploadConnector.getNotification(upload.reference)
       })
 
+      val auditedPath = appConfig.microservice.services.cdsFileUpload.fetchNotificationUri
+
       receivedNotifications.flatMap { notifications =>
         timer.stop()
         notifications.flatten match {
@@ -130,7 +132,7 @@ class UpscanStatusController @Inject() (
             logger.warn("Failed notification received for an upload.")
             logger.warn(s"Notifications: ${prettyPrint(ns)}")
 
-            auditUploadResult(request, AuditTypes.UploadFailure)
+            auditUploadResult(request, AuditTypes.UploadFailure, auditedPath)
 
             clearUserCache(request.eori, request.userAnswers.uuid)
             Future.successful(Redirect(routes.ErrorPageController.uploadError))
@@ -138,7 +140,7 @@ class UpscanStatusController @Inject() (
           case ns if ns.length == uploads.length =>
             logger.info("All notifications successful.")
 
-            auditUploadResult(request, AuditTypes.UploadSuccess)
+            auditUploadResult(request, AuditTypes.UploadSuccess, auditedPath)
 
             Future.successful(Redirect(routes.UploadYourFilesReceiptController.onPageLoad))
 
@@ -153,7 +155,7 @@ class UpscanStatusController @Inject() (
             logger.warn(s"Maximum number of retries exceeded. Retrieved ${ns.length} of ${uploads.length} notifications.")
             logger.warn(s"Notifications: ${prettyPrint(ns)}")
 
-            auditUploadResult(request, AuditTypes.UploadFailure)
+            auditUploadResult(request, AuditTypes.UploadFailure, auditedPath)
 
             clearUserCache(request.eori, request.userAnswers.uuid)
             Future.successful(Redirect(routes.ErrorPageController.uploadError))
@@ -172,13 +174,16 @@ class UpscanStatusController @Inject() (
     case _                        => Middle(refs.indexOf(ref) + 1, refs.size)
   }
 
-  private def auditUploadResult(request: FileUploadResponseRequest[_], auditType: Audit)(implicit hc: HeaderCarrier): Future[AuditResult] =
+  private def auditUploadResult(request: FileUploadResponseRequest[_], auditType: Audit, path: String)(
+    implicit hc: HeaderCarrier
+  ): Future[AuditResult] =
     auditservice.auditUploadResult(
       request.eori,
       request.userAnswers.contactDetails,
       request.userAnswers.mrn,
       request.userAnswers.fileUploadCount,
       request.fileUploadResponse.uploads,
-      auditType
+      auditType,
+      path
     )
 }

@@ -54,7 +54,8 @@ class AuditService @Inject() (connector: AuditConnector, appConfig: AppConfig)(i
     maybeMrn: Option[MRN],
     maybeFileUploadCount: Option[FileUploadCount],
     uploads: List[FileUpload],
-    auditType: Audit
+    auditType: Audit,
+    path: String
   )(implicit hc: HeaderCarrier): Future[AuditResult] = {
 
     def auditDetails(isOldStyle: Boolean): Map[String, String] = {
@@ -74,18 +75,18 @@ class AuditService @Inject() (connector: AuditConnector, appConfig: AppConfig)(i
       contactDetails ++ eoriMap ++ mrn ++ numberOfFiles ++ fileReferences ++ uploadResult
     }
 
-    def createDataEvent(isOldStyle: Boolean, auditType: Audit) = DataEvent(
+    def createDataEvent(isOldStyle: Boolean, auditType: Audit, path: String) = DataEvent(
       auditSource = appConfig.appName,
       auditType = auditType.toString,
-      tags = getAuditTags("trader-submission", "N/A"),
+      tags = getAuditTags("trader-submission", path),
       detail = hc.toAuditDetails(auditDetails(isOldStyle).toSeq: _*)
     )
 
     if (auditType == UploadSuccess) {
-      connector.sendEvent(createDataEvent(true, UploadSuccess)).map(handleResponse(_, UploadSuccess.toString))
-      connector.sendEvent(createDataEvent(false, FileUploaded)).map(handleResponse(_, FileUploaded.toString))
+      connector.sendEvent(createDataEvent(true, UploadSuccess, path)).map(handleResponse(_, UploadSuccess.toString))
+      connector.sendEvent(createDataEvent(false, FileUploaded, path)).map(handleResponse(_, FileUploaded.toString))
     } else {
-      connector.sendEvent(createDataEvent(false, FileUploaded)).map(handleResponse(_, FileUploaded.toString))
+      connector.sendEvent(createDataEvent(false, FileUploaded, path)).map(handleResponse(_, FileUploaded.toString))
     }
   }
 
