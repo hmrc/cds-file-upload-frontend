@@ -1,5 +1,4 @@
 !.gitignore
-!.pa11yci
 
 /.bsp
 .cache
