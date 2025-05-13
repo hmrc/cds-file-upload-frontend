@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.ServiceUrls
 import models.SignOutReason
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
@@ -24,7 +25,9 @@ import views.html.user_signed_out
 
 import javax.inject.Inject
 
-class SignOutController @Inject() (mcc: MessagesControllerComponents, userSignedOutPage: user_signed_out)
+class SignOutController @Inject() (mcc: MessagesControllerComponents,
+                                   userSignedOutPage: user_signed_out,
+                                   config: ServiceUrls)
     extends FrontendController(mcc) with I18nSupport {
 
   def signOut(signOutReason: SignOutReason): Action[AnyContent] = Action { _ =>
@@ -32,7 +35,7 @@ class SignOutController @Inject() (mcc: MessagesControllerComponents, userSigned
       case SignOutReason.SessionTimeout => routes.SignOutController.sessionTimeoutSignedOut
       case SignOutReason.UserAction     => routes.SignOutController.userSignedOut
     }
-    Redirect(redirectionTarget).withNewSession
+    Redirect(config.signOut, Map("continue" -> Seq(s"${config.selfBaseUrl.getOrElse("")}${redirectionTarget.url}")))
   }
 
   val sessionTimeoutSignedOut: Action[AnyContent] = Action { implicit request =>

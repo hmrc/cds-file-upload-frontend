@@ -25,6 +25,10 @@ class ServiceUrls @Inject() (val configuration: Configuration) {
   private def loadUrl(key: String): String =
     configuration.getOptional[String](s"urls.$key").getOrElse(throw new Exception(s"Missing configuration key: urls.$key"))
 
+  private def loadOptionalConfig(key: String): Option[String] =
+    configuration.getOptional[String](key)
+
+  lazy val selfBaseUrl: Option[String] = loadOptionalConfig("play.frontend.host")
   val cdsRegister: String = loadUrl("cdsRegister")
   val cdsSubscribe: String = loadUrl("cdsSubscribe")
   val emailFrontend: String = loadUrl("emailFrontend")
@@ -33,5 +37,6 @@ class ServiceUrls @Inject() (val configuration: Configuration) {
   val govUk: String = loadUrl("govUk")
   val login: String = loadUrl("login")
   val loginContinue: String = loadUrl("loginContinue")
+  val signOut: String = loadUrl("signOut")
   val nationalClearingHub: String = loadUrl("nationalClearingHub")
 }
