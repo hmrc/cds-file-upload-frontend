@@ -25,9 +25,7 @@ import views.html.user_signed_out
 
 import javax.inject.Inject
 
-class SignOutController @Inject() (mcc: MessagesControllerComponents,
-                                   userSignedOutPage: user_signed_out,
-                                   config: ServiceUrls)
+class SignOutController @Inject() (mcc: MessagesControllerComponents, userSignedOutPage: user_signed_out, config: ServiceUrls)
     extends FrontendController(mcc) with I18nSupport {
 
   def signOut(signOutReason: SignOutReason): Action[AnyContent] = Action { _ =>
