@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.ServiceUrls
 import models.SignOutReason
 import org.mockito.ArgumentMatchers.{any, eq => equalTo}
 import org.mockito.MockitoSugar.{mock, reset, verify, when}
@@ -27,7 +28,13 @@ class SignOutControllerSpec extends ControllerSpecBase {
 
   private val userSignedOutPage = mock[user_signed_out]
 
-  private val controller = new SignOutController(stubMessagesControllerComponents(), userSignedOutPage)
+  private val serviceUrls = instanceOf[ServiceUrls]
+
+  private val controller = new SignOutController(stubMessagesControllerComponents(), userSignedOutPage, serviceUrls)
+
+  private val expectedBasGatewayHost = "http://localhost:9553/bas-gateway/sign-out-without-state"
+  private val expectedUserSignOutUrl = s"${expectedBasGatewayHost}?continue=http%3A%2F%2Flocalhost%3A6793%2Fyou-have-signed-out"
+  private val expectedTimeoutSignOutUrl = s"${expectedBasGatewayHost}?continue=http%3A%2F%2Flocalhost%3A6793%2Fwe-signed-you-out"
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -51,7 +58,7 @@ class SignOutControllerSpec extends ControllerSpecBase {
 
       "redirect to /we-signed-you-out" in {
         val result = controller.signOut(SignOutReason.SessionTimeout)(fakeRequest)
-        redirectLocation(result) mustBe Some(controllers.routes.SignOutController.sessionTimeoutSignedOut.url)
+        redirectLocation(result) mustBe Some(expectedTimeoutSignOutUrl)
       }
     }
 
@@ -64,14 +71,14 @@ class SignOutControllerSpec extends ControllerSpecBase {
 
       "redirect to /you-have-signed-out" in {
         val result = controller.signOut(SignOutReason.UserAction)(fakeRequest)
-        redirectLocation(result) mustBe Some(controllers.routes.SignOutController.userSignedOut.url)
+        redirectLocation(result) mustBe Some(expectedUserSignOutUrl)
       }
     }
   }
 
   "SignOutController on sessionTimeoutSignedOut" should {
 
-    val controller = new SignOutController(mcc, userSignedOutPage)
+    val controller = new SignOutController(mcc, userSignedOutPage, serviceUrls)
 
     "call sessionTimedOutPage" in {
       controller.sessionTimeoutSignedOut()(fakeRequest).futureValue
@@ -86,7 +93,7 @@ class SignOutControllerSpec extends ControllerSpecBase {
 
   "SignOutController on userSignedOut" should {
 
-    val controller = new SignOutController(mcc, userSignedOutPage)
+    val controller = new SignOutController(mcc, userSignedOutPage, serviceUrls)
 
     "call userSignedOutPage" in {
       controller.userSignedOut()(fakeRequest).futureValue
