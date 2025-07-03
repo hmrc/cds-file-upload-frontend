@@ -1,6 +1,6 @@
 ## common
 
-service.name = Customs Declaration Service document uploads and secure messages
+service.name = CDS document uploads and secure messages
 
 title.format = {0} - {1} - GOV.UK
 title.withErrors.format = Error: {0} - {1} - GOV.UK
