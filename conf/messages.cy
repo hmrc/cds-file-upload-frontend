@@ -1,4 +1,4 @@
-service.name = Llwythiadau dogfennau CDS a negeseuon diogel
+service.name = Dogfennau CDS wedi’u huwchlwytho a negeseuon diogel
 
 title.format = {0} - {1} - GOV.UK
 title.withErrors.format = Gwall: {0} - {1} - GOV.UK

@@ -11,7 +11,7 @@ We use the [customs-declaration-stub](https://github.com/hmrc/customs-declaratio
 list of S3 bucket urls to upload to. The `customs-declaration-stub` '/file-upload' endpoint response returns fake S3 urls that actually point to the testOnly
 endpoint '/cds-file-upload-service/test-only/s3-bucket' here on the CDS File Upload Frontend service.
 
-So if you're running this service locally or in an environment that uses stubs you must start this service using `sbt -Dapplication.router=testOnlyDoNotUseInAppConf.Routes` because
+So if you're running this service locally or in an environment that uses stubs you must start this service using `sbt run -Dapplication.router=testOnlyDoNotUseInAppConf.Routes` because
 the test routes contains the fake S3 endpoint (that stubs the upscan service used in production like environments when users upload files from their browser).
 
 ## Running the app locally
@@ -24,7 +24,7 @@ In order to run CDS File Upload Frontend with the stubbed endpoints you will nee
 ./run-with-stubs.sh
 ```
 
-If you're running service manually without using the bash scripts on localhost you must use `sbt -Dapplication.router=testOnlyDoNotUseInAppConf.Routes` to
+If you're running service manually without using the bash scripts on localhost you must use `sbt run -Dapplication.router=testOnlyDoNotUseInAppConf.Routes` to
 enable the test-only S3 upload endpoint.
 
 ### Testing the file upload feature
