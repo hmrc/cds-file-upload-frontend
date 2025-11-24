@@ -18,16 +18,17 @@ package controllers
 
 import connectors.SecureMessageFrontendConnector
 import controllers.actions.{AuthAction, MessageFilterAction, VerifiedEmailAction}
-import play.api.i18n.I18nSupport
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import models.requests.MessageFilterRequest
+import play.api.i18n.{I18nSupport, Messages}
+import play.api.mvc.{Action, ActionBuilder, AnyContent, MessagesControllerComponents}
 import play.twirl.api.HtmlFormat
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.play.partials.HeaderCarrierForPartialsConverter
 import views.html.messaging.{inbox_wrapper, partial_wrapper}
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
-import scala.util.matching.Regex
 
 class SecureMessagingController @Inject() (
   authenticate: AuthAction,
@@ -41,26 +42,29 @@ class SecureMessagingController @Inject() (
 )(implicit ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
-  val actions = authenticate andThen verifiedEmail andThen messageFilterAction
+  val actions: ActionBuilder[MessageFilterRequest, AnyContent] = authenticate andThen verifiedEmail andThen messageFilterAction
 
   val displayInbox: Action[AnyContent] = actions.async { implicit request =>
-    implicit val hc = headerCarrierForPartialsConverter.fromRequestWithEncryptedCookie(request)
+    implicit val hc: HeaderCarrier = headerCarrierForPartialsConverter.fromRequestWithEncryptedCookie(request)
+    val inboxHeader: String = defineH1Text(request)
+    val messages = Messages
     messageConnector
       .retrieveInboxPartial(request.request.eori, request.secureMessageAnswers.filter)
       .map { partial =>
-        Ok(inbox_wrapper(HtmlFormat.raw(partial.body), defineH1Text(partial.toString)))
+        val updatedBody = partial.body.replace(messages("inbox.original.heading"), inboxHeader)
+        Ok(inbox_wrapper(HtmlFormat.raw(updatedBody), defineH1Text(request)))
       }
   }
 
   def displayConversation(client: String, conversationId: String): Action[AnyContent] = actions.async { implicit request =>
-    implicit val hc = headerCarrierForPartialsConverter.fromRequestWithEncryptedCookie(request)
+    implicit val hc: HeaderCarrier = headerCarrierForPartialsConverter.fromRequestWithEncryptedCookie(request)
     messageConnector
       .retrieveConversationPartial(client, conversationId)
       .map(partial =>
         Ok(
           partial_wrapper(
             HtmlFormat.raw(partial.body),
-            defineH1Text(partial.toString),
+            defineH1Text(request),
             defineUploadLink(routes.SecureMessagingController.displayConversation(client, conversationId).url)
           )
         )
@@ -68,7 +72,7 @@ class SecureMessagingController @Inject() (
   }
 
   def displayReplyResult(client: String, conversationId: String): Action[AnyContent] = actions.async { implicit request =>
-    implicit val hc = headerCarrierForPartialsConverter.fromRequestWithEncryptedCookie(request)
+    implicit val hc: HeaderCarrier = headerCarrierForPartialsConverter.fromRequestWithEncryptedCookie(request)
     messageConnector
       .retrieveReplyResult(client, conversationId)
       .map(partial =>
@@ -77,42 +81,41 @@ class SecureMessagingController @Inject() (
             HtmlFormat.raw(partial.body),
             "replyResult.heading",
             defineUploadLink(routes.SecureMessagingController.displayReplyResult(client, conversationId).url),
-            false,
-            false
+            hasBackButton = false
           )
         )
       )
   }
 
   def submitReply(client: String, conversationId: String): Action[AnyContent] = actions.async { implicit request =>
-    implicit val hc = headerCarrierForPartialsConverter.fromRequestWithEncryptedCookie(request)
+    implicit val hc: HeaderCarrier = headerCarrierForPartialsConverter.fromRequestWithEncryptedCookie(request)
     val formData = request.body.asFormUrlEncoded.getOrElse(Map.empty)
-
     messageConnector
       .submitReply(client, conversationId, formData)
-      .map { maybeErrorPartial =>
-        maybeErrorPartial match {
-          case None => Redirect(routes.SecureMessagingController.displayReplyResult(client, conversationId))
-          case Some(partial) =>
-            Ok(
-              partial_wrapper(
-                HtmlFormat.raw(partial.body),
-                defineH1Text(partial.toString),
-                defineUploadLink(routes.SecureMessagingController.displayConversation(client, conversationId).url),
-                true,
-                true
-              )
+      .map {
+        case None => Redirect(routes.SecureMessagingController.displayReplyResult(client, conversationId))
+        case Some(partial) =>
+          Ok(
+            partial_wrapper(
+              HtmlFormat.raw(partial.body),
+              defineH1Text(request),
+              defineUploadLink(routes.SecureMessagingController.displayConversation(client, conversationId).url),
+              hasErrors = true
             )
-        }
+          )
       }
   }
 
   private def defineUploadLink(refererUrl: String) =
     routes.MrnEntryController.onPageLoad.url
 
-  private def defineH1Text(partialBody: String) = {
-    val h1textPattern: Regex = "(?i)>(.*?)<\\/h1>".r
-    val maybeMatcher = h1textPattern.findFirstMatchIn(partialBody)
-    maybeMatcher.map(_.group(1)).getOrElse("")
+  private def defineH1Text(request: MessageFilterRequest[AnyContent])(implicit messages: Messages): String = {
+    val inboxFilter = request.secureMessageAnswers.filter.toString
+    inboxFilter match {
+      case "ImportMessages" => messages("inbox.imports.heading")
+      case "ExportMessages" => messages("inbox.exports.heading")
+      case _                => messages("inbox.original.heading")
+    }
   }
+
 }
