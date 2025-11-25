@@ -1,3 +1,5 @@
+## common
+
 service.name = Dogfennau CDS wedi’u huwchlwytho a negeseuon diogel
 
 title.format = {0} - {1} - GOV.UK
@@ -12,19 +14,27 @@ common.navigation.uploadFiles = Uwchlwytho ffeiliau
 common.back.link = Yn ôl
 common.warning = Rhybudd
 
+## common buttons with shared labels
+
 common.button.startNow = Dechrau nawr
 common.backToGovUk = Yn ôl i GOV.UK
+
+## errors
 
 error.browser.heading.prefix = Gwall:
 error.summary.title = Mae problem wedi codi
 error.required = Nodwch werth.
 
+## Sign-out
+
 signOut.link = Allgofnodi
 signed.out.heading = Rydych wedi cael eich allgofnodi
-session.timeout.heading = Er eich diogelwch, rydym wedi’ch allgofnodi
 signed.out.information = I ddefnyddio’r gwasanaeth eto bydd yn rhaid i chi {0}.
 signed.out.startPageLink = ddychwelyd i’r dudalen cychwyn a mewngofnodi
 signed.out.backToGovUk = Yn ôl i GOV.UK
+session.timeout.heading = Er eich diogelwch, rydym wedi’ch allgofnodi
+
+## Choice Page
 
 choicePage.heading = Rheoli dogfennau i ategu’ch datganiadau
 choicePage.text = Dewiswch un o’r opsiynau canlynol:
@@ -33,28 +43,53 @@ choicePage.input.documentUpload = Atodi dogfennau i ddatganiad
 choicePage.input.error.empty = Dewiswch yr hyn yr hoffech ei wneud
 choicePage.input.error.incorrect = Dewiswch yr hyn yr hoffech ei wneud
 
+## Secure Messaging Inbox Choice Page
+
 inboxChoice.heading = Bwrw golwg dros eich negeseuon
 inboxChoice.input.exportsMessages = Negeseuon ynghylch allforion
 inboxChoice.input.importsMessages = Negeseuon ynghylch mewnforion
 inboxChoice.input.error.empty = Dewiswch y negeseuon yr hoffech fwrw golwg drostynt
 inboxChoice.input.error.incorrect = Dewiswch y negeseuon yr hoffech fwrw golwg drostynt
+
+## Secure Messaging Inbox page
+
 inbox.heading = Mewnflwch sgyrsiau
+inbox.original.heading = Negeseuon rhyngoch chi a CThEM
+inbox.imports.heading = Negeseuon am fewnforion rhyngoch chi a CThEF
+inbox.exports.heading = Negeseuon am allforion rhyngoch chi a CThEF
+
+## Secure Messaging Read Conversation page
+
 conversation.heading = Bwrw golwg dros sgwrs
+
+## Secure Messaging Reply Result page
+
 replyResult.heading = Anfonwyd y neges
+
+## Secure Messaging. Right grey box in "Conversation" and "Reply Result" pages
+
 greyBox.heading = Uwchlwytho’r dogfennau y gofynnwyd amdanynt
 greyBox.paragraph.1 = Bydd angen i chi ailnodi’r cyfeirnod symud (MRN) cywir i atodi dogfennau i’r datganiad.
 greyBox.paragraph.2 = Uwchlwythwch y dogfennau ac yna atebwch y neges i roi gwybod i ni eu bod yn barod i gael eu gwirio.
 greyBox.uploadFiles = Uwchlwytho ac atodi dogfennau i ddatganiad
+
+## MRN Entry Page
 
 mrnEntryPage.heading = Beth yw Cyfeirnod Symud (MRN) y datganiad yr hoffech atodi ffeiliau iddo?
 mrnEntryPage.paragraph = Mae MRN yn cynnwys 18 o gymeriadau, yn dechrau â 2 rhif sy’n dynodi’r flwyddyn y cafodd y datganiad ei greu, y llythrennau ‘GB’ ac yna 14 o lythrennau a rhifau. Er enghraifft, 22GB123456789AB012.
 mrnEntryPage.label = Beth yw MRN y datganiad yr hoffech atodi ffeiliau iddo?
 mrn.missing = Nodwch gyfeirnod symud (MRN)
 mrn.invalid = Mae’n rhaid i’r cyfeirnod symud (MRN) fod yn fformat cywir
+
+## MRN access denied page
+
 mrnAccessDenied.heading = Nid oes gennych fynediad at unrhyw ddatganiad ag MRN {0}
 mrnAccessDenied.paragraph.1 = Os yw’r MRN yn gywir ac yn gyfredol, gallai hyn olygu bod angen i’r dogfennau gael eu huwchlwytho gan yr un person a wnaeth y datganiad.
 mrnAccessDenied.paragraph.2 = Gall person arall o’r un busnes hefyd uwchlwytho’r dogfennau gan ddefnyddio Dynodydd Porth y Llywordraeth sydd wedi cael mynediad at y Gwasanaeth Datganiadau Tollau gan y busnes hwnnw.
 mrnAccessDenied.link.enterDifferentMrn = Nodwch MRN gwahanol
+
+## Unverified email waring page
+
 emailUnverified.heading = Mae angen i chi ddilysu’ch cyfeiriad e-bost ar gyfer y Gwasanaeth Datganiadau Tollau
 emailUnverified.paragraph1 = Dyma’r cyfeiriad e-bost y mae’ch sefydliad wedi’i gofrestru ar gyfer y Gwasanaeth Datganiadau Tollau (CDS). Mae angen i chi ddilysu’r cyfeiriad e-bost hwn neu ei newid. Gallwch ddilysu’r cyfeiriad e-bost ar unwaith os oes gennych fynediad at y cyfrif e-bost.
 emailUnverified.paragraph2 = Dyma fydd yr unig gyfeiriad e-bost a ddefnyddiwn ar gyfer:
@@ -62,6 +97,9 @@ emailUnverified.bullets.item1 = diweddariadau ar newidiadau i’r Gwasanaeth Dat
 emailUnverified.bullets.item2 = diweddariadau brys am nwyddau yn y tollau
 emailUnverified.bullets.item3 = rhai hysbysiadau ariannol, gan gynnwys hysbysiadau Debyd Uniongyrchol a TAW
 emailUnverified.link = Dilysu neu newid y cyfeiriad e-bost
+
+## Undeliverable email warning page
+
 emailUndeliverable.title = Mae problem gyda’r cyfeiriad e-bost cofrestredig ar gyfer y Gwasanaeth Datganiadau Tollau
 emailUndeliverable.heading = Mae problem gyda’r cyfeiriad e-bost cofrestredig ar gyfer y Gwasanaeth Datganiadau Tollau
 emailUndeliverable.p1 = Gwnaethom geisio anfon e-bost atoch ond nid oedd modd ei ddosbarthu. Gallai hyn fod oherwydd bod y mewnflwch yn llawn, neu oherwydd bod problem dechnegol gyda’ch darparwr e-bost.
@@ -71,6 +109,8 @@ emailUndeliverable.list.1 = diweddariadau ar newidiadau i’r Gwasanaeth Datgani
 emailUndeliverable.list.2 = diweddariadau brys am nwyddau yn y tollau
 emailUndeliverable.list.3 = rhai hysbysiadau ariannol, gan gynnwys hysbysiadau Debyd Uniongyrchol a TAW
 emailUndeliverable.link-text = Dilysu neu newid y cyfeiriad e-bost
+
+## Contact details page
 
 contactDetails.heading = Eich manylion cyswllt
 contactDetails.name = Enw llawn
@@ -85,11 +125,15 @@ contactDetails.phoneNumber.invalid = Mae’n rhaid i’r rhif gynnwys 15 digid n
 contactDetails.phoneNumber.invalidPattern = Mae’n rhaid i’r rhif ffôn gynnwys rhifau yn unig
 contactDetails.paragraph1 = Rhowch y manylion hyn er mwyn i ni allu cysylltu â chi os bydd unrhyw broblemau â’r dogfennau a gyflwynwch.
 
+## file warning page
+
 fileWarning.heading = Cyfrifwch eich ffeiliau
 fileWarning.paragraph1 = Mae angen i CThEF gael gwybod faint o ffeiliau yr ydych am eu huwchlwytho cyn i chi ddechrau eu huwchlwytho.
 fileWarning.paragraph2 = Nid yw hyn yr un peth â nifer y dogfennau.
 fileWarning.panel = Mae angen i chi nodi’r nifer cywir o ffeiliau – ni allwch ddiwygio’ch ateb felly, os byddwch yn gwneud camgymeriad, bydd yn rhaid i chi ddechrau eto.
 fileWarning.button = Rwy’n deall
+
+## How many files do you need to upload page
 
 howManyFilesUpload.heading = Sawl ffeil ydych chi am ei huwchlwytho?
 howManyFilesUpload.missing = Nodwch nifer y ffeiliau i’w huwchlwytho
@@ -122,6 +166,7 @@ fileUploadPage.paragraph1 = Mae’n rhaid i bob ffeil a uwchlwythwch fod yn llai
 fileUploadPage.button = Uwchlwytho ac yn eich blaen
 fileUploadPage.insetText = Os oes gennych ddogfen Word neu Excel i’w huwchlwytho, bydd yn rhaid i chi gadw’r ffeil ar ffurf PDF yn gyntaf. Nid yw’r gwasanaeth hwn yn caniatáu fformatau Word nac Excel.
 fileUploadPage.cancel = Canslo’r broses uwchlwytho
+
 fileUploadConfirmationPage.heading = Ffeiliau wedi’u huwchlwytho
 fileUploadConfirmationPage.mrn = Cyfeirnod Symud Nwyddau:
 fileUploadConfirmationPage.tableTitle = Ffeiliau wedi’u huwchlwytho
@@ -133,6 +178,7 @@ fileUploadConfirmationPage.section1.paragraph1 = Os bydd awdurdod tollau’n cod
 fileUploadConfirmationPage.section1.paragraph1.linkText = mewnflwch diogel y Gwasanaeth Datganiadau Tollau
 fileUploadConfirmationPage.section1.paragraph2 = Os ydych wedi uwchlwytho’ch dogfennau mewn ymateb i ymholiad, dylech {0} nawr er mwyn rhoi gwybod i’r awdurdodau tollau fod eich dogfennau’n barod i gael eu gwirio.
 fileUploadConfirmationPage.section1.paragraph2.linkText = ateb y neges
+
 fileUploadConfirmationPage.section2.title = Beth sy’n digwydd nesaf?
 fileUploadConfirmationPage.section2.paragraph1 = Cyn belled â’ch bod wedi darparu’r dogfennau sydd eu hangen ar y tollau er mwyn clirio’ch nwyddau, dylent gael eu clirio cyn pen y terfynau amser hyn ar ôl i’r nwyddau gyrraedd neu ar ôl i’r dogfennau gael eu huwchlwytho (pa un bynnag sydd hwyraf):
 fileUploadConfirmationPage.section2.listitem1 = 2 awr ar gyfer mewnforion cludiant awyr, mewnforion cludiant ffordd, yr holl allforion
@@ -148,11 +194,15 @@ unauthorised.paragraph.1.bullet.1.link = cael Rhif Cofrestru ac Adnabod Gweithre
 unauthorised.paragraph.1.bullet.2.link = cael mynediad at y Gwasanaeth Datganiadau Tollau
 unauthorised.paragraph.2 = Os ydych wedi gwneud cais am rif EORI eisoes, gallwch {0}.
 unauthorised.paragraph.2.link = wirio statws eich cais
+
 unauthorisedAgent.heading = Ni allwch ddefnyddio’r gwasanaeth hwn
 unauthorisedAgent.paragraph.1 = Rydych wedi mewngofnodi i Borth y Llywodraeth gyda manylion cyfrif gwasanaethau asiant. Os ydych yn drefnydd anfon nwyddau neu’n frocer tollau sy’n cynrychioli allforiwr, mewngofnodwch gan ddefnyddio’r manylion Porth y Llywodraeth ar gyfer eich busnes.
 unauthorisedAgent.paragraph.2 = Byddwch yn gallu datgan eich cynrychiolaeth fel rhan o’r datganiad allforio.
+
 notImplemented.heading = Nid yw’r dudalen hon wedi’i rhoi ar waith eto
 notImplemented.message = Rydym yn gweithio’n galed i sicrhau ei bod ar gael i chi. Dewch yn ôl yn nes ymlaen.
+
+## Errors
 
 uploadError.heading = Mae un o’ch ffeiliau wedi cael ei gwrthod
 uploadError.paragraph = Mae’n bosibl bod o leiaf un o’ch ffeiliau:
@@ -177,6 +227,7 @@ feedback.line.2 = {0}. Bydd eich meddyliau a’ch syniadau’n ein helpu i wneud
 feedback.link = Anfonwch eich adborth atom
 
 ## UploadFile Component (client)
+
 fileUploadPage.error.nameStart = Mae’n rhaid i enw’r ffeil ddechrau gyda llythyren neu rif, a chynnwys cysylltnod, tanlinell, neu ddot yn unig fel cymeriadau arbennig
 fileUploadPage.error.fileSize = Mae’n rhaid i faint y ffeil beidio â bod yn fwy na {0} Megabeit (MB)
 fileUploadPage.error.extension = Mae’n rhaid i estyniad y ffeil fod yn {0}

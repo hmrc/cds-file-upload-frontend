@@ -32,7 +32,6 @@ signed.out.heading = You have been signed out
 signed.out.information = To use the service again, you will need to {0}.
 signed.out.startPageLink = return to the start page and sign in
 signed.out.backToGovUk = Back to GOV.UK
-
 session.timeout.heading = For your security we have signed you out
 
 ## Choice Page
@@ -55,6 +54,9 @@ inboxChoice.input.error.incorrect = Select which messages you want to view
 ## Secure Messaging Inbox page
 
 inbox.heading = Conversation Inbox
+inbox.original.heading = Messages between you and HMRC
+inbox.imports.heading = Import messages between you and HMRC
+inbox.exports.heading = Export messages between you and HMRC
 
 ## Secure Messaging Read Conversation page
 
@@ -201,6 +203,7 @@ notImplemented.heading = This page has not been implemented yet
 notImplemented.message = We are working hard to make it available to you. Please come back later.
 
 ## Errors
+
 uploadError.heading = One of your files has been rejected
 uploadError.paragraph = At least one of your files may be:
 uploadError.bullet.1 = larger than 10MB
@@ -224,6 +227,7 @@ feedback.line.2 = {0}. Your thoughts and ideas will help us to make improvements
 feedback.link = Send us your feedback
 
 ## UploadFile Component (client)
+
 fileUploadPage.error.nameStart = File name must start with a letter or number, and only contain hyphen, underscore or dot as special characters
 fileUploadPage.error.fileSize = File size must not be bigger than {0} Megabytes (MB)
 fileUploadPage.error.extension = File must have an extension of {0}

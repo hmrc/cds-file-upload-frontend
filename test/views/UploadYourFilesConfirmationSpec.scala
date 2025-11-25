@@ -60,7 +60,7 @@ class UploadYourFilesConfirmationSpec extends UnitViewSpec with Generators with 
     }
 
     "display the language toggle" in {
-      view.getElementsByClass("hmrc-language-select").text() must be("English Newid yr iaith ir Gymraeg Cymraeg")
+      view.getElementsByClass("hmrc-language-select").text() must be("English Newid yr iaith i’r Gymraeg Cymraeg")
     }
 
     "display the file receipts table" in {
