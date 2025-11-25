@@ -32,16 +32,16 @@ import scala.concurrent.ExecutionContext
 import scala.util.matching.Regex
 
 class SecureMessagingController @Inject() (
-                                            authenticate: AuthAction,
-                                            verifiedEmail: VerifiedEmailAction,
-                                            messageFilterAction: MessageFilterAction,
-                                            messageConnector: SecureMessageFrontendConnector,
-                                            mcc: MessagesControllerComponents,
-                                            inbox_wrapper: inbox_wrapper,
-                                            partial_wrapper: partial_wrapper,
-                                            headerCarrierForPartialsConverter: HeaderCarrierForPartialsConverter
-                                          )(implicit ec: ExecutionContext)
-  extends FrontendController(mcc) with I18nSupport {
+  authenticate: AuthAction,
+  verifiedEmail: VerifiedEmailAction,
+  messageFilterAction: MessageFilterAction,
+  messageConnector: SecureMessageFrontendConnector,
+  mcc: MessagesControllerComponents,
+  inbox_wrapper: inbox_wrapper,
+  partial_wrapper: partial_wrapper,
+  headerCarrierForPartialsConverter: HeaderCarrierForPartialsConverter
+)(implicit ec: ExecutionContext)
+    extends FrontendController(mcc) with I18nSupport {
 
   val actions: ActionBuilder[MessageFilterRequest, AnyContent] = authenticate andThen verifiedEmail andThen messageFilterAction
 
@@ -126,4 +126,3 @@ class SecureMessagingController @Inject() (
   }
 
 }
-
