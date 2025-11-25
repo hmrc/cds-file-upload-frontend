@@ -29,7 +29,6 @@ import views.html.messaging.{inbox_wrapper, partial_wrapper}
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
-import scala.util.matching.Regex
 
 class SecureMessagingController @Inject() (
   authenticate: AuthAction,
