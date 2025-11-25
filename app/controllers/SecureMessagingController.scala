@@ -29,30 +29,31 @@ import views.html.messaging.{inbox_wrapper, partial_wrapper}
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
+import scala.util.matching.Regex
 
 class SecureMessagingController @Inject() (
-  authenticate: AuthAction,
-  verifiedEmail: VerifiedEmailAction,
-  messageFilterAction: MessageFilterAction,
-  messageConnector: SecureMessageFrontendConnector,
-  mcc: MessagesControllerComponents,
-  inbox_wrapper: inbox_wrapper,
-  partial_wrapper: partial_wrapper,
-  headerCarrierForPartialsConverter: HeaderCarrierForPartialsConverter
-)(implicit ec: ExecutionContext)
-    extends FrontendController(mcc) with I18nSupport {
+                                            authenticate: AuthAction,
+                                            verifiedEmail: VerifiedEmailAction,
+                                            messageFilterAction: MessageFilterAction,
+                                            messageConnector: SecureMessageFrontendConnector,
+                                            mcc: MessagesControllerComponents,
+                                            inbox_wrapper: inbox_wrapper,
+                                            partial_wrapper: partial_wrapper,
+                                            headerCarrierForPartialsConverter: HeaderCarrierForPartialsConverter
+                                          )(implicit ec: ExecutionContext)
+  extends FrontendController(mcc) with I18nSupport {
 
   val actions: ActionBuilder[MessageFilterRequest, AnyContent] = authenticate andThen verifiedEmail andThen messageFilterAction
 
   val displayInbox: Action[AnyContent] = actions.async { implicit request =>
     implicit val hc: HeaderCarrier = headerCarrierForPartialsConverter.fromRequestWithEncryptedCookie(request)
-    val inboxHeader: String = defineH1Text(request)
+    val inboxHeader: String = defineInboxH1Text(request)
     val messages = Messages
     messageConnector
       .retrieveInboxPartial(request.request.eori, request.secureMessageAnswers.filter)
       .map { partial =>
         val updatedBody = partial.body.replace(messages("inbox.original.heading"), inboxHeader)
-        Ok(inbox_wrapper(HtmlFormat.raw(updatedBody), defineH1Text(request)))
+        Ok(inbox_wrapper(HtmlFormat.raw(updatedBody), defineInboxH1Text(request)))
       }
   }
 
@@ -64,7 +65,7 @@ class SecureMessagingController @Inject() (
         Ok(
           partial_wrapper(
             HtmlFormat.raw(partial.body),
-            defineH1Text(request),
+            defineTitleText(partial.body),
             defineUploadLink(routes.SecureMessagingController.displayConversation(client, conversationId).url)
           )
         )
@@ -98,7 +99,7 @@ class SecureMessagingController @Inject() (
           Ok(
             partial_wrapper(
               HtmlFormat.raw(partial.body),
-              defineH1Text(request),
+              defineTitleText(partial.body),
               defineUploadLink(routes.SecureMessagingController.displayConversation(client, conversationId).url),
               hasErrors = true
             )
@@ -109,7 +110,7 @@ class SecureMessagingController @Inject() (
   private def defineUploadLink(refererUrl: String) =
     routes.MrnEntryController.onPageLoad.url
 
-  private def defineH1Text(request: MessageFilterRequest[AnyContent])(implicit messages: Messages): String = {
+  private def defineInboxH1Text(request: MessageFilterRequest[AnyContent])(implicit messages: Messages): String = {
     val inboxFilter = request.secureMessageAnswers.filter.toString
     inboxFilter match {
       case "ImportMessages" => messages("inbox.imports.heading")
@@ -118,4 +119,11 @@ class SecureMessagingController @Inject() (
     }
   }
 
+  private def defineTitleText(partialBody: String) = {
+    val h1textPattern: Regex = "(?i)>(.*?)<\\/h1>".r
+    val maybeMatcher = h1textPattern.findFirstMatchIn(partialBody)
+    maybeMatcher.map(_.group(1)).getOrElse("")
+  }
+
 }
+
