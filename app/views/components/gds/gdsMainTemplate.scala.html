@@ -97,7 +97,6 @@
 
     @phaseBanner("Beta")
 
-
     @if(showLanguageSwitch && appConfig.play.i18n.langs.contains("cy")){
         @hmrcLanguageSelectHelper()
     }
@@ -115,20 +114,20 @@
     @govukFlexibleLayout(
         pageTitle = Some(title.toString),
         headBlock = Some(head),
-        beforeContentBlock = Some(beforeContentBlock),  // no navigation banner here anymore
+        beforeContentBlock = Some(beforeContentBlock),
         bodyEndBlock = None,
         scriptsBlock = Some(scripts),
-        headerBlock = Some(headerBlock),  // headerBlock includes navigationBanner
+        headerBlock = Some(headerBlock),
         footerBlock = Some(hmrcFooter())
     )(content)
 } else {
     @govukLayout(
         pageTitle = Some(title.toString),
         headBlock = Some(head),
-        beforeContentBlock = Some(beforeContentBlock),  // no navigation banner here anymore
+        beforeContentBlock = Some(beforeContentBlock),
         bodyEndBlock = None,
         scriptsBlock = Some(scripts),
-        headerBlock = Some(headerBlock),  // headerBlock includes navigationBanner
+        headerBlock = Some(headerBlock),
         footerBlock = Some(hmrcFooter())
     )(content)
 }
