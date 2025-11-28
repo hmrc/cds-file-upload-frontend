@@ -114,7 +114,7 @@ class UploadYourFilesConfirmationSpec extends UnitViewSpec with Generators with 
       }
 
       "have a bullet list" in {
-        val bulletList = view.getElementsByTag("ul").get(1)
+        val bulletList = view.getElementsByClass("govuk-list--bullet").get(0)
 
         bulletList must containMessage("fileUploadConfirmationPage.section2.listitem1")
         bulletList must containMessage("fileUploadConfirmationPage.section2.listitem2")

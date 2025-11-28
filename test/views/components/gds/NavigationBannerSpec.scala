@@ -35,14 +35,14 @@ class NavigationBannerSpec extends UnitSpec with ViewMatchers {
     }
 
     "contain link to /message-choice page" in {
-      val messagesLink = component.getElementsByClass("govuk-link").get(0)
+      val messagesLink = component.getElementsByClass("govuk-service-navigation__link").get(0)
 
       messagesLink must containMessage("common.navigation.messages")
       messagesLink must haveHref(controllers.routes.InboxChoiceController.onPageLoad)
     }
 
     "contain link to /mrn-entry page" in {
-      val messagesLink = component.getElementsByClass("govuk-link").get(1)
+      val messagesLink = component.getElementsByClass("govuk-service-navigation__link").get(1)
 
       messagesLink must containMessage("common.navigation.uploadFiles")
       messagesLink must haveHref(controllers.routes.MrnEntryController.onPageLoad)

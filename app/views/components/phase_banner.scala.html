@@ -28,9 +28,13 @@
   @Html(messages("common.feedback", link))
 }
 
-<div class="phase-banner">
-  <p>
-    <strong class="phase-tag">@messages("common.phase")</strong>
-    <span>@feedbackBanner</span>
-  </p>
+<div class="govuk-phase-banner">
+    <p class="govuk-phase-banner__content">
+        <strong class="govuk-tag govuk-phase-banner__content__tag">
+            @messages("common.phase")
+        </strong>
+        <span class="govuk-phase-banner__text">
+            @feedbackBanner
+        </span>
+    </p>
 </div>

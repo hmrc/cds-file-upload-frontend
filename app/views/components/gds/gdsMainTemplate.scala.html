@@ -76,6 +76,7 @@
     <meta name="format-detection" content="telephone=no" />
     <link rel="shortcut icon" href='@Assets.versioned("/lib/govuk-frontend/govuk/assets/images/favicon.ico")' type="image/x-icon" />
     <link href='@Assets.versioned("stylesheets/sfus-app.css")' media="all" rel="stylesheet" type="text/css" />
+
 }
 
 @scripts = {
@@ -84,12 +85,19 @@
     <script @CSPNonce.attr src='@Assets.versioned("javascripts/show-hide-content.js")'></script>
 }
 
-@beforeContentBlock = {
-    @phaseBanner("BETA")
+@headerBlock = {
+    @siteHeader(displaySignOut = displaySignOut)
 
     @if(withNavigationBanner) {
-      @navigationBanner()
+        @navigationBanner()
     }
+}
+
+@beforeContentBlock = {
+
+    @phaseBanner("Beta")
+
+
     @if(showLanguageSwitch && appConfig.play.i18n.langs.contains("cy")){
         @hmrcLanguageSelectHelper()
     }
@@ -104,23 +112,23 @@
 }
 
 @if(useCustomContentWidth) {
-  @govukFlexibleLayout(
-    pageTitle = Some(title.toString),
-    headBlock = Some(head),
-    beforeContentBlock = Some(beforeContentBlock),
-    bodyEndBlock = None,
-    scriptsBlock = Some(scripts),
-    headerBlock = Some(siteHeader(displaySignOut = displaySignOut)),
-    footerBlock = Some(hmrcFooter())
-  )(content)
+    @govukFlexibleLayout(
+        pageTitle = Some(title.toString),
+        headBlock = Some(head),
+        beforeContentBlock = Some(beforeContentBlock),  // no navigation banner here anymore
+        bodyEndBlock = None,
+        scriptsBlock = Some(scripts),
+        headerBlock = Some(headerBlock),  // headerBlock includes navigationBanner
+        footerBlock = Some(hmrcFooter())
+    )(content)
 } else {
-  @govukLayout(
-    pageTitle = Some(title.toString),
-    headBlock = Some(head),
-    beforeContentBlock = Some(beforeContentBlock),
-    bodyEndBlock = None,
-    scriptsBlock = Some(scripts),
-    headerBlock = Some(siteHeader(displaySignOut = displaySignOut)),
-    footerBlock = Some(hmrcFooter())
-  )(content)
+    @govukLayout(
+        pageTitle = Some(title.toString),
+        headBlock = Some(head),
+        beforeContentBlock = Some(beforeContentBlock),  // no navigation banner here anymore
+        bodyEndBlock = None,
+        scriptsBlock = Some(scripts),
+        headerBlock = Some(headerBlock),  // headerBlock includes navigationBanner
+        footerBlock = Some(hmrcFooter())
+    )(content)
 }
