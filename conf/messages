@@ -7,8 +7,8 @@ title.withErrors.format = Error: {0} - {1} - GOV.UK
 
 common.phase = Beta
 common.continue = Continue
-common.feedback = This is a new service - your {0} will help us to improve it.
-common.feedback.link = feedback
+common.feedback = This is a new service. Help us improve it and {0} .
+common.feedback.link = give your feedback (opens in new tab)
 common.navigation.messages = Messages
 common.navigation.uploadFiles = Upload files
 common.back.link = Back
