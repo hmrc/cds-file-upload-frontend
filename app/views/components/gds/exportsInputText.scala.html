@@ -15,6 +15,7 @@
  *@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components._
+@import views.helpers.ErrorMapper.prefixedErrorMessage
 @import views.components.gds.Styles._
 
 @this(govukInput: GovukInput, headingContent: headingContent)
@@ -58,7 +59,7 @@
     value = field.value,
     label = buildLabel,
     hint = hintKey.map(key => Hint(content = HtmlContent(Html(messages(key, hintKeyLinks:_*))))),
-    errorMessage = field.error.map(err => ErrorMessage(content = Text(messages(err.message)))),
+    errorMessage = field.error.map(prefixedErrorMessage(_)),
     classes = inputClasses.map(clazz => s" $clazz").getOrElse(defaultInputClasses),
     inputmode = Some(inputmode),
     pattern = Some(pattern)

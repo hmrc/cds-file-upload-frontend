@@ -52,7 +52,11 @@ class SecureMessagingController @Inject() (
     messageConnector
       .retrieveInboxPartial(request.request.eori, request.secureMessageAnswers.filter)
       .map { partial =>
-        val updatedBody = partial.body.replace(messages("inbox.original.heading"), inboxHeader)
+        val originalStatus = """<span class="govuk-visually-hidden">Status</span>"""
+        val replaceableStatus = s"""<span class="govuk-visually-hidden">${messages("common.status")}</span>"""
+        val updatedBody = partial.body
+          .replace(messages("inbox.original.heading"), inboxHeader)
+          .replace(originalStatus, replaceableStatus)
         Ok(inbox_wrapper(HtmlFormat.raw(updatedBody), defineInboxH1Text(request)))
       }
   }

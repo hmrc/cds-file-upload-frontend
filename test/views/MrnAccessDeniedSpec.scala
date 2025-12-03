@@ -52,7 +52,7 @@ class MrnAccessDeniedSpec extends UnitViewSpec {
     }
 
     "display link to /mrn-entry page" in {
-      val link = testView.getElementsByClass("govuk-link").get(1)
+      val link = testView.getElementsByClass("govuk-link").get(2)
 
       link must containMessage("mrnAccessDenied.link.enterDifferentMrn")
       link must haveHref(controllers.routes.MrnEntryController.onPageLoad)
