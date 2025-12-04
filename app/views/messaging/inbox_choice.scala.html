@@ -19,7 +19,7 @@
 @import forms.InboxChoiceForm.Values.{ExportsMessages, ImportsMessages}
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import views.components.gds.Styles._
-@import views.helpers.ErrorMapper.radioGroupErrors
+@import views.helpers.ErrorMapper.{radioGroupErrors, prefixedErrorMessage}
 @import views.html.components.gds._
 @import views.helpers.Title
 @import views.components.BackButton
@@ -64,7 +64,7 @@
               checked = form(InboxChoiceKey).value.contains(ImportsMessages)
             )
           ),
-          errorMessage = form(InboxChoiceKey).error.map(err => ErrorMessage(content = Text(messages(err.message, err.args:_*))))
+          errorMessage = form(InboxChoiceKey).error.map(prefixedErrorMessage(_))
         ))
 
         @govukButton(Button(content = Text(messages("common.continue")), attributes = Map("id" -> "submit", "name" -> "continue")))

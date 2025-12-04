@@ -7,12 +7,13 @@ title.withErrors.format = Gwall: {0} - {1} - GOV.UK
 
 common.phase = Beta
 common.continue = Yn eich blaen
-common.feedback = Gwasanaeth newydd yn hwn – bydd eich {0} yn ein helpu i’w wella.
-common.feedback.link = adborth
+common.feedback = Gwasanaeth newydd yw hwn. Rhowch help i ni ei wella, a {0}.
+common.feedback.link = rhoi eich adborth (yn agor tab newydd)
 common.navigation.messages = Negeseuon
 common.navigation.uploadFiles = Uwchlwytho ffeiliau
 common.back.link = Yn ôl
 common.warning = Rhybudd
+common.status = Statws
 
 ## common buttons with shared labels
 
@@ -24,6 +25,7 @@ common.backToGovUk = Yn ôl i GOV.UK
 error.browser.heading.prefix = Gwall:
 error.summary.title = Mae problem wedi codi
 error.required = Nodwch werth.
+site.accessibility.error = Gwall
 
 ## Sign-out
 

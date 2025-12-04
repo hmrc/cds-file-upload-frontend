@@ -13,6 +13,7 @@ common.navigation.messages = Messages
 common.navigation.uploadFiles = Upload files
 common.back.link = Back
 common.warning = Warning
+common.status = Status
 
 ## common buttons with shared labels
 
@@ -24,6 +25,7 @@ common.backToGovUk = Back to GOV.UK
 error.browser.heading.prefix = Error:
 error.summary.title = There is a problem
 error.required = Please enter a value.
+site.accessibility.error = Error
 
 ## Sign-out
 

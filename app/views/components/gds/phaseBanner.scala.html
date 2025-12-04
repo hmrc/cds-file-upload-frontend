@@ -23,7 +23,7 @@
 
 @backUrl = @{ appConfig.play.frontend.host.map(url => s"&backUrl=$url${request.uri}").getOrElse("") }
 @betaFeedbackUrl = @{s"${appConfig.microservice.services.contactFrontend.giveFeedbackLink}$backUrl"}
-@link = {<a href="@betaFeedbackUrl">@messages("common.feedback.link")</a>}
+@link = {<a href="@betaFeedbackUrl" class="govuk-link" target="_blank">@messages("common.feedback.link")</a>}
 
 @feedbackBanner = {
   @Html(messages("common.feedback", link))
