@@ -18,7 +18,8 @@ package controllers
 
 import models.UnauthorisedReason.{UrlDirect, UserIsAgent}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.MockitoSugar.{mock, reset, verify, when}
+import org.mockito.Mockito.{reset, verify, when}
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
 import views.html.{unauthorised, unauthorisedAgent}

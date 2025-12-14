@@ -23,7 +23,7 @@ class FileUploadRequestSpec extends UnitSpec with XmlBehaviours {
   ".toXml" should {
     "pass schema validation" in {
 
-      forAll { request: FileUploadRequest =>
+      forAll { (request: FileUploadRequest) =>
         validateFileUploadRequest(request.toXml) mustBe true
       }
     }

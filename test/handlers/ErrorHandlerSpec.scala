@@ -20,8 +20,8 @@ import base.UnitSpec
 import config.ServiceUrls
 import controllers.routes.UnauthorisedController
 import models.AuthKey.enrolment
-import org.mockito.BDDMockito.`given`
-import org.mockito.MockitoSugar.mock
+import org.mockito.Mockito.when
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.http.{HeaderNames, Status}
 import play.api.test.Helpers.stubMessagesApi
 import uk.gov.hmrc.auth.core.{InsufficientEnrolments, NoActiveSession}
@@ -39,8 +39,8 @@ class ErrorHandlerSpec extends UnitSpec {
   "ErrorHandler.resolveError" should {
 
     "handle a NoActiveSession exception" in {
-      given(serviceUrls.login).willReturn("login-url")
-      given(serviceUrls.loginContinue).willReturn("login-continue-url")
+      when(serviceUrls.login).thenReturn("login-url")
+      when(serviceUrls.loginContinue).thenReturn("login-continue-url")
 
       val result = errorHandler.resolveError(fakeRequest, new NoActiveSession("A user is not logged in") {}).futureValue
 

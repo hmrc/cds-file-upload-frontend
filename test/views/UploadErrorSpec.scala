@@ -35,7 +35,7 @@ class UploadErrorSpec extends UnitViewSpec with Generators with ScalaCheckProper
     behave like normalPage(view, messageKeyPrefix)
 
     "include the 'Sign out' link if the user is authorised" in {
-      forAll { user: SignedInUser =>
+      forAll { (user: SignedInUser) =>
         val view = page()(AuthenticatedRequest(request, user), messages)
         assertSignoutLinkIsIncluded(view)
       }

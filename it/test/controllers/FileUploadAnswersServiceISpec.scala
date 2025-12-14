@@ -18,6 +18,7 @@ package controllers
 
 import base.IntegrationSpec
 import models.{FileUploadAnswers, MRN}
+import org.mongodb.scala.SingleObservableFuture
 import play.api.inject.guice.GuiceApplicationBuilder
 import repositories.FileUploadAnswersRepository
 import services.FileUploadAnswersService

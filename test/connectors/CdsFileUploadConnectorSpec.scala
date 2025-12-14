@@ -17,7 +17,7 @@
 package connectors
 
 import models.{Email, Notification}
-import org.mockito.MockitoSugar.when
+import org.mockito.Mockito.when
 import uk.gov.hmrc.http.UpstreamErrorResponse
 
 import scala.concurrent.ExecutionContext.global

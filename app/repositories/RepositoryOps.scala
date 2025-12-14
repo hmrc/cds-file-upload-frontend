@@ -18,6 +18,7 @@ package repositories
 
 import com.mongodb.ErrorCategory.DUPLICATE_KEY
 import com.mongodb.client.model.{ReturnDocument, Updates}
+import org.mongodb.scala.{ObservableFuture, SingleObservableFuture}
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.Filters.{and, equal}
 import org.mongodb.scala.model.{FindOneAndReplaceOptions, FindOneAndUpdateOptions}
@@ -33,7 +34,7 @@ trait RepositoryOps[T] extends Logging {
   implicit def classTag: ClassTag[T]
   implicit val executionContext: ExecutionContext
 
-  val collection: MongoCollection[T]
+  def collection: MongoCollection[T]
 
   def findAll: Future[Seq[T]] =
     collection.find().toFuture()

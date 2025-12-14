@@ -23,7 +23,8 @@ import forms.FileUploadCountProvider
 import models._
 import models.requests.SignedInUser
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}
-import org.mockito.MockitoSugar.{mock, reset, verify, when}
+import org.mockito.Mockito.{reset, verify, when}
+import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalacheck.Arbitrary._
 import org.scalacheck.{Arbitrary, Gen}
 import play.api.data.Form
@@ -113,7 +114,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase {
     }
 
     "redirect to error page when no data is found in the cache on page load" in {
-      forAll { contactDetails: ContactDetails =>
+      forAll { (contactDetails: ContactDetails) =>
         val action = new FakeContactDetailsRequiredAction(contactDetails)
         val result = controller(action, None).onPageLoad(fakeRequest.withCSRFToken)
 
@@ -123,7 +124,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase {
     }
 
     "redirect to error page when no data is found in the cache on submit" in {
-      forAll { contactDetails: ContactDetails =>
+      forAll { (contactDetails: ContactDetails) =>
         val action = new FakeContactDetailsRequiredAction(contactDetails)
         val result = controller(action, None).onSubmit(fakeRequest.withCSRFToken)
 

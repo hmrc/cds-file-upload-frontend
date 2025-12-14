@@ -18,7 +18,7 @@ package connectors
 
 import generators.Generators
 import models.{FileUploadRequest, FileUploadResponse}
-import org.mockito.MockitoSugar.when
+import org.mockito.Mockito.when
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import play.mvc.Http.Status.{BAD_REQUEST, OK}
 import testdata.CommonTestData

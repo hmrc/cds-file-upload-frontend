@@ -23,7 +23,8 @@ import org.apache.pekko.stream.Materializer
 import org.apache.pekko.stream.scaladsl.Source
 import org.apache.pekko.util.ByteString
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}
-import org.mockito.MockitoSugar.{mock, times, verify, when}
+import org.mockito.Mockito.{times, verify, when}
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.http.Status
 import play.api.libs.ws.ahc.AhcWSResponse
 import play.api.libs.ws.ahc.cache.CacheableHttpResponseStatus

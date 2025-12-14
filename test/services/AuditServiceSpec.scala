@@ -20,7 +20,8 @@ import base.UnitSpec
 import models._
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
-import org.mockito.MockitoSugar.{mock, verify, when}
+import org.mockito.Mockito.{verify, when}
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.libs.json.Json
 import services.AuditTypes.{FileUploaded, NavigateToMessages, UploadFailure, UploadSuccess}
 import uk.gov.hmrc.http.HeaderCarrier

@@ -16,14 +16,15 @@
 
 import com.google.inject.{AbstractModule, Provides}
 import config.AppConfig
-import controllers.actions._
-import pureconfig.ConfigSource
-import pureconfig.generic.auto._
+import controllers.actions.*
+import pureconfig.generic.semiauto.deriveReader
+import pureconfig.{ConfigReader, ConfigSource}
 
 import javax.inject.Singleton
 
 class Module extends AbstractModule {
 
+  implicit val configReader: ConfigReader[AppConfig] = deriveReader[AppConfig]
   val cfg: AppConfig = ConfigSource.default.loadOrThrow[AppConfig]
 
   override def configure(): Unit = {

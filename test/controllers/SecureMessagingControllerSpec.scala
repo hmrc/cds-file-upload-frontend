@@ -20,7 +20,8 @@ import scala.concurrent.Future
 import connectors.SecureMessageFrontendConnector
 import models.{ConversationPartial, InboxPartial, ReplyResultPartial}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.MockitoSugar.{mock, reset, verify, when}
+import org.mockito.Mockito.{reset, verify, when}
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.i18n.Messages
 import play.api.mvc.Request
 import play.api.test.Helpers._

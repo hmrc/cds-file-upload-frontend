@@ -20,7 +20,8 @@ import controllers.ControllerSpecBase
 import models.requests.{AuthenticatedRequest, MessageFilterRequest, VerifiedEmailRequest}
 import models.{AllMessages, ExportMessages, SecureMessageAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.MockitoSugar.{mock, reset, when}
+import org.mockito.Mockito.{reset, when}
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.mvc.Result
 import services.SecureMessageAnswersService
 import testdata.CommonTestData._
@@ -48,7 +49,10 @@ class MessageFilterActionSpec extends ControllerSpecBase {
         val result = action.callRefine(request).futureValue
 
         result.isRight mustBe true
-        result.toOption.get.secureMessageAnswers mustBe answers
+
+        val secureMessageAnswers = result.toOption.get.secureMessageAnswers
+        secureMessageAnswers mustBe answers
+        secureMessageAnswers.uuid mustBe cacheId
       }
     }
 
@@ -63,6 +67,21 @@ class MessageFilterActionSpec extends ControllerSpecBase {
         val secureMessageAnswer = result.toOption.get.secureMessageAnswers
         secureMessageAnswer.eori mustBe eori_2
         secureMessageAnswer.filter mustBe AllMessages
+        secureMessageAnswer.uuid mustBe cacheId
+      }
+    }
+
+    "cache id of request not found in session" must {
+      "build a SecureMessageAnswers object having a random value for its uuid" in {
+        val request = VerifiedEmailRequest(AuthenticatedRequest(fakeRequest, signedInUser.copy(eori = eori_2)), verifiedEmail)
+
+        val result = action.callRefine(request).futureValue
+
+        result.isRight mustBe true
+        val secureMessageAnswer = result.toOption.get.secureMessageAnswers
+        secureMessageAnswer.eori mustBe eori_2
+        secureMessageAnswer.filter mustBe AllMessages
+        secureMessageAnswer.uuid mustNot (be(cacheId))
       }
     }
   }

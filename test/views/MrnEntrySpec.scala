@@ -63,7 +63,7 @@ class MrnEntrySpec extends UnitViewSpec with Generators with ScalaCheckPropertyC
     }
 
     "include the 'Sign out' link if the user is authorised" in {
-      forAll { user: SignedInUser =>
+      forAll { (user: SignedInUser) =>
         val authenticatedRequest = AuthenticatedRequest(request.withCSRFToken, user)
         val view = page(form)(authenticatedRequest, messages)
         assertSignoutLinkIsIncluded(view)

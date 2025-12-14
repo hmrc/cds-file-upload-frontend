@@ -49,7 +49,7 @@ class ContactDetailsSpec extends UnitViewSpec with ScalaCheckPropertyChecks with
     behave like normalPage(() => createView(form), "contactDetails")
 
     "include the 'Sign out' link if the user is authorised" in {
-      forAll { user: SignedInUser =>
+      forAll { (user: SignedInUser) =>
         val view = contactDetails(form, mrn)(messages, AuthenticatedRequest(request, user))
         assertSignoutLinkIsIncluded(view)
       }
@@ -63,7 +63,7 @@ class ContactDetailsSpec extends UnitViewSpec with ScalaCheckPropertyChecks with
       contactDetails(form, mrn)(messages, request).toString
 
     "display name input" in {
-      forAll { contactDetails: ContactDetails =>
+      forAll { (contactDetails: ContactDetails) =>
         val popForm = form.fillAndValidate(contactDetails)
         val input =
           exportsInputText(field = popForm("name"), autocomplete = Some("name"), labelKey = "contactDetails.name", labelClasses = "govuk-label")
@@ -73,7 +73,7 @@ class ContactDetailsSpec extends UnitViewSpec with ScalaCheckPropertyChecks with
     }
 
     "display company name input" in {
-      forAll { contactDetails: ContactDetails =>
+      forAll { (contactDetails: ContactDetails) =>
         val popForm = form.fillAndValidate(contactDetails)
         val input = exportsInputText(
           field = popForm("companyName"),
@@ -87,7 +87,7 @@ class ContactDetailsSpec extends UnitViewSpec with ScalaCheckPropertyChecks with
     }
 
     "display phone number input" in {
-      forAll { contactDetails: ContactDetails =>
+      forAll { (contactDetails: ContactDetails) =>
         val popForm = form.fillAndValidate(contactDetails)
         val input = exportsInputText(
           field = popForm("phoneNumber"),

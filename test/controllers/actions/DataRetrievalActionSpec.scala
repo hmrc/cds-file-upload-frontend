@@ -20,7 +20,8 @@ import controllers.ControllerSpecBase
 import models.FileUploadAnswers
 import models.requests.{AuthenticatedRequest, DataRequest, VerifiedEmailRequest}
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.MockitoSugar.{mock, reset, when}
+import org.mockito.Mockito.{reset, when}
+import org.scalatestplus.mockito.MockitoSugar.mock
 import services.FileUploadAnswersService
 import testdata.CommonTestData._
 
@@ -54,6 +55,18 @@ class DataRetrievalActionSpec extends ControllerSpecBase {
         val result = action.callTransform(request).futureValue
 
         result.userAnswers mustBe answers
+      }
+    }
+
+    "the connector does not find data" must {
+      "build a userAnswers object having a new cache id and add it to the request" in {
+
+        val request = VerifiedEmailRequest(AuthenticatedRequest(fakeRequest, signedInUser), verifiedEmail)
+
+        val result = action.callTransform(request).futureValue
+
+        result.userAnswers.eori mustBe answers.eori
+        result.userAnswers.uuid mustNot (be(answers.uuid))
       }
     }
   }

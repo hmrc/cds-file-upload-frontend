@@ -62,7 +62,7 @@ object FileUploadAnswersRepository {
         ascending("updated"),
         IndexOptions()
           .name("ttl")
-          .expireAfter(appConfig.fileUploadAnswersRepository.ttlSeconds, TimeUnit.SECONDS)
+          .expireAfter(appConfig.fileUploadAnswersRepository.ttlSeconds.toLong, TimeUnit.SECONDS)
       )
     )
 }

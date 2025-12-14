@@ -20,7 +20,8 @@ import base.SfusMetricsMock
 import connectors.CdsFileUploadConnector
 import models._
 import org.mockito.ArgumentMatchers._
-import org.mockito.MockitoSugar.{mock, reset, verify, when}
+import org.mockito.Mockito.{reset, verify, when}
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.i18n.Messages
 import play.api.mvc.Request
 import play.api.test.Helpers._

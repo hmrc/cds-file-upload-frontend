@@ -3,7 +3,7 @@ import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 val appName = "cds-file-upload-frontend"
 
 ThisBuild / majorVersion := 0
-ThisBuild / scalaVersion := "2.13.16"
+ThisBuild / scalaVersion := "3.3.7"
 
 PlayKeys.devSettings := List("play.server.http.port" -> "6793")
 
@@ -34,12 +34,15 @@ lazy val scalacFlags = List(
   "-encoding", "UTF-8",      // source files are in UTF-8
   "-feature",                // warn about misused language features
   "-unchecked",              // warn about unchecked type parameters
-  "-Ywarn-numeric-widen",
   "-Xfatal-warnings",        // warnings are fatal!!
-  "-Wconf:cat=unused-imports&src=routes/.*:s",       // silent "unused import" warnings from Play routes
-  "-Wconf:cat=unused-imports&src=twirl/.*:is",       // silent "unused import" warnings from Twirl templates
-  "-Wconf:site=.*Module.*&cat=lint-byname-implicit:s",  // silent warnings from Pureconfig/Shapeless
-  "-Wconf:cat=unused&src=.*routes.*:s" // silence private val defaultPrefix in class Routes is never used
+  "-Wconf:src=routes/.*&msg=unused import:silent",
+  "-Wconf:src=routes/.*&msg=unused private member:silent",
+  "-Wconf:src=routes/.*&msg=unused pattern variable:silent",
+  "-Wconf:src=app/controllers/.*&msg=unused explicit parameter:silent",
+  "-Wconf:src=app/repositories/.*&msg=unused explicit parameter:silent",
+  "-Wconf:src=.*views.html.*&msg=unused import:silent",
+  "-Wconf:src=.*views.html.*&msg=unused explicit parameter:silent",
+  "-Wconf:msg=Flag.*repeatedly:s" // suppress 'repeatedly' flags
 )
 
 // Prevent the "No processor claimed any of these annotations" warning

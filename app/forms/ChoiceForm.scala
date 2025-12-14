@@ -29,7 +29,7 @@ object ChoiceForm {
   private val choiceMapping: Mapping[ChoiceForm] = Forms.mapping(
     ChoiceKey -> requiredRadio("choicePage.input.error.empty")
       .verifying("choicePage.input.error.incorrect", FieldValidator.isContainedIn(AllowedChoiceValues.all))
-  )(ChoiceForm.apply)(ChoiceForm.unapply)
+  )(ChoiceForm.apply)(choiceForm => Some(choiceForm.choice))
 
   def form: Form[ChoiceForm] = Form(choiceMapping)
 

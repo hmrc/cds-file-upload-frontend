@@ -18,7 +18,8 @@ package controllers
 
 import config.ServiceUrls
 import org.mockito.ArgumentMatchers._
-import org.mockito.MockitoSugar.{mock, when}
+import org.mockito.Mockito.when
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
 import views.html.{undeliverable_email, unverified_email}
