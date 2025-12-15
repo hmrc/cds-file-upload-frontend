@@ -18,8 +18,9 @@ package services
 
 import base.UnitSpec
 import models.{ExportMessages, SecureMessageAnswers}
-import org.mockito.ArgumentMatchersSugar.any
-import org.mockito.MockitoSugar.{mock, reset, when}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{reset, when}
+import org.scalatestplus.mockito.MockitoSugar.mock
 import repositories.SecureMessageAnswersRepository
 import services.SecureMessageAnswersService
 import testdata.CommonTestData.cacheId

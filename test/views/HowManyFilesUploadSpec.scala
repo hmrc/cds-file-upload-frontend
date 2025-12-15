@@ -78,7 +78,7 @@ class HowManyFilesUploadSpec extends UnitViewSpec with Generators with ScalaChec
     }
 
     "include the 'Sign out' link if the user is authorised" in {
-      forAll { user: SignedInUser =>
+      forAll { (user: SignedInUser) =>
         val view = page(form, mrn)(AuthenticatedRequest(request, user), messages)
         assertSignoutLinkIsIncluded(view)
       }

@@ -18,7 +18,7 @@ package utils
 
 import base.UnitSpec
 import config._
-import org.mockito.MockitoSugar.mock
+import org.scalatestplus.mockito.MockitoSugar.mock
 
 class RefererUrlValidatorSpec extends UnitSpec {
 

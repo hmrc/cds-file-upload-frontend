@@ -21,6 +21,7 @@ import org.scalatest.concurrent.ScalaFutures
 import play.api.Application
 import play.api.libs.json.{Json, OFormat}
 import play.api.libs.ws.WSClient
+import play.api.libs.ws.writeableOf_JsValue
 
 trait AuthSuite extends ScalaFutures {
 

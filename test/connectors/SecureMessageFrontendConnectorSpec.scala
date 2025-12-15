@@ -20,7 +20,8 @@ import models._
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.Mockito.verifyNoInteractions
-import org.mockito.MockitoSugar.{mock, reset, verify, when}
+import org.mockito.Mockito.{reset, verify, when}
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.mvc.Http.Status.{BAD_GATEWAY, BAD_REQUEST, OK}
 import services.AuditService
 import testdata.CommonTestData

@@ -18,9 +18,10 @@ package base
 
 import com.google.inject.{AbstractModule, Provides}
 import config.AppConfig
-import controllers.actions._
+import controllers.actions.*
 import play.filters.csrf.CSRFConfig
-import pureconfig.generic.auto._
+import pureconfig.ConfigReader
+import pureconfig.generic.semiauto.*
 
 import javax.inject.Singleton
 
@@ -28,6 +29,7 @@ class TestModule(configOverride: AppConfig => AppConfig) extends AbstractModule 
 
   import pureconfig.ConfigSource
 
+  implicit val configReader: ConfigReader[AppConfig] = deriveReader[AppConfig]
   val cfg: AppConfig = ConfigSource.default.loadOrThrow[AppConfig]
 
   val csrfConfig: CSRFConfig = CSRFConfig(shouldProtect = !_.uri.matches("*test-only*"))

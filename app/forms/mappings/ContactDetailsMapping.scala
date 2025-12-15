@@ -29,5 +29,5 @@ object ContactDetailsMapping extends Mappings {
     "phoneNumber" -> text("contactDetails.phoneNumber.missing")
       .verifying(maxLength(15, "contactDetails.phoneNumber.invalid"))
       .verifying("contactDetails.phoneNumber.invalidPattern", isValidPhoneNumber)
-  )(ContactDetails.apply)(ContactDetails.unapply)
+  )(ContactDetails.apply)(contactDetails => Some((contactDetails.name, contactDetails.companyName, contactDetails.phoneNumber)))
 }

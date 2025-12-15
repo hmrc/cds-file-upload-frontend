@@ -21,7 +21,8 @@ import forms.mappings.ContactDetailsMapping._
 import models._
 import models.requests.SignedInUser
 import org.mockito.ArgumentMatchers._
-import org.mockito.MockitoSugar.{mock, reset, when}
+import org.mockito.Mockito.{reset, when}
+import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalacheck.Arbitrary._
 import play.api.data.Form
 import play.api.test.Helpers._

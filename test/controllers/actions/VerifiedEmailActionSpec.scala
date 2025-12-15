@@ -21,7 +21,8 @@ import controllers.{routes, ControllerSpecBase}
 import models.requests.{AuthenticatedRequest, VerifiedEmailRequest}
 import models.Email
 import org.mockito.ArgumentMatchers._
-import org.mockito.MockitoSugar.{mock, reset, when}
+import org.mockito.Mockito.{reset, when}
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{MessagesControllerComponents, Result}
 import play.api.test.FakeRequest

@@ -18,7 +18,8 @@ package controllers
 
 import handlers.ErrorHandler
 import org.mockito.ArgumentMatchers.any
-import org.mockito.MockitoSugar.{mock, verify, when}
+import org.mockito.Mockito.{verify, when}
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.test.Helpers._
 import play.twirl.api.HtmlFormat
 import views.html._

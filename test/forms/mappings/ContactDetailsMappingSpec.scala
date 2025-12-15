@@ -34,7 +34,7 @@ class ContactDetailsMappingSpec extends UnitSpec {
     "bind" when {
 
       "valid values are bound" in {
-        forAll { contactDetails: ContactDetails =>
+        forAll { (contactDetails: ContactDetails) =>
           form
             .fillAndValidate(contactDetails)
             .fold(_ => fail("form should not have errors"), _ mustBe contactDetails)

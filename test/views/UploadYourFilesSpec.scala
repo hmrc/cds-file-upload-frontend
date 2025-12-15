@@ -40,7 +40,7 @@ class UploadYourFilesSpec extends UnitViewSpec with Generators with ScalaCheckPr
     behave like pageWithoutHeading(() => view(), messagePrefix, "paragraph1", "listItem1", "listItem2", "listItem3", "listItem4")
 
     "include the 'Sign out' link if the user is authorised" in {
-      forAll { user: SignedInUser =>
+      forAll { (user: SignedInUser) =>
         val authenticatedRequest = AuthenticatedRequest(request, user)
         val view = page(uploadRequest, First(3), mrn)(authenticatedRequest, messages)
         assertSignoutLinkIsIncluded(view)
@@ -63,7 +63,7 @@ class UploadYourFilesSpec extends UnitViewSpec with Generators with ScalaCheckPr
       val service = messages("service.name")
 
       "first file upload is shown" in {
-        forAll { total: Int =>
+        forAll { (total: Int) =>
           val message = messages(s"$messagePrefix.heading.first")
           assertEqualsMessage(view(First(total)), "title", "title.format", message, service)
         }
@@ -77,7 +77,7 @@ class UploadYourFilesSpec extends UnitViewSpec with Generators with ScalaCheckPr
       }
 
       "the last file upload is shown" in {
-        forAll { total: Int =>
+        forAll { (total: Int) =>
           val message = messages(s"$messagePrefix.heading.last")
           assertEqualsMessage(view(Last(total)), "title", "title.format", message, service)
         }
@@ -87,7 +87,7 @@ class UploadYourFilesSpec extends UnitViewSpec with Generators with ScalaCheckPr
     "show heading" when {
 
       "first file upload is shown" in {
-        forAll { total: Int =>
+        forAll { (total: Int) =>
           assertH1EqualsMessage(view(First(total)), s"$messagePrefix.heading.first")
         }
       }
@@ -99,7 +99,7 @@ class UploadYourFilesSpec extends UnitViewSpec with Generators with ScalaCheckPr
       }
 
       "the last file upload is shown" in {
-        forAll { total: Int =>
+        forAll { (total: Int) =>
           assertH1EqualsMessage(view(Last(total)), s"$messagePrefix.heading.last")
         }
       }
@@ -115,7 +115,7 @@ class UploadYourFilesSpec extends UnitViewSpec with Generators with ScalaCheckPr
       }
 
       "the last file is requested" in {
-        forAll { total: Int =>
+        forAll { (total: Int) =>
           val doc = view(Last(total))
           assertContainsMessage(doc, s"$messagePrefix.filesUploaded", total - 1, total)
         }

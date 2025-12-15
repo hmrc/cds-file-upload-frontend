@@ -56,7 +56,7 @@ object SecureMessageAnswersRepository {
         ascending("created"),
         IndexOptions()
           .name("ttl")
-          .expireAfter(appConfig.secureMessageAnswersRepository.ttlSeconds, TimeUnit.SECONDS)
+          .expireAfter(appConfig.secureMessageAnswersRepository.ttlSeconds.toLong, TimeUnit.SECONDS)
       )
     )
 }

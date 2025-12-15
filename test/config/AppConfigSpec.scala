@@ -17,10 +17,12 @@
 package config
 
 import org.scalatestplus.play.PlaySpec
-import pureconfig.ConfigSource
-import pureconfig.generic.auto._
+import pureconfig.{ConfigReader, ConfigSource}
+import pureconfig.generic.semiauto.*
 
 class AppConfigSpec extends PlaySpec {
+
+  private implicit val configReader: ConfigReader[AppConfig] = deriveReader[AppConfig]
 
   private val config =
     ConfigSource

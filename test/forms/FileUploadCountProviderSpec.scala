@@ -29,13 +29,13 @@ class FileUploadCountProviderSpec extends UnitSpec {
   "formProvider" should {
 
     "return success for valid FileUploadCount values" in {
-      forAll(validFileUploadCountGen) { count: Int =>
+      forAll(validFileUploadCountGen) { (count: Int) =>
         form.bind(Map("value" -> count.toString)).fold(_ => fail("Form binding must not fail!"), result => result.value mustBe count)
       }
     }
 
     "return invalid error for invalid FileUploadCount values" in {
-      forAll { count: Int =>
+      forAll { (count: Int) =>
         if (count < 1 || count > 10) {
           form
             .bind(Map("value" -> count.toString))

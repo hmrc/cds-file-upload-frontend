@@ -40,7 +40,7 @@ object InboxChoiceForm {
       requiredRadio("inboxChoice.input.error.empty")
         .verifying("inboxChoice.input.error.incorrect", FieldValidator.isContainedIn(inboxChoiceValues))
 
-    val inboxChoiceMapping = Forms.mapping(InboxChoiceKey -> fieldMapping)(InboxChoiceForm.apply)(InboxChoiceForm.unapply)
+    val inboxChoiceMapping = Forms.mapping(InboxChoiceKey -> fieldMapping)(InboxChoiceForm.apply)(inboxChoiceForm => Some(inboxChoiceForm.choice))
 
     Form(inboxChoiceMapping)
   }

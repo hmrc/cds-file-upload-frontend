@@ -21,7 +21,8 @@ import connectors.CustomsDeclarationsConnector
 import models._
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}
-import org.mockito.MockitoSugar.{mock, reset, times, verify, when}
+import org.mockito.Mockito.{reset, times, verify, when}
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.test.Helpers._
 
 import scala.concurrent.Future

@@ -20,6 +20,7 @@ import config.AppConfig
 import models.{FileUploadRequest, FileUploadResponse}
 import play.api.Logging
 import play.api.http.{ContentTypes, HeaderNames}
+import play.api.libs.ws.writeableOf_String
 import play.api.mvc.Codec
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
