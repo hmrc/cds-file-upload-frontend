@@ -151,7 +151,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase {
           FileUpload("someFileRef3", Waiting(UploadRequest("http://s3bucket/myfile3", Map("" -> ""))), id = "id3")
         )
       )
-      val fileUploadsAfterContactDetails = fileUploadResponse.uploads.tail
+      val fileUploadsAfterContactDetails = fileUploadResponse.files.tail
 
       when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
       when(mockUpscanConnector.upload(any(), any())).thenReturn(Future.successful(wsResponse))
@@ -167,7 +167,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase {
       val savedAnswers = theSavedFileUploadAnswers
       val fileUploadCount = FileUploadCount(2).get
       savedAnswers.fileUploadCount mustBe Some(fileUploadCount)
-      savedAnswers.fileUploadResponse mustBe Some(FileUploadResponse(fileUploadResponse.uploads.tail))
+      savedAnswers.fileUploadResponse mustBe Some(FileUploadResponse(fileUploadResponse.files.tail))
     }
 
     "redirect to error page when contact details upload fails" in {

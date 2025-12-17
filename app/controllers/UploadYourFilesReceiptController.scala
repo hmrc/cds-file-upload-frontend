@@ -51,7 +51,7 @@ class UploadYourFilesReceiptController @Inject() (
       val result = for {
         userAnswers <- getOrRedirect(maybeUserAnswers, routes.RootController.displayPage)
         fileUploads <- getOrRedirect(userAnswers.fileUploadResponse, routes.ErrorPageController.error)
-      } yield composeSuccessResult(fileUploads.uploads, userAnswers.mrn).map(Ok(_))
+      } yield composeSuccessResult(fileUploads.files, userAnswers.mrn).map(Ok(_))
 
       result match {
         case Right(successResult) => successResult

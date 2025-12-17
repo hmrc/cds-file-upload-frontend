@@ -59,14 +59,14 @@ class UpscanStatusController @Inject() (
   val actions = authenticate andThen verifiedEmail andThen getData andThen requireMrn andThen requireResponse
 
   def onPageLoad(reference: String): Action[AnyContent] = actions.async { implicit request =>
-    val references = request.fileUploadResponse.uploads.map(_.reference)
+    val references = request.fileUploadResponse.files.map(_.reference)
     val refPosition = getPosition(reference, references)
 
-    request.fileUploadResponse.uploads.find(_.reference == reference) match {
+    request.fileUploadResponse.files.find(_.reference == reference) match {
       case Some(upload) =>
         upload.state match {
           case Waiting(uploadRequest) => Future.successful(Ok(uploadYourFiles(uploadRequest, refPosition, request.request.mrn)))
-          case _                      => nextPage(upload.reference, request.fileUploadResponse.uploads)
+          case _                      => nextPage(upload.reference, request.fileUploadResponse.files)
         }
 
       case None =>
@@ -79,7 +79,7 @@ class UpscanStatusController @Inject() (
   }
 
   def success(id: String): Action[AnyContent] = actions.async { implicit request =>
-    val uploads = request.fileUploadResponse.uploads
+    val uploads = request.fileUploadResponse.files
     uploads.find(_.id == id) match {
 
       case Some(upload) =>
@@ -114,7 +114,7 @@ class UpscanStatusController @Inject() (
 
     def prettyPrint: List[Notification] => String = _.map(n => s"(${n.fileReference}, ${n.outcome})").mkString(",")
 
-    val uploads = request.fileUploadResponse.uploads
+    val uploads = request.fileUploadResponse.files
 
     def retrieveNotifications(retries: Int = 0): Future[Result] = {
       val timer = metrics.startTimer(fetchNotificationMetric)
@@ -182,7 +182,7 @@ class UpscanStatusController @Inject() (
       request.userAnswers.contactDetails,
       request.userAnswers.mrn,
       request.userAnswers.fileUploadCount,
-      request.fileUploadResponse.uploads,
+      request.fileUploadResponse.files,
       auditType,
       path
     )
