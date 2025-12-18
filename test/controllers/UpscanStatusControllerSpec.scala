@@ -45,14 +45,14 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
   private val responseGen: Gen[(FileUpload, FileUploadResponse)] =
     for {
       response <- arbitrary[FileUploadResponse]
-      index <- Gen.choose(0, response.uploads.length - 1)
-      upload = response.uploads(index)
+      index <- Gen.choose(0, response.files.length - 1)
+      upload = response.files(index)
     } yield (upload, response)
 
   private val waitingGen: Gen[(FileUpload, UploadRequest, FileUploadResponse)] = responseGen.flatMap { case (file, response) =>
     arbitrary[Waiting].map { waiting =>
       val uploadedFile = file.copy(state = waiting)
-      val updatedFiles = uploadedFile :: response.uploads.filterNot(_ == file)
+      val updatedFiles = uploadedFile :: response.files.filterNot(_ == file)
 
       (uploadedFile, waiting.uploadRequest, FileUploadResponse(updatedFiles))
     }
@@ -172,7 +172,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
 
     "file reference is not in response" in {
       forAll { (ref: String, response: FileUploadResponse) =>
-        whenever(!response.uploads.exists(_.reference == ref)) {
+        whenever(!response.files.exists(_.reference == ref)) {
 
           val answers = FileUploadAnswers(eori, cacheId, fileUploadResponse = Some(response))
           val result = controller(fakeDataRetrievalAction(answers)).success(ref)(fakeRequest)
@@ -199,7 +199,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       await(controller(fakeDataRetrievalAction(answers)).success("ref")(fakeRequest))
 
       val updateResponse = theSavedFileUploadAnswers.fileUploadResponse.get
-      val updatedFile = updateResponse.uploads.find(_.id == "ref").get
+      val updatedFile = updateResponse.files.find(_.id == "ref").get
       updatedFile.state mustBe Uploaded
     }
 
@@ -248,7 +248,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
         meq(Some(cd)),
         meq(Some(mrn)),
         meq(FileUploadCount(3)),
-        meq(response.uploads),
+        meq(response.files),
         meq(AuditTypes.UploadSuccess),
         any
       )(any[HeaderCarrier])
@@ -316,7 +316,7 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
         meq(Some(cd)),
         meq(Some(mrn)),
         meq(FileUploadCount(3)),
-        meq(response.uploads),
+        meq(response.files),
         meq(AuditTypes.UploadFailure),
         any
       )(any[HeaderCarrier])

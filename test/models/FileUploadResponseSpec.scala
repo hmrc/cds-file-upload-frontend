@@ -17,7 +17,7 @@
 package models
 
 import base.UnitSpec
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 
 class FileUploadResponseSpec extends UnitSpec with XmlBehaviours {
 
@@ -100,6 +100,13 @@ class FileUploadResponseSpec extends UnitSpec with XmlBehaviours {
     "generate the expected JSON" in {
       val json = Json.toJson(fileUpload1.as[FileUpload])
       json mustBe fileUpload1
+    }
+  }
+
+  "A conversion from a 'FileUploadResponse' instance" should {
+    "generate the expected JSON" in {
+      val json = Json.toJson(FileUploadResponse(List(fileUpload1.as[FileUpload])))
+      json mustBe Json.obj("files" -> List(fileUpload1))
     }
   }
 }

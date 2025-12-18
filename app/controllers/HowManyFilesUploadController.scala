@@ -80,7 +80,7 @@ class HowManyFilesUploadController @Inject() (
   ): Future[Either[Throwable, List[FileUpload]]] = {
 
     def saveRemainingFileUploadsToCache(fileUploadResponse: FileUploadResponse): Future[List[FileUpload]] = {
-      val remainingFileUploads = fileUploadResponse.uploads.tail
+      val remainingFileUploads = fileUploadResponse.files.tail
       logger.info("remainingFileUploads " + remainingFileUploads)
 
       val answers =
@@ -122,7 +122,7 @@ class HowManyFilesUploadController @Inject() (
     customsDeclarationsService.batchFileUpload(request.eori, request.request.mrn, fileUploadCount)
 
   private def firstUploadFile(fileUploadResponse: FileUploadResponse): Either[Throwable, (FileUpload, UploadRequest)] =
-    fileUploadResponse.uploads.headOption match {
+    fileUploadResponse.files.headOption match {
       case Some(f @ FileUpload(_, Waiting(u), _, _)) => Right((f, u))
       case _                                         => Left(new IllegalStateException("Unable to initiate upload"))
     }

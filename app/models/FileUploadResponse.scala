@@ -33,7 +33,7 @@ object FileUpload {
   implicit val format: OFormat[FileUpload] = Json.format[FileUpload]
 }
 
-case class FileUploadResponse(uploads: List[FileUpload])
+case class FileUploadResponse(files: List[FileUpload])
 
 object FileUploadResponse extends Logging {
   implicit val format: OFormat[FileUploadResponse] = Json.format[FileUploadResponse]
