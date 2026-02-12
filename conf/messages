@@ -77,9 +77,9 @@ greyBox.uploadFiles = Upload and attach documents to a declaration
 
 ## MRN Entry Page
 
-mrnEntryPage.heading = What is the movement reference number(MRN) of the declaration you want to attach files to?
+mrnEntryPage.heading = What is the movement reference number (MRN) of the declaration you want to attach files to?
 mrnEntryPage.paragraph = The MRN is 18 characters, starting with 2 numbers for the year the declaration was created, the letters ‘GB’, then 14 letters and numbers. For example, 22GB123456789AB012.
-mrnEntryPage.label = What is the movement reference number(MRN) of the declaration you want to attach files to?
+mrnEntryPage.label = What is the movement reference number (MRN) of the declaration you want to attach files to?
 mrn.missing = Enter an MRN
 mrn.invalid = The MRN must be in the correct format
 
