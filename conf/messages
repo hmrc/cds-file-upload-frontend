@@ -168,6 +168,9 @@ fileUploadPage.paragraph1 = Each file you upload must not be bigger than 10 mega
 fileUploadPage.button = Upload and continue
 fileUploadPage.insetText = If you have a Word or Excel document to upload, you need to 'save as' a PDF first. Word and Excel formats are not allowed on this service.
 fileUploadPage.cancel = Cancel upload
+fileUpload.choose=Choose filetesting
+fileUpload.noFileSelected=No file selectedtesting
+fileUpload.dropZone=Drag and drop a file heretesting
 
 fileUploadConfirmationPage.heading = Files uploaded
 fileUploadConfirmationPage.mrn = Movement reference number:
