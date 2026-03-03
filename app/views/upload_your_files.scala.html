@@ -78,22 +78,21 @@
                 <input type="hidden" name="@key" value="@value"/>
             }
 
-            <label class="govuk-label" for="@fileUploadId">
-                @messages("fileUploadPage.label")
-            </label>
-            <div class="govuk-drop-zone" data-module="govuk-file-upload">
-                @govukFileUpload(FileUploadComponent(
-                    id = fileUploadId,
-                    name = "file",
-                    label = Label(content = Empty),
-                    attributes = Map(
-                        "accept" -> appConfig.fileFormats.approvedFileTypes,
-                        "data-max-file-size" -> appConfig.fileFormats.maxFileSize.toString,
-                        "file-extensions" -> appConfig.fileFormats.approvedFileExtensions
-                    ),
-                    errorMessage = Some(ErrorMessage(id = Some("file-upload-error"), visuallyHiddenText = None))
-                ))
-            </div>
+            @govukFileUpload(FileUploadComponent(
+                id = fileUploadId,
+                name = "file",
+                javascript = Some(true),
+                noFileChosenText = Some(messages("fileUpload.noFileChosen")),
+                chooseFilesButtonText = Some(messages("fileUpload.choose")),
+                dropInstructionText = Some(messages("fileUpload.dropZone")),
+                label = Label(content = Text(messages("fileUploadPage.label"))),
+                attributes = Map(
+                    "accept" -> appConfig.fileFormats.approvedFileTypes,
+                    "data-max-file-size" -> appConfig.fileFormats.maxFileSize.toString,
+                    "file-extensions" -> appConfig.fileFormats.approvedFileExtensions
+                ),
+                errorMessage = Some(ErrorMessage(id = Some("file-upload-error"), visuallyHiddenText = None))
+            ))
         </div>
 
         @govukButton(Button(name = Some("submit"), content = Text(messages("fileUploadPage.button"))))
