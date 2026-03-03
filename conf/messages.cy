@@ -168,9 +168,9 @@ fileUploadPage.paragraph1 = Mae’n rhaid i bob ffeil a uwchlwythwch fod yn llai
 fileUploadPage.button = Uwchlwytho ac yn eich blaen
 fileUploadPage.insetText = Os oes gennych ddogfen Word neu Excel i’w huwchlwytho, bydd yn rhaid i chi gadw’r ffeil ar ffurf PDF yn gyntaf. Nid yw’r gwasanaeth hwn yn caniatáu fformatau Word nac Excel.
 fileUploadPage.cancel = Canslo’r broses uwchlwytho
-fileUpload.choose=Dewis ffeil
-fileUpload.noFileChosen=Heb ddewis ffeil
-fileUpload.dropZone=neu ollwng ffeil
+fileUpload.choose = Dewis ffeil
+fileUpload.noFileChosen = Heb ddewis ffeil
+fileUpload.dropZone = neu ollwng ffeil
 
 fileUploadConfirmationPage.heading = Ffeiliau wedi’u huwchlwytho
 fileUploadConfirmationPage.mrn = Cyfeirnod Symud Nwyddau:
