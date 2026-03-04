@@ -81,6 +81,10 @@
             @govukFileUpload(FileUploadComponent(
                 id = fileUploadId,
                 name = "file",
+                javascript = Some(true),
+                noFileChosenText = Some(messages("fileUpload.noFileChosen")),
+                chooseFilesButtonText = Some(messages("fileUpload.choose")),
+                dropInstructionText = Some(messages("fileUpload.dropZone")),
                 label = Label(content = Text(messages("fileUploadPage.label"))),
                 attributes = Map(
                     "accept" -> appConfig.fileFormats.approvedFileTypes,
