@@ -166,7 +166,6 @@ fileUploadPage.validation.accept = Ni ellir derbyn y math hwn o ffeil
 fileUploadPage.validation.filesize = Mae maint y ffeil yn fwy na 10 megabeit (MB)
 fileUploadPage.paragraph1 = Mae’n rhaid i bob ffeil a uwchlwythwch fod yn llai na 10 megabeit (MB), a rhaid iddynt fod yn un o’r fformatau canlynol:
 fileUploadPage.button = Uwchlwytho ac yn eich blaen
-fileUploadPage.insetText = Os oes gennych ddogfen Word neu Excel i’w huwchlwytho, bydd yn rhaid i chi gadw’r ffeil ar ffurf PDF yn gyntaf. Nid yw’r gwasanaeth hwn yn caniatáu fformatau Word nac Excel.
 fileUploadPage.cancel = Canslo’r broses uwchlwytho
 fileUpload.choose = Dewis ffeil
 fileUpload.noFileChosen = Heb ddewis ffeil

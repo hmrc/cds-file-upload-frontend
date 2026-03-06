@@ -55,10 +55,6 @@ class UploadYourFilesSpec extends UnitViewSpec with Generators with ScalaCheckPr
       assertContainsLink(view(), "Cancel upload", controllers.routes.HowManyFilesUploadController.onPageLoad.url)
     }
 
-    "display inset text" in {
-      assertContainsMessage(view(), s"$messagePrefix.insetText")
-    }
-
     "show title" when {
       val service = messages("service.name")
 
