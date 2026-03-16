@@ -139,6 +139,7 @@ class AppConfigSpec extends PlaySpec {
       |  login = "http://localhost:9949/auth-login-stub/gg-sign-in"
       |  loginContinue = "http://localhost:6793/cds-file-upload-service/start"
       |  nationalClearingHub = "mailto:nch.cds@hmrc.gov.uk"
+      |  officeForProductSafetyAndStandards = "mailto:opss.borders@businessandtrade.gov.uk"
       |}
       |
       |file-upload-answers-repository {
