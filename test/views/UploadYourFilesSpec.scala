@@ -37,7 +37,7 @@ class UploadYourFilesSpec extends UnitViewSpec with Generators with ScalaCheckPr
 
   "Upload your files page" must {
 
-    behave like pageWithoutHeading(() => view(), messagePrefix, "paragraph1", "listItem1", "listItem2", "listItem3", "listItem4")
+    behave like pageWithoutHeading(() => view(), messagePrefix, "paragraph1", "listItem1", "listItem2", "listItem3")
 
     "include the 'Sign out' link if the user is authorised" in {
       forAll { (user: SignedInUser) =>

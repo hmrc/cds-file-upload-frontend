@@ -113,8 +113,8 @@ class AppConfigSpec extends PlaySpec {
       |
       |file-formats {
       |  max-file-size = 10485760
-      |  approved-file-extensions = ".pdf,.png,.jpg,.jpeg,.csv,.txt,.msg,.doc,.docx,.xls,.xlsx,.ods,.odt"
-      |  approved-file-types = "application/pdf,image/png,image/jpeg,text/csv,text/plain,application/vnd.ms-outlook,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text"
+      |  approved-file-extensions = ".pdf,.png,.jpg,.jpeg,.csv,.txt,.doc,.docx,.xls,.xlsx,.ods,.odt"
+      |  approved-file-types = "application/pdf,image/png,image/jpeg,text/csv,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text"
       |}
       |
       |# ttl cannot be changed after initial deployment without manually dropping the index

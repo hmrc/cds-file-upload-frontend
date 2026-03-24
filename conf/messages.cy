@@ -149,7 +149,6 @@ howManyFilesUpload.paragraph3 = Mae’n rhaid i bob ffeil fod hyd at 10MB. Gallw
 howManyFilesUpload.listItem1 = dogfennau (PDF, TXT, DOC, DOCX neu ODT)
 howManyFilesUpload.listItem2 = delweddau (PNG, JPG neu JPEG)
 howManyFilesUpload.listItem3 = taenlenni (CSV, XLS, XLSX neu ODS)
-howManyFilesUpload.listItem4 = ffeiliau Outlook (MSG)
 howManyFilesUpload.warning = Sylwer: ni allwch ddiwygio’r rhif hwn ar ôl i chi ddewis mynd yn eich blaen. I ddiwygio’r rhif, bydd yn rhaid i chi ddechrau eto.
 
 fileUploadPage.heading.first = Uwchlwythwch eich ffeil gyntaf
@@ -158,7 +157,6 @@ fileUploadPage.heading.last = Uwchlwythwch eich ffeil olaf
 fileUploadPage.listItem1 = dogfennau (PDF, TXT, DOC, DOCX neu ODT)
 fileUploadPage.listItem2 = delweddau (PNG, JPG neu JPEG)
 fileUploadPage.listItem3 = taenlenni (CSV, XLS, XLSX neu ODS)
-fileUploadPage.listItem4 = ffeiliau Outlook (MSG)
 fileUploadPage.label = Uwchlwytho ffeil
 fileUploadPage.filesUploaded = Rydych wedi uwchlwytho {0} o {1} ffeil
 fileUploadPage.validation.required = Dewiswch y ffeil yr hoffech ei huwchlwytho

@@ -58,18 +58,8 @@ class HowManyFilesUploadSpec extends UnitViewSpec with Generators with ScalaChec
 
     "display the correct guidance" in {
       val page = createView()
-      val expectedGuidanceKeys: List[String] = List(
-        "paragraph1",
-        "paragraph2.heading",
-        "paragraph2",
-        "paragraph3.heading",
-        "paragraph3",
-        "listItem1",
-        "listItem2",
-        "listItem3",
-        "listItem4",
-        "warning"
-      )
+      val expectedGuidanceKeys: List[String] =
+        List("paragraph1", "paragraph2.heading", "paragraph2", "paragraph3.heading", "paragraph3", "listItem1", "listItem2", "listItem3", "warning")
       for (key <- expectedGuidanceKeys) assertContainsText(page, messages(s"$messagePrefix.$key"))
     }
 

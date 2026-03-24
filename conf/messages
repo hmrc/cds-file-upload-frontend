@@ -149,7 +149,6 @@ howManyFilesUpload.paragraph3 = Each file must be up to 10MB. You can upload:
 howManyFilesUpload.listItem1 = documents (PDF, TXT, DOC, DOCX or ODT)
 howManyFilesUpload.listItem2 = images (PNG, JPG or JPEG)
 howManyFilesUpload.listItem3 = spreadsheets (CSV, XLS, XLSX or ODS)
-howManyFilesUpload.listItem4 = outlook files (MSG)
 howManyFilesUpload.warning = Be aware: you cannot revise this number once you select continue. To revise the number, you will have to start again.
 
 fileUploadPage.heading.first = Upload your first file
@@ -158,7 +157,6 @@ fileUploadPage.heading.last = Upload your last file
 fileUploadPage.listItem1 = documents (PDF, TXT, DOC, DOCX or ODT)
 fileUploadPage.listItem2 = images (PNG, JPG or JPEG)
 fileUploadPage.listItem3 = spreadsheets (CSV, XLS, XLSX or ODS)
-fileUploadPage.listItem4 = outlook files (MSG)
 fileUploadPage.label = Upload a file
 fileUploadPage.filesUploaded = You have uploaded {0} of {1} files
 fileUploadPage.validation.required = Select the file you want to upload
