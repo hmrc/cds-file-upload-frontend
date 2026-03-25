@@ -113,8 +113,8 @@ class AppConfigSpec extends PlaySpec {
       |
       |file-formats {
       |  max-file-size = 10485760
-      |  approved-file-extensions = ".jpeg,.jpg,.png,.pdf,.txt"
-      |  approved-file-types = "image/jpeg,image/png,application/pdf,text/plain"
+      |  approved-file-extensions = ".pdf,.png,.jpg,.jpeg,.csv,.txt,.doc,.docx,.xls,.xlsx,.ods,.odt"
+      |  approved-file-types = "application/pdf,image/png,image/jpeg,text/csv,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text"
       |}
       |
       |# ttl cannot be changed after initial deployment without manually dropping the index
@@ -139,6 +139,7 @@ class AppConfigSpec extends PlaySpec {
       |  login = "http://localhost:9949/auth-login-stub/gg-sign-in"
       |  loginContinue = "http://localhost:6793/cds-file-upload-service/start"
       |  nationalClearingHub = "mailto:nch.cds@hmrc.gov.uk"
+      |  officeForProductSafetyAndStandards = "mailto:opss.borders@businessandtrade.gov.uk"
       |}
       |
       |file-upload-answers-repository {

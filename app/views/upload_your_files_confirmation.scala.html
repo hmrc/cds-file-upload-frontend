@@ -26,6 +26,7 @@
     mainTemplate: gdsMainTemplate,
     feedbackSection: components.feedback_section,
     serviceUrls: ServiceUrls,
+    govukInsetText: GovukInsetText,
     govukButton: GovukButton,
     bulletList: bulletList,
     paragraphBody: paragraphBody,
@@ -119,10 +120,16 @@
                 )
             )
 
-            @paragraphBody(message = messages("fileUploadConfirmationPage.section2.paragraph2", link(
+            @govukInsetText(InsetText(content = Text(messages("fileUploadConfirmationPage.section2.insetText"))))
+
+            @paragraphBody(message = messages("fileUploadConfirmationPage.section2.paragraph2",
+            link(
                 text = serviceUrls.nationalClearingHub.replace("mailto:", ""),
-                call = Call("GET", serviceUrls.nationalClearingHub)
-            )))
+                call = Call("GET", serviceUrls.nationalClearingHub)),
+            link(
+                text = serviceUrls.officeForProductSafetyAndStandards.replace("mailto:", ""),
+                call = Call("GET", serviceUrls.officeForProductSafetyAndStandards))
+            ))
 
             </br>
             @govukButton(

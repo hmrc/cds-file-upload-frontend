@@ -26,7 +26,6 @@
     govukButton: GovukButton,
     govukErrorSummary: GovukErrorSummary,
     govukFileUpload : GovukFileUpload,
-    govukInsetText: GovukInsetText,
     bulletList: bulletList,
     pageTitle: pageTitle,
     paragraphBody: paragraphBody,
@@ -58,12 +57,11 @@
         elements = Seq(
             Html(messages("fileUploadPage.listItem1")),
             Html(messages("fileUploadPage.listItem2")),
-            Html(messages("fileUploadPage.listItem3")),
-            Html(messages("fileUploadPage.listItem4"))
+            Html(messages("fileUploadPage.listItem3"))
         )
     )
 
-    @govukInsetText(InsetText(content = Text(messages("fileUploadPage.insetText"))))
+
 
     @{
         Some(refPosition).collect {

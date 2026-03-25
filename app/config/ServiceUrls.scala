@@ -39,4 +39,5 @@ class ServiceUrls @Inject() (val configuration: Configuration) {
   val loginContinue: String = loadUrl("loginContinue")
   val signOut: String = loadUrl("signOut")
   val nationalClearingHub: String = loadUrl("nationalClearingHub")
+  val officeForProductSafetyAndStandards: String = loadUrl("officeForProductSafetyAndStandards")
 }

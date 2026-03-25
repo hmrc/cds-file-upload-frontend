@@ -57,4 +57,8 @@ class ServiceUrlsSpec extends UnitSpec {
   "have a correct configuration for National Clearance Hub url" in {
     serviceUrls.nationalClearingHub mustBe "mailto:nch.cds@hmrc.gov.uk"
   }
+
+  "have a correct configuration for Office for Product Safety and Standards url" in {
+    serviceUrls.officeForProductSafetyAndStandards mustBe "mailto:opss.borders@businessandtrade.gov.uk"
+  }
 }
