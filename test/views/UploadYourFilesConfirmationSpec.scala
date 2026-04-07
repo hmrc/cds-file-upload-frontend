@@ -60,7 +60,15 @@ class UploadYourFilesConfirmationSpec extends UnitViewSpec with Generators with 
     }
 
     "display the language toggle" in {
-      view.getElementsByClass("hmrc-language-select").text() must be("English Newid yr iaith i’r Gymraeg Cymraeg")
+      val toggleNav = view.getElementsByClass("hmrc-service-navigation-language-select")
+      toggleNav.size() must be > 0
+
+      val current = toggleNav.select("li span[aria-current=true]").text()
+      current mustBe "ENG"
+
+      val alternate = toggleNav.select("li a.govuk-service-navigation__link")
+      alternate.text() must include("CYM")
+      alternate.select("span.govuk-visually-hidden").text() must include("Newid yr iaith i’r Gymraeg")
     }
 
     "display the file receipts table" in {

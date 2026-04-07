@@ -30,7 +30,6 @@
     govukBackLink: GovukBackLink,
     hmrcHead: HmrcHead,
     hmrcScripts: HmrcScripts,
-    hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
     hmrcReportTechnicalIssue: HmrcReportTechnicalIssueHelper,
     hmrcFooter: HmrcStandardFooter,
     hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
@@ -94,14 +93,10 @@
 }
 
 @beforeContentBlock = {
-
     @phaseBanner("Beta")
-
-    @if(showLanguageSwitch && appConfig.play.i18n.langs.contains("cy")){
-        @hmrcLanguageSelectHelper()
-    }
-
-    @backLink
+    <div class="govuk-back-link-div">
+        @backLink
+    </div>
 }
 
 @content = {

@@ -46,7 +46,7 @@ trait ViewBehaviours { self: UnitViewSpec =>
     "behave like a normal page" when {
       "rendered" must {
         "have the correct banner title" in {
-          val element = view().getElementsByClass("govuk-header__service-name")
+          val element = view().getElementsByClass("govuk-service-navigation__service-name")
           element.text mustBe messages("service.name")
         }
 
