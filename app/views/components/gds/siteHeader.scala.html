@@ -18,32 +18,33 @@
 @import controllers.routes.{RootController, SignOutController}
 @import models.requests.Authenticated
 @import uk.gov.hmrc.hmrcfrontend.views.html.components.HmrcHeader
-@import uk.gov.hmrc.hmrcfrontend.views.html.components.Header
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.language
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.header.v2._
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.servicenavigation._
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 
 @this(serviceUrls: ServiceUrls, hmrcHeader: HmrcHeader)
 
 @(displaySignOut: Boolean = false)(implicit request: Request[_], messages: Messages)
 
-@lang = @{
-    messages.lang.code match {
-        case "cy" => language.Cy
-        case _ => language.En
-    }
-}
-
 @signOutHref = @{
     if (request.isInstanceOf[Authenticated] || displaySignOut)
         Some(SignOutController.signOut(models.SignOutReason.UserAction).url)
-    else
-        None
+    else None
 }
 
-@hmrcHeader(Header(
-    homepageUrl = serviceUrls.govUk,
-    serviceName = Some(messages("service.name")),
-    serviceUrl = RootController.displayPage.url,
-    language = lang,
-    containerClasses = "govuk-width-container",
-    signOutHref = signOutHref
-))
+@hmrcHeader(
+    HeaderParams(
+        headerUrls = HeaderUrls(
+            homepageUrl = serviceUrls.govUk,
+            signOutHref = signOutHref
+        ),
+        language = if (messages.lang.code == "cy") language.Cy else language.En,
+        serviceNavigation = Some(
+            ServiceNavigation(
+                serviceName = Some(messages("service.name")),
+                serviceUrl = Some(RootController.displayPage.url)
+            ).withLanguageToggle()
+        )
+    )
+)
