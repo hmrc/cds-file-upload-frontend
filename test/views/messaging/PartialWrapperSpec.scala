@@ -39,10 +39,6 @@ class PartialWrapperSpec extends UnitViewSpec {
       view.getElementsByTag("title").first() must containMessage(titleKeyForConversation)
     }
 
-    "display navigation banner" in {
-      view must containElementWithID("navigation-banner")
-    }
-
     "display the 'Back' link" in {
       assertBackLinkIsIncluded(view)
     }
@@ -63,10 +59,6 @@ class PartialWrapperSpec extends UnitViewSpec {
 
     "display page header" in {
       view.getElementsByTag("title").first() must containMessage(titleKeyForReplyResult)
-    }
-
-    "display navigation banner" in {
-      view must containElementWithID("navigation-banner")
     }
 
     "not display the 'Back' link" in {

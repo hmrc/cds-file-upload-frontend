@@ -34,7 +34,7 @@
 
 @(form: Form[ChoiceForm])(implicit request: Request[_], messages: Messages)
 
-@mainTemplate(title = Title("choicePage.heading", hasErrors = form.hasErrors || form.hasGlobalErrors)) {
+@mainTemplate(title = Title("choicePage.heading", hasErrors = form.hasErrors || form.hasGlobalErrors), isStartPage = true) {
 
     @pageTitle(text = messages("choicePage.heading"))
 

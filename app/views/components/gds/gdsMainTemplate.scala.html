@@ -36,7 +36,6 @@
     timeoutDialogConfig: TimeoutDialogConfig,
     siteHeader: siteHeader,
     phaseBanner: phaseBanner,
-    navigationBanner: navigationBanner,
     appConfig: AppConfig
 )
 
@@ -44,9 +43,8 @@
   title: Title,
   backButton: Option[BackButton] = None,
   useCustomContentWidth: Boolean = false,
-  withNavigationBanner: Boolean = false,
   displaySignOut: Boolean = false,
-  showLanguageSwitch: Boolean = true
+  isStartPage: Boolean = false
 )(contentBlock: Html)(implicit request: Request[_], messages: Messages)
 
 @userIsSignedIn = @{ request.isInstanceOf[Authenticated] }
@@ -85,11 +83,10 @@
 }
 
 @headerBlock = {
-    @siteHeader(displaySignOut = displaySignOut)
-
-    @if(withNavigationBanner) {
-        @navigationBanner()
-    }
+    @siteHeader(
+        displaySignOut = displaySignOut,
+        showNavigationLinks = !isStartPage
+    )
 }
 
 @beforeContentBlock = {

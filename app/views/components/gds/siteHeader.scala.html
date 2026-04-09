@@ -22,10 +22,11 @@
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.header.v2._
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.servicenavigation._
 @import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 
 @this(serviceUrls: ServiceUrls, hmrcHeader: HmrcHeader)
 
-@(displaySignOut: Boolean = false)(implicit request: Request[_], messages: Messages)
+@(displaySignOut: Boolean = false, showNavigationLinks: Boolean = false)(implicit request: Request[_], messages: Messages)
 
 @signOutHref = @{
     if (request.isInstanceOf[Authenticated] || displaySignOut)
@@ -43,7 +44,22 @@
         serviceNavigation = Some(
             ServiceNavigation(
                 serviceName = Some(messages("service.name")),
-                serviceUrl = Some(RootController.displayPage.url)
+                serviceUrl = Some(RootController.displayPage.url),
+                navigation =
+                    if(showNavigationLinks) {
+                        Seq(
+                            ServiceNavigationItem(
+                                href = routes.InboxChoiceController.onPageLoad.url,
+                                content = Text(messages("common.navigation.messages"))
+                            ),
+                            ServiceNavigationItem(
+                                href = routes.MrnEntryController.onPageLoad.url,
+                                content = Text(messages("common.navigation.uploadFiles"))
+                            )
+                        )
+                    } else {
+                        Seq.empty
+                    }
             ).withLanguageToggle()
         )
     )
