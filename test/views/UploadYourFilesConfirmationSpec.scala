@@ -55,10 +55,6 @@ class UploadYourFilesConfirmationSpec extends UnitViewSpec with Generators with 
       }
     }
 
-    "display navigation banner" in {
-      view must containElementWithID("navigation-banner")
-    }
-
     "display the language toggle" in {
       val toggleNav = view.getElementsByClass("hmrc-service-navigation-language-select")
       toggleNav.size() must be > 0

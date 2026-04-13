@@ -34,10 +34,6 @@ class InboxWrapperSpec extends UnitViewSpec {
       view.getElementsByTag("title").first() must containText("Messages between you and HMRC")
     }
 
-    "display navigation banner" in {
-      view must containElementWithID("navigation-banner")
-    }
-
     "display the 'Back' link" in {
       assertBackLinkIsIncluded(view)
     }

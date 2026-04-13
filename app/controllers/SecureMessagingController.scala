@@ -65,31 +65,14 @@ class SecureMessagingController @Inject() (
     implicit val hc: HeaderCarrier = headerCarrierForPartialsConverter.fromRequestWithEncryptedCookie(request)
     messageConnector
       .retrieveConversationPartial(client, conversationId)
-      .map(partial =>
-        Ok(
-          partial_wrapper(
-            HtmlFormat.raw(partial.body),
-            defineTitleText(partial.body),
-            defineUploadLink(routes.SecureMessagingController.displayConversation(client, conversationId).url)
-          )
-        )
-      )
+      .map(partial => Ok(partial_wrapper(HtmlFormat.raw(partial.body), defineTitleText(partial.body), defineUploadLink())))
   }
 
   def displayReplyResult(client: String, conversationId: String): Action[AnyContent] = actions.async { implicit request =>
     implicit val hc: HeaderCarrier = headerCarrierForPartialsConverter.fromRequestWithEncryptedCookie(request)
     messageConnector
       .retrieveReplyResult(client, conversationId)
-      .map(partial =>
-        Ok(
-          partial_wrapper(
-            HtmlFormat.raw(partial.body),
-            "replyResult.heading",
-            defineUploadLink(routes.SecureMessagingController.displayReplyResult(client, conversationId).url),
-            hasBackButton = false
-          )
-        )
-      )
+      .map(partial => Ok(partial_wrapper(HtmlFormat.raw(partial.body), "replyResult.heading", defineUploadLink(), hasBackButton = false)))
   }
 
   def submitReply(client: String, conversationId: String): Action[AnyContent] = actions.async { implicit request =>
@@ -100,18 +83,11 @@ class SecureMessagingController @Inject() (
       .map {
         case None => Redirect(routes.SecureMessagingController.displayReplyResult(client, conversationId))
         case Some(partial) =>
-          Ok(
-            partial_wrapper(
-              HtmlFormat.raw(partial.body),
-              defineTitleText(partial.body),
-              defineUploadLink(routes.SecureMessagingController.displayConversation(client, conversationId).url),
-              hasErrors = true
-            )
-          )
+          Ok(partial_wrapper(HtmlFormat.raw(partial.body), defineTitleText(partial.body), defineUploadLink(), hasErrors = true))
       }
   }
 
-  private def defineUploadLink(refererUrl: String) =
+  private def defineUploadLink() =
     routes.MrnEntryController.onPageLoad.url
 
   private def defineInboxH1Text(request: MessageFilterRequest[AnyContent])(implicit messages: Messages): String = {

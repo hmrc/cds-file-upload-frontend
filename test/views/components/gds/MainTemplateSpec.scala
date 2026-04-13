@@ -32,8 +32,8 @@ class MainTemplateSpec extends UnitViewSpec {
     private implicit val mainTemplate: gdsMainTemplate = injector.instanceOf[gdsMainTemplate]
     private val testContent = HtmlFormat.empty
 
-    private def createView(withNavigationBanner: Boolean = false)(implicit template: gdsMainTemplate): Document =
-      template(title = Title("service.name"), withNavigationBanner = withNavigationBanner)(testContent)(request, messages)
+    private def createView(isStartPage: Boolean = false)(implicit template: gdsMainTemplate): Document =
+      template(title = Title("service.name"), isStartPage = isStartPage)(testContent)(request, messages)
 
     "Main Template" should {
 
@@ -43,24 +43,21 @@ class MainTemplateSpec extends UnitViewSpec {
         view.getElementsByTag("title").first.text mustBe messages("title.format", serviceName, serviceName)
       }
 
-      "display NavigationBanner" when {
-        "withNavigationBanner flag set to true" in {
-          val view: Document = createView(withNavigationBanner = true)
-          view must containElementWithID("navigation-banner")
-        }
+      "display service navigation when not start page" in {
+        val view: Document = createView()
+        val links = view.getElementsByClass("govuk-service-navigation__link")
+        links.size mustBe 2
       }
 
-      "not display NavigationBanner" when {
-        "withNavigationBanner flag set to false" in {
-          val view: Document = createView()
-          view mustNot containElementWithID("navigation-banner")
-        }
+      "not display service navigation on start page" in {
+        val view: Document = createView(isStartPage = true)
+        val links = view.getElementsByClass("govuk-service-navigation__link")
+        links.size mustBe 0
       }
 
       "welsh is not in the languages config" should {
         "not display the language toggle" in {
           val view: Document = createView()
-
           view mustNot containElementWithClass("hmrc-language-select")
         }
       }
