@@ -31,7 +31,7 @@
 
 @(headingKey: String)(implicit request: Request[_], messages: Messages)
 
-@startPageLink = {<a href="@routes.RootController.displayPage">@messages("signed.out.startPageLink")</a>}
+@startPageLink = {<a class="govuk-link" href="@routes.RootController.displayPage">@messages("signed.out.startPageLink")</a>}
 
 @gdsMainTemplate(title = Title(headingKey)) {
 
