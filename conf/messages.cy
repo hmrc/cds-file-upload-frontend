@@ -1,6 +1,6 @@
 ## common
 
-service.name = Dogfennau CDS wedi’u huwchlwytho a negeseuon diogel
+service.name = Gwasanaeth Datganiadau Tollau: uwchlwythwch ddogfennau a negeseuon diogel
 
 title.format = {0} - {1} - GOV.UK
 title.withErrors.format = Gwall: {0} - {1} - GOV.UK
