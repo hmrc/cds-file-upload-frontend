@@ -66,8 +66,7 @@ class HowManyFilesUploadController @Inject() (
           uploadContactDetails(request, fileUploadCount) map {
             case Right(firstUpload :: _) =>
               logger.info("uploadContactDetails success: " + firstUpload)
-              Redirect(routes.UpscanStatusController.onPageLoad(firstUpload.reference))
-
+              Redirect(routes.UploadMultipleController.onPageLoad())
             case err =>
               logger.warn("uploadContactDetails error: " + err)
               Redirect(routes.ErrorPageController.error)
