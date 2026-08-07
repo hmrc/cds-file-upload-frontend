@@ -65,8 +65,11 @@ class UpscanStatusController @Inject() (
     request.fileUploadResponse.files.find(_.reference == reference) match {
       case Some(upload) =>
         upload.state match {
-          case Waiting(uploadRequest) => Future.successful(Ok(uploadYourFiles(uploadRequest, refPosition, request.request.mrn)))
-          case _                      => nextPage(upload.reference, request.fileUploadResponse.files)
+          case Waiting(uploadRequest) =>
+            uploadedFilenames(request.fileUploadResponse.files).map { filenames =>
+              Ok(uploadYourFiles(uploadRequest, refPosition, request.request.mrn, filenames))
+            }
+          case _ => nextPage(upload.reference, request.fileUploadResponse.files)
         }
 
       case None =>
@@ -74,6 +77,16 @@ class UpscanStatusController @Inject() (
     }
   }
 
+  private def uploadedFilenames(files: List[FileUpload])(implicit hc: HeaderCarrier): Future[Seq[String]] =
+    Future
+      .sequence(files.collect { case file@FileUpload(reference, Uploaded, _, _) =>
+        cdsFileUploadConnector
+          .getNotification(reference)
+          .map(_.flatMap(_.filename).orElse(Some(file.filename).filter(_.nonEmpty)))
+      })
+      .map(_.flatten)
+    
+  
   def error(reference: String): Action[AnyContent] = authenticate { implicit request =>
     Ok(uploadError())
   }
@@ -110,6 +123,8 @@ class UpscanStatusController @Inject() (
   }
 
   private def allFilesUploaded(implicit request: FileUploadResponseRequest[_]): Future[Result] = {
+    println(">>>>>: allFilesUploaded")
+
     def failedUpload(notification: Notification): Boolean = notification.outcome != "SUCCESS"
 
     def prettyPrint: List[Notification] => String = _.map(n => s"(${n.fileReference}, ${n.outcome})").mkString(",")
@@ -122,6 +137,7 @@ class UpscanStatusController @Inject() (
       val receivedNotifications = Future.sequence(uploads.map { upload =>
         cdsFileUploadConnector.getNotification(upload.reference)
       })
+      println(">>>>>: got notifications")
 
       val auditedPath = appConfig.microservice.services.cdsFileUpload.fetchNotificationUri
 
@@ -136,14 +152,20 @@ class UpscanStatusController @Inject() (
 
             clearUserCache(request.eori, request.userAnswers.uuid)
             Future.successful(Redirect(routes.ErrorPageController.uploadError))
-
           case ns if ns.length == uploads.length =>
             logger.info("All notifications successful.")
+            ns.foreach(n => println(">>>: "+ n.outcome))
 
             auditUploadResult(request, AuditTypes.UploadSuccess, auditedPath)
 
             Future.successful(Redirect(routes.UploadYourFilesReceiptController.onPageLoad))
 
+          case ns if !ns.exists(failedUpload) => 
+            println(">>> All notifications successful.")
+            logger.info("All notifications successful.")
+            auditUploadResult(request, AuditTypes.UploadSuccess, auditedPath)
+            Future.successful(Redirect(routes.UploadYourFilesReceiptController.onPageLoad))
+            
           case ns if retries < notificationsMaxRetries =>
             logger.info(
               s"Retrieved ${ns.length} of ${uploads.length} notifications. Retried $retries times. Retrying in $notificationsRetryPause ms ..."
