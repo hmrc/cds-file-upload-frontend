@@ -159,13 +159,6 @@ class UpscanStatusController @Inject() (
             auditUploadResult(request, AuditTypes.UploadSuccess, auditedPath)
 
             Future.successful(Redirect(routes.UploadYourFilesReceiptController.onPageLoad))
-
-          case ns if !ns.exists(failedUpload) => 
-            println(">>> All notifications successful.")
-            logger.info("All notifications successful.")
-            auditUploadResult(request, AuditTypes.UploadSuccess, auditedPath)
-            Future.successful(Redirect(routes.UploadYourFilesReceiptController.onPageLoad))
-            
           case ns if retries < notificationsMaxRetries =>
             logger.info(
               s"Retrieved ${ns.length} of ${uploads.length} notifications. Retried $retries times. Retrying in $notificationsRetryPause ms ..."
