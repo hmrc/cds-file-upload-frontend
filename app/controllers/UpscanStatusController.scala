@@ -64,10 +64,11 @@ class UpscanStatusController @Inject() (
 
     request.fileUploadResponse.files.find(_.reference == reference) match {
       case Some(upload) =>
+        println(">>>: " + request.fileUploadResponse)
         upload.state match {
           case Waiting(uploadRequest) =>
             uploadedFilenames(request.fileUploadResponse.files).map { filenames =>
-              Ok(uploadYourFiles(uploadRequest, refPosition, request.request.mrn, filenames))
+              Ok(uploadYourFiles(uploadRequest, refPosition, request.request.mrn, filenames, request.fileUploadResponse.files))
             }
           case _ => nextPage(upload.reference, request.fileUploadResponse.files)
         }
@@ -118,7 +119,7 @@ class UpscanStatusController @Inject() (
       case Some(file) =>
         Future.successful(Redirect(nextFile(file)))
       case None =>
-        allFilesUploaded
+        allFilesUploaded(files)
     }
   }
 

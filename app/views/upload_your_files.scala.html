@@ -33,7 +33,7 @@
     appConfig: AppConfig
 )
 
-@(uploadRequest: UploadRequest, refPosition: Position, mrn: MRN, files: Seq[String] = Seq.empty)(implicit request: Request[_], messages: Messages)
+@(uploadRequest: UploadRequest, refPosition: Position, mrn: MRN, files: Seq[String] = Seq.empty, fullfiles: List[FileUpload])(implicit request: Request[_], messages: Messages)
 
 @positionModifier = @{
     refPosition match {
@@ -44,6 +44,14 @@
 }
 
 @fileUploadId = @{"file-upload-component"}
+
+@statusTag(file: FileUpload) = @{
+    file match {
+        case _: FileUpload.FileState.Uploaded =>
+            govukTag(Tag(content = Text("Uploaded"), classes = "govuk-tag--green"))
+        case _ => HtmlFormat.empty
+    }
+}
 
 @mainTemplate(title = Title(s"fileUploadPage.heading.$positionModifier")) {
     <div class="govuk-error-summary govuk-visually-hidden" data-module="govuk-error-summary"></div>
@@ -107,6 +115,50 @@
         @files.map { file =>
         <div class="govuk-summary-list__value">
             @file
+        </div>
+        }
+    </div>
+
+
+    <div aria-live="polite">
+        <dl class="govuk-summary-list govuk-summary-list--long-key">
+            @fullfiles.map { fullfile =>
+            <div class="govuk-summary-list__row"
+                 data-upload-status-row=""
+                 data-status-url="@statusCall(file.reference).url">
+                <dt class="govuk-summary-list__key">
+                    @fullfile match {
+                    case errored: ErroredFileUpload => {
+                    <div id="error-@errored.reference" class="govuk-form-group govuk-form-group--error" tabindex="-1">
+                        @defining(rowHeading(errored)) { heading =>
+                        @if(heading.nonEmpty) {
+                        <span class="govuk-!-font-weight-bold">@heading</span>
+                        }
+                        }
+                        @govukErrorMessage(ErrorMessage(content = Text(errorMessageFor(errored))))
+                    </div>
+                    }
+                    case _ => {
+                        fullfile.filename
+                    <br>
+                    <span class="govuk-body-s">Customs Document</span>
+                    }
+                    }
+                </dt>
+                <dd class="govuk-summary-list__value">
+                    @statusTag(fullfile)
+                </dd>
+            </div>
+            }
+        </dl>
+    </div>
+
+
+
+    <div class="govuk-summary-list govuk-summary-list--long-key">
+        @fullfiles.map { fullfile =>
+        <div class="govuk-summary-list__value">
+            @fullfile.reference
         </div>
         }
     </div>
