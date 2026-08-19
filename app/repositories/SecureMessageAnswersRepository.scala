@@ -34,8 +34,7 @@ class SecureMessageAnswersRepository @Inject() (mongoComponent: MongoComponent, 
       mongoComponent = mongoComponent,
       collectionName = "answers-secure-message",
       domainFormat = SecureMessageAnswers.format,
-      indexes = SecureMessageAnswersRepository.indexes(appConfig),
-      replaceIndexes = true
+      indexes = SecureMessageAnswersRepository.indexes(appConfig)
     ) with RepositoryOps[SecureMessageAnswers] {
 
   override def classTag: ClassTag[SecureMessageAnswers] = implicitly[ClassTag[SecureMessageAnswers]]
