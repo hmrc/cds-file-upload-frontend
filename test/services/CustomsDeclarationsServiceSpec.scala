@@ -44,54 +44,19 @@ class CustomsDeclarationsServiceSpec extends UnitSpec with SfusMetricsMock {
     super.afterEach()
   }
 
-  ".batchFileUpload" must {
+  ".initiateSingleFileBatch" must {
 
-    "use eori number for the upload" in {
-      await(service.batchFileUpload("GBEORINUMBER12345", MRN("13GB12345678901234").get, FileUploadCount(5).get))
-      verify(mockConnector).requestFileUpload(eqTo("GBEORINUMBER12345"), any())(any())
+    "request a batch of exactly one file" in {
+      val captor: ArgumentCaptor[FileUploadRequest] = ArgumentCaptor.forClass(classOf[FileUploadRequest])
+
+      await(service.initiateSingleFileBatch("GBEORINUMBER12345", MRN("13GB12345678901234").get))
+      verify(mockConnector).requestFileUpload(eqTo("GBEORINUMBER12345"), captor.capture())(any())
+
+      val request = captor.getValue
+      request.files.map(_.fileSequenceNo) mustBe Seq(1)
+      (request.toXml \ "FileGroupSize").text mustBe "1"
       verify(sfusMetrics, times(1)).incrementCounter(any())
-
     }
   }
 
-  "use the mrn for the declaration id" in {
-    await(service.batchFileUpload("GBEORINUMBER12345", MRN("13GB12345678901234").get, FileUploadCount(1).get))
-    verify(mockConnector).requestFileUpload(any(), eqTo(FileUploadRequest(MRN("13GB12345678901234").get, expectedUploadFiles(2))))(any())
-    verify(sfusMetrics, times(1)).incrementCounter(any())
-  }
-
-  "have a max file sequence number as group size" in {
-    val captor: ArgumentCaptor[FileUploadRequest] = ArgumentCaptor.forClass(classOf[FileUploadRequest])
-
-    await(service.batchFileUpload("GBEORINUMBER12345", MRN("13GB12345678901234").get, FileUploadCount(3).get))
-    verify(mockConnector).requestFileUpload(any(), captor.capture())(any())
-
-    val request = captor.getValue
-    request.files.length mustBe request.files.map(_.fileSequenceNo).max
-    verify(sfusMetrics, times(1)).incrementCounter(any())
-  }
-
-  "start file sequence number at 1" in {
-    val captor: ArgumentCaptor[FileUploadRequest] = ArgumentCaptor.forClass(classOf[FileUploadRequest])
-
-    await(service.batchFileUpload("GBEORINUMBER12345", MRN("13GB12345678901234").get, FileUploadCount(4).get))
-    verify(mockConnector).requestFileUpload(any(), captor.capture())(any())
-
-    val request = captor.getValue
-    request.files.map(_.fileSequenceNo).min mustBe 1
-    verify(sfusMetrics, times(1)).incrementCounter(any())
-  }
-
-  "have init an upload request for an additional file for the contact details text" in {
-    val captor: ArgumentCaptor[FileUploadRequest] = ArgumentCaptor.forClass(classOf[FileUploadRequest])
-    val userUploadedFiles = 3
-
-    await(service.batchFileUpload("GBEORINUMBER12345", MRN("13GB12345678901234").get, FileUploadCount(userUploadedFiles).get))
-
-    verify(mockConnector).requestFileUpload(any(), captor.capture())(any())
-    captor.getValue.files.size mustBe userUploadedFiles + 1
-    verify(sfusMetrics, times(1)).incrementCounter(any())
-  }
-
-  private def expectedUploadFiles(n: Int) = (1 to n).map(FileUploadFile(_, "", "http://localhost:6793").get)
 }

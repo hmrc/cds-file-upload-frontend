@@ -16,7 +16,7 @@
 
 @import config.AppConfig
 @import uk.gov.hmrc.govukfrontend.views.html.components.{FileUpload => FileUploadComponent, _}
-@import views.html.components.gds.{bulletList, gdsMainTemplate, link, paragraphBody, pageTitle}
+@import views.html.components.gds.{bulletList, gdsMainTemplate, paragraphBody, pageTitle}
 @import views.helpers.Title
 @import views.html.helper.CSPNonce
 
@@ -29,89 +29,96 @@
     bulletList: bulletList,
     pageTitle: pageTitle,
     paragraphBody: paragraphBody,
-    link: link,
     appConfig: AppConfig
 )
 
-@(uploadRequest: UploadRequest, refPosition: Position, mrn: MRN)(implicit request: Request[_], messages: Messages)
-
-@positionModifier = @{
-    refPosition match {
-        case First(_) => "first"
-        case Middle(_, _) => "middle"
-        case Last(_) => "last"
-    }
-}
+@(uploadRequest: Option[UploadRequest], mrn: MRN, uploadedFiles: Seq[(String, String)])(implicit request: Request[_], messages: Messages)
 
 @fileUploadId = @{"file-upload-component"}
 
-@mainTemplate(title = Title(s"fileUploadPage.heading.$positionModifier")) {
+@mainTemplate(title = Title("fileUploadPage.heading.middle")) {
     <div class="govuk-error-summary govuk-visually-hidden" data-module="govuk-error-summary"></div>
 
     <span class="govuk-caption-l">@{mrn.value}</span>
-    @pageTitle(text = messages(s"fileUploadPage.heading.$positionModifier"))
+    @pageTitle(text = messages("fileUploadPage.heading.middle"))
 
-    @paragraphBody(messages("fileUploadPage.paragraph1"))
+    @uploadRequest.map { upload =>
+        @paragraphBody(messages("fileUploadPage.paragraph1"))
 
-    @bulletList(
-        elements = Seq(
-            Html(messages("fileUploadPage.listItem1")),
-            Html(messages("fileUploadPage.listItem2")),
-            Html(messages("fileUploadPage.listItem3"))
+        @bulletList(
+            elements = Seq(
+                Html(messages("fileUploadPage.listItem1")),
+                Html(messages("fileUploadPage.listItem2")),
+                Html(messages("fileUploadPage.listItem3"))
+            )
         )
-    )
 
+        <form action="@upload.href" method="POST" enctype="multipart/form-data">
+            <div class="govuk-form-group">
+                @upload.fields.map { case (key, value) =>
+                    <input type="hidden" name="@key" value="@value"/>
+                }
 
+                @govukFileUpload(FileUploadComponent(
+                    id = fileUploadId,
+                    name = "file",
+                    javascript = Some(true),
+                    noFileChosenText = Some(messages("fileUpload.noFileChosen")),
+                    chooseFilesButtonText = Some(messages("fileUpload.choose")),
+                    dropInstructionText = Some(messages("fileUpload.dropZone")),
+                    label = Label(content = Text(messages("fileUploadPage.label"))),
+                    attributes = Map(
+                        "accept" -> appConfig.fileFormats.approvedFileTypes,
+                        "data-max-file-size" -> appConfig.fileFormats.maxFileSize.toString,
+                        "file-extensions" -> appConfig.fileFormats.approvedFileExtensions
+                    ),
+                    errorMessage = Some(ErrorMessage(id = Some("file-upload-error"), visuallyHiddenText = None))
+                ))
+            </div>
 
-    @{
-        Some(refPosition).collect {
-            case Middle(index, total) => messages("fileUploadPage.filesUploaded", index - 1, total)
-            case Last(total) => messages("fileUploadPage.filesUploaded", total - 1, total)
-        }.map(msg => <p class="govuk-body"><strong>{msg}</strong></p>)
+            @govukButton(Button(name = Some("submit"), content = Text(messages("fileUploadPage.button"))))
+        </form>
     }
 
-    <form action="@uploadRequest.href" method="POST" enctype="multipart/form-data">
-        <div class="govuk-form-group">
-            @uploadRequest.fields.map { case (key, value) =>
-                <input type="hidden" name="@key" value="@value"/>
+    @if(uploadedFiles.nonEmpty) {
+    <h2 class="govuk-heading-m" id="uploaded-files-title">@messages("fileUploadPage.uploadedFiles.title")</h2>
+    <ul class="govuk-list govuk-list--bullet" id="uploaded-files">
+        @uploadedFiles.map { case (reference, name) =>
+            @name
+            @formHelper(action = routes.UpscanStatusController.remove(reference)) {
+                @govukButton(Button(
+                    id = Some(s"remove-$reference"),
+                    name = Some("remove"),
+                    content = Text(messages("fileUploadPage.remove"))
+                ))
             }
+        </li>
+        }
+    </ul>
+    }
 
-            @govukFileUpload(FileUploadComponent(
-                id = fileUploadId,
-                name = "file",
-                javascript = Some(true),
-                noFileChosenText = Some(messages("fileUpload.noFileChosen")),
-                chooseFilesButtonText = Some(messages("fileUpload.choose")),
-                dropInstructionText = Some(messages("fileUpload.dropZone")),
-                label = Label(content = Text(messages("fileUploadPage.label"))),
-                attributes = Map(
-                    "accept" -> appConfig.fileFormats.approvedFileTypes,
-                    "data-max-file-size" -> appConfig.fileFormats.maxFileSize.toString,
-                    "file-extensions" -> appConfig.fileFormats.approvedFileExtensions
-                ),
-                errorMessage = Some(ErrorMessage(id = Some("file-upload-error"), visuallyHiddenText = None))
+    @if(uploadedFiles.nonEmpty) {
+        @formHelper(action = routes.UpscanStatusController.finish) {
+            @govukButton(Button(
+                id = Some("finish-button"),
+                name = Some("finish"),
+                classes = "govuk-button--secondary",
+                content = Text(messages("fileUploadPage.finish"))
             ))
-        </div>
-
-        @govukButton(Button(name = Some("submit"), content = Text(messages("fileUploadPage.button"))))
-
-        @link(
-            id = Some("cancel-link"),
-            classes = "govuk-link govuk-!-margin-left-5 govuk-!-margin-top-2 inline-block",
-            text = messages("fileUploadPage.cancel"),
-            call = routes.HowManyFilesUploadController.onPageLoad
-        )
-    </form>
+        }
+    }
 }
-<script @CSPNonce.attr id="validation-messages" type="text/javascript">
-window.messages = {
-        "fileUploadPage.error.nameStart": "@messages("fileUploadPage.error.nameStart")",
-        "fileUploadPage.error.fileSize" : "@messages("fileUploadPage.error.fileSize")",
-        "fileUploadPage.error.extension" : "@messages("fileUploadPage.error.extension")",
-        "fileUploadPage.selectFile" : "@messages("fileUploadPage.error.selectFile")",
-        "fileUploadPage.error.emptyFile": "@messages("fileUploadPage.error.emptyFile")",
-        "global.error.title": "@messages("global.error.title")",
-        "error.browser.heading.prefix": "@messages("error.browser.heading.prefix")"
+@uploadRequest.map { _ =>
+    <script @CSPNonce.attr id="validation-messages" type="text/javascript">
+    window.messages = {
+            "fileUploadPage.error.nameStart": "@messages("fileUploadPage.error.nameStart")",
+            "fileUploadPage.error.fileSize" : "@messages("fileUploadPage.error.fileSize")",
+            "fileUploadPage.error.extension" : "@messages("fileUploadPage.error.extension")",
+            "fileUploadPage.selectFile" : "@messages("fileUploadPage.error.selectFile")",
+            "fileUploadPage.error.emptyFile": "@messages("fileUploadPage.error.emptyFile")",
+            "global.error.title": "@messages("global.error.title")",
+            "error.browser.heading.prefix": "@messages("error.browser.heading.prefix")"
+    }
+    </script>
+    <script @CSPNonce.attr id="validation" src="@routes.Assets.versioned("javascripts/validation.js")"></script>
 }
-</script>
-<script @CSPNonce.attr id="validation" src="@routes.Assets.versioned("javascripts/validation.js")"></script>

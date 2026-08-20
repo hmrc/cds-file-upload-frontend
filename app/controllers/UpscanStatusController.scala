@@ -27,7 +27,7 @@ import play.api.Logging
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import services.AuditTypes.Audit
-import services.{AuditService, AuditTypes, FileUploadAnswersService}
+import services.{AuditService, AuditTypes, CustomsDeclarationsService, FileUploadAnswersService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -45,6 +45,7 @@ class UpscanStatusController @Inject() (
   answersService: FileUploadAnswersService,
   auditservice: AuditService,
   cdsFileUploadConnector: CdsFileUploadConnector,
+  customsDeclarationsService: CustomsDeclarationsService,
   implicit val appConfig: AppConfig,
   mcc: MessagesControllerComponents,
   metrics: SfusMetrics,
@@ -58,16 +59,31 @@ class UpscanStatusController @Inject() (
 
   val actions = authenticate andThen verifiedEmail andThen getData andThen requireMrn andThen requireResponse
 
-  def onPageLoad(reference: String): Action[AnyContent] = actions.async { implicit request =>
-    val references = request.fileUploadResponse.files.map(_.reference)
-    val refPosition = getPosition(reference, references)
+  val onPageLoad: Action[AnyContent] = actions.async { implicit request =>
+    val files = request.fileUploadResponse.files
 
-    request.fileUploadResponse.files.find(_.reference == reference) match {
-      case Some(upload) =>
-        upload.state match {
-          case Waiting(uploadRequest) => Future.successful(Ok(uploadYourFiles(uploadRequest, refPosition, request.request.mrn)))
-          case _                      => nextPage(upload.reference, request.fileUploadResponse.files)
+    uploadedFiles(files).flatMap { uploaded =>
+      if (uploaded.size >= FileUploadCount.maxNumberOfFiles)
+        Future.successful(Ok(uploadYourFiles(None, request.request.mrn, uploaded)))
+      else
+        nextUploadSlot(files).map {
+          case Some(uploadRequest) => Ok(uploadYourFiles(Some(uploadRequest), request.request.mrn, uploaded))
+          case None                => Redirect(routes.ErrorPageController.error)
         }
+    }
+  }
+
+  def remove(reference: String): Action[AnyContent] = actions.async { implicit request =>
+    val files = request.fileUploadResponse.files
+
+    files.find(file => file.reference == reference && file.state == Uploaded) match {
+      case Some(_) =>
+        val remaining = files.filterNot(_.reference == reference)
+
+        // TODO audit deletion
+        answersService
+          .findOneAndReplace(request.userAnswers.copy(fileUploadResponse = Some(FileUploadResponse(remaining))))
+          .map(_ => Redirect(routes.UpscanStatusController.onPageLoad))
 
       case None =>
         Future.successful(Redirect(routes.ErrorPageController.error))
@@ -80,41 +96,43 @@ class UpscanStatusController @Inject() (
 
   def success(id: String): Action[AnyContent] = actions.async { implicit request =>
     val uploads = request.fileUploadResponse.files
-    uploads.find(_.id == id) match {
 
-      case Some(upload) =>
-        val updatedFiles = upload.copy(state = Uploaded) :: uploads.filterNot(_.id == id)
-        val answers = request.userAnswers.copy(fileUploadResponse = Some(FileUploadResponse(updatedFiles)))
-        answersService.findOneAndReplace(answers).flatMap { _ =>
-          nextPage(upload.reference, uploads)
+    if (uploads.exists(_.id == id)) {
+      val updatedFiles = uploads.map(file => if (file.id == id) file.copy(state = Uploaded) else file)
+      val answers = request.userAnswers.copy(fileUploadResponse = Some(FileUploadResponse(updatedFiles)))
+      answersService.findOneAndReplace(answers).map(_ => Redirect(routes.UpscanStatusController.onPageLoad))
+    } else
+      Future.successful(Redirect(routes.ErrorPageController.error))
+  }
+
+  val finish: Action[AnyContent] = actions.async { implicit request =>
+    val uploaded = request.fileUploadResponse.files.filter(_.state == Uploaded)
+
+    if (uploaded.isEmpty) Future.successful(Redirect(routes.UpscanStatusController.onPageLoad))
+    else allFilesUploaded(uploaded)
+  }
+
+  private def nextUploadSlot(files: List[FileUpload])(implicit request: FileUploadResponseRequest[_]): Future[Option[UploadRequest]] =
+    files.lastOption match {
+      case Some(FileUpload(_, Waiting(uploadRequest), _, _)) =>
+        Future.successful(Some(uploadRequest))
+      case _ =>
+        customsDeclarationsService.initiateSingleFileBatch(request.eori, request.request.mrn).flatMap { response =>
+          response.files match {
+            case (file @ FileUpload(_, Waiting(uploadRequest), _, _)) :: Nil =>
+              val answers = request.userAnswers.copy(fileUploadResponse = Some(FileUploadResponse(files :+ file)))
+              answersService.findOneAndReplace(answers).map(_ => Some(uploadRequest))
+            case other =>
+              logger.warn(s"Unexpected file: $other")
+              Future.successful(None)
+          }
         }
-
-      case None =>
-        Future.successful(Redirect(routes.ErrorPageController.error))
-    }
-  }
-
-  private def nextPage(ref: String, files: List[FileUpload])(implicit request: FileUploadResponseRequest[_]): Future[Result] = {
-    def nextFile(file: FileUpload): Call = routes.UpscanStatusController.onPageLoad(file.reference)
-
-    val nextFileToUpload = files.collectFirst {
-      case file @ FileUpload(reference, Waiting(_), _, _) if reference > ref => file
     }
 
-    nextFileToUpload match {
-      case Some(file) =>
-        Future.successful(Redirect(nextFile(file)))
-      case None =>
-        allFilesUploaded
-    }
-  }
-
-  private def allFilesUploaded(implicit request: FileUploadResponseRequest[_]): Future[Result] = {
+  private def allFilesUploaded(uploads: List[FileUpload])(implicit request: FileUploadResponseRequest[_]): Future[Result] = {
     def failedUpload(notification: Notification): Boolean = notification.outcome != "SUCCESS"
 
     def prettyPrint: List[Notification] => String = _.map(n => s"(${n.fileReference}, ${n.outcome})").mkString(",")
-
-    val uploads = request.fileUploadResponse.files
 
     def retrieveNotifications(retries: Int = 0): Future[Result] = {
       val timer = metrics.startTimer(fetchNotificationMetric)
@@ -132,7 +150,7 @@ class UpscanStatusController @Inject() (
             logger.warn("Failed notification received for an upload.")
             logger.warn(s"Notifications: ${prettyPrint(ns)}")
 
-            auditUploadResult(request, AuditTypes.UploadFailure, auditedPath)
+            auditUploadResult(uploads, AuditTypes.UploadFailure, auditedPath)
 
             clearUserCache(request.eori, request.userAnswers.uuid)
             Future.successful(Redirect(routes.ErrorPageController.uploadError))
@@ -140,7 +158,7 @@ class UpscanStatusController @Inject() (
           case ns if ns.length == uploads.length =>
             logger.info("All notifications successful.")
 
-            auditUploadResult(request, AuditTypes.UploadSuccess, auditedPath)
+            auditUploadResult(uploads, AuditTypes.UploadSuccess, auditedPath)
 
             Future.successful(Redirect(routes.UploadYourFilesReceiptController.onPageLoad))
 
@@ -155,7 +173,7 @@ class UpscanStatusController @Inject() (
             logger.warn(s"Maximum number of retries exceeded. Retrieved ${ns.length} of ${uploads.length} notifications.")
             logger.warn(s"Notifications: ${prettyPrint(ns)}")
 
-            auditUploadResult(request, AuditTypes.UploadFailure, auditedPath)
+            auditUploadResult(uploads, AuditTypes.UploadFailure, auditedPath)
 
             clearUserCache(request.eori, request.userAnswers.uuid)
             Future.successful(Redirect(routes.ErrorPageController.uploadError))
@@ -168,21 +186,25 @@ class UpscanStatusController @Inject() (
 
   private def clearUserCache(eori: String, uuid: String): Future[Unit] = answersService.remove(eori, uuid)
 
-  private def getPosition(ref: String, refs: List[String]): Position = refs match {
-    case head :: _ if head == ref => First(refs.size)
-    case _ :+ last if last == ref => Last(refs.size)
-    case _                        => Middle(refs.indexOf(ref) + 1, refs.size)
-  }
+  private def uploadedFiles(files: List[FileUpload])(implicit hc: HeaderCarrier): Future[Seq[(String, String)]] =
+    Future
+      .sequence(files.collect { case file @ FileUpload(reference, Uploaded, _, _) =>
+        cdsFileUploadConnector
+          .getNotification(reference)
+          .map(_.flatMap(_.filename).orElse(Some(file.filename).filter(_.nonEmpty)).map(reference -> _))
+      })
+      .map(_.flatten)
 
-  private def auditUploadResult(request: FileUploadResponseRequest[_], auditType: Audit, path: String)(
-    implicit hc: HeaderCarrier
+  private def auditUploadResult(uploads: List[FileUpload], auditType: Audit, path: String)(
+    implicit request: FileUploadResponseRequest[_],
+    hc: HeaderCarrier
   ): Future[AuditResult] =
     auditservice.auditUploadResult(
       request.eori,
       request.userAnswers.contactDetails,
       request.userAnswers.mrn,
-      request.userAnswers.fileUploadCount,
-      request.fileUploadResponse.files,
+      FileUploadCount(uploads.size), // TODO remove this field from auditUploadResult and just apply uploads.size
+      uploads,
       auditType,
       path
     )
