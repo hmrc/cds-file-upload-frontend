@@ -38,7 +38,7 @@
   title = Title("inboxChoice.heading", hasErrors = form.hasErrors || form.hasGlobalErrors),
   backButton = Some(BackButton())
 ) {
-    @formHelper(action = routes.InboxChoiceController.onSubmit, args = Symbol("autoComplete") -> "off") {
+    @formHelper(action = routes.InboxChoiceController.onSubmit) {
         @errorSummary(radioGroupErrors(InboxChoiceKey, ExportsMessages, form.errors))
 
         @govukRadios(Radios(
