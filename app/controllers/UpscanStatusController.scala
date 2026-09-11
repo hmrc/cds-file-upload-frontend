@@ -17,14 +17,14 @@
 package controllers
 
 import config.AppConfig
-import connectors.CdsFileUploadConnector
+import connectors.{CdsFileUploadConnector, CustomsDeclarationsConnector}
 import controllers.actions._
 import metrics.MetricIdentifiers.fetchNotificationMetric
 import metrics.SfusMetrics
 import models._
 import models.requests.FileUploadResponseRequest
 import play.api.Logging
-import play.api.i18n.I18nSupport
+import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import services.AuditTypes.Audit
 import services.{AuditService, AuditTypes, CustomsDeclarationsService, FileUploadAnswersService}
@@ -46,6 +46,7 @@ class UpscanStatusController @Inject() (
   auditservice: AuditService,
   cdsFileUploadConnector: CdsFileUploadConnector,
   customsDeclarationsService: CustomsDeclarationsService,
+  customsDeclarationsConnector: CustomsDeclarationsConnector,
   implicit val appConfig: AppConfig,
   mcc: MessagesControllerComponents,
   metrics: SfusMetrics,
@@ -61,15 +62,30 @@ class UpscanStatusController @Inject() (
 
   val onPageLoad: Action[AnyContent] = actions.async { implicit request =>
     val files = request.fileUploadResponse.files
+    val uploaded = uploadedFiles(files)
 
-    uploadedFiles(files).flatMap { uploaded =>
-      if (uploaded.size >= FileUploadCount.maxNumberOfFiles)
-        Future.successful(Ok(uploadYourFiles(None, request.request.mrn, uploaded)))
-      else
-        nextUploadSlot(files).map {
-          case Some(uploadRequest) => Ok(uploadYourFiles(Some(uploadRequest), request.request.mrn, uploaded))
-          case None                => Redirect(routes.ErrorPageController.error)
-        }
+    if (uploaded.size >= FileUploadCount.maxNumberOfFiles)
+      Future.successful(Ok(uploadYourFiles(None, request.request.mrn, uploaded)))
+    else
+      nextUploadSlot(files).map {
+        case Some(uploadRequest) => Ok(uploadYourFiles(Some(uploadRequest), request.request.mrn, uploaded))
+        case None                => Redirect(routes.ErrorPageController.error)
+      }
+  }
+
+  // we need record each filename using JS. Currently, we can only retrieve the name using cdsFileUploadConnector.getNotification(reference)
+  // but that name is only available at the end of the roundtrip. Instead, push name.
+  // this name is then retrieved in uploadedFiles so it can be displayed
+  def recordFilename(reference: String): Action[AnyContent] = actions.async { implicit request =>
+    val filename = request.body.asFormUrlEncoded.flatMap(_.get("filename")).flatMap(_.headOption).getOrElse("")
+    val files = request.fileUploadResponse.files
+
+    if (filename.isEmpty || !files.exists(_.reference == reference)) Future.successful(NoContent)
+    else {
+      val updated = files.map(file => if (file.reference == reference) file.copy(filename = filename) else file)
+      answersService
+        .findOneAndReplace(request.userAnswers.copy(fileUploadResponse = Some(FileUploadResponse(updated))))
+        .map(_ => NoContent)
     }
   }
 
@@ -108,24 +124,45 @@ class UpscanStatusController @Inject() (
   val finish: Action[AnyContent] = actions.async { implicit request =>
     val uploaded = request.fileUploadResponse.files.filter(_.state == Uploaded)
 
-    if (uploaded.isEmpty) Future.successful(Redirect(routes.UpscanStatusController.onPageLoad))
-    else allFilesUploaded(uploaded)
+    if (uploaded.isEmpty)
+      Future.successful(Redirect(routes.UpscanStatusController.onPageLoad))
+    else
+      request.userAnswers.batchId match {
+        case None          =>
+          Future.successful(Redirect(routes.ErrorPageController.error))
+        case Some(batchId) =>
+          //Send message to finish the batch
+          completeBatch(batchId, uploaded)
+      }
   }
 
-  private def nextUploadSlot(files: List[FileUpload])(implicit request: FileUploadResponseRequest[_]): Future[Option[UploadRequest]] =
+  private def completeBatch(batchId: String, uploaded: List[FileUpload])(
+    using request: FileUploadResponseRequest[_]
+  ): Future[Result] =
+    customsDeclarationsConnector.completeBatch(request.eori, batchId, uploaded.map(_.reference)).flatMap { _ =>
+      allFilesUploaded(uploaded)
+    }
+
+  private def nextUploadSlot(files: List[FileUpload])(using request: FileUploadResponseRequest[_]): Future[Option[UploadRequest]] =
     files.lastOption match {
       case Some(FileUpload(_, Waiting(uploadRequest), _, _)) =>
         Future.successful(Some(uploadRequest))
       case _ =>
-        customsDeclarationsService.initiateSingleFileBatch(request.eori, request.request.mrn).flatMap { response =>
-          response.files match {
-            case (file @ FileUpload(_, Waiting(uploadRequest), _, _)) :: Nil =>
-              val answers = request.userAnswers.copy(fileUploadResponse = Some(FileUploadResponse(files :+ file)))
-              answersService.findOneAndReplace(answers).map(_ => Some(uploadRequest))
-            case other =>
-              logger.warn(s"Unexpected file: $other")
-              Future.successful(None)
-          }
+        request.userAnswers.batchId match {
+          case None =>
+            //TODO ???
+            Future.successful(None)
+          case Some(batchId) =>
+            customsDeclarationsService.initiateSingleFileBatch(request.eori, request.request.mrn, batchId).flatMap { response =>
+              response.files match {
+                case (file @ FileUpload(_, Waiting(uploadRequest), _, _)) :: Nil =>
+                  val answers = request.userAnswers.copy(fileUploadResponse = Some(FileUploadResponse(files :+ file)))
+                  answersService.findOneAndReplace(answers).map(_ => Some(uploadRequest))
+                case other =>
+                  logger.warn(s"Unexpected file: $other")
+                  Future.successful(None)
+              }
+            }
         }
     }
 
@@ -186,14 +223,17 @@ class UpscanStatusController @Inject() (
 
   private def clearUserCache(eori: String, uuid: String): Future[Unit] = answersService.remove(eori, uuid)
 
-  private def uploadedFiles(files: List[FileUpload])(implicit hc: HeaderCarrier): Future[Seq[(String, String)]] =
-    Future
-      .sequence(files.collect { case file @ FileUpload(reference, Uploaded, _, _) =>
-        cdsFileUploadConnector
-          .getNotification(reference)
-          .map(_.flatMap(_.filename).orElse(Some(file.filename).filter(_.nonEmpty)).map(reference -> _))
-      })
-      .map(_.flatten)
+  private def uploadedFiles(files: List[FileUpload])(using messages: Messages): Seq[(String, String)] =
+    files.collect { case FileUpload(reference, Uploaded, filename, _) => reference -> filename }
+      .zipWithIndex
+      .map { case ((reference, filename), index) =>
+        val filenameMsg =
+          if (filename.nonEmpty)
+            filename
+          else
+            messages("fileUploadPage.uploadedFiles.unnamed", index + 1)
+        reference -> filenameMsg
+      }
 
   private def auditUploadResult(uploads: List[FileUpload], auditType: Audit, path: String)(
     implicit request: FileUploadResponseRequest[_],

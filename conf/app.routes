@@ -41,6 +41,7 @@ GET         /upload/receipt                                 controllers.UploadYo
 GET         /upload                                         controllers.UpscanStatusController.onPageLoad
 POST        /upload/finish                                  controllers.UpscanStatusController.finish
 POST        /upload/remove/:reference                       controllers.UpscanStatusController.remove(reference: String)
+POST        /upload/filename/:reference                     controllers.UpscanStatusController.recordFilename(reference: String)
 
 GET         /upload/upscan-error/:id                        controllers.UpscanStatusController.error(id: String)
 GET         /upload/upscan-success/:id                      controllers.UpscanStatusController.success(id: String)

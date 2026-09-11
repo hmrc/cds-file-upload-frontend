@@ -28,6 +28,7 @@ case class FileUploadAnswers(
   contactDetails: Option[ContactDetails] = None,
   fileUploadCount: Option[FileUploadCount] = None,
   fileUploadResponse: Option[FileUploadResponse] = None,
+  batchId: Option[String] = None,
   updated: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC),
   mrnPageRefererUrl: Option[String] = None
 )
