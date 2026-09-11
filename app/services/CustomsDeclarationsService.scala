@@ -31,11 +31,11 @@ class CustomsDeclarationsService @Inject() (customsDeclarationsConnector: Custom
   implicit ec: ExecutionContext
 ) extends Logging {
 
-  def initiateSingleFileBatch(eori: String, mrn: MRN)(implicit hc: HeaderCarrier): Future[FileUploadResponse] = {
+  def initiateSingleFileBatch(eori: String, mrn: MRN, batchId: String)(using HeaderCarrier): Future[FileUploadResponse] = {
     val uploadUrl = appConfig.microservice.services.cdsFileUploadFrontend.uri
     val files = FileUploadFile(1, "", uploadUrl).toList
 
-    val request = FileUploadRequest(mrn, files)
+    val request = FileUploadRequest(mrn, files, Some(batchId)) 
     val timer = metrics.startTimer(fileUploadRequestMetric)
 
     customsDeclarationsConnector.requestFileUpload(eori, request).map { response =>

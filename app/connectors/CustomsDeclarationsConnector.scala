@@ -37,10 +37,11 @@ class CustomsDeclarationsConnector @Inject() (appConfig: AppConfig, httpClientV2
   protected val httpClient: HttpClientV2 = httpClientV2
 
   private val fileUploadUrl = appConfig.microservice.services.customsDeclarations.batchUploadEndpoint
+  private val completeUrl = appConfig.microservice.services.customsDeclarations.completeEndpoint
   private val apiVersion = appConfig.microservice.services.customsDeclarations.apiVersion
   private val clientId = appConfig.developerHubClientId
 
-  def requestFileUpload(eori: String, request: FileUploadRequest)(implicit hc: HeaderCarrier): Future[FileUploadResponse] = {
+  def requestFileUpload(eori: String, request: FileUploadRequest)(using: HeaderCarrier): Future[FileUploadResponse] = {
     logger.info(s"Request to initiate ${request.toXml}")
     logger.info(s"fileUploadUrl: $fileUploadUrl")
     post[String, HttpResponse](fileUploadUrl, request.toXml.mkString, headers(eori))
@@ -55,6 +56,17 @@ class CustomsDeclarationsConnector @Inject() (appConfig: AppConfig, httpClientV2
             throw exception
         }
       )
+  }
+
+  def completeBatch(eori: String, batchId: String, references: Seq[String])(using HeaderCarrier): Future[Unit] = {
+    // TODO create a case class called FileUploadCompleteRequest and define a toXml
+    val body =
+      <FileUploadCompleteRequest xmlns="hmrc:fileupload">
+        <BatchID>{batchId}</BatchID>
+        <Files>{references.map(reference => <File><Reference>{reference}</Reference></File>)}</Files>
+      </FileUploadCompleteRequest>
+
+    post[String, HttpResponse](completeUrl, body.mkString, headers(eori)).map(_ => ())
   }
 
   private def headers(eori: String): Seq[(String, String)] = List(

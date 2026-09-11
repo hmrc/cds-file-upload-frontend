@@ -27,6 +27,7 @@ import services.FileUploadAnswersService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.{mrn_access_denied, mrn_entry}
 
+import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -62,10 +63,15 @@ class MrnEntryController @Inject() (
         .map(updateUserAnswersAndRedirect(_, request.userAnswers))
         .getOrElse(invalidMrnResponse(mrn))
     }
-  private def updateUserAnswersAndRedirect(mrn: MRN, userAnswers: FileUploadAnswers)(implicit request: DataRequest[AnyContent]): Future[Result] =
-    answersService.findOneAndReplace(userAnswers.copy(mrn = Some(mrn))).map { _ =>
+  private def updateUserAnswersAndRedirect(mrn: MRN, userAnswers: FileUploadAnswers)(using request: DataRequest[AnyContent]): Future[Result] = {
+    val batchId =
+      if (userAnswers.mrn.contains(mrn) && userAnswers.batchId.isDefined) userAnswers.batchId
+      else Some(UUID.randomUUID().toString)
+
+    answersService.findOneAndReplace(userAnswers.copy(mrn = Some(mrn), batchId = batchId)).map { _ =>
       Redirect(routes.ContactDetailsController.onPageLoad).addingToSession(SessionHelper.ANSWER_CACHE_ID -> userAnswers.uuid)
     }
+  }
 
   private def invalidMrnResponse(mrn: String)(implicit request: DataRequest[AnyContent]): Future[Result] =
     Future.successful(BadRequest(mrnAccessDenied(mrn)))

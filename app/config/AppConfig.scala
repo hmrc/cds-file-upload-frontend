@@ -62,8 +62,17 @@ case class Services(
   secureMessaging: SecureMessaging
 )
 
-case class CustomsDeclarations(protocol: Option[String], host: String, port: Option[Int], batchUploadUri: String, apiVersion: String) {
+case class CustomsDeclarations(
+  protocol: Option[String],
+  host: String,
+  port: Option[Int],
+  batchUploadUri: String,
+  completeUri: String,
+  apiVersion: String
+) {
+  //TODO maybe add a new endpoint here with batch id?
   def batchUploadEndpoint: String = s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$batchUploadUri"
+  def completeEndpoint: String = s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$completeUri"
 }
 
 case class CDSFileUploadFrontend(protocol: Option[String], host: String, port: Option[Int]) {

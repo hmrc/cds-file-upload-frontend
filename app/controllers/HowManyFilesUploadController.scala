@@ -59,8 +59,18 @@ class HowManyFilesUploadController @Inject() (
   // TODO
   def onSubmit: Action[AnyContent] = Action(Redirect(routes.HowManyFilesUploadController.onPageLoad))
 
-  private def uploadContactDetails(request: ContactDetailsRequest[AnyContent])(implicit hc: HeaderCarrier): Future[Either[Throwable, Unit]] =
-    customsDeclarationsService.initiateSingleFileBatch(request.eori, request.request.mrn).flatMap { fileUploadResponse =>
+  private def uploadContactDetails(request: ContactDetailsRequest[AnyContent])(using HeaderCarrier): Future[Either[Throwable, Unit]] =
+    request.userAnswers.batchId match {
+      case None =>
+        Future.successful(Left(new IllegalStateException("No batchId in the session")))
+      case Some(batchId) =>
+        uploadContactDetails(request, batchId)
+    }
+
+  private def uploadContactDetails(request: ContactDetailsRequest[AnyContent], batchId: String)(
+    using HeaderCarrier
+  ): Future[Either[Throwable, Unit]] =
+    customsDeclarationsService.initiateSingleFileBatch(request.eori, request.request.mrn, batchId).flatMap { fileUploadResponse =>
       fileUploadResponse.files match {
         case FileUpload(_, Waiting(uploadRequest), _, _) :: Nil =>
           upscanConnector.upload(uploadRequest, request.contactDetails).flatMap { response =>

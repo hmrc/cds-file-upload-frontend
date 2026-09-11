@@ -56,6 +56,13 @@
         else if (!hasExpectedExtension(file)) showError(messages("fileUploadPage.error.extension", fileExtensions.join(", ")))
         else if (allowSubmit) {
             allowSubmit = false
+
+            const reference = document.querySelector('input[name="key"]').value
+            const payload = new URLSearchParams()
+            payload.append('filename', file.name)
+            payload.append('csrfToken', document.querySelector('form').dataset.csrfToken)
+            navigator.sendBeacon(`/cds-file-upload-service/upload/filename/${encodeURIComponent(reference)}`, payload)
+
             return true
         }
 

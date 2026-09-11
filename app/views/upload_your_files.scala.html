@@ -53,7 +53,7 @@
             )
         )
 
-        <form action="@upload.href" method="POST" enctype="multipart/form-data">
+        <form action="@upload.href" method="POST" enctype="multipart/form-data" data-csrf-token="@play.filters.csrf.CSRF.getToken.map(_.value)">
             <div class="govuk-form-group">
                 @upload.fields.map { case (key, value) =>
                     <input type="hidden" name="@key" value="@value"/>

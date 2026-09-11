@@ -51,7 +51,7 @@ object FileUploadResponse extends Logging {
           case field                                             => field.label -> field.text.trim
         }.toMap
 
-      FileUpload(reference, Waiting(UploadRequest(href, fields)), id = successUrl.split('/').last)
+      FileUpload(reference, Waiting(UploadRequest(href, fields)), id = successUrl.split('/').last.takeWhile(_ != '?'))
     }.toList
 
     FileUploadResponse(files)
