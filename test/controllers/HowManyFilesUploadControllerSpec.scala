@@ -19,7 +19,6 @@ package controllers
 import connectors.UpscanConnector
 import controllers.actions._
 import controllers.routes.ErrorPageController
-import forms.FileUploadCountProvider
 import models._
 import models.requests.SignedInUser
 import org.mockito.ArgumentMatchers.{eq => eqTo, _}
@@ -27,14 +26,11 @@ import org.mockito.Mockito.{reset, verify, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalacheck.Arbitrary._
 import org.scalacheck.{Arbitrary, Gen}
-import play.api.data.Form
 import play.api.libs.ws.WSResponse
 import play.api.test.Helpers._
-import play.twirl.api.HtmlFormat
 import services.CustomsDeclarationsService
 import testdata.CommonTestData.cacheId
 import utils.FakeRequestCSRFSupport._
-import views.html.how_many_files_upload
 
 import scala.concurrent.Future
 
@@ -48,8 +44,7 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase {
   implicit val arbitraryUserInfo: Arbitrary[UserInfo] = Arbitrary(zip(userGen, alphaNumString()))
   val eori: String = eoriString.sample.get
   val mrn: MRN = arbitraryMrn.arbitrary.sample.get
-  private val fileUploadCount = FileUploadCount(7)
-  val validAnswers = FileUploadAnswers(eori, cacheId, mrn = Some(mrn), fileUploadCount = fileUploadCount)
+  val validAnswers = FileUploadAnswers(eori, cacheId, mrn = Some(mrn))
 
   implicit val arbitraryContactDetailsActions: Arbitrary[ContactDetailsRequiredAction] =
     Arbitrary(arbitrary[FakeContactDetailsRequiredAction].map(_.asInstanceOf[ContactDetailsRequiredAction]))
@@ -65,55 +60,61 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase {
   private val mockCustomsDeclarationsService = mock[CustomsDeclarationsService]
   private val mockUpscanConnector = mock[UpscanConnector]
 
-  private val page = mock[how_many_files_upload]
+  private val contactDetailsBatch = FileUploadResponse(
+    List(FileUpload("contactDetailsRef", Waiting(UploadRequest("http://s3bucket/contact", Map("" -> ""))), id = "id1"))
+  )
 
-  private def controller(
-    contactDetailsRequiredAction: ContactDetailsRequiredAction = new FakeContactDetailsRequiredAction(),
-    answers: Option[FileUploadAnswers] = Some(validAnswers)
-  ) =
+  private def controller(contactDetailsRequiredAction: ContactDetailsRequiredAction, answers: Option[FileUploadAnswers] = Some(validAnswers)) =
     new HowManyFilesUploadController(
       new FakeAuthAction(),
       new FakeDataRetrievalAction(answers),
       new MrnRequiredActionImpl(mcc),
       contactDetailsRequiredAction,
       new FakeVerifiedEmailAction(),
-      new FileUploadCountProvider,
       mockFileUploadAnswersService,
       mockUpscanConnector,
       mockCustomsDeclarationsService,
-      mcc,
-      page
+      mcc
     )(executionContext)
+
+  private def stubSuccessfulContactDetailsUpload(): Unit = {
+    val wsResponse = mock[WSResponse]
+    when(wsResponse.header("Location")).thenReturn(Some("upscan-success"))
+    when(wsResponse.status).thenReturn(303)
+    when(mockUpscanConnector.upload(any(), any())).thenReturn(Future.successful(wsResponse))
+  }
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
 
-    reset(mockCustomsDeclarationsService, mockUpscanConnector, page)
+    reset(mockCustomsDeclarationsService, mockUpscanConnector)
 
-    when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(FileUploadResponse(List())))
-    when(page(any[Form[FileUploadCount]], any())(any(), any())).thenReturn(HtmlFormat.empty)
+    when(mockCustomsDeclarationsService.initiateSingleFileBatch(any(), any())(any()))
+      .thenReturn(Future.successful(contactDetailsBatch))
   }
 
   "How Many Files Upload Page" must {
 
-    "load correct page when user is logged in " in {
-      val result = controller().onPageLoad(fakeRequest.withCSRFToken)
+    "initiate a single file batch, upload contact details and redirect to the upload page" in {
+      stubSuccessfulContactDetailsUpload()
 
-      status(result) mustBe OK
-      verify(page).apply(any[Form[FileUploadCount]], any())(any(), any())
+      val result = controller(fakeContactDetailsRequiredAction).onPageLoad(fakeRequest.withCSRFToken)
 
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(routes.UpscanStatusController.onPageLoad.url)
+
+      theSavedFileUploadAnswers.fileUploadResponse mustBe Some(FileUploadResponse(Nil))
     }
 
-    "provide view template with correct file count if it exist in the cache" in {
-      val updatedAction = new FakeContactDetailsRequiredAction(fakeContactDetailsRequiredAction.contactDetails)
+    "request the batch for the declaration's mrn" in {
+      stubSuccessfulContactDetailsUpload()
 
-      controller(updatedAction).onPageLoad(fakeRequest.withCSRFToken).futureValue
+      await(controller(fakeContactDetailsRequiredAction).onPageLoad(fakeRequest.withCSRFToken))
 
-      val expectedForm = (new FileUploadCountProvider)().fill(fileUploadCount.get)
-      verify(page).apply(eqTo(expectedForm), any())(any(), any())
+      verify(mockCustomsDeclarationsService).initiateSingleFileBatch(any(), eqTo(mrn))(any())
     }
 
-    "redirect to error page when no data is found in the cache on page load" in {
+    "redirect to error page when no data is found in the cache" in {
       forAll { (contactDetails: ContactDetails) =>
         val action = new FakeContactDetailsRequiredAction(contactDetails)
         val result = controller(action, None).onPageLoad(fakeRequest.withCSRFToken)
@@ -123,71 +124,13 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase {
       }
     }
 
-    "redirect to error page when no data is found in the cache on submit" in {
-      forAll { (contactDetails: ContactDetails) =>
-        val action = new FakeContactDetailsRequiredAction(contactDetails)
-        val result = controller(action, None).onSubmit(fakeRequest.withCSRFToken)
-
-        status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(ErrorPageController.error.url)
-      }
-    }
-
-    "return a bad request when empty data is submitted" in {
-      val postRequest = fakeRequest.withFormUrlEncodedBody("value" -> "").withCSRFToken
-      val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
-      status(result) mustBe BAD_REQUEST
-    }
-
-    "return an ok and save to the data cache when valid data is submitted" in {
-      val wsResponse = mock[WSResponse]
-      when(wsResponse.header("Location")).thenReturn(Some("upscan-success"))
-      when(wsResponse.status).thenReturn(303)
-
-      val fileUploadResponse = FileUploadResponse(
-        List(
-          FileUpload("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> ""))), id = "id1"),
-          FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> ""))), id = "id2"),
-          FileUpload("someFileRef3", Waiting(UploadRequest("http://s3bucket/myfile3", Map("" -> ""))), id = "id3")
-        )
-      )
-      val fileUploadsAfterContactDetails = fileUploadResponse.files.tail
-
-      when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
-      when(mockUpscanConnector.upload(any(), any())).thenReturn(Future.successful(wsResponse))
-
-      val postRequest = fakePostRequest.withFormUrlEncodedBody("value" -> "2").withCSRFToken
-
-      val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
-
-      status(result) mustBe SEE_OTHER
-      val nextRef = fileUploadsAfterContactDetails.map(_.reference).min
-      redirectLocation(result) mustBe Some(routes.UpscanStatusController.onPageLoad(nextRef).url)
-
-      val savedAnswers = theSavedFileUploadAnswers
-      val fileUploadCount = FileUploadCount(2).get
-      savedAnswers.fileUploadCount mustBe Some(fileUploadCount)
-      savedAnswers.fileUploadResponse mustBe Some(FileUploadResponse(fileUploadResponse.files.tail))
-    }
-
     "redirect to error page when contact details upload fails" in {
       val wsResponse = mock[WSResponse]
       when(wsResponse.header("Location")).thenReturn(Some("upscan-error"))
       when(wsResponse.status).thenReturn(303)
-
-      val fileUploadResponse = FileUploadResponse(
-        List(
-          FileUpload("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> ""))), id = "id1"),
-          FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> ""))), id = "id2")
-        )
-      )
-      reset(mockUpscanConnector)
-      when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
       when(mockUpscanConnector.upload(any(), any())).thenReturn(Future.successful(wsResponse))
 
-      val postRequest = fakePostRequest.withFormUrlEncodedBody("value" -> "2").withCSRFToken
-
-      val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
+      val result = controller(fakeContactDetailsRequiredAction).onPageLoad(fakeRequest.withCSRFToken)
 
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(ErrorPageController.error.url)
@@ -197,31 +140,22 @@ class HowManyFilesUploadControllerSpec extends ControllerSpecBase {
       val wsResponse = mock[WSResponse]
       when(wsResponse.header("Location")).thenReturn(Some("upscan-error"))
       when(wsResponse.status).thenReturn(400)
-
-      val fileUploadResponse = FileUploadResponse(
-        List(
-          FileUpload("someFileRef1", Waiting(UploadRequest("http://s3bucket/myfile1", Map("" -> ""))), id = "id1"),
-          FileUpload("someFileRef2", Waiting(UploadRequest("http://s3bucket/myfile2", Map("" -> ""))), id = "id2")
-        )
-      )
-      reset(mockUpscanConnector)
-      when(mockCustomsDeclarationsService.batchFileUpload(any(), any(), any())(any())).thenReturn(Future.successful(fileUploadResponse))
       when(mockUpscanConnector.upload(any(), any())).thenReturn(Future.successful(wsResponse))
 
-      val postRequest = fakePostRequest.withFormUrlEncodedBody("value" -> "2").withCSRFToken
-
-      val result = controller(fakeContactDetailsRequiredAction).onSubmit(postRequest)
+      val result = controller(fakeContactDetailsRequiredAction).onPageLoad(fakeRequest.withCSRFToken)
 
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(ErrorPageController.error.url)
     }
 
-    "make a request to customs declarations" in {
-      val postRequest = fakePostRequest.withFormUrlEncodedBody("value" -> "2")
-      await(controller(fakeContactDetailsRequiredAction).onSubmit(postRequest.withCSRFToken))
+    "redirect to error page when the batch does not contain exactly one waiting file" in {
+      when(mockCustomsDeclarationsService.initiateSingleFileBatch(any(), any())(any()))
+        .thenReturn(Future.successful(FileUploadResponse(Nil)))
 
-      val fileUploadCount = FileUploadCount(2).get
-      verify(mockCustomsDeclarationsService).batchFileUpload(any(), eqTo(mrn), eqTo(fileUploadCount))(any())
+      val result = controller(fakeContactDetailsRequiredAction).onPageLoad(fakeRequest.withCSRFToken)
+
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(ErrorPageController.error.url)
     }
   }
 }

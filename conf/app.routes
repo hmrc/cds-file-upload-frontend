@@ -38,7 +38,9 @@ POST        /how-many-files-upload                          controllers.HowManyF
 
 GET         /upload/receipt                                 controllers.UploadYourFilesReceiptController.onPageLoad
 
-GET         /upload/:ref                                    controllers.UpscanStatusController.onPageLoad(ref: String)
+GET         /upload                                         controllers.UpscanStatusController.onPageLoad
+POST        /upload/finish                                  controllers.UpscanStatusController.finish
+POST        /upload/remove/:reference                       controllers.UpscanStatusController.remove(reference: String)
 
 GET         /upload/upscan-error/:id                        controllers.UpscanStatusController.error(id: String)
 GET         /upload/upscan-success/:id                      controllers.UpscanStatusController.success(id: String)

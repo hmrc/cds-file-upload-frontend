@@ -38,8 +38,6 @@ case class FileUploadResponse(files: List[FileUpload])
 object FileUploadResponse extends Logging {
   implicit val format: OFormat[FileUploadResponse] = Json.format[FileUploadResponse]
 
-  def apply(files: List[FileUpload]): FileUploadResponse = new FileUploadResponse(files.sortBy(_.reference)) {}
-
   def fromXml(xml: Elem): FileUploadResponse = {
     logger.info("File Upload Response " + xml)
     val files: List[FileUpload] = (xml \ "Files" \ "_").theSeq.collect { case file =>

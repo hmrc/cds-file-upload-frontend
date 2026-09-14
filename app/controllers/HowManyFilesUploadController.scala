@@ -18,7 +18,6 @@ package controllers
 
 import connectors.UpscanConnector
 import controllers.actions._
-import forms.FileUploadCountProvider
 import models._
 import models.requests.ContactDetailsRequest
 import play.api.Logging
@@ -27,7 +26,6 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.{CustomsDeclarationsService, FileUploadAnswersService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import views.html.how_many_files_upload
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -39,91 +37,46 @@ class HowManyFilesUploadController @Inject() (
   requireMrn: MrnRequiredAction,
   requireContactDetails: ContactDetailsRequiredAction,
   verifiedEmail: VerifiedEmailAction,
-  formProvider: FileUploadCountProvider,
   answersService: FileUploadAnswersService,
   upscanConnector: UpscanConnector,
   customsDeclarationsService: CustomsDeclarationsService,
-  mcc: MessagesControllerComponents,
-  howManyFilesUpload: how_many_files_upload
+  mcc: MessagesControllerComponents
 )(implicit ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport with Logging {
 
-  val form = formProvider()
-
   val actions = authenticate andThen verifiedEmail andThen getData andThen requireMrn andThen requireContactDetails
 
-  def onPageLoad: Action[AnyContent] = actions { implicit request =>
-    val populatedForm = request.userAnswers.fileUploadCount.fold(form)(form.fill)
-    Ok(howManyFilesUpload(populatedForm, request.request.mrn))
-  }
-
-  def onSubmit: Action[AnyContent] = actions.async { implicit request =>
-    form
-      .bindFromRequest()
-      .fold(
-        errorForm => Future.successful(BadRequest(howManyFilesUpload(errorForm, request.request.mrn))),
-        fileUploadCount =>
-          uploadContactDetails(request, fileUploadCount) map {
-            case Right(firstUpload :: _) =>
-              logger.info("uploadContactDetails success: " + firstUpload)
-              Redirect(routes.UpscanStatusController.onPageLoad(firstUpload.reference))
-
-            case err =>
-              logger.warn("uploadContactDetails error: " + err)
-              Redirect(routes.ErrorPageController.error)
-          }
-      )
-  }
-
-  private def uploadContactDetails(request: ContactDetailsRequest[AnyContent], fileUploadCount: FileUploadCount)(
-    implicit hc: HeaderCarrier
-  ): Future[Either[Throwable, List[FileUpload]]] = {
-
-    def saveRemainingFileUploadsToCache(fileUploadResponse: FileUploadResponse): Future[List[FileUpload]] = {
-      val remainingFileUploads = fileUploadResponse.files.tail
-      logger.info("remainingFileUploads " + remainingFileUploads)
-
-      val answers =
-        request.userAnswers.copy(fileUploadCount = Some(fileUploadCount), fileUploadResponse = Some(FileUploadResponse(remainingFileUploads)))
-
-      answersService
-        .findOneAndReplace(answers)
-        .map { _ =>
-          logger.info("saving remaining uploads")
-          remainingFileUploads
-        }
+  def onPageLoad: Action[AnyContent] = actions.async { implicit request =>
+    uploadContactDetails(request).map {
+      case Right(_) =>
+        Redirect(routes.UpscanStatusController.onPageLoad)
+      case Left(e) =>
+        logger.warn("uploadContactDetails error: " + e)
+        Redirect(routes.ErrorPageController.error)
     }
+  }
 
-    initiateUpload(request, fileUploadCount).flatMap { fileUploadResponse =>
-      firstUploadFile(fileUploadResponse) match {
-        case Right((_, uploadRequest)) =>
+  // TODO
+  def onSubmit: Action[AnyContent] = Action(Redirect(routes.HowManyFilesUploadController.onPageLoad))
+
+  private def uploadContactDetails(request: ContactDetailsRequest[AnyContent])(implicit hc: HeaderCarrier): Future[Either[Throwable, Unit]] =
+    customsDeclarationsService.initiateSingleFileBatch(request.eori, request.request.mrn).flatMap { fileUploadResponse =>
+      fileUploadResponse.files match {
+        case FileUpload(_, Waiting(uploadRequest), _, _) :: Nil =>
           upscanConnector.upload(uploadRequest, request.contactDetails).flatMap { response =>
-            logger.info(s"Upload contact details successful: $response")
-            logger.info(s"Upload contact details headers: ${response.header("Location")}")
             val isSuccessRedirect = response.header("Location").exists(_.contains("upscan-success"))
             if (response.status == SEE_OTHER && isSuccessRedirect) {
-              saveRemainingFileUploadsToCache(fileUploadResponse).map(fileUploads => Right(fileUploads))
+              val answers = request.userAnswers.copy(fileUploadResponse = Some(FileUploadResponse(Nil)))
+              answersService.findOneAndReplace(answers).map(_ => Right(()))
             } else {
-              logger.warn(s"Left: error: illegal state")
-              logger.warn(s"Response: $response")
-              Future.successful(Left(new IllegalStateException("Contact details was not uploaded successfully")))
+              logger.warn(s"Failed to upload contact details. Response: $response")
+              Future.successful(Left(new IllegalStateException("Failed to upload contact details")))
             }
           }
-        case Left(error) =>
-          logger.warn(s"Left: error: $error")
-          Future.successful(Left(error))
+
+        case other =>
+          logger.warn(s"Unable to initiate upload. Expected file upload with waiting but got: $other")
+          Future.successful(Left(new IllegalStateException("Unable to initiate upload")))
       }
-    }
-  }
-
-  private def initiateUpload(request: ContactDetailsRequest[AnyContent], fileUploadCount: FileUploadCount)(
-    implicit hc: HeaderCarrier
-  ): Future[FileUploadResponse] =
-    customsDeclarationsService.batchFileUpload(request.eori, request.request.mrn, fileUploadCount)
-
-  private def firstUploadFile(fileUploadResponse: FileUploadResponse): Either[Throwable, (FileUpload, UploadRequest)] =
-    fileUploadResponse.files.headOption match {
-      case Some(f @ FileUpload(_, Waiting(u), _, _)) => Right((f, u))
-      case _                                         => Left(new IllegalStateException("Unable to initiate upload"))
     }
 }
