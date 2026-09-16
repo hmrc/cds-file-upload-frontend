@@ -346,5 +346,34 @@ class UpscanStatusControllerSpec extends ControllerSpecBase with SfusMetricsMock
       status(result) mustBe SEE_OTHER
       redirectLocation(result) mustBe Some(routes.ErrorPageController.uploadError.url)
     }
+
+    "requested file in all possible positions in the list" when {
+      val file1 = FileUpload("ref1", Waiting(UploadRequest("href", Map.empty)), id = "ref1")
+      val file2 = FileUpload("ref2", Waiting(UploadRequest("href", Map.empty)), id = "ref2")
+      val file3 = FileUpload("ref3", Waiting(UploadRequest("href", Map.empty)), id = "ref3")
+      val response = FileUploadResponse(List(file1, file2, file3))
+      val answers = FileUploadAnswers(eori, cacheId, fileUploadResponse = Some(response))
+
+      "the requested file is the first of the list" in {
+        val result = controller(fakeDataRetrievalAction(answers)).onPageLoad(file1.reference)(fakeRequest)
+
+        status(result) mustBe OK
+        verify(uploadYourFiles).apply(any(), meq(First(3)), any())(any(), any())
+      }
+
+      "the requested file is in the middle of the list" in {
+        val result = controller(fakeDataRetrievalAction(answers)).onPageLoad(file2.reference)(fakeRequest)
+
+        status(result) mustBe OK
+        verify(uploadYourFiles).apply(any(), meq(Middle(2, 3)), any())(any(), any())
+      }
+
+      "the requested file is the last of the list" in {
+        val result = controller(fakeDataRetrievalAction(answers)).onPageLoad(file3.reference)(fakeRequest)
+
+        status(result) mustBe OK
+        verify(uploadYourFiles).apply(any(), meq(Last(3)), any())(any(), any())
+      }
+    }
   }
 }
