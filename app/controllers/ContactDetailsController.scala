@@ -19,11 +19,11 @@ package controllers
 import com.google.inject.Singleton
 import controllers.actions.*
 import forms.mappings.ContactDetailsMapping.*
-import models.requests.ContactDetailsRequest
 
 import javax.inject.Inject
 import play.api.data.Form
 import play.api.i18n.I18nSupport
+import play.api.i18n.Lang.logger
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.{ContactDetailsService, FileUploadAnswersService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -60,7 +60,7 @@ class ContactDetailsController @Inject() (
         contactDetails =>
           for {
             _         <- answersService.findOneAndReplace(req.userAnswers.copy(contactDetails = Some(contactDetails)))
-            result    <- contactDetailsService.uploadContactDetails(req)
+            result    <- contactDetailsService.uploadContactDetails(req, contactDetails)
           } yield result match {
             case Right(_) => 
               Redirect(routes.UpscanStatusController.onPageLoad)

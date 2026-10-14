@@ -17,34 +17,35 @@
 package services
 
 import connectors.UpscanConnector
-import models.requests.ContactDetailsRequest
-import play.api.mvc.AnyContent
-import uk.gov.hmrc.http.HeaderCarrier
 import models.*
+import models.requests.MrnRequest
 import play.api.Logging
 import play.api.http.Status.SEE_OTHER
+import play.api.mvc.AnyContent
+import uk.gov.hmrc.http.HeaderCarrier
+
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class ContactDetailsService @Inject() (customsDeclarationsService: CustomsDeclarationsService,
-                                       upscanConnector: UpscanConnector,
-                                       answersService: FileUploadAnswersService)(implicit ec: ExecutionContext) extends Logging {
-  
-  def uploadContactDetails(request: ContactDetailsRequest[AnyContent])(using HeaderCarrier): Future[Either[Throwable, Unit]] =
+class ContactDetailsService @Inject()(customsDeclarationsService: CustomsDeclarationsService,
+                                      upscanConnector: UpscanConnector,
+                                      answersService: FileUploadAnswersService)(implicit ec: ExecutionContext) extends Logging {
+
+  def uploadContactDetails(request: MrnRequest[AnyContent], contactDetails: ContactDetails)(using HeaderCarrier): Future[Either[Throwable, Unit]] =
     request.userAnswers.batchId match {
       case None =>
         Future.successful(Left(new IllegalStateException("No batchId in the session")))
       case Some(batchId) =>
-        uploadContactDetails(request, batchId)
+        uploadContactDetails(request, batchId, contactDetails)
     }
-  
-  private def uploadContactDetails(request: ContactDetailsRequest[AnyContent], batchId: String)(
+
+  private def uploadContactDetails(request: MrnRequest[AnyContent], batchId: String, contactDetails: ContactDetails)(
     using HeaderCarrier
   ): Future[Either[Throwable, Unit]] =
-    customsDeclarationsService.initiateSingleFileBatch(request.eori, request.request.mrn, batchId).flatMap { fileUploadResponse =>
+    customsDeclarationsService.initiateSingleFileBatch(request.eori, request.mrn, batchId).flatMap { fileUploadResponse =>
       fileUploadResponse.files match {
         case FileUpload(_, Waiting(uploadRequest), _, _) :: Nil =>
-          upscanConnector.upload(uploadRequest, request.contactDetails).flatMap { response =>
+          upscanConnector.upload(uploadRequest, contactDetails).flatMap { response =>
             val isSuccessRedirect = response.header("Location").exists(_.contains("upscan-success"))
             if (response.status == SEE_OTHER && isSuccessRedirect) {
               val answers = request.userAnswers.copy(fileUploadResponse = Some(FileUploadResponse(Nil)))
