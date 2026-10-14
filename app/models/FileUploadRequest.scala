@@ -23,7 +23,6 @@ import scala.xml.Elem
 //TODO make maybeBatchId nonOptional (batchId: String)
 final case class FileUploadRequest(declarationId: MRN, files: Seq[FileUploadFile], maybeBatchId: Option[String] = None) {
 
-  //TODO maybe move batch id to query rather than adding it into xml?
   def toXml: Elem =
     <FileUploadRequest xmlns="hmrc:fileupload">
       <DeclarationID>{declarationId.value}</DeclarationID>

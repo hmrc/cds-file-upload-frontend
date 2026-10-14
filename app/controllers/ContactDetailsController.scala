@@ -17,13 +17,15 @@
 package controllers
 
 import com.google.inject.Singleton
-import controllers.actions._
-import forms.mappings.ContactDetailsMapping._
+import controllers.actions.*
+import forms.mappings.ContactDetailsMapping.*
+import models.requests.ContactDetailsRequest
+
 import javax.inject.Inject
 import play.api.data.Form
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.FileUploadAnswersService
+import services.{ContactDetailsService, FileUploadAnswersService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.contact_details
 
@@ -34,10 +36,12 @@ class ContactDetailsController @Inject() (
   authenticate: AuthAction,
   getData: DataRetrievalAction,
   requireMrn: MrnRequiredAction,
+  requireContactDetails: ContactDetailsRequiredAction,
   verifiedEmail: VerifiedEmailAction,
   answersService: FileUploadAnswersService,
   mcc: MessagesControllerComponents,
-  contactDetails: contact_details
+  contactDetails: contact_details,
+  contactDetailsService: ContactDetailsService
 )(implicit ec: ExecutionContext)
     extends FrontendController(mcc) with I18nSupport {
 
@@ -54,6 +58,17 @@ class ContactDetailsController @Inject() (
       .fold(
         errorForm => Future.successful(BadRequest(contactDetails(errorForm, req.mrn))),
         contactDetails =>
+          for {
+            _         <- answersService.findOneAndReplace(req.userAnswers.copy(contactDetails = Some(contactDetails)))
+            result    <- contactDetailsService.uploadContactDetails(req)
+          } yield result match {
+            case Right(_) => 
+              Redirect(routes.UpscanStatusController.onPageLoad)
+            case Left(e)  =>
+              logger.warn("uploadContactDetails error: " + e)
+              Redirect(routes.ErrorPageController.error)
+          }
+
           answersService.findOneAndReplace(req.userAnswers.copy(contactDetails = Some(contactDetails))).map { _ =>
             Redirect(routes.HowManyFilesUploadController.onPageLoad)
           }

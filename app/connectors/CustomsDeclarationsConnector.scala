@@ -17,12 +17,12 @@
 package connectors
 
 import config.AppConfig
-import models.{FileUploadRequest, FileUploadResponse}
+import models.{FileUploadCompleteRequest, FileUploadRequest, FileUploadResponse}
 import play.api.Logging
 import play.api.http.{ContentTypes, HeaderNames}
 import play.api.libs.ws.writeableOf_String
 import play.api.mvc.Codec
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -59,14 +59,9 @@ class CustomsDeclarationsConnector @Inject() (appConfig: AppConfig, httpClientV2
   }
 
   def completeBatch(eori: String, batchId: String, references: Seq[String])(using HeaderCarrier): Future[Unit] = {
-    // TODO create a case class called FileUploadCompleteRequest and define a toXml
-    val body =
-      <FileUploadCompleteRequest xmlns="hmrc:fileupload">
-        <BatchID>{batchId}</BatchID>
-        <Files>{references.map(reference => <File><Reference>{reference}</Reference></File>)}</Files>
-      </FileUploadCompleteRequest>
+    val body = FileUploadCompleteRequest(batchId, references).toXml.mkString
 
-    post[String, HttpResponse](completeUrl, body.mkString, headers(eori)).map(_ => ())
+    post[String, HttpResponse](completeUrl, body, headers(eori)).map(_ => ())
   }
 
   private def headers(eori: String): Seq[(String, String)] = List(
