@@ -244,9 +244,6 @@ Format all project files:
 sbt scalafmtAll
 ```
 
-### Autocomplete
-The TamperMonkey/GreaseMonkey autocomplete script previously available for this service has been removed (DCWL-5031).
-
 ### Run all checks
 This is an sbt command alias specific to this project. It will clean the project, apply scalafmt formatting, run unit and integration tests and produce a coverage report:
 > `sbt precommit`
