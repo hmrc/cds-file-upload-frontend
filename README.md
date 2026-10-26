@@ -9,25 +9,33 @@ Once a file is submitted it is scanned by Upscan. The [Notification Service](htt
 
 See the [Secure File Upload UI Service - Solution Design](https://confluence.tools.tax.service.gov.uk/display/CD/Secure+File+Upload+UI+Service+-+Solution+Design) for more details.
 
-| | |
-|---|---|
-| Digital service | CDS Exports |
-| Local port | `6793` |
-| Base path | `/cds-file-upload-service` |
-| Back-end | [cds-file-upload](https://github.com/hmrc/cds-file-upload) (port `6795`) |
-| Acceptance tests | [sfus-acceptance-ui-journey-tests](https://github.com/hmrc/sfus-acceptance-ui-journey-tests) |
-| Performance tests | [cds-file-upload-performance-tests](https://github.com/hmrc/cds-file-upload-performance-tests) |
+| Key                             | Value                                                                                                         |
+|---------------------------------|---------------------------------------------------------------------------------------------------------------|
+| Digital service                 | CDS Exports                                                                                                   |
+| Local port                      | `6793`                                                                                                        |
+| Base path                       | `/cds-file-upload-service`                                                                                    |
+| Back-end                        | [cds-file-upload](https://github.com/hmrc/cds-file-upload) (port `6795`)                                     |
+| Acceptance tests                | [sfus-acceptance-ui-journey-tests](https://github.com/hmrc/sfus-acceptance-ui-journey-tests)                  |
+| Performance tests               | [cds-file-upload-performance-tests](https://github.com/hmrc/cds-file-upload-performance-tests)               |
+| Stubs used in Local and Staging | [customs-declarations-stub](https://github.com/hmrc/customs-declarations-stub)                               |
 
 ## How to Run this Service
 
 ### Prerequisites
-Start all the services this service depends on with [Service Manager](#service-manager-profiles):
+
+This service depends on:
+* `AUTH`
+* `AUTH_LOGIN_STUB`
+* `AUTH_LOGIN_API`
+* `BAS_GATEWAY`
+* `CDS_FILE_UPLOAD`
+* `CUSTOMS_DECLARATIONS_STUB`
+
+Use [Service Manager](#service-manager-profiles) to start all the services this service depends on:
 
 ```bash
-./run-services.sh
+sm2 --start CDS_FUF_ALL
 ```
-
-This runs `sm2 --start CDS_FUF_ALL`.
 
 ### Running the service locally
 To run this service from source (for example, to test your own changes), stop the instance started by Service Manager and run it with the stubbed endpoints:
@@ -64,35 +72,48 @@ When the test-only endpoint is called, it sends a success notification to our ba
 sbt test it/test
 ```
 
+To get a unit test coverage report, run:
+```bash
+sbt clean coverage test it/test coverageReport
+```
+Then open the resulting coverage report `target/scala-3.x.x/scoverage-report/index.html` in a web browser.
+
+The minimum requirement for test coverage is 90%. Builds will fail when the project drops below this threshold.
+
 #### Pre-push check
-There is a script called `precheck.sh` that runs all unit and integration tests, examines their coverage (minimum 90%) and checks that all files are properly formatted.
+There is a script called `precheck.sh` that runs the `precommit` sbt alias. This cleans the project, applies scalafmt formatting, runs all unit and integration tests, checks coverage (minimum 90%) and verifies all files are properly formatted.
 It is good practice to run it just before pushing to GitHub.
 
 ```bash
 ./precheck.sh
 ```
 
-#### Acceptance tests
-Once your changes are done, run the [sfus-acceptance-ui-journey-tests](https://github.com/hmrc/sfus-acceptance-ui-journey-tests) against your locally running copy of this service (see [Running the service locally](#running-the-service-locally)).
+Which is equivalent to running:
+```bash
+sbt precommit
+```
 
-For the Service Manager profile and the script options, see that repository's README.
+#### Acceptance tests (smoke and regression)
+The acceptance tests for this service are in [sfus-acceptance-ui-journey-tests](https://github.com/hmrc/sfus-acceptance-ui-journey-tests). For information about how to run them, and which environments they run against, see that repository's [README](https://github.com/hmrc/sfus-acceptance-ui-journey-tests).
 
 #### Performance tests
-The performance tests for this service are in [cds-file-upload-performance-tests](https://github.com/hmrc/cds-file-upload-performance-tests). For how to run them and which environments they run against, see that repository's README.
+The performance tests for this service are in [cds-file-upload-performance-tests](https://github.com/hmrc/cds-file-upload-performance-tests). For information about how to run them, and which environments they run against, see that repository's [README](https://github.com/hmrc/cds-file-upload-performance-tests).
 
-### Staging
-To check the service manually, sign in through the auth login stub at https://www.staging.tax.service.gov.uk/auth-login-stub/gg-sign-in, using the [enrolment details](#enrolment-required) below and the redirect URL https://www.staging.tax.service.gov.uk/cds-file-upload-service/start.
+### Manual Testing in QA and Staging
+After the successful [deployment pipeline](https://build.tax.service.gov.uk/job/BordersAndTradeLiveServices/job/CDSExports/job/cds-file-upload-frontend-pipeline/), manual testing is performed in the QA and/or Staging environments. For more details see the [sfus-acceptance-ui-journey-tests README](https://github.com/hmrc/sfus-acceptance-ui-journey-tests).
 
-### QA
-QA uses real upstream services (including Upscan and S3), so files are scanned for real and the test-only S3 endpoint is not available.
+Note that QA uses real upstream services (including Upscan and S3), so files are scanned for real and the test-only S3 endpoint is not available.
 
 ## Service Catalogue
 - [cds-file-upload-frontend in the MDTP Catalogue](https://catalogue.tax.service.gov.uk/repositories/cds-file-upload-frontend)
 
 ## Jenkins Pipeline
-- [cds-file-upload-frontend build](https://build.tax.service.gov.uk/job/BordersAndTradeLiveServices/job/CDSExports/job/cds-file-upload-frontend/)
+Front End Build and Deployment Pipeline
+ - [Build pipeline](https://build.tax.service.gov.uk/job/BordersAndTradeLiveServices/job/CDSExports/job/cds-file-upload-frontend/)
+ - [Deployment pipeline](https://build.tax.service.gov.uk/job/BordersAndTradeLiveServices/job/CDSExports/job/cds-file-upload-frontend-pipeline/)
 
-The acceptance test Jenkins jobs are listed in the [sfus-acceptance-ui-journey-tests README](https://github.com/hmrc/sfus-acceptance-ui-journey-tests).
+The acceptance test Jenkins jobs (smoke and regression) are listed in the sfus-acceptance-ui-journey-tests [README](https://github.com/hmrc/sfus-acceptance-ui-journey-tests).
+The performance test Jenkins jobs are listed in the cds-file-upload-performance-tests [README](https://github.com/hmrc/cds-file-upload-performance-tests).
 
 ## Smoke and Regression Test Coverage
 The smoke and regression tests for this service are in [sfus-acceptance-ui-journey-tests](https://github.com/hmrc/sfus-acceptance-ui-journey-tests). They cover the file upload journey (MRN entry, contact details, number of files, upload and receipt) and the secure messaging journeys.
@@ -102,15 +123,15 @@ For how to run each test pack and the full list of scenarios, see that repositor
 ## Service Manager Profiles
 These profiles are defined in [service-manager-config](https://github.com/hmrc/service-manager-config).
 
-| Profile | Use |
-|---|---|
-| `CDS_FUF_ALL` | Running and developing this service locally (started by `./run-services.sh`) |
+| Profile       | Use                                         | Services started                                                                                   |
+|---------------|---------------------------------------------|----------------------------------------------------------------------------------------------------|
+| `CDS_FUF_ALL` | Running and developing this service locally | `CDS_FILE_UPLOAD_FRONTEND`, `CDS_FILE_UPLOAD`, `AUTH`, `AUTH_LOGIN_STUB`, `AUTH_LOGIN_API`, `BAS_GATEWAY`, `CUSTOMS_DECLARATIONS_STUB` |
 
-| Service | Port | Repository |
-|---|---|---|
-| `CDS_FILE_UPLOAD_FRONTEND` | 6793 | This service |
-| `CDS_FILE_UPLOAD` | 6795 | [cds-file-upload](https://github.com/hmrc/cds-file-upload) |
-| `CUSTOMS_DECLARATIONS_STUB` | 6790 | [customs-declarations-stub](https://github.com/hmrc/customs-declarations-stub) (also stubs secure messaging locally) |
+| Service                    | Port | Repository                                                                                             |
+|----------------------------|------|--------------------------------------------------------------------------------------------------------|
+| `CDS_FILE_UPLOAD_FRONTEND` | 6793 | This service                                                                                           |
+| `CDS_FILE_UPLOAD`          | 6795 | [cds-file-upload](https://github.com/hmrc/cds-file-upload)                                            |
+| `CUSTOMS_DECLARATIONS_STUB`| 6790 | [customs-declarations-stub](https://github.com/hmrc/customs-declarations-stub) (also stubs secure messaging locally) |
 
 ### Accessibility Statement
 As a developer we rarely have the need to test it locally, therefore we should not add the
@@ -130,49 +151,50 @@ It is then available at http://localhost:12346/accessibility-statement/cds-file-
 
 All paths are relative to `/cds-file-upload-service` and, unless stated otherwise, need an [authenticated user with the HMRC-CUS-ORG enrolment](#enrolment-required).
 
-| Method | Path | Purpose | Sample request (query / form body) | Response |
-|---|---|---|---|---|
-| GET | `/` or `/start` | Service start | – | `303` → `/what-do-you-want-to-do` |
-| GET | `/what-do-you-want-to-do` | Choose between uploading documents and reading messages | – | `200` |
-| POST | `/what-do-you-want-to-do` | Submit the choice | `choice=DocumentUpload` (or `MessageInbox`) | `303` → `/mrn-entry`, or `/message-choice` |
-| GET | `/mrn-entry` | Enter the MRN of the declaration | – | `200` |
-| POST | `/mrn-entry` | Submit the MRN | `value=24GB1J1V8TS3JU1AR8` | `303` → `/contact-details`<br>Invalid or not allowed: `400` |
-| GET | `/mrn-entry/:mrn` | Pre-fill the MRN (used by [customs-declare-exports-frontend](https://github.com/hmrc/customs-declare-exports-frontend)) | `/mrn-entry/24GB1J1V8TS3JU1AR8` | `303` → `/contact-details` |
-| GET / POST | `/contact-details` | Contact details for the upload | `name=Joe+Bloggs&companyName=Acme&phoneNumber=01234567890` | `303` → `/how-many-files-upload` |
-| GET / POST | `/how-many-files-upload` | Number of files to upload (1 to 10) | `value=2` | `303` → `/upload/:ref` |
-| GET | `/upload/:ref` | Upload one file | – | `200`<br>Already uploaded: `303` → next file or `/upload/receipt` |
-| GET | `/upload/upscan-success/:id` | Upscan redirect after a successful upload | – | `303` → next file, `/upload/receipt` or `/upload-error` |
-| GET | `/upload/upscan-error/:id` | Upscan redirect after a failed upload | – | `200` |
-| GET | `/upload/receipt` | File Receipt page | – | `200` |
-| GET / POST | `/message-choice` | Choose exports or imports messages | `choice=ExportMessages` (or `ImportMessages`) | `303` → `/messages` |
-| GET | `/exports-message-choice` | Go straight to exports messages | – | `303` → `/messages` |
-| GET | `/messages` | Secure messages inbox | – | `200` |
-| GET / POST | `/conversation/:client/:conversationId` | View or reply to a conversation | – | `200` / `303` → `/conversation/:client/:conversationId/result` |
-| GET | `/language/:lang` | Switch language. *No authentication needed* | `english` or `cymraeg` | `303` |
-| GET | `/sign-out` | Sign out | `?signOutReason=UserAction` (or `SessionTimeout`) | `303` → `bas-gateway` sign-out |
+| Method     | Path                                      | Purpose                                                                                          | Sample request (query / form body)                    | Response                                                                        |
+|------------|-------------------------------------------|--------------------------------------------------------------------------------------------------|-------------------------------------------------------|---------------------------------------------------------------------------------|
+| GET        | `/` or `/start`                           | Service start                                                                                    | –                                                     | `303` → `/what-do-you-want-to-do`                                               |
+| GET        | `/what-do-you-want-to-do`                 | Choose between uploading documents and reading messages                                          | –                                                     | `200`                                                                           |
+| POST       | `/what-do-you-want-to-do`                 | Submit the choice                                                                                | `choice=DocumentUpload` (or `MessageInbox`)           | `303` → `/mrn-entry`, or `/message-choice`                                      |
+| GET        | `/mrn-entry`                              | Enter the MRN of the declaration                                                                 | –                                                     | `200`                                                                           |
+| POST       | `/mrn-entry`                              | Submit the MRN                                                                                   | `value=24GB1J1V8TS3JU1AR8`                            | `303` → `/contact-details`<br>Invalid or not allowed: `400`                     |
+| GET        | `/mrn-entry/:mrn`                         | Pre-fill the MRN (used by [customs-declare-exports-frontend](https://github.com/hmrc/customs-declare-exports-frontend)) | `/mrn-entry/24GB1J1V8TS3JU1AR8` | `303` → `/contact-details`                                                      |
+| GET / POST | `/contact-details`                        | Contact details for the upload                                                                   | `name=Joe+Bloggs&companyName=Acme&phoneNumber=01234567890` | `303` → `/how-many-files-upload`                                           |
+| GET / POST | `/how-many-files-upload`                  | Number of files to upload (1 to 10)                                                              | `value=2`                                             | `303` → `/upload/:ref`                                                          |
+| GET        | `/upload/:ref`                            | Upload one file                                                                                  | –                                                     | `200`<br>Already uploaded: `303` → next file or `/upload/receipt`               |
+| GET        | `/upload/upscan-success/:id`              | Upscan redirect after a successful upload                                                        | –                                                     | `303` → next file, `/upload/receipt` or `/upload-error`                         |
+| GET        | `/upload/upscan-error/:id`                | Upscan redirect after a failed upload                                                            | –                                                     | `200`                                                                           |
+| GET        | `/upload/receipt`                         | File Receipt page                                                                                | –                                                     | `200`                                                                           |
+| GET / POST | `/message-choice`                         | Choose exports or imports messages                                                               | `choice=ExportMessages` (or `ImportMessages`)         | `303` → `/messages`                                                             |
+| GET        | `/exports-message-choice`                 | Go straight to exports messages                                                                  | –                                                     | `303` → `/messages`                                                             |
+| GET        | `/messages`                               | Secure messages inbox                                                                            | –                                                     | `200`                                                                           |
+| GET / POST | `/conversation/:client/:conversationId`   | View or reply to a conversation                                                                  | –                                                     | `200` / `303` → `/conversation/:client/:conversationId/result`                  |
+| GET        | `/language/:lang`                         | Switch language. *No authentication needed*                                                      | `english` or `cymraeg`                                | `303`                                                                           |
+| GET        | `/sign-out`                               | Sign out                                                                                         | `?signOutReason=UserAction` (or `SessionTimeout`)     | `303` → `bas-gateway` sign-out                                                  |
 
 Test-only (enabled with `testOnlyDoNotUseInAppConf.Routes`):
 
-| Method | Path | Purpose |
-|---|---|---|
-| POST | `/cds-file-upload-service/test-only/s3-bucket` | Fake S3 upload endpoint; sends a success notification (or a rejection for files starting with `x`) |
+| Method | Path                                            | Purpose                                                                                                          |
+|--------|-------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
+| POST   | `/cds-file-upload-service/test-only/s3-bucket`  | Fake S3 upload endpoint; sends a success notification (or a rejection for files starting with `x`)              |
 
 ## Enrolment Required
 
-Locally, sign in through the auth login stub at http://localhost:9949/auth-login-stub/gg-sign-in, enter the values below, and submit.
+Access the service via the auth login stub at http://localhost:9949/auth-login-stub/gg-sign-in (locally) or https://`<host>`/auth-login-stub/gg-sign-in (on DEV/QA/Staging).
 
-| Field | Value |
-|---|---|
-| Redirect URL | Local: `http://localhost:6793/cds-file-upload-service/start`<br>Staging: `https://www.staging.tax.service.gov.uk/cds-file-upload-service/start` |
-| Enrolment Key | `HMRC-CUS-ORG` |
-| Identifier Name | `EORINumber` |
-| Identifier Value | A GB EORI number, e.g. `GB123456789006` |
+Redirect URL:
+- Local: `http://localhost:6793/cds-file-upload-service/start`
+- Staging: `https://www.staging.tax.service.gov.uk/cds-file-upload-service/start`
+
+| Enrolment Key  | Identifier Name | Identifier Value                     |
+|----------------|-----------------|--------------------------------------|
+| `HMRC-CUS-ORG` | `EORINumber`    | A GB EORI number, e.g. `GB123456789006` |
 
 The user must also have a verified email address; otherwise they are redirected to `/unverified-email`.
 
 ## Developer Notes
 
-### Config settings
+### Config Settings
 The following settings are used to configure the notifications persistence and retrieval:
 
 ```
@@ -221,6 +243,13 @@ Format all project files:
 ```bash
 sbt scalafmtAll
 ```
+
+### Autocomplete
+The TamperMonkey/GreaseMonkey autocomplete script previously available for this service has been removed (DCWL-5031).
+
+### Run all checks
+This is an sbt command alias specific to this project. It will clean the project, apply scalafmt formatting, run unit and integration tests and produce a coverage report:
+> `sbt precommit`
 
 ## License
 This code is open source software licensed under the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.html).
