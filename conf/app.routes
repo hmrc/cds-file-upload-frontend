@@ -33,9 +33,6 @@ GET         /mrn-entry/:mrn                                 controllers.MrnEntry
 GET         /contact-details                                controllers.ContactDetailsController.onPageLoad
 POST        /contact-details                                controllers.ContactDetailsController.onSubmit
 
-GET         /how-many-files-upload                          controllers.HowManyFilesUploadController.onPageLoad
-POST        /how-many-files-upload                          controllers.HowManyFilesUploadController.onSubmit
-
 GET         /upload/receipt                                 controllers.UploadYourFilesReceiptController.onPageLoad
 
 GET         /upload                                         controllers.UpscanStatusController.onPageLoad

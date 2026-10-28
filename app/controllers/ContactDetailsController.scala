@@ -68,10 +68,6 @@ class ContactDetailsController @Inject() (
               logger.warn("uploadContactDetails error: " + e)
               Redirect(routes.ErrorPageController.error)
           }
-
-          answersService.findOneAndReplace(req.userAnswers.copy(contactDetails = Some(contactDetails))).map { _ =>
-            Redirect(routes.HowManyFilesUploadController.onPageLoad)
-          }
       )
   }
 }

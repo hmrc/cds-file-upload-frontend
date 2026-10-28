@@ -20,14 +20,13 @@ import java.util.UUID
 
 import scala.xml.Elem
 
-//TODO make maybeBatchId nonOptional (batchId: String)
-final case class FileUploadRequest(declarationId: MRN, files: Seq[FileUploadFile], maybeBatchId: Option[String] = None) {
+final case class FileUploadRequest(declarationId: MRN, files: Seq[FileUploadFile], batchId: String) {
 
   def toXml: Elem =
     <FileUploadRequest xmlns="hmrc:fileupload">
       <DeclarationID>{declarationId.value}</DeclarationID>
       <FileGroupSize>{files.length}</FileGroupSize>
-      {maybeBatchId.map(id => <BatchID>{id}</BatchID>).getOrElse(scala.xml.NodeSeq.Empty)}
+      <BatchID>batchId</BatchID>
       <Files>{files.map(_.toXml)}</Files>
     </FileUploadRequest>
 }
