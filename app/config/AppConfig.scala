@@ -70,7 +70,6 @@ case class CustomsDeclarations(
   completeUri: String,
   apiVersion: String
 ) {
-  //TODO maybe add a new endpoint here with batch id?
   def batchUploadEndpoint: String = s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$batchUploadUri"
   def completeEndpoint: String = s"${protocol.getOrElse("https")}://$host:${port.getOrElse(443)}$completeUri"
 }

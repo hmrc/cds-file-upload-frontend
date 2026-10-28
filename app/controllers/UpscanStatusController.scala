@@ -150,8 +150,7 @@ class UpscanStatusController @Inject() (
       case _ =>
         request.userAnswers.batchId match {
           case None =>
-            //TODO ???
-            Future.successful(None)
+            throw new IllegalStateException("No batchId in the session")
           case Some(batchId) =>
             customsDeclarationsService.initiateSingleFileBatch(request.eori, request.request.mrn, batchId).flatMap { response =>
               response.files match {
