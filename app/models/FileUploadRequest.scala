@@ -26,7 +26,7 @@ final case class FileUploadRequest(declarationId: MRN, files: Seq[FileUploadFile
     <FileUploadRequest xmlns="hmrc:fileupload">
       <DeclarationID>{declarationId.value}</DeclarationID>
       <FileGroupSize>{files.length}</FileGroupSize>
-      <BatchID>batchId</BatchID>
+      <BatchID>{batchId}</BatchID>
       <Files>{files.map(_.toXml)}</Files>
     </FileUploadRequest>
 }

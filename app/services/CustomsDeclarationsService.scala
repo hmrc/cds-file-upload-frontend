@@ -35,7 +35,7 @@ class CustomsDeclarationsService @Inject() (customsDeclarationsConnector: Custom
     val uploadUrl = appConfig.microservice.services.cdsFileUploadFrontend.uri
     val files = FileUploadFile(1, "", uploadUrl).toList
 
-    val request = FileUploadRequest(mrn, files, batchId) 
+    val request = FileUploadRequest(mrn, files, batchId)
     val timer = metrics.startTimer(fileUploadRequestMetric)
 
     customsDeclarationsConnector.requestFileUpload(eori, request).map { response =>
