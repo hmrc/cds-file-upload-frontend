@@ -95,8 +95,7 @@ class UpscanStatusController @Inject() (
     files.find(file => file.reference == reference && file.state == Uploaded) match {
       case Some(_) =>
         val remaining = files.filterNot(_.reference == reference)
-
-        // TODO audit deletion
+        
         answersService
           .findOneAndReplace(request.userAnswers.copy(fileUploadResponse = Some(FileUploadResponse(remaining))))
           .map(_ => Redirect(routes.UpscanStatusController.onPageLoad))
@@ -242,7 +241,7 @@ class UpscanStatusController @Inject() (
       request.eori,
       request.userAnswers.contactDetails,
       request.userAnswers.mrn,
-      FileUploadCount(uploads.size), // TODO remove this field from auditUploadResult and just apply uploads.size
+      uploads.size,
       uploads,
       auditType,
       path

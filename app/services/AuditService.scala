@@ -52,7 +52,7 @@ class AuditService @Inject() (connector: AuditConnector, appConfig: AppConfig)(i
     eori: String,
     maybeContactDetails: Option[ContactDetails],
     maybeMrn: Option[MRN],
-    maybeFileUploadCount: Option[FileUploadCount],
+    fileUploadCount: Int,
     uploads: List[FileUpload],
     auditType: Audit,
     path: String
@@ -65,7 +65,7 @@ class AuditService @Inject() (connector: AuditConnector, appConfig: AppConfig)(i
         .fold(Map.empty[String, String])(cd => Map("fullName" -> cd.name, "companyName" -> cd.companyName, phoneFieldKeyName -> cd.phoneNumber))
       val eoriMap = Map("eori" -> eori)
       val mrn = maybeMrn.fold(Map.empty[String, String])(m => Map("mrn" -> m.value))
-      val numberOfFiles = maybeFileUploadCount.fold(Map.empty[String, String])(n => Map("numberOfFiles" -> s"${n.value}"))
+      val numberOfFiles = Map("numberOfFiles" -> fileUploadCount.toString)
       val fileReferences = (1 to uploads.size)
         .map(i => s"fileReference$i")
         .zip(uploads.map(_.reference))

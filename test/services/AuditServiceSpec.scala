@@ -62,7 +62,7 @@ class AuditServiceSpec extends UnitSpec {
         eori,
         Some(contactDetails),
         None,
-        fileUploadCount,
+        List(fileUpload).size,
         List(fileUpload),
         AuditTypes.UploadSuccess,
         appConfig.microservice.services.cdsFileUpload.fetchNotificationUri
@@ -76,7 +76,7 @@ class AuditServiceSpec extends UnitSpec {
         eori,
         Some(contactDetails),
         None,
-        fileUploadCount,
+        List(fileUpload).size,
         List(fileUpload),
         AuditTypes.UploadFailure,
         appConfig.microservice.services.cdsFileUpload.fetchNotificationUri
