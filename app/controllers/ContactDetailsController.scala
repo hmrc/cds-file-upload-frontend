@@ -36,7 +36,6 @@ class ContactDetailsController @Inject() (
   authenticate: AuthAction,
   getData: DataRetrievalAction,
   requireMrn: MrnRequiredAction,
-  requireContactDetails: ContactDetailsRequiredAction,
   verifiedEmail: VerifiedEmailAction,
   answersService: FileUploadAnswersService,
   mcc: MessagesControllerComponents,
