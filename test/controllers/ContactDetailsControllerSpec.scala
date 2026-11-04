@@ -17,23 +17,29 @@
 package controllers
 
 import controllers.actions.DataRetrievalAction
-import forms.mappings.ContactDetailsMapping._
-import models._
+import forms.mappings.ContactDetailsMapping.*
+import models.*
 import models.requests.SignedInUser
-import org.mockito.ArgumentMatchers._
+import org.mockito.ArgumentMatchers.*
 import org.mockito.Mockito.{reset, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
-import org.scalacheck.Arbitrary._
+import org.scalacheck.Arbitrary.*
 import play.api.data.Form
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.twirl.api.HtmlFormat
+import services.ContactDetailsService
 import testdata.CommonTestData.cacheId
 import views.html.contact_details
+
+import scala.concurrent.Future
 
 class ContactDetailsControllerSpec extends ControllerSpecBase {
 
   private val form = Form(contactDetailsMapping)
   val page = mock[contact_details]
+  val mockContactDetailsService: ContactDetailsService = mock[ContactDetailsService]
+  when(mockContactDetailsService.uploadContactDetails(any(), any())(using any()))
+    .thenReturn(Future.successful(Right(())))
 
   val mrn: MRN = arbitraryMrn.arbitrary.sample.get
 
@@ -47,7 +53,8 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
       new FakeVerifiedEmailAction(),
       mockFileUploadAnswersService,
       mcc,
-      page
+      page,
+      mockContactDetailsService
     )(mcc.executionContext)
 
   override protected def beforeEach(): Unit = {
@@ -87,7 +94,7 @@ class ContactDetailsControllerSpec extends ControllerSpecBase {
         val result = controller(user, fakeDataRetrievalAction(answers)).onSubmit(postRequest)
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.HowManyFilesUploadController.onPageLoad.url)
+        redirectLocation(result) mustBe Some(routes.UpscanStatusController.onPageLoad.url)
       }
     }
 

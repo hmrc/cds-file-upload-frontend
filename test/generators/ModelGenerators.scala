@@ -16,12 +16,14 @@
 
 package generators
 
-import models.{FileUploadCount, MRN, _}
-import org.scalacheck.Arbitrary._
-import org.scalacheck.Gen._
+import models.{FileUploadCount, MRN, *}
+import org.scalacheck.Arbitrary.*
+import org.scalacheck.Gen.*
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.OptionValues
-import testdata.CommonTestData._
+import testdata.CommonTestData.*
+
+import java.util.UUID
 
 trait ModelGenerators extends SignedInUserGen with OptionValues {
   self: Generators =>
@@ -34,7 +36,8 @@ trait ModelGenerators extends SignedInUserGen with OptionValues {
     for {
       decId <- arbitrary[MRN]
       files <- Gen.listOf(arbitrary[FileUploadFile]) suchThat (_.nonEmpty)
-    } yield FileUploadRequest(decId, files)
+      batchId <- UUID.randomUUID().toString
+    } yield FileUploadRequest(decId, files, batchId)
 
   implicit val arbitraryFileUploadRequest: Arbitrary[FileUploadRequest] =
     Arbitrary(fileUploadRequestGen)
